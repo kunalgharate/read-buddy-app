@@ -1,11 +1,13 @@
 // features/books/data/datasources/book_remote_data_source.dart
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import '../models/book_model.dart';
 
 abstract class BookRemoteDataSource {
   Future<List<BookModel>> getBooks();
 }
 
+@Injectable(as: BookRemoteDataSource)
 class BookRemoteDataSourceImpl implements BookRemoteDataSource {
   final Dio dio;
 

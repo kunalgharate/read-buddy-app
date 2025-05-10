@@ -1,7 +1,10 @@
 // features/books/domain/usecases/get_books.dart
+import 'package:injectable/injectable.dart';
+
 import '../entities/book.dart';
 import '../repositories/book_repository.dart';
 
+@injectable
 class GetBooks {
   final BookRepository repository;
 

@@ -20,20 +20,22 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Read Buddy",
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<BookBloc>()),
+      ],
+      child: MaterialApp(
+        title: "Read Buddy",
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home:BookPage(),
+        routes: {
+          '/book': (context) => const BookPage(),
+        },
+        initialRoute: '/book', // Make sure you're navigating to the correct route
       ),
-      home: BlocProvider(
-        create: (_) => sl<BookBloc>(), // from get_it / injectable
-        child: const BookPage(),
-      ),
-      routes: {
-        '/book': (context) => const BookPage(),
-      },
-      initialRoute: '/book', // Make sure you're navigating to the correct route
     );
   }
 }
