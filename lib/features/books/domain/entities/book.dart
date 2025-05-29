@@ -15,3 +15,4 @@ class Book extends Equatable {
   @override
   List<Object> get props => [id, title];
 }
+
