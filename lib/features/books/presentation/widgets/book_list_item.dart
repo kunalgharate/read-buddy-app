@@ -12,7 +12,7 @@ class BookListItem extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.book),
       title: Text(book.title),
-      subtitle: Text(book.author),
+    //  subtitle: Text(book.authors.first),
     );
   }
 }

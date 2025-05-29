@@ -5,20 +5,20 @@ class BookModel extends Book {
   BookModel({
     required String id,
     required String title,
-    required String author,
-  }) : super(id: id, title: title, author: author);
+   // required List<String> authors,
+  }) : super(id: id, title: title);
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
     return BookModel(
       id: json['_id'],
-      title: json['title'],
-      author: json['author'],
+      title: json['title'] ?? 'Unknown Title',
+    //  authors: json['authors'],
     );
   }
 
   Map<String, dynamic> toJson() => {
     '_id': id,
     'title': title,
-    'author': author,
+   // 'authors': authors,
   };
 }

@@ -11,13 +11,21 @@ class BookPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.read<BookBloc>().add(LoadBooks());
     return Scaffold(
       appBar: AppBar(title: const Text('Ready Buddy Books')),
       body: BlocBuilder<BookBloc, BookState>(
         builder: (context, state) {
           switch (state) {
             case BookInitial():
-              return const Center(child: Text('No books loaded.'));
+              return Column(
+                children: [
+                  ElevatedButton(onPressed: (){
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => const AddBookPage()));
+                  }, child: const Text("Add Book")),
+                   const Center(child: Text('No books loaded.')),
+                ],
+              );
 
             case BookLoading():
               return const Center(child: CircularProgressIndicator());
@@ -43,3 +51,18 @@ class BookPage extends StatelessWidget {
     );
   }
 }
+
+class AddBookPage extends StatefulWidget {
+  const AddBookPage({super.key});
+
+  @override
+  State<AddBookPage> createState() => _AddBookPageState();
+}
+
+class _AddBookPageState extends State<AddBookPage> {
+  @override
+  Widget build(BuildContext context) {
+    return const Text('Add book');
+  }
+}
+

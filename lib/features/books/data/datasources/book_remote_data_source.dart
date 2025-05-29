@@ -15,7 +15,13 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
 
   @override
   Future<List<BookModel>> getBooks() async {
+
     final response = await dio.get('books');
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load books');
+    }
+    print('Response data: ${response.data}');
     return (response.data as List)
         .map((json) => BookModel.fromJson(json))
         .toList();
