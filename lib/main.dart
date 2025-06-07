@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'core/di/injection.dart';
 import 'features/books/presentation/bloc/book_bloc.dart';
 import 'features/books/presentation/pages/book_page.dart';
-
-
-
+import 'sign_in.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();  // Ensures that Flutter bindings are initialized
@@ -17,7 +14,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -25,16 +21,19 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<BookBloc>()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: "Read Buddy",
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home:BookPage(),
+        // home:const BookPage(),
+         home:const ReadBuddyLoginScreen(),
         routes: {
           '/book': (context) => const BookPage(),
         },
-        initialRoute: '/book', // Make sure you're navigating to the correct route
+        // initialRoute: '/book', // Make sure you're navigating to the correct route
+          initialRoute: '/signin',
       ),
     );
   }
