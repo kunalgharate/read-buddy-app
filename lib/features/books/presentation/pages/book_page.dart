@@ -1,6 +1,7 @@
 // lib/features/books/presentation/pages/book_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../auth/presentation/pages/sign_in_page.dart';
 import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/book_state.dart';
@@ -11,19 +12,35 @@ class BookPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final actions = [
+      ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ReadBuddyLoginScreen()));
+          },
+          child: const Text("Login")),
+    ];
+
     context.read<BookBloc>().add(LoadBooks());
     return Scaffold(
-      appBar: AppBar(title: const Text('Ready Buddy Books')),
+      appBar: AppBar(title: const Text('Ready Buddy Books'), actions: actions),
       body: BlocBuilder<BookBloc, BookState>(
         builder: (context, state) {
           switch (state) {
             case BookInitial():
               return Column(
                 children: [
-                  ElevatedButton(onPressed: (){
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => const AddBookPage()));
-                  }, child: const Text("Add Book")),
-                   const Center(child: Text('No books loaded.')),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const AddBookPage()));
+                      },
+                      child: const Text("Add Book")),
+                  const Center(child: Text('No books loaded.')),
                 ],
               );
 
@@ -65,4 +82,3 @@ class _AddBookPageState extends State<AddBookPage> {
     return const Text('Add book');
   }
 }
-

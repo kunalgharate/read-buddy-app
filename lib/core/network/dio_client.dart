@@ -5,8 +5,23 @@ import 'package:dio/dio.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../utils/app_interceptor.dart';
+
 @module
 abstract class DioModule {
+
   @lazySingleton
-  Dio get dio => Dio(BaseOptions(baseUrl: 'http://readbuddy-server.onrender.com/api/'));
+  Dio dio(AppInterceptor interceptor) {
+    final dio = Dio(BaseOptions(
+      baseUrl: 'https://readbuddy-server.onrender.com/api/',
+      followRedirects: true,
+    ));
+
+    dio.interceptors.add(interceptor);
+    return dio;
+  }
+
+  @lazySingleton
+  AppInterceptor appInterceptor() => AppInterceptor();
 }
+
