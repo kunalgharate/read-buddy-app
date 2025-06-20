@@ -7,6 +7,8 @@ import 'core/di/injection.dart';
 import 'core/utils/app_bloc_observer.dart';
 import 'features/books/presentation/bloc/book_bloc.dart';
 import 'features/books/presentation/pages/book_page.dart';
+import 'features/splash/splash_screen.dart';
+import 'features/user_preference/presentation/screens/question_screen.dart';
 
 
 
@@ -35,11 +37,12 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home:const BookPage(),
+        initialRoute: '/',
         routes: {
+          '/': (context) => const SplashScreen(),
           '/book': (context) => const BookPage(),
+          '/onboarding': (context) => const QuestionScreen(),
         },
-        initialRoute: '/book', // Make sure you're navigating to the correct route
       ),
     );
   }

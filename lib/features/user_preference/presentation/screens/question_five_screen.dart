@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import '../widgets/option_tile.dart';
-import 'question_three_screen.dart';
 
-class QuestionTwoScreen extends StatefulWidget {
-  const QuestionTwoScreen({super.key});
+import '../widgets/option_tile.dart';
+
+
+class QuestionFiveScreen extends StatefulWidget {
+  const QuestionFiveScreen({super.key});
 
   @override
-  State<QuestionTwoScreen> createState() => _QuestionTwoScreenState();
+  State<QuestionFiveScreen> createState() => _QuestionFiveScreenState();
 }
 
-class _QuestionTwoScreenState extends State<QuestionTwoScreen> {
+class _QuestionFiveScreenState extends State<QuestionFiveScreen> {
   String? selectedOption;
-  final int currentPage = 2;
+  final int currentPage = 5;
   final int totalPages = 5;
 
   final options = [
-    {'label': 'Fiction', 'icon': 'assets/icons/fiction.png'},
-    {'label': 'Non-fiction', 'icon': 'assets/non_fiction.png'},
-    {'label': 'Self-help', 'icon': 'assets/icons/self_help.png'},
-    {'label': 'Biographies', 'icon': 'assets/icons/biographies.png'},
-    {'label': 'Fantasy', 'icon': 'assets/icons/fantasy.png'},
+    {'label': 'Less than 10 pages', 'icon': 'assets/pages.svg'},
+    {'label': '10 – 20 pages', 'icon': 'assets/pages.svg'},
+    {'label': '20 – 40 pages', 'icon': 'assets/pages.svg'},
+    {'label': 'More than 40 pages', 'icon': 'assets/pages.svg'},
   ];
 
   void selectOption(String label) {
@@ -28,16 +28,32 @@ class _QuestionTwoScreenState extends State<QuestionTwoScreen> {
     });
   }
 
-  void goToNext() {
+  void handleSubmit() {
     if (selectedOption == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select at least one option")),
       );
       return;
     }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QuestionThreeScreen()),
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Thank You!"),
+        content: Text("Your selections:\n\n${selectedOption!}"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.popUntil(
+                context,
+                (route) => route.isFirst,
+              ); // Go to first screen
+            },
+            child: const Text("Continue"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -67,12 +83,12 @@ class _QuestionTwoScreenState extends State<QuestionTwoScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    "Question 2",
+                    "Question 5",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "What genre do you mostly prefer?",
+                    "How many pages do you usually read in a day?",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 24),
@@ -96,15 +112,15 @@ class _QuestionTwoScreenState extends State<QuestionTwoScreen> {
                       height: 44,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey.shade300,
-                          foregroundColor: Colors.black87,
+                          backgroundColor: const Color(0xFF2CE07F),
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
                         ),
-                        onPressed: goToNext,
+                        onPressed: handleSubmit,
                         child: const Text(
-                          "Next",
+                          "Continue",
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),

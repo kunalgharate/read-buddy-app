@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:read_buddy_app/features/user_preference/presentation/screens/question_three_screen.dart';
 import '../widgets/option_tile.dart';
 
-class QuestionFiveScreen extends StatefulWidget {
-  const QuestionFiveScreen({super.key});
+class QuestionTwoScreen extends StatefulWidget {
+  const QuestionTwoScreen({super.key});
 
   @override
-  State<QuestionFiveScreen> createState() => _QuestionFiveScreenState();
+  State<QuestionTwoScreen> createState() => _QuestionTwoScreenState();
 }
 
-class _QuestionFiveScreenState extends State<QuestionFiveScreen> {
+class _QuestionTwoScreenState extends State<QuestionTwoScreen> {
   String? selectedOption;
-  final int currentPage = 5;
+  final int currentPage = 2;
   final int totalPages = 5;
 
   final options = [
-    {'label': 'Less than 10 pages', 'icon': 'assets/pages.svg'},
-    {'label': '10 – 20 pages', 'icon': 'assets/pages.svg'},
-    {'label': '20 – 40 pages', 'icon': 'assets/pages.svg'},
-    {'label': 'More than 40 pages', 'icon': 'assets/pages.svg'},
+    {'label': 'Fiction', 'icon': 'assets/icons/fiction.png'},
+    {'label': 'Non-fiction', 'icon': 'assets/non_fiction.png'},
+    {'label': 'Self-help', 'icon': 'assets/icons/self_help.png'},
+    {'label': 'Biographies', 'icon': 'assets/icons/biographies.png'},
+    {'label': 'Fantasy', 'icon': 'assets/icons/fantasy.png'},
   ];
 
   void selectOption(String label) {
@@ -26,32 +28,16 @@ class _QuestionFiveScreenState extends State<QuestionFiveScreen> {
     });
   }
 
-  void handleSubmit() {
+  void goToNext() {
     if (selectedOption == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select at least one option")),
       );
       return;
     }
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Thank You!"),
-        content: Text("Your selections:\n\n${selectedOption!}"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.popUntil(
-                context,
-                (route) => route.isFirst,
-              ); // Go to first screen
-            },
-            child: const Text("Continue"),
-          ),
-        ],
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const QuestionThreeScreen()),
     );
   }
 
@@ -81,12 +67,12 @@ class _QuestionFiveScreenState extends State<QuestionFiveScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    "Question 5",
+                    "Question 2",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "How many pages do you usually read in a day?",
+                    "What genre do you mostly prefer?",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 24),
@@ -110,15 +96,15 @@ class _QuestionFiveScreenState extends State<QuestionFiveScreen> {
                       height: 44,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2CE07F),
-                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.grey.shade300,
+                          foregroundColor: Colors.black87,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
                         ),
-                        onPressed: handleSubmit,
+                        onPressed: goToNext,
                         child: const Text(
-                          "Continue",
+                          "Next",
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),

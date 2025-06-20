@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/selection_store.dart';
 import '../widgets/option_tile.dart';
 import 'question_two_screen.dart';
-import '../data/selection_store.dart';
 
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
