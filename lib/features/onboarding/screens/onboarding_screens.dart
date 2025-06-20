@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../widgets/onboarding_page.dart';
 
 class OnboardingScreens extends StatefulWidget {
