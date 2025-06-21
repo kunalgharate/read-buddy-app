@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:read_buddy_app/features/onboarding/widgets/onboarding_widget.dart';
 
-import '../widgets/onboarding_page.dart';
+import '../../../core/di/injection.dart';
+import '../../../core/utils/secure_storage_utils.dart';
 
-class OnboardingScreens extends StatefulWidget {
-  const OnboardingScreens({super.key});
+
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreens> createState() => _OnboardingScreensState();
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreensState extends State<OnboardingScreens> {
+class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int currentIndex = 0;
 
@@ -62,7 +65,7 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
                 });
               },
               itemBuilder: (_, index) {
-                return OnboardingPage(
+                return OnboardingWidget(
                   image: onboardingData[index]["image"]!,
                   title: onboardingData[index]["title"]!,
                   description: onboardingData[index]["description"]!, // <-- updated here
@@ -94,6 +97,8 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
                             ),
                           ),
                           onPressed: () {
+                            final secureStorage = getIt<SecureStorageUtil>();
+                            secureStorage.saveOnboardingStatus(true);
                             Navigator.pushNamed(context, '/signin');
                           },
                           child: const Text(

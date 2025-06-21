@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/utils/secure_storage_utils.dart';
 import '../widgets/custom_text_button_widget.dart';
 import 'forget_password_page.dart';
 import 'sing_up_page.dart';
@@ -63,15 +65,35 @@ BlocProvider.of<SignInBloc>(context).add(SignInRequest(email: email, password: p
   @override
   Widget build(BuildContext context) {
     return BlocListener<SignInBloc, SignInState>(
-  listener: (context, state) {
+  listener: (context, state) async {
     if(state is SignInSuccess) {
+      final secureStorage = getIt<SecureStorageUtil>();
+      await secureStorage.saveUser(state.user);
+      await secureStorage.saveTokens(accessToken: state.user.accessToken, refreshToken:  state.user.refreshToken);
       ScaffoldMessenger.of(context).showSnackBar(
-       SnackBar(
-        content: Text('Login form validated successfully! ${state.user.name}'),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+        SnackBar(
+          content: Text('Login form validated successfully! ${state.user.name}'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      if (state.user.role == 'admin') {
+        Navigator.pushReplacementNamed(context, '/admin');
+      } else {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+
+    } else if(state is SignInFailure) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid email or password. Please try again.'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+
     }
   },
   child: Scaffold(

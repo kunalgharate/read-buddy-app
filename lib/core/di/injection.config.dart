@@ -30,6 +30,7 @@ import '../../features/books/domain/usecases/get_books.dart' as _i581;
 import '../../features/books/presentation/bloc/book_bloc.dart' as _i903;
 import '../network/dio_client.dart' as _i667;
 import '../utils/app_interceptor.dart' as _i795;
+import '../utils/secure_storage_utils.dart' as _i206;
 
 extension GetItInjectableX on _i174.GetIt {
 // initializes the registration of main-scope dependencies inside of GetIt
@@ -44,6 +45,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     final dioModule = _$DioModule();
     gh.lazySingleton<_i558.FlutterSecureStorage>(() => dioModule.storage);
+    gh.lazySingleton<_i206.SecureStorageUtil>(() => _i206.SecureStorageUtil());
     gh.lazySingleton<_i361.Dio>(
       () => dioModule.provideAuthDio(),
       instanceName: 'auth',
