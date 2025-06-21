@@ -7,8 +7,26 @@ import 'package:injectable/injectable.dart';
 
 import '../utils/app_interceptor.dart';
 
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:injectable/injectable.dart';
+
+import '../utils/app_interceptor.dart';
+
 @module
 abstract class DioModule {
+  @lazySingleton
+  FlutterSecureStorage get storage => const FlutterSecureStorage();
+
+  @Named('auth')
+  @lazySingleton
+  Dio provideAuthDio() => Dio(); // clean Dio for refresh only
+
+  @lazySingleton
+  AppInterceptor appInterceptor(
+      FlutterSecureStorage storage,
+      @Named('auth') Dio authDio,
+      ) => AppInterceptor(storage, authDio);
 
   @lazySingleton
   Dio dio(AppInterceptor interceptor) {
@@ -20,8 +38,4 @@ abstract class DioModule {
     dio.interceptors.add(interceptor);
     return dio;
   }
-
-  @lazySingleton
-  AppInterceptor appInterceptor() => AppInterceptor();
 }
-

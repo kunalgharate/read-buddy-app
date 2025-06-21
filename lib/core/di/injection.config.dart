@@ -9,6 +9,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -29,6 +30,7 @@ import '../../features/books/domain/usecases/get_books.dart' as _i581;
 import '../../features/books/presentation/bloc/book_bloc.dart' as _i903;
 import '../network/dio_client.dart' as _i667;
 import '../utils/app_interceptor.dart' as _i795;
+import '../utils/secure_storage_utils.dart' as _i206;
 
 extension GetItInjectableX on _i174.GetIt {
 // initializes the registration of main-scope dependencies inside of GetIt
@@ -42,7 +44,16 @@ extension GetItInjectableX on _i174.GetIt {
       environmentFilter,
     );
     final dioModule = _$DioModule();
-    gh.lazySingleton<_i795.AppInterceptor>(() => dioModule.appInterceptor());
+    gh.lazySingleton<_i558.FlutterSecureStorage>(() => dioModule.storage);
+    gh.lazySingleton<_i206.SecureStorageUtil>(() => _i206.SecureStorageUtil());
+    gh.lazySingleton<_i361.Dio>(
+      () => dioModule.provideAuthDio(),
+      instanceName: 'auth',
+    );
+    gh.lazySingleton<_i795.AppInterceptor>(() => dioModule.appInterceptor(
+          gh<_i558.FlutterSecureStorage>(),
+          gh<_i361.Dio>(instanceName: 'auth'),
+        ));
     gh.lazySingleton<_i361.Dio>(
         () => dioModule.dio(gh<_i795.AppInterceptor>()));
     gh.factory<_i170.AuthRemoteDataSource>(
