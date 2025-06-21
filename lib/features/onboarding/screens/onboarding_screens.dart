@@ -94,10 +94,10 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/onboarding');
+                            Navigator.pushNamed(context, '/signin');
                           },
                           child: const Text(
-                            "Sign In",
+                            "Sign in",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -107,24 +107,6 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Don't have an account? "),
-                          GestureDetector(
-                            onTap: () {
-                              // TODO: Navigate to sign-up screen
-                            },
-                            child: const Text(
-                              "Sign Up",
-                              style: TextStyle(
-                                color: Colors.purple,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   )
                 : Row(

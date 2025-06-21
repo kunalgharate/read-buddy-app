@@ -18,14 +18,14 @@ class BookPage extends StatelessWidget {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const ReadBuddyLoginScreen()));
+                    builder: (context) => const SignInScreen()));
           },
           child: const Text("Login")),
     ];
 
     context.read<BookBloc>().add(LoadBooks());
     return Scaffold(
-      appBar: AppBar(title: const Text('Ready Buddy Books'), actions: actions),
+      appBar: AppBar(title: const Text('Ready Buddy'), actions: actions),
       body: BlocBuilder<BookBloc, BookState>(
         builder: (context, state) {
           switch (state) {

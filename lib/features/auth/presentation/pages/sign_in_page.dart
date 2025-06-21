@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
-import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
 import '../widgets/custom_text_button_widget.dart';
 import 'forget_password_page.dart';
 import 'sing_up_page.dart';
 
 
-class ReadBuddyLoginScreen extends StatefulWidget {
-  const ReadBuddyLoginScreen({super.key});
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
 
   @override
-  State<ReadBuddyLoginScreen> createState() => _ReadBuddyLoginScreenState();
+  State<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _ReadBuddyLoginScreenState extends State<ReadBuddyLoginScreen> {
+class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -278,7 +277,7 @@ BlocProvider.of<SignInBloc>(context).add(SignInRequest(email: email, password: p
                             onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const CreateAccountScreen()),
+                                MaterialPageRoute(builder: (context) => const SignUpScreen()),
                               );
                             },
                             child: const Text(
