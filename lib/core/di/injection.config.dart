@@ -57,7 +57,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i581.GetBooks(gh<_i674.BookRepository>()));
     gh.factory<_i903.BookBloc>(() => _i903.BookBloc(gh<_i581.GetBooks>()));
     gh.factory<_i920.SignIn>(() => _i920.SignIn(gh<_i787.AuthRepository>()));
-    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
+    gh.factory<_i78.SignInBloc>(
+        () => _i78.SignInBloc(gh<_i920.SignIn>(), gh<_i787.AuthRepository>()));
     return this;
   }
 }

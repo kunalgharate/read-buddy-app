@@ -31,3 +31,22 @@ final class SignInFailure extends SignInState {
   @override
   List<Object> get props => [errorMessage];
 }
+
+class GoogleSignInInProgress extends SignInState {
+  @override
+  List<Object> get props => [];
+}
+
+class GoogleSignInSuccess extends SignInState {
+  final AppUser user;
+  GoogleSignInSuccess(this.user);
+  @override
+  List<Object?> get props => [user];
+}
+
+class GoogleSignInFailure extends SignInState {
+  final String message;
+  GoogleSignInFailure(this.message);
+  @override
+  List<Object?> get props => [message];
+}

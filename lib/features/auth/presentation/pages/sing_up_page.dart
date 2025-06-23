@@ -1,3 +1,7 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/sign_in/sign_in_bloc.dart';
+import 'google_sign_in_button.dart';
+
 import 'package:flutter/material.dart';
 import '../widgets/email_verification_widget.dart';
 
@@ -92,132 +96,154 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 30),
-                const Text(
-                  'Create New Account',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E2939),
+        child: BlocListener<SignInBloc, SignInState>(
+          listener: (context, state) {
+            if (state is GoogleSignInSuccess) {
+              // Handle successful Google sign-in, e.g., navigate to home screen
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Welcome, \${state.user.name}!')),
+              );
+            } else if (state is GoogleSignInFailure) {
+              // Handle Google sign-in failure
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text('Google Sign-In Failed: \${state.message}')),
+              );
+            }
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(32.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 30),
+                  const Text(
+                    'Create New Account',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E2939),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 30),
+                  const SizedBox(height: 30),
 
-                // Name
-                const Text(
-                  'Name',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _nameController,
-                  validator: _validateName,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Enter Name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.person_outline),
+                  // Name
+                  const Text(
+                    'Name',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Email',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _emailController,
-                  validator: _validateEmail,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Enter Email ID',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _nameController,
+                    validator: _validateName,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Enter Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Email',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _emailController,
+                    validator: _validateEmail,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Enter Email ID',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.email_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-                // Password
-                const Text(
-                  'Password',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _passwordController,
-                  validator: _validatePassword,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Enter Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: CustomIconButton(
-                      icon: _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                      color: Colors.grey,
+                  // Password
+                  const Text(
+                    'Password',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _passwordController,
+                    validator: _validatePassword,
+                    obscureText: !_isPasswordVisible,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Enter Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: CustomIconButton(
+                        icon: _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Phone
-                const Text(
-                  'Phone Number (Optional)',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.number,
-                  onChanged: _validatePhone,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Enter Phone Number',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.phone_outlined),
-                    errorText: _phoneError,
+                  // Phone
+                  const Text(
+                    'Phone Number (Optional)',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
-                ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.number,
+                    onChanged: _validatePhone,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Enter Phone Number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.phone_outlined),
+                      errorText: _phoneError,
+                    ),
+                  ),
 
-                const SizedBox(height: 24),
-                CustomButton(
-                  text: 'Send Email Code',
-                  onPressed: _handleSignUp,
-                  backgroundColor: const Color(0xFF4CAF50),
-                  textColor: Colors.white,
-                  height: 56,
-                  borderRadius: 12,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ],
+                  const SizedBox(height: 24),
+
+                  // Google Sign-In Button
+                  GoogleSignInButton(),
+
+                  const SizedBox(height: 24),
+
+                  CustomButton(
+                    text: 'Send Email Code',
+                    onPressed: _handleSignUp,
+                    backgroundColor: const Color(0xFF4CAF50),
+                    textColor: Colors.white,
+                    height: 56,
+                    borderRadius: 12,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -225,7 +251,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 }
-
 
 class CustomButton extends StatelessWidget {
   final String text;
