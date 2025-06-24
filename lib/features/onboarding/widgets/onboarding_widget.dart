@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class OnboardingPage extends StatelessWidget {
+class OnboardingWidget extends StatelessWidget {
   final String image, title, description;
 
-  const OnboardingPage({
+  const OnboardingWidget({
     required this.image,
     required this.title,
     required this.description,
