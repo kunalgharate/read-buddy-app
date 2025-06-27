@@ -7,6 +7,7 @@ import '../blocs/sign_in/sign_in_bloc.dart';
 import '../widgets/custom_text_button_widget.dart';
 import 'forget_password_page.dart';
 import 'sing_up_page.dart';
+import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_with_google.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -50,7 +51,7 @@ class _SignInScreenState extends State<SignInScreen> {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim().toLowerCase();
       final password = _passwordController.text;
-      
+
       context.read<SignInBloc>().add(
         SignInRequest(email: email, password: password),
       );
@@ -76,7 +77,7 @@ class _SignInScreenState extends State<SignInScreen> {
             accessToken: state.user.accessToken,
             refreshToken: state.user.refreshToken,
           );
-          
+
           UiUtils.showSuccessSnackBar(
             context,
             message: 'Welcome back, ${state.user.name}!',
