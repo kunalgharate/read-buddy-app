@@ -76,7 +76,7 @@ class _SignInScreenState extends State<SignInScreen> {
             SnackBar(
               content:
                   Text('Login form validated successfully! ${state.user.name}'),
-              backgroundColor: Colors.green,
+              backgroundColor: Colors.red,
               duration: const Duration(seconds: 2),
             ),
           );
@@ -377,17 +377,21 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                           ),
                           onPressed: () async {
-                            GoogleSignInService _googleSignIn =
-                                GoogleSignInService();
-                            await _googleSignIn
-                                .signInAndSendTokenServer(); //Token server
-                            // Google sign-in logic can be added here
-                            // ScaffoldMessenger.of(context).showSnackBar(
-                            //   const SnackBar(
-                            //     content: Text('Google Sign In pressed'),
-                            //     duration: Duration(seconds: 2),
-                            //   ),
-                            // );
+                            final googleSignIn = GoogleSignInService();
+                            final account =
+                                await googleSignIn.signInWithGoogle();
+
+                            if (account != null) {
+                              Navigator.pushReplacementNamed(context, '/home');
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Google Sign-In failed. Please try again.'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           },
                         ),
                         const Spacer(flex: 1),
