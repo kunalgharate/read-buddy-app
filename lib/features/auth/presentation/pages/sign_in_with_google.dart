@@ -1,98 +1,121 @@
-// import 'dart:math';
+//Sign In With Google
 
-// import 'package:flutter/material.dart';
+import 'dart:convert' show json;
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+/// Your scopes
 
 class GoogleSignInService {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email'],
-    // serverClientId:
-    //     '620497979110-rrsto8omsq5brg2c9h1h4j5phecbcrma.apps.googleusercontent.com',
+    serverClientId:
+        '792931872361-kkc5l707rubeil9c7mvre3lnob7nsl03.apps.googleusercontent.com',
+    clientId:
+        '792931872361-7jfmhcaksih17sdg9gfn2d2rg0iloi75.apps.googleusercontent.com',
   );
 
-  Future<void> signInAndSendTokenServer() async {
-    // Google cloud function logic own server with token
+  GoogleSignInAccount? currentUser;
+  bool isAuthorized = false;
+  String? contactName;
+  String? serverAuthCode;
+
+  // Basic sign in
+  Future<GoogleSignInAccount?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? account = await _googleSignIn.signIn();
-      if (account == null) {
-        print("Üser canceled sign in");
-        return;
-      }
+      final account = await _googleSignIn.signIn();
+      currentUser = account;
 
-      final GoogleSignInAuthentication auth = await account.authentication;
-      final String? idToken = auth.idToken;
-      final String? accessToken = auth.accessToken;
-      print(account);
-      print('ID Token: $idToken');
-      print('Access Token: $accessToken');
-      if (idToken != null) {
-        final response = await http.post(
-          Uri.parse("http://192.168.29.103:3000/api/users/verify-email"),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'idToken': idToken,
-            'accessToken': accessToken,
-          }),
-        );
+      if (account != null) {
+        final auth = await account.authentication;
 
-        if (response.statusCode == 200) {
-          print("User verified on server");
-        } else {
-          print('Server rejected: ${response.body}');
+        debugPrint('Access Token: ${auth.accessToken}');
+        debugPrint('ID Token: ${auth.idToken}');
+
+        isAuthorized = auth.accessToken != null;
+
+        if (isAuthorized) {
+          final backendSuccess = await _fetchContact(auth.accessToken!);
+
+          if (backendSuccess) {
+            return account; // ✅ Backend registered or already existed
+          } else {
+            debugPrint('❌ Backend rejected registration.');
+            return null;
+          }
         }
-      } else {
-        print("IdToken is invalid or null ");
       }
     } catch (e) {
-      print("Google sign_in error: $e");
+      debugPrint("❌ Google Sign-In failed: $e");
+    }
+
+    return null;
+  }
+
+  // Sign out and clear state
+  Future<void> signOut() async {
+    await _googleSignIn.disconnect();
+    currentUser = null;
+    isAuthorized = false;
+    contactName = null;
+    serverAuthCode = null;
+  }
+
+  // Send accessToken and data to your backend
+  Future<bool> _fetchContact(String accessToken) async {
+    final response = await http.post(
+      Uri.parse('https://readbuddy-server.onrender.com/api/users/register'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'name': currentUser?.displayName ?? '',
+        'email': currentUser?.email ?? '',
+        'password': 'google_auth_default',
+        'phno': '0000000000',
+        'userRole': 'user',
+        'picture': currentUser?.photoUrl ?? '',
+        'deviceInfo': {
+          'deviceModel': 'Unknown',
+          'deviceOS': 'Unknown',
+        },
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      debugPrint('✅ User successfully registered with backend.');
+      return true;
+    } else if (response.statusCode == 400 &&
+        response.body.contains('User already exists')) {
+      debugPrint('⚠️ User already exists. Proceeding as success.');
+      return true; // ✅ Treat as success
+    } else {
+      debugPrint('❌ Backend registration failed: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
+      return false;
     }
   }
+
+  // Request additional scopes (like contacts)
+  String? extractFirstContactName(Map<String, dynamic> data) {
+    final connections = data['connections'] as List<dynamic>?;
+    final contact = connections?.firstWhere(
+      (contact) => contact['names'] != null,
+      orElse: () => null,
+    ) as Map<String, dynamic>?;
+
+    if (contact != null) {
+      final names = contact['names'] as List<dynamic>;
+      final name = names.firstWhere(
+        (name) => name['displayName'] != null,
+        orElse: () => null,
+      ) as Map<String, dynamic>?;
+
+      return name?['displayName'] as String?;
+    }
+    return null;
+  }
+
+  Future<void>
+      getServerAuthCode() async {} //Your backend can verify and fetch tokens directly from Google, ensuring better security
 }
-
-//   Future<void> signIn() async {
-//     // Google cloud function logic with token
-//     try {
-//       final GoogleSignInAccount? result = await _googleSignIn.signIn();
-//       if (result != null) {
-//         final GoogleSignInAuthentication auth = await result.authentication;
-
-//         final String? idToken = auth.idToken;
-//         final String? accessToken = auth.accessToken;
-
-//         print(result);
-//         print('User: ${result.displayName}');
-//         print('Email: ${result.email}');
-//         print('ID Token: $idToken');
-//         print('Access Token: $accessToken');
-//       } else {
-//         print('Sign-in canceled');
-//       }
-//     } catch (e) {
-//       print('Google sign-in error: $e');
-//     }
-//   }
-// }
-
-
-
-  // Future<UserCredential> signInWithGoogle() async {    //FireBase sign-in logic
-//   // Trigger the authentication flow
-//   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-//   // Obtain the auth details from the request
-//   final GoogleSignInAuthentication? googleAuth =
-//       await googleUser?.authentication;
-
-//   // Create a new credential
-//   final credential = GoogleAuthProvider.credential(
-//     accessToken: googleAuth?.accessToken,
-//     idToken: googleAuth?.idToken,
-//   );
-
-//   // Once signed in, return the UserCredential
-//   return await FirebaseAuth.instance.signInWithCredential(credential);
-// }
