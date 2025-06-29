@@ -377,21 +377,60 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                           ),
                           onPressed: () async {
-                            final googleSignIn = GoogleSignInService();
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) => const Center(
+                                  child: CircularProgressIndicator()),
+                            );
+                            final googleSignIn = SignInWithGoogle();
                             final account =
                                 await googleSignIn.signInWithGoogle();
+                            await Future.delayed(const Duration(seconds: 2));
+                            if (!mounted) return;
 
-                            if (account != null) {
-                              Navigator.pushReplacementNamed(context, '/home');
-                            } else {
+                            // if (account != null) {
+                            //   Navigator.pushReplacementNamed(context, '/home');
+                            // } else {
+                            //   ScaffoldMessenger.of(context).showSnackBar(
+                            //     const SnackBar(
+                            //       content: Text(
+                            //           'Google Sign-In failed. Please try again.'),
+                            //       backgroundColor: Colors.red,
+                            //     ),
+                            //   );
+                            // }
+                            if (account == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Google Sign-In failed. Please try again.'),
+                                SnackBar(
+                                  content: Text('❌ Sign-In failed.'),
                                   backgroundColor: Colors.red,
+                                  duration: const Duration(seconds: 2),
                                 ),
                               );
+                              await Future.delayed(const Duration(seconds: 2));
+                              return;
                             }
+
+                            if (account.status == 'registered') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('🎉 Registered successfully!'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                              await Future.delayed(const Duration(seconds: 4));
+                            } else if (account.status == 'login') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('👋 Login successful!'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                              await Future.delayed(const Duration(seconds: 4));
+                            }
+                            if (!mounted) return;
+                            Navigator.pushReplacementNamed(context, '/home');
                           },
                         ),
                         const Spacer(flex: 1),

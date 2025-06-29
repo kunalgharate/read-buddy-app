@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 
 /// Your scopes
 
-class GoogleSignInService {
+class SignInWithGoogle {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     serverClientId:
         '792931872361-kkc5l707rubeil9c7mvre3lnob7nsl03.apps.googleusercontent.com',
@@ -21,7 +21,7 @@ class GoogleSignInService {
   String? serverAuthCode;
 
   // Basic sign in
-  Future<GoogleSignInAccount?> signInWithGoogle() async {
+  Future<AuthResult?> signInWithGoogle() async {
     try {
       final account = await _googleSignIn.signIn();
       currentUser = account;
@@ -36,13 +36,15 @@ class GoogleSignInService {
 
         if (isAuthorized) {
           final backendSuccess = await _fetchContact(auth.accessToken!);
+          final status = await _fetchContact(auth.accessToken!);
+          return AuthResult(account: account, status: status);
 
-          if (backendSuccess) {
-            return account; // Backend registered or already existed
-          } else {
-            debugPrint('Backend rejected registration.');
-            return null;
-          }
+          // if (backendSuccess) {
+          //   return account; // Backend registered or already existed
+          // } else {
+          //   debugPrint('Backend rejected registration.');
+          //   return null;
+          // }
         }
       }
     } catch (e) {
@@ -62,7 +64,7 @@ class GoogleSignInService {
   }
 
   // Send accessToken and data to your backend
-  Future<bool> _fetchContact(String accessToken) async {
+  Future<String> _fetchContact(String accessToken) async {
     final response = await http.post(
       Uri.parse('https://readbuddy-server.onrender.com/api/users/register'),
       headers: {
@@ -84,15 +86,15 @@ class GoogleSignInService {
 
     if (response.statusCode == 200) {
       debugPrint('User successfully registered with backend.');
-      return true;
+      return 'registered';
     } else if (response.statusCode == 400 &&
         response.body.contains('User already exists')) {
-      debugPrint('⚠️ User already exists. Proceeding as success.');
-      return true; //Treat as success
+      debugPrint('User already exists. Proceeding as success.');
+      return "login"; //Treat as success
     } else {
       debugPrint('Backend registration failed: ${response.statusCode}');
       debugPrint('Response body: ${response.body}');
-      return false;
+      return 'null';
     }
   }
 
@@ -118,4 +120,11 @@ class GoogleSignInService {
 
   Future<void>
       getServerAuthCode() async {} //Your backend can verify and fetch tokens directly from Google, ensuring better security
+}
+
+class AuthResult {
+  final GoogleSignInAccount account;
+  final String status; // 'registered' or 'login'
+
+  AuthResult({required this.account, required this.status});
 }
