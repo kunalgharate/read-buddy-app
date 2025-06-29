@@ -38,7 +38,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        // home: const AuthStartupHandler(), //Use this for the auto log in if the User Manullay dont log out
+        // home:
+        //     const AuthStartupHandler(), //Use this for the auto log in if the User Manullay dont log out
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',
       ),
