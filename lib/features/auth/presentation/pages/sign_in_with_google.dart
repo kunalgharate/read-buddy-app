@@ -38,15 +38,15 @@ class GoogleSignInService {
           final backendSuccess = await _fetchContact(auth.accessToken!);
 
           if (backendSuccess) {
-            return account; // ✅ Backend registered or already existed
+            return account; // Backend registered or already existed
           } else {
-            debugPrint('❌ Backend rejected registration.');
+            debugPrint('Backend rejected registration.');
             return null;
           }
         }
       }
     } catch (e) {
-      debugPrint("❌ Google Sign-In failed: $e");
+      debugPrint("Google Sign-In failed: $e");
     }
 
     return null;
@@ -83,14 +83,14 @@ class GoogleSignInService {
     );
 
     if (response.statusCode == 200) {
-      debugPrint('✅ User successfully registered with backend.');
+      debugPrint('User successfully registered with backend.');
       return true;
     } else if (response.statusCode == 400 &&
         response.body.contains('User already exists')) {
       debugPrint('⚠️ User already exists. Proceeding as success.');
-      return true; // ✅ Treat as success
+      return true; //Treat as success
     } else {
-      debugPrint('❌ Backend registration failed: ${response.statusCode}');
+      debugPrint('Backend registration failed: ${response.statusCode}');
       debugPrint('Response body: ${response.body}');
       return false;
     }
