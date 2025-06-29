@@ -11,9 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SignInWithGoogle {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     serverClientId:
-        '792931872361-kkc5l707rubeil9c7mvre3lnob7nsl03.apps.googleusercontent.com',
+        "792931872361-2s2ld08loq4ltp47631ubhafo7rp196c.apps.googleusercontent.com",
     clientId:
-        '792931872361-7jfmhcaksih17sdg9gfn2d2rg0iloi75.apps.googleusercontent.com',
+        '792931872361-l0v7j837bgts06c92mef9repg822thmv.apps.googleusercontent.com',
   );
 
   GoogleSignInAccount? currentUser;
@@ -23,16 +23,17 @@ class SignInWithGoogle {
   Future<AuthResult?> signInRespectingLogout() async {
     final prefs = await SharedPreferences.getInstance();
     final loggedOut = prefs.getBool('user_logged_out') ?? false;
+    final rememberMe = prefs.getBool('remember_me') ?? false;
 
-    if (loggedOut) {
-      return await _signInWithPicker(); // show account picker
+    if (loggedOut || !rememberMe) {
+      return await _signInWithPicker(); // force user to choose
     } else {
-      return await _signInSilently(); // auto sign-in
+      return await _signInSilently(); // auto-login
     }
   }
 
   // Basic sign in
-  Future<AuthResult?> signInWithGoogle() async {
+  Future<AuthResult?> signInWithGoogle({bool rememberMe = false}) async {
     try {
       final account = await _googleSignIn.signIn();
       currentUser = account;
@@ -46,15 +47,14 @@ class SignInWithGoogle {
         isAuthorized = auth.accessToken != null;
 
         if (isAuthorized) {
+          // final status = await _fetchContact(auth.accessToken!);
+          // return AuthResult(account: account, status: status);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('user_logged_out', false);
+          await prefs.setBool('remember_me', rememberMe);
+
           final status = await _fetchContact(auth.accessToken!);
           return AuthResult(account: account, status: status);
-
-          // if (backendSuccess) {
-          //   return account; // Backend registered or already existed
-          // } else {
-          //   debugPrint('Backend rejected registration.');
-          //   return null;
-          // }
         }
       }
     } catch (e) {
@@ -105,7 +105,7 @@ class SignInWithGoogle {
     } else if (response.statusCode == 400 &&
         response.body.contains('User already exists')) {
       debugPrint('User already exists. Proceeding as success.');
-      return "login"; //Treat as success
+      return 'login'; //Treat as success
     } else {
       debugPrint('Backend registration failed: ${response.statusCode}');
       debugPrint('Response body: ${response.body}');

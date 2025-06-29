@@ -383,58 +383,45 @@ class _SignInScreenState extends State<SignInScreen> {
                               builder: (_) => const Center(
                                   child: CircularProgressIndicator()),
                             );
-                            // final googleSignIn = SignInWithGoogle();
-                            // final account =
-                            //     await googleSignIn.signInWithGoogle();
-                            // await Future.delayed(const Duration(seconds: 2));
-                            // if (!mounted) return;
+
                             final googleSignIn = SignInWithGoogle();
                             final account =
-                                await googleSignIn.signInRespectingLogout();
-                            if (account != null)
-                              await googleSignIn.clearLogoutFlag();
+                                await googleSignIn.signInWithGoogle();
 
-                            // if (account != null) {
-                            //   Navigator.pushReplacementNamed(context, '/home');
-                            // } else {
-                            //   ScaffoldMessenger.of(context).showSnackBar(
-                            //     const SnackBar(
-                            //       content: Text(
-                            //           'Google Sign-In failed. Please try again.'),
-                            //       backgroundColor: Colors.red,
-                            //     ),
-                            //   );
-                            // }
+                            Navigator.of(context)
+                                .pop(); // remove loading dialog
+
                             if (account == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   content: Text('❌ Sign-In failed.'),
-                                  backgroundColor: Colors.red,
-                                  duration: const Duration(seconds: 2),
+                                  // backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
-                              await Future.delayed(const Duration(seconds: 2));
                               return;
                             }
 
                             if (account.status == 'registered') {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   content: Text('🎉 Registered successfully!'),
-                                  duration: const Duration(seconds: 2),
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
-                              await Future.delayed(const Duration(seconds: 4));
                             } else if (account.status == 'login') {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   content: Text('👋 Login successful!'),
-                                  duration: const Duration(seconds: 2),
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
-                              await Future.delayed(const Duration(seconds: 4));
                             }
-                            if (!mounted) return;
+
+                            await googleSignIn
+                                .clearLogoutFlag(); // mark user as logged in
+
+                            if (!context.mounted) return;
                             Navigator.pushReplacementNamed(context, '/home');
                           },
                         ),
