@@ -4,6 +4,7 @@ import 'dart:convert' show json;
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Your scopes
 
@@ -19,6 +20,16 @@ class SignInWithGoogle {
   bool isAuthorized = false;
   String? contactName;
   String? serverAuthCode;
+  Future<AuthResult?> signInRespectingLogout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final loggedOut = prefs.getBool('user_logged_out') ?? false;
+
+    if (loggedOut) {
+      return await _signInWithPicker(); // show account picker
+    } else {
+      return await _signInSilently(); // auto sign-in
+    }
+  }
 
   // Basic sign in
   Future<AuthResult?> signInWithGoogle() async {
@@ -35,7 +46,6 @@ class SignInWithGoogle {
         isAuthorized = auth.accessToken != null;
 
         if (isAuthorized) {
-          final backendSuccess = await _fetchContact(auth.accessToken!);
           final status = await _fetchContact(auth.accessToken!);
           return AuthResult(account: account, status: status);
 
@@ -59,8 +69,13 @@ class SignInWithGoogle {
     await _googleSignIn.disconnect();
     currentUser = null;
     isAuthorized = false;
-    contactName = null;
-    serverAuthCode = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('user_logged_out', true);
+  }
+
+  Future<void> clearLogoutFlag() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('user_logged_out', false);
   }
 
   // Send accessToken and data to your backend
@@ -120,6 +135,27 @@ class SignInWithGoogle {
 
   Future<void>
       getServerAuthCode() async {} //Your backend can verify and fetch tokens directly from Google, ensuring better security
+  Future<AuthResult?> _signInSilently() async {
+    final account = await _googleSignIn.signInSilently();
+    return await _handleAccount(account);
+  }
+
+  Future<AuthResult?> _signInWithPicker() async {
+    final account = await _googleSignIn.signIn();
+    return await _handleAccount(account);
+  }
+
+  Future<AuthResult?> _handleAccount(GoogleSignInAccount? account) async {
+    currentUser = account;
+    if (account == null) return null;
+
+    final auth = await account.authentication;
+    if (auth.accessToken == null) return null;
+
+    isAuthorized = true;
+    final status = await _fetchContact(auth.accessToken!);
+    return AuthResult(account: account, status: status);
+  }
 }
 
 class AuthResult {

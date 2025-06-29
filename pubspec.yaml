@@ -24,6 +24,7 @@ dependencies:
   curved_navigation_bar: ^1.0.6
   google_sign_in: ^6.2.2
   http: ^1.0.0
+  shared_preferences: ^2.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

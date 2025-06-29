@@ -383,11 +383,16 @@ class _SignInScreenState extends State<SignInScreen> {
                               builder: (_) => const Center(
                                   child: CircularProgressIndicator()),
                             );
+                            // final googleSignIn = SignInWithGoogle();
+                            // final account =
+                            //     await googleSignIn.signInWithGoogle();
+                            // await Future.delayed(const Duration(seconds: 2));
+                            // if (!mounted) return;
                             final googleSignIn = SignInWithGoogle();
                             final account =
-                                await googleSignIn.signInWithGoogle();
-                            await Future.delayed(const Duration(seconds: 2));
-                            if (!mounted) return;
+                                await googleSignIn.signInRespectingLogout();
+                            if (account != null)
+                              await googleSignIn.clearLogoutFlag();
 
                             // if (account != null) {
                             //   Navigator.pushReplacementNamed(context, '/home');
