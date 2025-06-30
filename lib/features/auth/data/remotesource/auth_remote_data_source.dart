@@ -18,8 +18,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AppUserModel> signIn(
       {required String email, required String password}) async {
+    print("login api");
     final response = await dio
-        .post('users/login', data: {'email': email, 'password': password});
+        .post('https://readbuddy-server.onrender.com/api/users/login', data: {'email': email, 'password': password});
 
     if (response.statusCode != 200) {
       throw Exception('Failed to logged in');

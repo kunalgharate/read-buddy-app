@@ -15,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
-          _checkUserSession();
+      _checkUserSession();
     });
   }
 
@@ -25,11 +25,11 @@ class _SplashScreenState extends State<SplashScreen> {
     final accessToken = await secureStorage.getAccessToken();
     final refreshToken = await secureStorage.getRefreshToken();
 
-    final hasValidSession = user != null && accessToken != null &&
-        refreshToken != null;
+    final hasValidSession =
+        user != null && accessToken != null && refreshToken != null;
 
-
-    print("user : ${user?.name} ${user?.email} ${user?.role} $accessToken $refreshToken");
+    print(
+        "user : ${user?.name} ${user?.email} ${user?.role} $accessToken $refreshToken");
     final isOnboardingCompleted = await secureStorage.getOnboardingStatus();
 
     if (!isOnboardingCompleted) {
@@ -45,10 +45,9 @@ class _SplashScreenState extends State<SplashScreen> {
     if (user.role == 'admin') {
       Navigator.pushReplacementNamed(context, '/admin');
     } else {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/admin');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +57,8 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/book_logo.png", height: 140), // <-- PNG logo here
+            Image.asset("assets/book_logo.png",
+                height: 140), // <-- PNG logo here
             const SizedBox(height: 16),
             Text(
               "ReadBuddy",
