@@ -6,10 +6,12 @@ class DashboardBoxWidget extends StatelessWidget {
   final IconData? icon;
   final Color? color;
 
+  final void Function() onPressed;
   const DashboardBoxWidget({
     super.key,
     required this.title,
     required this.count,
+    required this.onPressed,
     this.icon,
     this.color,
   });
@@ -34,9 +36,10 @@ class DashboardBoxWidget extends StatelessWidget {
             Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(count.toString(), style: const TextStyle(fontSize: 20)),
             ElevatedButton(
-              onPressed: () {
-                // TODO: navigate or show details
-              },
+              onPressed: onPressed,
+              // onPressed: () {
+              //   // TODO: navigate or show details
+              // },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               child: const Text("View All"),
             ),

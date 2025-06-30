@@ -46,10 +46,25 @@ class AdminDashboardScreen extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  DashboardBoxWidget(title: 'Books Donated', count: 5, color: Colors.grey),
-                  DashboardBoxWidget(title: 'Books Request', count: 8, color: Colors.redAccent),
-                  DashboardBoxWidget(title: 'New Users', count: 5, color: Colors.lightBlue),
+                children: [
+                  DashboardBoxWidget(
+                    title: 'Books Donated',
+                    count: 5,
+                    color: Colors.grey,
+                    onPressed: () {},
+                  ),
+                  DashboardBoxWidget(
+                    title: 'Books Request',
+                    count: 8,
+                    color: Colors.redAccent,
+                    onPressed: () {},
+                  ),
+                  DashboardBoxWidget(
+                    title: 'New Users',
+                    count: 5,
+                    color: Colors.lightBlue,
+                    onPressed: () {},
+                  ),
                 ],
               ),
             ),
@@ -60,12 +75,42 @@ class AdminDashboardScreen extends StatelessWidget {
                 childAspectRatio: 0.85, // Adjust this to give enough height
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                children: const [
-                  DashboardBoxWidget(title: 'Categories', count: 12, icon: Icons.category),
-                  DashboardBoxWidget(title: 'Books', count: 236, icon: Icons.book),
-                  DashboardBoxWidget(title: 'Donations', count: 318, icon: Icons.card_giftcard),
-                  DashboardBoxWidget(title: 'Request', count: 12, icon: Icons.list_alt),
-                  DashboardBoxWidget(title: 'Users', count: 12, icon: Icons.people),
+                children: [
+                  DashboardBoxWidget(
+                    title: 'Categories',
+                    count: 12,
+                    icon: Icons.category,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/category');
+                    },
+                  ),
+                  DashboardBoxWidget(
+                      title: 'Books',
+                      count: 236,
+                      icon: Icons.book,
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/books');
+                      }),
+                  DashboardBoxWidget(
+                    title: 'Donations',
+                    count: 318,
+                    icon: Icons.card_giftcard,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/donation');
+                    },
+                  ),
+                  DashboardBoxWidget(
+                    title: 'Request',
+                    count: 12,
+                    icon: Icons.list_alt,
+                    onPressed: () {},
+                  ),
+                  DashboardBoxWidget(
+                    title: 'Users',
+                    count: 12,
+                    icon: Icons.people,
+                    onPressed: () {},
+                  ),
                 ],
               ),
             ),

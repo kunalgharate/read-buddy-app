@@ -5,8 +5,11 @@ import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_
 
 import '../core/di/injection.dart';
 import '../core/utils/app_bloc_observer.dart';
+import '../features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
+import '../features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 import '../features/books/presentation/bloc/book_bloc.dart';
 import '../features/books/presentation/pages/book_page.dart';
+import '../features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/user_preference/presentation/screens/question_screen.dart';
 import '../routes/app_router.dart';
@@ -29,14 +32,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => getIt<BookBloc>()),
         BlocProvider(create: (_) => getIt<SignInBloc>()),
+        BlocProvider(create: (_) => getIt<BookBloc>()),
+
+        BlocProvider(create: (_) => getIt<CategoryBloc>()),
+        BlocProvider(create: (_) => getIt<BookCrudBloc>()),
+        BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
       ],
       child: MaterialApp(
         title: "Read Buddy",
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color.fromARGB(255, 3, 7, 91)),
           useMaterial3: true,
+
+
         ),
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sing_up_page.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
+import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
+import 'package:read_buddy_app/features/donate/presentation/donation_page.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
 
 import '../features/books/presentation/pages/book_page.dart';
@@ -23,6 +26,12 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SignUpScreen());
       case '/admin':
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
+      case '/category':
+        return MaterialPageRoute(builder: (_) => const CategoryListPage());
+      case '/books':
+        return MaterialPageRoute(builder: (_) => const BooksListPage());
+      case '/donation':
+        return MaterialPageRoute(builder: (_) => const DonationPage());
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       default:
