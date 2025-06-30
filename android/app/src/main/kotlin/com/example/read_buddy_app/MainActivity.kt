@@ -1,4 +1,4 @@
-package com.example.read_buddy_app
+package app.thecodershub.read_buddy
 
 import io.flutter.embedding.android.FlutterActivity
 

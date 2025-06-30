@@ -3,6 +3,7 @@ import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dar
 import 'package:read_buddy_app/features/auth/presentation/pages/sing_up_page.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
 
+import '../features/auth/presentation/widgets/email_verification_widget.dart';
 import '../features/books/presentation/pages/book_page.dart';
 import '../features/dashboard/presentation/screens/admin_dashboard_screen.dart';
 import '../features/onboarding/screens/onboarding_screens.dart';
@@ -25,6 +26,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case '/verification':
+        return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

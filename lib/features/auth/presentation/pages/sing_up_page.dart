@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/sign_up/sign_up_bloc.dart';
 import '../widgets/email_verification_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -57,17 +59,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _handleSignUp() {
     if (_formKey.currentState!.validate() && _phoneError == null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EmailVerificationScreen(
-            email: _emailController.text,
-            name: _nameController.text,
-            password: _passwordController.text,
-            phone: _phoneController.text.isEmpty ? '' : _phoneController.text,
-          ),
-        ),
-      );
+      final data = {
+        "name": _nameController.text,
+        "email": _emailController.text,
+        "password": _passwordController.text,
+        "phno": _phoneController.text.isEmpty ? '' : _phoneController.text,
+        "userRole": "user",
+        "picture": "https://example.com/profile.jpg",
+        "deviceInfo": {
+          "deviceModel": "Redmi Note 13",
+          "deviceOS": "Android 13",
+        },
+      };
+      context.read<SignUpBloc>().add(RegisterUserEvent(data));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -78,154 +82,179 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  @override
-  void dispose() {
+  void disposeControllers() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
+  }
+
+  @override
+  void dispose() {
+    disposeControllers();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 30),
-                const Text(
-                  'Create New Account',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E2939),
-                  ),
-                ),
-                const SizedBox(height: 30),
+    return BlocConsumer<SignUpBloc, SignUpState>(
+      listener: (context, state) {
+        if (state is SignUpSuccess) {
+          Navigator.pushNamed(context, '/verification');
+        }
+        if (state is SignUpError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(32.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 30),
+                    const Text(
+                      'Create New Account',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E2939),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
 
-                // Name
-                const Text(
-                  'Name',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _nameController,
-                  validator: _validateName,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Enter Name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    // Name
+                    const Text(
+                      'Name',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
-                    prefixIcon: const Icon(Icons.person_outline),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Email',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _emailController,
-                  validator: _validateEmail,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Enter Email ID',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _nameController,
+                      validator: _validateName,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Enter Name',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.person_outline),
+                      ),
                     ),
-                    prefixIcon: const Icon(Icons.email_outlined),
-                  ),
-                ),
-                const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Email',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _emailController,
+                      validator: _validateEmail,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Enter Email ID',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.email_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
 
-                // Password
-                const Text(
-                  'Password',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _passwordController,
-                  validator: _validatePassword,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Enter Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    // Password
+                    const Text(
+                      'Password',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: CustomIconButton(
-                      icon: _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                      color: Colors.grey,
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _passwordController,
+                      validator: _validatePassword,
+                      obscureText: !_isPasswordVisible,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Enter Password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: CustomIconButton(
+                          icon: _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                          color: Colors.grey,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                // Phone
-                const Text(
-                  'Phone Number (Optional)',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.number,
-                  onChanged: _validatePhone,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Enter Phone Number',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    // Phone
+                    const Text(
+                      'Phone Number (Optional)',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
-                    prefixIcon: const Icon(Icons.phone_outlined),
-                    errorText: _phoneError,
-                  ),
-                ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.number,
+                      onChanged: _validatePhone,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Enter Phone Number',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.phone_outlined),
+                        errorText: _phoneError,
+                      ),
+                    ),
 
-                const SizedBox(height: 24),
-                CustomButton(
-                  text: 'Send Email Code',
-                  onPressed: _handleSignUp,
-                  backgroundColor: const Color(0xFF4CAF50),
-                  textColor: Colors.white,
-                  height: 56,
-                  borderRadius: 12,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                    const SizedBox(height: 24),
+                    CustomButton(
+                      isLoading: state is SignUpLoading,
+                      text: 'Send Email Code',
+                      onPressed: _handleSignUp,
+                      backgroundColor: const Color(0xFF4CAF50),
+                      textColor: Colors.white,
+                      height: 56,
+                      borderRadius: 12,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
-
 
 class CustomButton extends StatelessWidget {
   final String text;

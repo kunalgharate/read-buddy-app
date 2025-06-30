@@ -18,9 +18,14 @@ import '../../features/auth/data/remotesource/auth_remote_data_source.dart'
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
+import '../../features/auth/domain/usecases/register_user_usecase.dart'
+    as _i241;
 import '../../features/auth/domain/usecases/sign_in.dart' as _i920;
+import '../../features/auth/domain/usecases/verify_email_usecase.dart' as _i30;
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart'
     as _i78;
+import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart'
+    as _i725;
 import '../../features/books/data/datasources/book_remote_data_source.dart'
     as _i906;
 import '../../features/books/data/repositories/book_repository_impl.dart'
@@ -67,8 +72,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i581.GetBooks>(
         () => _i581.GetBooks(gh<_i674.BookRepository>()));
     gh.factory<_i903.BookBloc>(() => _i903.BookBloc(gh<_i581.GetBooks>()));
+    gh.factory<_i241.RegisterUserUseCase>(
+        () => _i241.RegisterUserUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i920.SignIn>(() => _i920.SignIn(gh<_i787.AuthRepository>()));
+    gh.factory<_i30.VerifyEmailUseCase>(
+        () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
+    gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
+          gh<_i241.RegisterUserUseCase>(),
+          gh<_i30.VerifyEmailUseCase>(),
+        ));
     return this;
   }
 }
