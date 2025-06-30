@@ -26,11 +26,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future signUp() {
-    // TODO: implement signUp
-    throw UnimplementedError();
+  Future<AppUser> registerUser(Map<String, dynamic> data) {
+    return remoteDataSource.registerUser(data);
   }
 
+  @override
+  Future<AppUser> verifyEmail(String email, String code) {
+    return remoteDataSource.verifyEmail(email, code);
+  }
   @override
   Future<AppUser> signIn({required String email, required String password}) {
     return remoteDataSource.signIn(email: email, password: password);

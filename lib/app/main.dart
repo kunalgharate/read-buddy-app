@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 
 import '../core/di/injection.dart';
 import '../core/utils/app_bloc_observer.dart';
@@ -32,7 +33,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (_) => getIt<BookBloc>()),
         BlocProvider(create: (_) => getIt<SignInBloc>()),
+        BlocProvider(create: (_) => getIt<SignUpBloc>()),
         BlocProvider(create: (_) => getIt<BookBloc>()),
 
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
@@ -46,8 +49,6 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 3, 7, 91)),
           useMaterial3: true,
-
-
         ),
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',
