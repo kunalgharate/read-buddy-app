@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sing_in/google_sign_in_bloc.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sing_in/google_sign_in_event.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sing_in/google_sign_in_state.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
@@ -355,6 +358,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                         const SizedBox(height: 24.0),
 
+<<<<<<< Updated upstream
                         CustomButton(
                           text: 'Sign In with Google',
                           width: double.infinity,
@@ -423,7 +427,54 @@ class _SignInScreenState extends State<SignInScreen> {
 
                             if (!context.mounted) return;
                             Navigator.pushReplacementNamed(context, '/home');
+=======
+                        BlocListener<GoogleSignInBloc, GoogleSignInState>(
+                          listener: (context, state) async {
+                            if (state is GoogleSignInSuccess) {
+                              await getIt<SecureStorageUtil>()
+                                  .saveUser(state.user);
+                              Navigator.pushReplacementNamed(context, '/admin');
+                            } else if (state is GoogleSignInFailure) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(state.errorMessage)),
+                              );
+                            }
+>>>>>>> Stashed changes
                           },
+                          child: CustomButton(
+                            text: 'Sign In with Google',
+                            width: double.infinity,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w500,
+                            backgroundColor: Colors.white.withOpacity(0.8),
+                            textColor: const Color(0xFF1E2939),
+                            icon: Container(
+                              width: 28,
+                              height: 28,
+                              decoration: const BoxDecoration(
+                                  shape: BoxShape.circle, color: Colors.black),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                'G',
+                                style: TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white),
+                              ),
+                            ),
+                            onPressed: () {
+                              context
+                                  .read<GoogleSignInBloc>()
+                                  .add(GoogleSignInRequested());
+                              // Google sign-in logic can be added here
+                              // ScaffoldMessenger.of(context).showSnackBar(
+                              //   const SnackBar(
+                              //     content: Text('Google Sign In pressed'),
+                              //     duration: Duration(seconds: 2),
+                              //   )
+                              // );
+                            },
+                          ),
                         ),
                         const Spacer(flex: 1),
                       ],
