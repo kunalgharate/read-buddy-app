@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookcrud_remote_resources.dart';
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/respository/bookcrud_repo.dart';
 import '../../domain/entities/book_crud.dart';

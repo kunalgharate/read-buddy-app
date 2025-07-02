@@ -1,7 +1,7 @@
 // features/books/data/datasources/book_remote_data_source.dart
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
+import '../../../../core/network/api_constants.dart';
 import '../models/book_model.dart';
 
 abstract class BookRemoteDataSource {
@@ -17,15 +17,12 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
   @override
   Future<List<BookModel>> getBooks() async {
     try {
-      print("getBooks() calling...");
-      final response = await dio.get(Api.books);
-      print("Status Code: ${response.statusCode}");
+      final response = await dio.get(ApiConstants.books);
 
-      if (response.statusCode != 200) {
+      if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load books');
       }
 
-      print('Response data: ${response.data}');
       return (response.data as List)
           .map((json) => BookModel.fromJson(json))
           .toList();

@@ -3,7 +3,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookcrud_remote_resources.dart';
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/user_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/repositories/bookcrud_repo_impl.dart';
 import 'package:read_buddy_app/features/bookcrud/data/repositories/user_repo_impl.dart';

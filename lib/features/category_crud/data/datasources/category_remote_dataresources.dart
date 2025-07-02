@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
+import '../../../../../core/network/api_constants.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 import 'package:read_buddy_app/features/category_crud/data/model/category_model.dart';
 
@@ -36,7 +36,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   @override
   Future<List<CategoryModel>> getCategories() async {
     try {
-      final response = await dio.get(Api.categories); // e.g. '/categories'
+      final response = await dio.get(ApiConstants.categories); // e.g. '/categories'
 
       print("Fetched categories response");
 
@@ -91,7 +91,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       print("Sending file name: ${image.path.split('/').last}");
 
       final response = await dio.post(
-        Api.addCategory,
+        ApiConstants.categories,
         data: formData,
         options: Options(
           headers: {
@@ -140,7 +140,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       final formData = FormData.fromMap(formMap);
 
       final response = await dio.put(
-        '${Api.updateCategory}/$id',
+        '${ApiConstants.categories}/$id',
         data: formData,
         options: Options(
           headers: {
@@ -167,7 +167,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   Future<void> deleteCategory(String id) async {
     try {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
-      final response = await dio.delete('${Api.deleteCategory}/$id',
+      final response = await dio.delete('${ApiConstants.categories}/$id',
           options: Options(
             headers: {
               'Authorization': 'Bearer $token',

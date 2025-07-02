@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
+import '../../../../core/network/api_constants.dart';
 import 'package:read_buddy_app/core/utils/book_value_items.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/user_model.dart';
@@ -21,7 +21,7 @@ class UserRemoteResourcesImpl extends UserRemoteResources {
   Future<List<UserEntity>> getusersList() async {
     try {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
-      final response = await dio.get(Api.userslist,
+      final response = await dio.get(ApiConstants.users,
           options: Options(headers: {
             'Authorization': 'Bearer $token',
           }));

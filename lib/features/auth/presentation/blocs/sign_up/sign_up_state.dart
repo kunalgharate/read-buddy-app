@@ -3,7 +3,6 @@ part of 'sign_up_bloc.dart';
 @immutable
 sealed class SignUpState {}
 
-
 class SignUpInitial extends SignUpState {}
 
 class SignUpLoading extends SignUpState {}
@@ -20,5 +19,10 @@ class SignUpUserVerified extends SignUpState {
 
 class SignUpError extends SignUpState {
   final String message;
-  SignUpError(this.message);
+  final bool isUserAlreadyExists;
+  
+  SignUpError({
+    required this.message,
+    this.isUserAlreadyExists = false,
+  });
 }

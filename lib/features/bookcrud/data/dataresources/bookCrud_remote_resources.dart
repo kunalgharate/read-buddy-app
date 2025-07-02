@@ -20,22 +20,18 @@ abstract class BookCrudRemoteDataSource {
 @Injectable(as: BookCrudRemoteDataSource)
 class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
   final Dio dio;
-  //static const String token =
-  //  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODIwZTA0ZjJkZjg4YzU4ZGIwM2JjMzUiLCJpYXQiOjE3NTA2ODA1MjgsImV4cCI6MTc1MDcwOTMyOH0.ujgcF5MqVseNJg6Rd7MG6OkjnBdroUXYrIc_hdef2Dk";
 
   BookCrudRemoteDataSourceImpl({required this.dio});
+  
   @override
   Future<List<BookCrudModel>> getBooks() async {
     try {
-      final response = await dio.get(Api.books);
+      final response = await dio.get(ApiConstants.books);
 
-      if (response.statusCode != 200) {
+      if (response.statusCode != ApiConstants.success) {
         throw Exception(
             'Failed to load books. Status code: ${response.statusCode}');
       }
-
-      print("📚 Book CRUD: Successfully fetched books list");
-      print(response.data);
 
       return (response.data as List).map((json) {
         // ✅ Safely extract category object from each book
@@ -57,7 +53,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
     try {
       print("📖 Fetching book by ID: $id");
 
-      final response = await dio.get('${Api.books}/$id');
+      final response = await dio.get('${ApiConstants.books}/$id');
 
       if (response.statusCode != 200) {
         throw Exception(
@@ -188,7 +184,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
           "additionalImages: ${book.additionalImages.map((f) => f.path.split('/').last).toList()}");
 
       final response = await dio.post(
-        Api.books,
+        ApiConstants.books,
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -215,7 +211,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
   @override
   Future<void> updateBook(String id, BookCrudModel book) async {
-    final response = await dio.put('${Api.books}/$id', data: book.toJson());
+    final response = await dio.put('${ApiConstants.books}/$id', data: book.toJson());
 
     if (response.statusCode != 200) {
       throw Exception('Failed to update book');
@@ -227,7 +223,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
     try {
       print("Deleteing book_id $id");
       final token = await getIt<SecureStorageUtil>().getAccessToken();
-      final response = await dio.delete('${Api.books}/$id',
+      final response = await dio.delete('${ApiConstants.books}/$id',
           options: Options(
             headers: {
               'Authorization': 'Bearer $token',

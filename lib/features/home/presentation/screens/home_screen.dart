@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
 
+import '../../../auth/presentation/pages/sign_in_page.dart';
 import '../../../books/presentation/bloc/book_bloc.dart';
 import '../../../books/presentation/bloc/book_event.dart';
 import '../../../books/presentation/bloc/book_state.dart';
@@ -15,12 +16,10 @@ class HomeScreen extends StatelessWidget {
     final actions = [
       ElevatedButton(
           onPressed: () {
-            // Navigator.push(
-            //     context,
-            //     MaterialPageRoute(
-            //         builder: (context) => const SignInScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const SignInScreen()));
           },
-          child: const Text("Login")),
+          child: const Icon(Icons.logout)),
     ];
 
     context.read<BookBloc>().add(LoadBooks());
@@ -65,9 +64,7 @@ class HomeScreen extends StatelessWidget {
         },
         child: const Icon(Icons.refresh),
       ),
-    bottomNavigationBar: BottomNavWidget(),
+      bottomNavigationBar: BottomNavWidget(),
     );
   }
 }
-
-

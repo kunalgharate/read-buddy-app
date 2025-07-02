@@ -1,7 +1,7 @@
-// features/books/data/datasources/book_remote_data_source.dart
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/features/auth/data/models/app_user_model.dart';
+import '../../../../core/network/api_constants.dart';
+import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AppUserModel> signIn({required String email, required String password});
@@ -11,39 +11,90 @@ abstract class AuthRemoteDataSource {
 
 @Injectable(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final Dio dio;
+  final Dio _dio;
 
-  AuthRemoteDataSourceImpl({required this.dio});
+  AuthRemoteDataSourceImpl({required Dio dio}) : _dio = dio;
 
   @override
-  Future<AppUserModel> signIn(
-      {required String email, required String password}) async {
-    print("login api");
-    final response = await dio
-        .post('https://readbuddy-server.onrender.com/api/users/login', data: {'email': email, 'password': password});
+  Future<AppUserModel> signIn({
+    required String email, 
+    required String password,
+  }) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.login,
+        data: {
+          'email': email.trim().toLowerCase(),
+          'password': password,
+        },
+      );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to logged in');
+      if (response.statusCode == ApiConstants.success) {
+        return AppUserModel.fromJson(response.data);
+      }
+      
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        message: 'Login failed',
+      );
+    } catch (e) {
+      rethrow;
     }
-    print('Response data: ${response.data}');
-    return AppUserModel.fromJson(response.data);
   }
 
   @override
   Future<AppUserModel> registerUser(Map<String, dynamic> data) async {
-    final response = await dio.post('users/register', data: data);
-    return AppUserModel.fromJson(response.data);
+    try {
+      // Clean and validate data
+      final cleanData = {
+        ...data,
+        'email': data['email']?.toString().trim().toLowerCase(),
+        'name': data['name']?.toString().trim(),
+      };
+
+      final response = await _dio.post(
+        ApiConstants.register,
+        data: cleanData,
+      );
+
+      if (response.statusCode == ApiConstants.success || 
+          response.statusCode == ApiConstants.created) {
+        return AppUserModel.fromJson(response.data);
+      }
+
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        message: 'Registration failed',
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
   Future<AppUserModel> verifyEmail(String email, String code) async {
-    final response = await dio.post('users/verify-email', data: {
-      'email': email,
-      'code': code,
-    });
+    try {
+      final response = await _dio.post(
+        ApiConstants.verifyEmail,
+        data: {
+          'email': email.trim().toLowerCase(),
+          'code': code.trim(),
+        },
+      );
 
-    return AppUserModel.fromJson(
-      response.data,
-    );
+      if (response.statusCode == ApiConstants.success) {
+        return AppUserModel.fromJson(response.data);
+      }
+
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        message: 'Email verification failed',
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 }
