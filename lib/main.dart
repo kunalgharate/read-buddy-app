@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 
@@ -15,13 +17,12 @@ import 'features/splash/splash_screen.dart';
 import 'features/user_preference/presentation/screens/question_screen.dart';
 import 'routes/app_router.dart';
 
-
-
-
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();  // Ensures that Flutter bindings are initialized
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Ensures that Flutter bindings are initialized
   configureDependencies();
-  Bloc.observer = AppBlocObserver();// Initialize all dependencies (before runApp())
+  Bloc.observer =
+      AppBlocObserver(); // Initialize all dependencies (before runApp())
   runApp(const MyApp());
 }
 
@@ -37,10 +38,10 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<SignInBloc>()),
         BlocProvider(create: (_) => getIt<SignUpBloc>()),
         BlocProvider(create: (_) => getIt<BookBloc>()),
-
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
+        BlocProvider(create: (_) => getIt<GoogleSignInBloc>()),
       ],
       child: MaterialApp(
         title: "Read Buddy",

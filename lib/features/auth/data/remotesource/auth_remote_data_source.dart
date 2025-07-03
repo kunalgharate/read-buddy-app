@@ -4,7 +4,9 @@ import '../../../../core/network/api_constants.dart';
 import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AppUserModel> signIn({required String email, required String password});
+  Future<AppUserModel> signIn(
+      {required String email, required String password});
+  Future<AppUserModel> signInWithGoogle({required String token});
   Future<AppUserModel> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
 }
@@ -17,7 +19,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<AppUserModel> signIn({
-    required String email, 
+    required String email,
     required String password,
   }) async {
     try {
@@ -32,7 +34,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.statusCode == ApiConstants.success) {
         return AppUserModel.fromJson(response.data);
       }
-      
+
       throw DioException(
         requestOptions: response.requestOptions,
         response: response,
@@ -58,7 +60,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: cleanData,
       );
 
-      if (response.statusCode == ApiConstants.success || 
+      if (response.statusCode == ApiConstants.success ||
           response.statusCode == ApiConstants.created) {
         return AppUserModel.fromJson(response.data);
       }
@@ -92,6 +94,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         requestOptions: response.requestOptions,
         response: response,
         message: 'Email verification failed',
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<AppUserModel> signInWithGoogle({required String token}) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.loginWithGoogle,
+        data: {
+          'token': token,
+        },
+      );
+      print('Response status: ${response.statusCode}');
+      print('Response data: ${response.data}');
+
+      if (response.statusCode == ApiConstants.success) {
+        return AppUserModel.fromJson(response.data);
+      }
+
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        message: 'Login failed',
       );
     } catch (e) {
       rethrow;

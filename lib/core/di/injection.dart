@@ -3,6 +3,8 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/user_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/repositories/bookcrud_repo_impl.dart';
@@ -37,7 +39,7 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/sign_in.dart';
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import '../utils/secure_storage_utils.dart';
-//import 'injection.config.dart'; // Import generated file
+import 'injection.config.dart'; // Import generated file
 
 final getIt = GetIt.instance;
 
@@ -46,90 +48,4 @@ final getIt = GetIt.instance;
   preferRelativeImports: true, // default
   asExtension: true, // default
 )
-void configureDependencies() {
-
-  getIt.registerLazySingleton<SecureStorageUtil>(() => SecureStorageUtil());
-
-  getIt.registerLazySingleton<AuthRemoteDataSource>(()=>AuthRemoteDataSourceImpl(dio: Dio()));
-  getIt.registerLazySingleton<AuthRepository>(()=>AuthRepositoryImpl(getIt<AuthRemoteDataSource>()));
-  getIt.registerLazySingleton(()=>SignIn(getIt<AuthRepository>()));
-
-  getIt.registerLazySingleton(()=>SignInBloc(getIt<SignIn>()));
-
-
-  getIt.registerLazySingleton<BookRemoteDataSource>(
-      () => BookRemoteDataSourceImpl(dio: Dio()));
-
-  getIt.registerLazySingleton<BookRepository>(
-      () => BookRepositoryImpl(getIt<BookRemoteDataSource>()));
-
-  getIt.registerLazySingleton(() => GetBooks(getIt<BookRepository>()));
-
-  getIt.registerLazySingleton(() => BookBloc(getIt<GetBooks>()));
-
-//???Category Bloc CRUD Operations
-
-  getIt.registerLazySingleton<CategoryRemoteDataSource>(
-      () => CategoryRemoteDataSourceImpl(dio: Dio()));
-
-  getIt.registerLazySingleton<CategoryRepository>(
-      () => CategoryRepositoryImpl(getIt<CategoryRemoteDataSource>()));
-
-  getIt.registerLazySingleton(
-      () => AddCategoryUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(
-      () => DeleteCategoryUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(
-      () => GetCategoriesUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(
-      () => UpdateCategoryUsecase(getIt<CategoryRepository>()));
-
-  getIt.registerLazySingleton(() => CategoryBloc(
-      getCategories: getIt<GetCategoriesUsecase>(),
-      addCategory: getIt<AddCategoryUsecase>(),
-      updateCategory: getIt<UpdateCategoryUsecase>(),
-      deleteCategory: getIt<DeleteCategoryUsecase>()));
-
-//???Book Bloc CRUD Operations
-
-  getIt.registerLazySingleton<BookCrudRemoteDataSource>(
-      () => BookCrudRemoteDataSourceImpl(dio: Dio()));
-
-  getIt.registerLazySingleton<BookCrudRepository>(
-      () => BookCrudRepositoryImpl(getIt<BookCrudRemoteDataSource>()));
-
-  getIt
-      .registerLazySingleton(() => AddBookUsecase(getIt<BookCrudRepository>()));
-
-  getIt.registerLazySingleton(
-      () => GetBooksUsecase(getIt<BookCrudRepository>()));
-
-  getIt.registerLazySingleton(
-      () => GetBookByIdUsecase(getIt<BookCrudRepository>()));
-
-  getIt.registerLazySingleton(
-      () => UpdateBookUsecase(getIt<BookCrudRepository>()));
-
-  getIt.registerLazySingleton(
-      () => DeleteBookusecase(getIt<BookCrudRepository>()));
-
-  getIt.registerLazySingleton(() => BookCrudBloc(
-      addBookCrud: getIt<AddBookUsecase>(),
-      getBooksCrud: getIt<GetBooksUsecase>(),
-      getBookByIdCrud: getIt<GetBookByIdUsecase>(),
-      updateBookCrud: getIt<UpdateBookUsecase>(),
-      deleteBookCrud: getIt<DeleteBookusecase>()));
-
-  ///???Cubit for calling UsersList
-  getIt.registerLazySingleton<UserRemoteResources>(
-      () => UserRemoteResourcesImpl(dio: Dio()));
-
-  getIt.registerLazySingleton<UserRepository>(
-      () => UserRepositoryImpl(getIt<UserRemoteResources>()));
-
-  getIt
-      .registerLazySingleton(() => GetUserListUseCase(getIt<UserRepository>()));
-
-  getIt.registerLazySingleton(
-      () => UserCubit(GetUserListUseCase(getIt<UserRepository>())));
-}
+Future<void> configureDependencies() async => getIt.init();

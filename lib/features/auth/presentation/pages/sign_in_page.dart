@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
+import 'package:read_buddy_app/features/auth/presentation/widgets/custom_button_widget.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
@@ -50,10 +52,10 @@ class _SignInScreenState extends State<SignInScreen> {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim().toLowerCase();
       final password = _passwordController.text;
-      
+
       context.read<SignInBloc>().add(
-        SignInRequest(email: email, password: password),
-      );
+            SignInRequest(email: email, password: password),
+          );
     }
   }
 
@@ -76,7 +78,7 @@ class _SignInScreenState extends State<SignInScreen> {
             accessToken: state.user.accessToken,
             refreshToken: state.user.refreshToken,
           );
-          
+
           UiUtils.showSuccessSnackBar(
             context,
             message: 'Welcome back, ${state.user.name}!',
@@ -181,7 +183,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 24.0),
+                          const SizedBox(height: 12.0),
 
                           // Password Field
                           const Text(
@@ -279,7 +281,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                 width: double.infinity,
                                 height: 56.0,
                                 child: ElevatedButton(
-                                  onPressed: state is SignInLoading ? null : _handleSignIn,
+                                  onPressed: state is SignInLoading
+                                      ? null
+                                      : _handleSignIn,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF3182CE),
                                     foregroundColor: Colors.white,
@@ -294,7 +298,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                           width: 24,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
                                           ),
                                         )
                                       : const Text(
@@ -334,7 +340,59 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24.0),
+                          const SizedBox(height: 8.0),
+                          BlocListener<GoogleSignInBloc, GoogleSignInState>(
+                            listener: (context, state) {
+                              if (state is GoogleSignInLoading) {
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_) => const Center(
+                                      child: CircularProgressIndicator()),
+                                );
+                              } else {
+                                Navigator.of(context).pop();
+                              }
+
+                              if (state is GoogleSignInSuccess) {
+                                // Go to the home screen
+                                Navigator.pushReplacementNamed(
+                                    context, '/home');
+                              }
+                              if (state is GoogleSignInFailure) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(state.errorMessage)));
+                              }
+                            },
+                            child: CustomButton(
+                                width: double.infinity,
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w500,
+                                backgroundColor: Colors.black.withOpacity(0.8),
+                                textColor: const Color(0xFF1E2939),
+                                icon: Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.black),
+                                  alignment: Alignment.center,
+                                  child: const Text(
+                                    'G',
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white),
+                                  ),
+                                ),
+                                text: "Sign In With Google ",
+                                onPressed: () async {
+                                  context
+                                      .read<GoogleSignInBloc>()
+                                      .add(GoogleSignInRequested());
+                                }),
+                          )
                         ],
                       ),
                     ),

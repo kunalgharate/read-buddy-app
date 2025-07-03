@@ -21,13 +21,13 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     Emitter<SignInState> emit,
   ) async {
     emit(SignInLoading());
-    
+
     try {
       final params = SignInParams(
         email: event.email.trim().toLowerCase(),
         password: event.password,
       );
-      
+
       final user = await _signIn(params);
       emit(SignInSuccess(user));
     } catch (error) {

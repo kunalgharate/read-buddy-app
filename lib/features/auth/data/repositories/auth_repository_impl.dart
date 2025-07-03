@@ -19,11 +19,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
 
-  @override
-  Future signInUsingGoogle() {
-    // TODO: implement signInUsingGoogle
-    throw UnimplementedError();
-  }
+  // @override
+  // Future<AppUser> signInUsingGoogle(String token) {
+  //   return remoteDataSource.signInWithGoogle(token: token);
+  // }
 
   @override
   Future<AppUser> registerUser(Map<String, dynamic> data) {
@@ -37,5 +36,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AppUser> signIn({required String email, required String password}) {
     return remoteDataSource.signIn(email: email, password: password);
+  }
+
+  @override
+  Future<AppUser> signInUsingGoogle({required String token}) {
+    return remoteDataSource.signInWithGoogle(token: token);
   }
 }
