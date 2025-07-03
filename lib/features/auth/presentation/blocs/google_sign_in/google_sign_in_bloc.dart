@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
+import 'package:read_buddy_app/core/services/storage_service.dart';
 import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
 
@@ -11,8 +12,10 @@ part 'google_sign_in_state.dart';
 @injectable
 class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
   final SignInWithGoogle signInWithGoogle;
+  final StorageService storageService;
 
-  GoogleSignInBloc(this.signInWithGoogle) : super(GoogleSignInInitial()) {
+  GoogleSignInBloc(this.signInWithGoogle, this.storageService)
+      : super(GoogleSignInInitial()) {
     on<GoogleSignInRequested>(_onGoogleSignInRequested);
   }
 
@@ -37,7 +40,7 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
       }
 
       final auth = await account.authentication;
-      final accessToken = auth.accessToken;
+      // final accessToken = auth.accessToken;
       final idToken = auth.idToken;
 
       if (idToken == null) {
@@ -45,9 +48,7 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
         return;
       }
 
-      // Optionally log or use accessToken if needed
-      print("Access Token: $accessToken");
-      print("ID Token: $idToken");
+      await storageService.saveToken(idToken); //save the token
 
       // Send ID token to backend
       final user = await signInWithGoogle(SignInGoogleParams(token: idToken));

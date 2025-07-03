@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/app_start/app_start_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
@@ -42,6 +43,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
         BlocProvider(create: (_) => getIt<GoogleSignInBloc>()),
+        BlocProvider(
+            create: (_) => getIt<AppStartBloc>()
+              ..add(CheckAuthStatus())), //For auto login on SignInWithGoogle
       ],
       child: MaterialApp(
         title: "Read Buddy",
@@ -50,6 +54,17 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 3, 7, 91)),
           useMaterial3: true,
+        ),
+        home: BlocBuilder<AppStartBloc, AppStartState>(
+          builder: (context, state) {
+            if (state is UserLoggedIn) {
+              return const BookPage();
+            } else if (state is UserLoggedOut) {
+              return const SplashScreen();
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
         ),
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',
