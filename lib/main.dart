@@ -36,8 +36,6 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<BookBloc>()),
         BlocProvider(create: (_) => getIt<SignInBloc>()),
         BlocProvider(create: (_) => getIt<SignUpBloc>()),
-        BlocProvider(create: (_) => getIt<BookBloc>()),
-
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),

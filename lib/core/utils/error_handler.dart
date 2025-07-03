@@ -1,50 +1,127 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../network/api_constants.dart';
 
 class ErrorHandler {
   static String getErrorMessage(dynamic error) {
+    if (kDebugMode) {
+      print('🚨 ErrorHandler: Processing error');
+      print('🚨 ErrorHandler: Error type: ${error.runtimeType}');
+      print('🚨 ErrorHandler: Error details: $error');
+    }
+    
     if (error is DioException) {
       return _handleDioError(error);
     }
-    return error.toString();
+    
+    final message = error.toString();
+    
+    if (kDebugMode) {
+      print('🚨 ErrorHandler: Final error message: $message');
+    }
+    
+    return message;
   }
 
   static String _handleDioError(DioException error) {
+    if (kDebugMode) {
+      print('🚨 ErrorHandler: Handling Dio error');
+      print('🚨 ErrorHandler: Status code: ${error.response?.statusCode}');
+      print('🚨 ErrorHandler: Response data: ${error.response?.data}');
+      print('🚨 ErrorHandler: Error type: ${error.type}');
+      print('🚨 ErrorHandler: Error message: ${error.message}');
+    }
+    
+    String message;
+    
     switch (error.response?.statusCode) {
       case ApiConstants.badRequest:
-        return _extractErrorMessage(error.response?.data) ?? 
+        message = _extractErrorMessage(error.response?.data) ?? 
                'Invalid request. Please check your input.';
+        break;
       
       case ApiConstants.unauthorized:
-        return 'Session expired. Please login again.';
+        message = _extractErrorMessage(error.response?.data) ?? 
+               'Invalid credentials. Please check your email and password.';
+        break;
       
       case ApiConstants.forbidden:
-        return _handleForbiddenError(error.response?.data);
+        message = _handleForbiddenError(error.response?.data);
+        break;
       
       case ApiConstants.notFound:
-        return 'Resource not found.';
+        message = 'Resource not found.';
+        break;
       
       case ApiConstants.conflict:
-        return _extractErrorMessage(error.response?.data) ?? 
+        message = _extractErrorMessage(error.response?.data) ?? 
                'This resource already exists.';
+        break;
       
       case ApiConstants.internalServerError:
-        return 'Server error. Please try again later.';
+        message = 'Server error. Please try again later.';
+        break;
       
       default:
-        if (error.type == DioExceptionType.connectionTimeout ||
-            error.type == DioExceptionType.receiveTimeout) {
-          return 'Connection timeout. Please check your internet connection.';
+        message = _handleNetworkError(error);
+        break;
+    }
+    
+    if (kDebugMode) {
+      print('🚨 ErrorHandler: Processed error message: $message');
+    }
+    
+    return message;
+  }
+
+  static String _handleNetworkError(DioException error) {
+    switch (error.type) {
+      case DioExceptionType.connectionTimeout:
+        return 'Connection timeout. The server is taking too long to respond. Please try again.';
+      
+      case DioExceptionType.receiveTimeout:
+        return 'Server response timeout. Please check your connection and try again.';
+      
+      case DioExceptionType.sendTimeout:
+        return 'Request timeout. Please check your connection and try again.';
+      
+      case DioExceptionType.connectionError:
+        // More specific error message for connection issues
+        if (error.message?.contains('SocketException') == true) {
+          return 'Unable to connect to server. Please check your internet connection and try again.';
+        } else if (error.message?.contains('HandshakeException') == true) {
+          return 'Secure connection failed. Please try again.';
+        } else if (error.message?.contains('HttpException') == true) {
+          return 'Network error occurred. Please check your connection.';
         }
-        if (error.type == DioExceptionType.connectionError) {
-          return 'No internet connection. Please check your network.';
+        return 'Connection failed. Please check your internet connection and try again.';
+      
+      case DioExceptionType.badCertificate:
+        return 'Security certificate error. Please try again.';
+      
+      case DioExceptionType.cancel:
+        return 'Request was cancelled.';
+      
+      case DioExceptionType.unknown:
+        if (error.message?.contains('SocketException') == true) {
+          return 'Network connection failed. Please check your internet and try again.';
         }
-        return 'Something went wrong. Please try again.';
+        return _extractErrorMessage(error.response?.data) ?? 
+               'An unexpected error occurred. Please try again.';
+      
+      default:
+        return _extractErrorMessage(error.response?.data) ?? 
+               'Something went wrong. Please try again.';
     }
   }
 
   static String _handleForbiddenError(dynamic responseData) {
     final message = _extractErrorMessage(responseData);
+    
+    if (kDebugMode) {
+      print('🚨 ErrorHandler: Handling forbidden error');
+      print('🚨 ErrorHandler: Extracted message: $message');
+    }
     
     // Handle specific 403 cases
     if (message?.toLowerCase().contains('already registered') == true ||
@@ -60,10 +137,20 @@ class ErrorHandler {
   }
 
   static String? _extractErrorMessage(dynamic responseData) {
+    if (kDebugMode) {
+      print('🚨 ErrorHandler: Extracting error message from: $responseData');
+    }
+    
     if (responseData is Map<String, dynamic>) {
-      return responseData['message'] ?? 
+      final message = responseData['message'] ?? 
              responseData['error'] ?? 
              responseData['msg'];
+             
+      if (kDebugMode) {
+        print('🚨 ErrorHandler: Extracted message: $message');
+      }
+      
+      return message;
     }
     return null;
   }

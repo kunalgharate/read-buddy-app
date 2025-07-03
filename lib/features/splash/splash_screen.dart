@@ -15,7 +15,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
-      _checkUserSession();
+      // Temporarily navigate to test login screen for debugging
+      Navigator.pushReplacementNamed(context, '/signin');
+      // _checkUserSession();
     });
   }
 
@@ -66,6 +68,15 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: Colors.green[800],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "Debug Mode - Test Login",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
