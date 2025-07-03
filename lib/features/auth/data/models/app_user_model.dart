@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 
 
@@ -23,9 +24,20 @@ class AppUserModel extends AppUser {
   });
 
   factory AppUserModel.fromJson(Map<String, dynamic> json) {
+    if (kDebugMode) {
+      print('👤 AppUserModel: Parsing JSON response');
+      print('👤 AppUserModel: Raw JSON: $json');
+    }
+    
     final user = json['user'] ?? {};
+    
+    if (kDebugMode) {
+      print('👤 AppUserModel: User data: $user');
+      print('👤 AppUserModel: Access token: ${json['accessToken']}');
+      print('👤 AppUserModel: Refresh token: ${json['refreshToken']}');
+    }
 
-    return AppUserModel(
+    final model = AppUserModel(
       id: user['_id'] ?? '',
       name: user['name'] ?? '',
       email: user['email'] ?? '',
@@ -44,6 +56,14 @@ class AppUserModel extends AppUser {
       phno: user['phno'],
       wishlist: user['wishlist'] ?? [],
     );
+    
+    if (kDebugMode) {
+      print('👤 AppUserModel: Created model with ID: ${model.id}');
+      print('👤 AppUserModel: Created model with name: ${model.name}');
+      print('👤 AppUserModel: Created model with email: ${model.email}');
+    }
+    
+    return model;
   }
 
   Map<String, dynamic> toJson() {

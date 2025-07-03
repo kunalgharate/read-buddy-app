@@ -3,6 +3,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import '../network/dio_client.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/user_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/repositories/bookcrud_repo_impl.dart';
@@ -35,7 +36,11 @@ import '../../features/auth/data/remotesource/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/sign_in.dart';
+import '../../features/auth/domain/usecases/register_user_usecase.dart';
+import '../../features/auth/domain/usecases/verify_email_usecase.dart';
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
+import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
+import '../../features/profile/presentation/blocs/profile_bloc.dart';
 import '../utils/secure_storage_utils.dart';
 //import 'injection.config.dart'; // Import generated file
 
@@ -50,15 +55,22 @@ void configureDependencies() {
 
   getIt.registerLazySingleton<SecureStorageUtil>(() => SecureStorageUtil());
 
-  getIt.registerLazySingleton<AuthRemoteDataSource>(()=>AuthRemoteDataSourceImpl(dio: Dio()));
+  // Register Dio instance with logging
+  getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
+
+  getIt.registerLazySingleton<AuthRemoteDataSource>(()=>AuthRemoteDataSourceImpl(dio: getIt<Dio>()));
   getIt.registerLazySingleton<AuthRepository>(()=>AuthRepositoryImpl(getIt<AuthRemoteDataSource>()));
   getIt.registerLazySingleton(()=>SignIn(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(()=>RegisterUserUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(()=>VerifyEmailUseCase(getIt<AuthRepository>()));
 
   getIt.registerLazySingleton(()=>SignInBloc(getIt<SignIn>()));
+  getIt.registerLazySingleton(()=>SignUpBloc(getIt<RegisterUserUseCase>(), getIt<VerifyEmailUseCase>()));
+  getIt.registerLazySingleton(()=>ProfileBloc(getIt<SecureStorageUtil>()));
 
 
   getIt.registerLazySingleton<BookRemoteDataSource>(
-      () => BookRemoteDataSourceImpl(dio: Dio()));
+      () => BookRemoteDataSourceImpl(dio: getIt<Dio>()));
 
   getIt.registerLazySingleton<BookRepository>(
       () => BookRepositoryImpl(getIt<BookRemoteDataSource>()));
@@ -70,7 +82,7 @@ void configureDependencies() {
 //???Category Bloc CRUD Operations
 
   getIt.registerLazySingleton<CategoryRemoteDataSource>(
-      () => CategoryRemoteDataSourceImpl(dio: Dio()));
+      () => CategoryRemoteDataSourceImpl(dio: getIt<Dio>()));
 
   getIt.registerLazySingleton<CategoryRepository>(
       () => CategoryRepositoryImpl(getIt<CategoryRemoteDataSource>()));
@@ -93,7 +105,7 @@ void configureDependencies() {
 //???Book Bloc CRUD Operations
 
   getIt.registerLazySingleton<BookCrudRemoteDataSource>(
-      () => BookCrudRemoteDataSourceImpl(dio: Dio()));
+      () => BookCrudRemoteDataSourceImpl(dio: getIt<Dio>()));
 
   getIt.registerLazySingleton<BookCrudRepository>(
       () => BookCrudRepositoryImpl(getIt<BookCrudRemoteDataSource>()));
@@ -122,7 +134,7 @@ void configureDependencies() {
 
   ///???Cubit for calling UsersList
   getIt.registerLazySingleton<UserRemoteResources>(
-      () => UserRemoteResourcesImpl(dio: Dio()));
+      () => UserRemoteResourcesImpl(dio: getIt<Dio>()));
 
   getIt.registerLazySingleton<UserRepository>(
       () => UserRepositoryImpl(getIt<UserRemoteResources>()));
