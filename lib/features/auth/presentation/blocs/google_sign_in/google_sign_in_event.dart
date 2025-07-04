@@ -8,5 +8,4 @@ class GoogleSignInRequested extends GoogleSignInEvent {
   const GoogleSignInRequested();
   @override
   List<Object?> get props => [];
-  // final String token;
 }
