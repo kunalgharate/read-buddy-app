@@ -51,7 +51,12 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
       await storageService.saveToken(idToken); //save the token
 
       // Send ID token to backend
-      final user = await signInWithGoogle(SignInGoogleParams(token: idToken));
+      final user = await signInWithGoogle(SignInGoogleParams(
+        token: idToken,
+        name: account.displayName ?? '',
+        email: account.email,
+        picture: account.photoUrl ?? '',
+      ));
 
       emit(GoogleSignInSuccess(user));
     } catch (e) {

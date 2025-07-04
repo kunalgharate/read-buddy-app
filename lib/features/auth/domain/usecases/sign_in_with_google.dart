@@ -6,9 +6,15 @@ import 'package:read_buddy_app/features/auth/domain/repositories/auth_repository
 /// Param class for SignIn use case
 class SignInGoogleParams {
   final String token;
+  final String email;
+  final String name;
+  final String picture;
 
   SignInGoogleParams({
     required this.token,
+    this.name = '',
+    this.email = '',
+    this.picture = '',
   });
 }
 
