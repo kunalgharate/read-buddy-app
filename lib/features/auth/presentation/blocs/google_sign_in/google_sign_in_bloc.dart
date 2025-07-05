@@ -2,7 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/core/services/storage_service.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
+
 import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
 
@@ -12,10 +13,8 @@ part 'google_sign_in_state.dart';
 @injectable
 class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
   final SignInWithGoogle signInWithGoogle;
-  final StorageService storageService;
 
-  GoogleSignInBloc(this.signInWithGoogle, this.storageService)
-      : super(GoogleSignInInitial()) {
+  GoogleSignInBloc(this.signInWithGoogle) : super(GoogleSignInInitial()) {
     on<GoogleSignInRequested>(_onGoogleSignInRequested);
   }
 
@@ -48,15 +47,15 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
         return;
       }
 
-      await storageService.saveToken(idToken); //save the token
-
       // Send ID token to backend
-      final user = await signInWithGoogle(SignInGoogleParams(
-        token: idToken,
-        name: account.displayName ?? '',
-        email: account.email,
-        picture: account.photoUrl ?? '',
-      ));
+      final user = await signInWithGoogle(SignInGoogleParams(token: idToken));
+
+      // TEMPORARY: Save tokens and user here
+      await SecureStorageUtil().saveUser(user);
+      await SecureStorageUtil().saveTokens(
+        accessToken: user.accessToken,
+        refreshToken: user.refreshToken,
+      );
 
       emit(GoogleSignInSuccess(user));
     } catch (e) {

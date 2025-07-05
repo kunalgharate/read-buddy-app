@@ -8,7 +8,6 @@ import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dar
 
 import '../../../books/presentation/pages/book_page.dart';
 
-
 class BottomNavWidget extends StatefulWidget {
   const BottomNavWidget({super.key});
 
@@ -20,7 +19,7 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
   int currentIndex = 0;
 
   final List<Widget> pages = const [
-    Maintab(),
+    HomeTab(),
     CategoryTab(),
     DonationTab(),
     ProfileTab()
@@ -42,7 +41,6 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
           // Main content
           pages[currentIndex],
 
-
           Positioned(
             bottom: 0,
             left: 0,
@@ -60,14 +58,17 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
                 });
               },
               items: [
-SvgPicture.asset('assets/icons/home.svg', width: 28, height: 28, color: Colors.white),
-SvgPicture.asset('assets/icons/categories.svg', width: 28, height: 28, color: Colors.white),
-SvgPicture.asset('assets/icons/donation.svg', width: 28, height: 28, color: Colors.white),
-SvgPicture.asset('assets/icons/person.svg', width: 28, height: 28, color: Colors.white),
+                SvgPicture.asset('assets/icons/home.svg',
+                    width: 28, height: 28, color: Colors.white),
+                SvgPicture.asset('assets/icons/categories.svg',
+                    width: 28, height: 28, color: Colors.white),
+                SvgPicture.asset('assets/icons/donation.svg',
+                    width: 28, height: 28, color: Colors.white),
+                SvgPicture.asset('assets/icons/person.svg',
+                    width: 28, height: 28, color: Colors.white),
               ],
             ),
           ),
-
 
           Positioned(
             bottom: 0,
