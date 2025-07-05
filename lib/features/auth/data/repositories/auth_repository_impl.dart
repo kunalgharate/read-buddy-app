@@ -5,7 +5,6 @@ import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../remotesource/auth_remote_data_source.dart';
 
-
 @Injectable(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -18,21 +17,29 @@ class AuthRepositoryImpl implements AuthRepository {
     throw UnimplementedError();
   }
 
+  @override
+  Future<AppUser> registerUser(Map<String, dynamic> data) {
+    return remoteDataSource.registerUser(data);
+  }
 
   @override
-  Future signInUsingGoogle() {
-    // TODO: implement signInUsingGoogle
-    throw UnimplementedError();
+  Future<AppUser> verifyEmail(String email, String code) {
+    return remoteDataSource.verifyEmail(email, code);
+  }
+
+  @override
+  Future<AppUser> signIn({required String email, required String password}) {
+    return remoteDataSource.signIn(email: email, password: password);
+  }
+
+  @override
+  Future<AppUser> signInUsingGoogle({required String token}) {
+    return remoteDataSource.signInWithGoogle(token: token);
   }
 
   @override
   Future signUp() {
     // TODO: implement signUp
     throw UnimplementedError();
-  }
-
-  @override
-  Future<AppUser> signIn({required String email, required String password}) {
-    return remoteDataSource.signIn(email: email, password: password);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 
 import '../core/di/injection.dart';
@@ -11,13 +12,12 @@ import '../features/splash/splash_screen.dart';
 import '../features/user_preference/presentation/screens/question_screen.dart';
 import '../routes/app_router.dart';
 
-
-
-
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();  // Ensures that Flutter bindings are initialized
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Ensures that Flutter bindings are initialized
   configureDependencies();
-  Bloc.observer = AppBlocObserver();// Initialize all dependencies (before runApp())
+  Bloc.observer =
+      AppBlocObserver(); // Initialize all dependencies (before runApp())
   runApp(const MyApp());
 }
 
@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => getIt<BookBloc>()),
         BlocProvider(create: (_) => getIt<SignInBloc>()),
+        BlocProvider(create: (context) => getIt<GoogleSignInBloc>()),
       ],
       child: MaterialApp(
         title: "Read Buddy",

@@ -5,6 +5,11 @@ class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color backgroundColor;
   final Color foregroundColor;
+  final double? width;
+  final double? fontSize;
+  final FontWeight? fontWeight;
+  final Color? textColor;
+  final Widget? icon;
 
   const CustomButton({
     super.key,
@@ -12,12 +17,17 @@ class CustomButton extends StatelessWidget {
     required this.onPressed,
     this.backgroundColor = const Color(0xFF00C853),
     this.foregroundColor = Colors.white,
+    this.width = 0,
+    this.fontSize,
+    this.fontWeight,
+    this.textColor,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
+      width: width == 0 ? double.infinity : width,
       height: 56,
       child: ElevatedButton(
         onPressed: onPressed,
@@ -29,12 +39,23 @@ class CustomButton extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              icon!,
+              const SizedBox(width: 8),
+            ],
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: fontSize ?? 18,
+                fontWeight: fontWeight ?? FontWeight.w600,
+                color: textColor ?? foregroundColor,
+              ),
+            ),
+          ],
         ),
       ),
     );

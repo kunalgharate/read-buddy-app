@@ -19,6 +19,9 @@ class AppUser {
   final int version;
   final String accessToken;
   final String refreshToken;
+  final String? picture;
+  final String? phno;
+  final List<dynamic>? wishlist;
 
   AppUser({
     required this.id,
@@ -35,7 +38,8 @@ class AppUser {
     required this.version,
     required this.accessToken,
     required this.refreshToken,
+    this.picture,
+    this.phno,
+    this.wishlist,
   });
-
-
 }
