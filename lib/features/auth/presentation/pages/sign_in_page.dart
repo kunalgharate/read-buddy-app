@@ -357,7 +357,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                         const SizedBox(height: 24.0),
 
-                        BlocListener<GoogleSignInBloc, GoogleSignInState>(
+                        BlocConsumer<GoogleSignInBloc, GoogleSignInState>(
                           listener: (context, state) async {
                             if (state is GoogleSignInSuccess) {
                               final secureStorage = getIt<SecureStorageUtil>();
@@ -366,7 +366,6 @@ class _SignInScreenState extends State<SignInScreen> {
                                 accessToken: state.user.accessToken,
                                 refreshToken: state.user.refreshToken,
                               );
-                              // print(state.user.accessToken);
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -394,33 +393,43 @@ class _SignInScreenState extends State<SignInScreen> {
                               );
                             }
                           },
-                          child: CustomButton(
-                            text: 'Sign In with Google',
-                            width: double.infinity,
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.w500,
-                            backgroundColor: Colors.white.withOpacity(0.8),
-                            textColor: const Color(0xFF1E2939),
-                            icon: Container(
-                              width: 28,
-                              height: 28,
-                              decoration: const BoxDecoration(
-                                  shape: BoxShape.circle, color: Colors.black),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                'G',
-                                style: TextStyle(
+                          builder: (context, state) {
+                            if (state is GoogleSignInLoading) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+
+                            return CustomButton(
+                              text: 'Sign In with Google',
+                              width: double.infinity,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.w500,
+                              backgroundColor: Colors.white.withOpacity(0.8),
+                              textColor: const Color(0xFF1E2939),
+                              icon: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.black,
+                                ),
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  'G',
+                                  style: TextStyle(
                                     fontSize: 18.0,
                                     fontWeight: FontWeight.w900,
-                                    color: Colors.white),
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
-                            ),
-                            onPressed: () {
-                              context
-                                  .read<GoogleSignInBloc>()
-                                  .add(GoogleSignInRequested());
-                            },
-                          ),
+                              onPressed: () {
+                                context
+                                    .read<GoogleSignInBloc>()
+                                    .add(GoogleSignInRequested());
+                              },
+                            );
+                          },
                         ),
 
                         const Spacer(flex: 1),
