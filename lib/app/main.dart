@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
-
+import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 import '../core/di/injection.dart';
 import '../core/utils/app_bloc_observer.dart';
 import '../features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
@@ -13,14 +13,14 @@ import '../features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/user_preference/presentation/screens/question_screen.dart';
 import '../routes/app_router.dart';
-
-
-
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();  // Ensures that Flutter bindings are initialized
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Ensures that Flutter bindings are initialized
   configureDependencies();
-  Bloc.observer = AppBlocObserver();// Initialize all dependencies (before runApp())
+  Bloc.observer =
+      AppBlocObserver(); // Initialize all dependencies (before runApp())
   runApp(const MyApp());
 }
 
@@ -33,8 +33,8 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<SignInBloc>()),
+        BlocProvider(create: (_) => getIt<BannerBloc>()),
         BlocProvider(create: (_) => getIt<BookBloc>()),
-
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
@@ -45,9 +45,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 3, 7, 91)),
+          textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           useMaterial3: true,
-
-
         ),
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',

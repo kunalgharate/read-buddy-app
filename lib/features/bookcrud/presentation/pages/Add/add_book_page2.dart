@@ -8,13 +8,14 @@ import 'package:read_buddy_app/core/utils/auto_complete.dart';
 import 'package:read_buddy_app/core/utils/book_validators.dart';
 import 'package:read_buddy_app/core/utils/book_value_items.dart';
 import 'package:read_buddy_app/core/utils/image_helper.dart';
+import 'package:read_buddy_app/core/theme/text_styles.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/user_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_event.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
-import 'package:read_buddy_app/features/bookcrud/presentation/widgets/book_textfields.dart';
+import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddBookPage2 extends StatefulWidget {
@@ -115,7 +116,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
                 popupProps: const PopupProps.menu(fit: FlexFit.loose),
               ),
               const SizedBox(height: 16),
-              const Text('Additional Notes', style: labelStyle),
+              const Text('Additional Notes', style: TextStyles.labelStyle),
               MyTextField(
                 controller: notesController,
                 validator: BookFormValidator.validateNotes,
@@ -133,7 +134,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
                     color: Color.fromARGB(255, 4, 33, 83)),
               ),
               const SizedBox(height: 16),
-              const Text('Owner Name', style: labelStyle),
+              const Text('Owner Name', style: TextStyles.labelStyle),
               GenericAutocomplete<UserEntity>(
                 options: BookValueItems.usersList,
                 controller: ownerIdController,
@@ -150,7 +151,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
               ),
 
               const SizedBox(height: 16),
-              const Text('Location', style: labelStyle),
+              const Text('Location', style: TextStyles.labelStyle),
               MyTextField(
                 controller: locationController,
                 validator: BookFormValidator.validateLocation,
@@ -161,7 +162,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
               ),
               const SizedBox(height: 16),
 
-              const Text('Cover Image Url', style: labelStyle),
+              const Text('Cover Image Url', style: TextStyles.labelStyle),
               MyTextField(
                 controller: coverImageController,
                 validator: BookFormValidator.validateImageUrl,
@@ -172,7 +173,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
                     onPressed: singleImagePermission, icon: Icon(Icons.upload)),
               ),
               const SizedBox(height: 16),
-              const Text('Book Images', style: labelStyle),
+              const Text('Book Images', style: TextStyles.labelStyle),
 
               InkWell(
                 onTap: dialogpermission,
@@ -219,9 +220,9 @@ class _AddBookPage2State extends State<AddBookPage2> {
                 ),
 
               const SizedBox(height: 16),
-              const Text('Book Description', style: labelStyle),
+              const Text('Book Description', style: TextStyles.labelStyle),
               MyTextField(
-                controller: descriptionController, // ✅ Corrected
+                controller: descriptionController,
                 validator: BookFormValidator.validateDescription,
                 hintText: " Book Description",
                 obscureText: false,
@@ -229,7 +230,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
                 maxlines: 5,
               ),
               const SizedBox(height: 16),
-              const Text('Tag', style: labelStyle),
+              const Text('Tag', style: TextStyles.labelStyle),
               MyTextField(
                 controller: tagController,
                 validator: _tags.isEmpty || _tags == []
@@ -451,10 +452,4 @@ class _AddBookPage2State extends State<AddBookPage2> {
       );
     }
   }
-
-  static const TextStyle labelStyle = TextStyle(
-    fontWeight: FontWeight.w700,
-    fontSize: 18,
-    color: Color.fromARGB(255, 4, 33, 83),
-  );
 }

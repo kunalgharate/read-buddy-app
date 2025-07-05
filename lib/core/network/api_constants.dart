@@ -7,4 +7,7 @@ class Api {
   static const addCategory = '$baseUrl/categories';
   static const updateCategory = '$baseUrl/categories'; // append /:id
   static const deleteCategory = '$baseUrl/categories'; // append /:id
+
+//Banner Apis
+  static const createBanner = '$baseUrl/banners/';
 }

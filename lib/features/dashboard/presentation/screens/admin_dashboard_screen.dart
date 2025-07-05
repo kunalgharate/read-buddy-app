@@ -111,6 +111,14 @@ class AdminDashboardScreen extends StatelessWidget {
                     icon: Icons.people,
                     onPressed: () {},
                   ),
+                  DashboardBoxWidget(
+                    title: 'Banner',
+                    count: 12,
+                    icon: Icons.people,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/banner');
+                    },
+                  ),
                 ],
               ),
             ),

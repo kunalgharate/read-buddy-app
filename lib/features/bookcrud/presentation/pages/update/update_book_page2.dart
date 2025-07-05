@@ -14,7 +14,7 @@ import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_cru
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_event.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_state.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
-import 'package:read_buddy_app/features/bookcrud/presentation/widgets/book_textfields.dart';
+import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UpdateBookPage2 extends StatefulWidget {

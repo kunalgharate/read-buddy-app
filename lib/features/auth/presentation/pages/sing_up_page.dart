@@ -226,7 +226,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 }
 
-
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
