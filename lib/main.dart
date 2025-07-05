@@ -6,16 +6,15 @@ import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
 
 import 'core/di/injection.dart';
 import 'core/utils/app_bloc_observer.dart';
 import 'features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 import 'features/books/presentation/bloc/book_bloc.dart';
-import 'features/books/presentation/pages/book_page.dart';
 import 'features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'features/splash/splash_screen.dart';
-import 'features/user_preference/presentation/screens/question_screen.dart';
 import 'routes/app_router.dart';
 
 void main() {
@@ -54,19 +53,21 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: FutureBuilder<String?>(
-          future: SecureStorageUtil().getAccessToken(),
+          future: SecureStorageUtil().getAccessToken().then((value) {
+            return value;
+          }),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-              return const BookPage(); // User is logged in
+              return const HomeTab();
             } else {
-              return const SplashScreen(); // User is logged out
+              return const SplashScreen();
             }
           },
         ),
         onGenerateRoute: AppRouter.generateRoute,
-        initialRoute: '/',
+        // initialRoute: '/',
       ),
     );
   }

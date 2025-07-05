@@ -50,13 +50,6 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
       // Send ID token to backend
       final user = await signInWithGoogle(SignInGoogleParams(token: idToken));
 
-      // TEMPORARY: Save tokens and user here
-      await SecureStorageUtil().saveUser(user);
-      await SecureStorageUtil().saveTokens(
-        accessToken: user.accessToken,
-        refreshToken: user.refreshToken,
-      );
-
       emit(GoogleSignInSuccess(user));
     } catch (e) {
       emit(GoogleSignInFailure("Google Sign-In failed: $e"));
