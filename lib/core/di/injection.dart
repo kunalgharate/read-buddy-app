@@ -3,8 +3,17 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+<<<<<<< HEAD
 import '../network/dio_client.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
+=======
+import 'package:read_buddy_app/features/banner/datasources/data/createbanner_remote_datasource.dart';
+import 'package:read_buddy_app/features/banner/datasources/repositories/banner_repo_impl.dart';
+import 'package:read_buddy_app/features/banner/domain/repository/banner_repository.dart';
+import 'package:read_buddy_app/features/banner/domain/usecase/create_banner.dart';
+import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookcrud_remote_resources.dart';
+>>>>>>> f426d93 (Feature:search_category/banner_ui is Done)
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/user_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/repositories/bookcrud_repo_impl.dart';
 import 'package:read_buddy_app/features/bookcrud/data/repositories/user_repo_impl.dart';
@@ -52,9 +61,9 @@ final getIt = GetIt.instance;
   asExtension: true, // default
 )
 void configureDependencies() {
-
   getIt.registerLazySingleton<SecureStorageUtil>(() => SecureStorageUtil());
 
+<<<<<<< HEAD
   // Register Dio instance with logging
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
 
@@ -67,7 +76,15 @@ void configureDependencies() {
   getIt.registerLazySingleton(()=>SignInBloc(getIt<SignIn>()));
   getIt.registerLazySingleton(()=>SignUpBloc(getIt<RegisterUserUseCase>(), getIt<VerifyEmailUseCase>()));
   getIt.registerLazySingleton(()=>ProfileBloc(getIt<SecureStorageUtil>()));
+=======
+  getIt.registerLazySingleton<AuthRemoteDataSource>(
+      () => AuthRemoteDataSourceImpl(dio: Dio()));
+  getIt.registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(getIt<AuthRemoteDataSource>()));
+  getIt.registerLazySingleton(() => SignIn(getIt<AuthRepository>()));
+>>>>>>> f426d93 (Feature:search_category/banner_ui is Done)
 
+  getIt.registerLazySingleton(() => SignInBloc(getIt<SignIn>()));
 
   getIt.registerLazySingleton<BookRemoteDataSource>(
       () => BookRemoteDataSourceImpl(dio: getIt<Dio>()));
@@ -144,4 +161,17 @@ void configureDependencies() {
 
   getIt.registerLazySingleton(
       () => UserCubit(GetUserListUseCase(getIt<UserRepository>())));
+
+//???Banner Operations
+  getIt.registerLazySingleton<BannerRemoteDataSource>(
+      () => BannerRemoteDataSourceImpl(dio: Dio()));
+
+  getIt.registerLazySingleton<BannerRepository>(
+      () => BannerRepoImpl(remoteDataSource: getIt<BannerRemoteDataSource>()));
+
+  getIt.registerLazySingleton(
+      () => CreateBannerUsecase(getIt<BannerRepository>()));
+
+  getIt.registerLazySingleton(
+      () => BannerBloc(createBannerUsecase: getIt<CreateBannerUsecase>()));
 }

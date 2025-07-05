@@ -55,6 +55,12 @@ class _CategoryListPageState extends State<CategoryListPage> {
               child: TextField(
                 cursorColor: Colors.grey,
                 controller: searchCategoryController,
+                onChanged: (value) {
+                  setState(() {
+                    searchCategoryController.text = value;
+                    print("Searching categories: $value");
+                  });
+                },
                 decoration: InputDecoration(
                     hintText: 'Search Categories',
                     prefixIcon: Icon(Icons.search),
@@ -80,12 +86,21 @@ class _CategoryListPageState extends State<CategoryListPage> {
                     if (state.categories.isEmpty) {
                       return const Center(child: Text("No categories found."));
                     }
-
+                    final searchText =
+                        searchCategoryController.text.toLowerCase();
+                    final filteredCategories =
+                        state.categories.where((category) {
+                      return category.title.toLowerCase().contains(searchText);
+                    }).toList();
                     return ListView.builder(
                       padding: const EdgeInsets.all(8),
-                      itemCount: state.categories.length,
+                      itemCount: filteredCategories.isNotEmpty
+                          ? filteredCategories.length
+                          : state.categories.length,
                       itemBuilder: (context, index) {
-                        final category = state.categories[index];
+                        final category = filteredCategories.isNotEmpty
+                            ? filteredCategories[index]
+                            : state.categories[index];
                         return _buildCategoryCard(category, context);
                       },
                     );

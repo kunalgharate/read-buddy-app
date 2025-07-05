@@ -178,4 +178,34 @@ class BookFormValidator {
     }
     return null;
   }
+
+//=================Banner Type validations==================
+
+  static String? validateBannerTypes(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Banner type is required';
+    }
+    return null;
+  }
+
+  static String? validateBannerTitle(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Banner Title is  required';
+    }
+    return null;
+  }
+
+  static String? validateBannerDescription(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Banner Description is  required';
+    }
+    return null;
+  }
+
+  static String? validateBannerLink(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Banner Link is  required';
+    }
+    return null;
+  }
 }

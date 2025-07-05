@@ -6,7 +6,7 @@ import 'package:read_buddy_app/core/utils/book_value_items.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/Add/add_book_page2.dart';
-import 'package:read_buddy_app/features/bookcrud/presentation/widgets/book_textfields.dart';
+import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 
 class AddBookPage extends StatefulWidget {
   final Function onContinue;
