@@ -4,7 +4,9 @@ import '../../../../core/network/api_constants.dart';
 import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AppUserModel> signIn({required String email, required String password});
+  Future<AppUserModel> signIn(
+      {required String email, required String password});
+  Future<AppUserModel> signInWithGoogle({required String token});
   Future<AppUserModel> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
 }
@@ -52,7 +54,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Response status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Response status: ${response.statusCode}');
         print('🌐 AuthRemoteDataSource: Response data: ${response.data}');
       }
 
@@ -68,9 +71,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Login failed with status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Login failed with status: ${response.statusCode}');
       }
-      
+
       throw DioException(
         requestOptions: response.requestOptions,
         response: response,
@@ -121,8 +125,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Registration response status: ${response.statusCode}');
-        print('🌐 AuthRemoteDataSource: Registration response data: ${response.data}');
+        print(
+            '🌐 AuthRemoteDataSource: Registration response status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Registration response data: ${response.data}');
       }
 
       if (response.statusCode == ApiConstants.success ||
@@ -170,7 +176,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Verification response status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Verification response status: ${response.statusCode}');
       }
 
       if (response.statusCode == ApiConstants.success) {
@@ -183,9 +190,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'Email verification failed',
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Email verification exception: $e');
-      }
       rethrow;
     }
   }

@@ -9,6 +9,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -20,7 +21,10 @@ import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/register_user_usecase.dart'
     as _i241;
 import '../../features/auth/domain/usecases/sign_in.dart' as _i920;
+import '../../features/auth/domain/usecases/sign_in_with_google.dart' as _i692;
 import '../../features/auth/domain/usecases/verify_email_usecase.dart' as _i30;
+import '../../features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart'
+    as _i170;
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart'
     as _i78;
 import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart'
@@ -57,6 +61,10 @@ import '../../features/category_crud/domain/usecases/get_caategories.dart'
 import '../../features/category_crud/domain/usecases/update_category.dart'
     as _i527;
 import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
+import '../network/dio_client.dart' as _i667;
+import '../services/storage_service.dart' as _i306;
+import '../utils/app_interceptor.dart' as _i795;
+import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
 import '../utils/secure_storage_utils.dart' as _i206;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -71,6 +79,20 @@ extension GetItInjectableX on _i174.GetIt {
       environmentFilter,
     );
     gh.lazySingleton<_i206.SecureStorageUtil>(() => _i206.SecureStorageUtil());
+    gh.factory<_i133.ProfileBloc>(
+        () => _i133.ProfileBloc(gh<_i206.SecureStorageUtil>()));
+    gh.lazySingleton<_i361.Dio>(
+      () => dioModule.provideAuthDio(),
+      instanceName: 'auth',
+    );
+    gh.lazySingleton<_i306.StorageService>(() =>
+        dioModule.provideStorageService(gh<_i558.FlutterSecureStorage>()));
+    gh.lazySingleton<_i795.AppInterceptor>(() => dioModule.appInterceptor(
+          gh<_i558.FlutterSecureStorage>(),
+          gh<_i361.Dio>(instanceName: 'auth'),
+        ));
+    gh.lazySingleton<_i361.Dio>(
+        () => dioModule.dio(gh<_i795.AppInterceptor>()));
     gh.factory<_i133.ProfileBloc>(
         () => _i133.ProfileBloc(gh<_i206.SecureStorageUtil>()));
     gh.factory<_i673.BookCrudRemoteDataSource>(
@@ -89,30 +111,34 @@ extension GetItInjectableX on _i174.GetIt {
         _i574.CategoryRepositoryImpl(gh<_i212.CategoryRemoteDataSource>()));
     gh.factory<_i787.AuthRepository>(
         () => _i153.AuthRepositoryImpl(gh<_i170.AuthRemoteDataSource>()));
-    gh.factory<_i161.UpdateBookUsecase>(
-        () => _i161.UpdateBookUsecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i900.AddBookUsecase>(
         () => _i900.AddBookUsecase(gh<_i344.BookCrudRepository>()));
-    gh.factory<_i328.GetBookByIdUsecase>(
-        () => _i328.GetBookByIdUsecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i836.DeleteBookusecase>(
         () => _i836.DeleteBookusecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i701.GetBooksUsecase>(
         () => _i701.GetBooksUsecase(gh<_i344.BookCrudRepository>()));
+    gh.factory<_i328.GetBookByIdUsecase>(
+        () => _i328.GetBookByIdUsecase(gh<_i344.BookCrudRepository>()));
+    gh.factory<_i161.UpdateBookUsecase>(
+        () => _i161.UpdateBookUsecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i581.GetBooks>(
         () => _i581.GetBooks(gh<_i674.BookRepository>()));
     gh.factory<_i903.BookBloc>(() => _i903.BookBloc(gh<_i581.GetBooks>()));
     gh.factory<_i665.DeleteCategoryUsecase>(
         () => _i665.DeleteCategoryUsecase(gh<_i187.CategoryRepository>()));
-    gh.factory<_i527.UpdateCategoryUsecase>(
-        () => _i527.UpdateCategoryUsecase(gh<_i187.CategoryRepository>()));
     gh.factory<_i359.GetCategoriesUsecase>(
         () => _i359.GetCategoriesUsecase(gh<_i187.CategoryRepository>()));
+    gh.factory<_i527.UpdateCategoryUsecase>(
+        () => _i527.UpdateCategoryUsecase(gh<_i187.CategoryRepository>()));
     gh.factory<_i241.RegisterUserUseCase>(
         () => _i241.RegisterUserUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i920.SignIn>(() => _i920.SignIn(gh<_i787.AuthRepository>()));
+    gh.factory<_i692.SignInWithGoogle>(
+        () => _i692.SignInWithGoogle(gh<_i787.AuthRepository>()));
     gh.factory<_i30.VerifyEmailUseCase>(
         () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i170.GoogleSignInBloc>(
+        () => _i170.GoogleSignInBloc(gh<_i692.SignInWithGoogle>()));
     gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),

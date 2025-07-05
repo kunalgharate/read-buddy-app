@@ -1,6 +1,7 @@
 // lib/core/di/injection.dart
 
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import '../network/dio_client.dart';
@@ -42,7 +43,7 @@ import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 import '../../features/profile/presentation/blocs/profile_bloc.dart';
 import '../utils/secure_storage_utils.dart';
-//import 'injection.config.dart'; // Import generated file
+import 'injection.config.dart'; // Import generated file
 
 final getIt = GetIt.instance;
 
@@ -52,22 +53,25 @@ final getIt = GetIt.instance;
   asExtension: true, // default
 )
 void configureDependencies() {
-
   getIt.registerLazySingleton<SecureStorageUtil>(() => SecureStorageUtil());
 
   // Register Dio instance with logging
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
 
-  getIt.registerLazySingleton<AuthRemoteDataSource>(()=>AuthRemoteDataSourceImpl(dio: getIt<Dio>()));
-  getIt.registerLazySingleton<AuthRepository>(()=>AuthRepositoryImpl(getIt<AuthRemoteDataSource>()));
-  getIt.registerLazySingleton(()=>SignIn(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(()=>RegisterUserUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(()=>VerifyEmailUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton<AuthRemoteDataSource>(
+      () => AuthRemoteDataSourceImpl(dio: getIt<Dio>()));
+  getIt.registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(getIt<AuthRemoteDataSource>()));
+  getIt.registerLazySingleton(() => SignIn(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(
+      () => RegisterUserUseCase(getIt<AuthRepository>()));
+  getIt
+      .registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
 
-  getIt.registerLazySingleton(()=>SignInBloc(getIt<SignIn>()));
-  getIt.registerLazySingleton(()=>SignUpBloc(getIt<RegisterUserUseCase>(), getIt<VerifyEmailUseCase>()));
-  getIt.registerLazySingleton(()=>ProfileBloc(getIt<SecureStorageUtil>()));
-
+  getIt.registerLazySingleton(() => SignInBloc(getIt<SignIn>()));
+  getIt.registerLazySingleton(() =>
+      SignUpBloc(getIt<RegisterUserUseCase>(), getIt<VerifyEmailUseCase>()));
+  getIt.registerLazySingleton(() => ProfileBloc(getIt<SecureStorageUtil>()));
 
   getIt.registerLazySingleton<BookRemoteDataSource>(
       () => BookRemoteDataSourceImpl(dio: getIt<Dio>()));
