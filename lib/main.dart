@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
@@ -52,14 +53,15 @@ class MyApp extends StatelessWidget {
               seedColor: const Color.fromARGB(255, 3, 7, 91)),
           useMaterial3: true,
         ),
-        home: BlocBuilder<AppStartBloc, AppStartState>(
-          builder: (context, state) {
-            if (state is UserLoggedIn) {
-              return const BookPage();
-            } else if (state is UserLoggedOut) {
-              return const SplashScreen();
-            } else {
+        home: FutureBuilder<String?>(
+          future: SecureStorageUtil().getAccessToken(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              return const BookPage(); // User is logged in
+            } else {
+              return const SplashScreen(); // User is logged out
             }
           },
         ),

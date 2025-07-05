@@ -6,15 +6,9 @@ import 'package:read_buddy_app/features/auth/domain/repositories/auth_repository
 /// Param class for SignIn use case
 class SignInGoogleParams {
   final String token;
-  final String email;
-  final String name;
-  final String picture;
 
   SignInGoogleParams({
     required this.token,
-    this.name = '',
-    this.email = '',
-    this.picture = '',
   });
 }
 
@@ -25,7 +19,8 @@ class SignInWithGoogle {
 
   SignInWithGoogle(this.repository);
 
-  Future<AppUser> call(SignInGoogleParams params) {
-    return repository.signInUsingGoogle(token: params.token);
+  Future<AppUser> call(SignInGoogleParams params) async {
+    final user = await repository.signInUsingGoogle(token: params.token);
+    return user;
   }
 }
