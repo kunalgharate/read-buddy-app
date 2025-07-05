@@ -13,6 +13,8 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart'
+    as _i199;
 
 import '../../features/auth/data/remotesource/auth_remote_data_source.dart'
     as _i170;
@@ -22,8 +24,7 @@ import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/sign_in.dart' as _i920;
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart'
     as _i78;
-import '../../features/bookcrud/data/dataresources/bookcrud_remote_resources.dart'
-    as _i199;
+
 import '../../features/bookcrud/data/repositories/bookcrud_repo_impl.dart'
     as _i473;
 import '../../features/bookcrud/domain/respository/bookcrud_repo.dart' as _i344;
