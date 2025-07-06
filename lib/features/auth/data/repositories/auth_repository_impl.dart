@@ -21,12 +21,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
 
   @override
-  Future signInUsingGoogle() {
-    // TODO: implement signInUsingGoogle
-    throw UnimplementedError();
-  }
-
-  @override
   Future<AppUser> registerUser(Map<String, dynamic> data) async {
     if (kDebugMode) {
       print('📦 AuthRepository: Starting user registration');

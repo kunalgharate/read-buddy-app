@@ -20,7 +20,10 @@ import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/register_user_usecase.dart'
     as _i241;
 import '../../features/auth/domain/usecases/sign_in.dart' as _i920;
+import '../../features/auth/domain/usecases/sign_in_with_google.dart' as _i692;
 import '../../features/auth/domain/usecases/verify_email_usecase.dart' as _i30;
+import '../../features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart'
+    as _i170;
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart'
     as _i78;
 import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart'
@@ -110,9 +113,13 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i359.GetCategoriesUsecase(gh<_i187.CategoryRepository>()));
     gh.factory<_i241.RegisterUserUseCase>(
         () => _i241.RegisterUserUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i692.SignInWithGoogle>(
+        () => _i692.SignInWithGoogle(gh<_i787.AuthRepository>()));
     gh.factory<_i920.SignIn>(() => _i920.SignIn(gh<_i787.AuthRepository>()));
     gh.factory<_i30.VerifyEmailUseCase>(
         () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i170.GoogleSignInBloc>(
+        () => _i170.GoogleSignInBloc(gh<_i692.SignInWithGoogle>()));
     gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),

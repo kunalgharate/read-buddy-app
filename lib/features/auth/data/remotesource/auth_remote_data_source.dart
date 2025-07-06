@@ -197,7 +197,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AppUserModel> signInWithGoogle({required String token}) async {
     try {
-      final response = await dio.post(
+      final response = await _dio.post(
         ApiConstants.loginWithGoogle,
         data: {
           'token': token,

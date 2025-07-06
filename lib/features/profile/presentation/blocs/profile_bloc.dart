@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../auth/domain/entities/app_user.dart';
+import '../../domain/usecases/update_profile_usecase.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
@@ -13,10 +14,15 @@ enum PhotoSource { camera, gallery }
 @injectable
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final SecureStorageUtil _secureStorage;
+  final UpdateProfileUseCase _updateProfileUseCase;
 
-  ProfileBloc(this._secureStorage) : super(ProfileInitial()) {
+  ProfileBloc(
+    this._secureStorage,
+    this._updateProfileUseCase,
+  ) : super(ProfileInitial()) {
     on<LoadProfileEvent>(_onLoadProfile);
     on<UpdateProfileFieldEvent>(_onUpdateProfileField);
+    on<UpdateProfileApiEvent>(_onUpdateProfileApi);
     on<UpdateProfilePhotoEvent>(_onUpdateProfilePhoto);
     on<RefreshProfileEvent>(_onRefreshProfile);
   }
@@ -58,6 +64,37 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       
       // TODO: Also update on server via API call
       // await _profileRepository.updateProfile(updatedUser);
+      
+      emit(ProfileUpdated(updatedUser));
+      emit(ProfileLoaded(updatedUser));
+    } catch (error) {
+      final errorMessage = ErrorHandler.getErrorMessage(error);
+      emit(ProfileError(errorMessage));
+      emit(ProfileLoaded(currentState.user)); // Revert to previous state
+    }
+  }
+
+  Future<void> _onUpdateProfileApi(
+    UpdateProfileApiEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    if (state is! ProfileLoaded) return;
+    
+    final currentState = state as ProfileLoaded;
+    emit(ProfileUpdating(currentState.user));
+    
+    try {
+      // Call API to update profile
+      final updatedUser = await _updateProfileUseCase.call(
+        name: event.name,
+        phno: event.phno,
+        gender: event.gender,
+        dob: event.dob,
+        picture: event.picture,
+      );
+      
+      // Save updated user to secure storage
+      await _secureStorage.saveUser(updatedUser);
       
       emit(ProfileUpdated(updatedUser));
       emit(ProfileLoaded(updatedUser));
