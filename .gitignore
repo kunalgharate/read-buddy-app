@@ -33,3 +33,11 @@ doc/api/
 /web/
 /macos/
 /linux/
+
+# IntelliJ IDEA files
+**/*.iml
+**/*.xml
+
+# Android Studio files
+*.iml
+*.xml
