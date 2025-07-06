@@ -33,4 +33,6 @@ class ApiConstants {
 
 //Banner Apis
   static const createBanner = '$baseUrl/banners/';
+
+  static const String updateUserInfo = '$baseUrl/users/update-user-info';
 }

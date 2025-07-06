@@ -20,21 +20,19 @@ class AppUserModel extends AppUser {
     required super.refreshToken,
     super.picture,
     super.phno,
+    super.gender,
     super.wishlist,
   });
 
   factory AppUserModel.fromJson(Map<String, dynamic> json) {
-    if (kDebugMode) {
-      print('👤 AppUserModel: Parsing JSON response');
-      print('👤 AppUserModel: Raw JSON: $json');
-    }
-    
-    final user = json['user'] ?? {};
+
+    final user = json['user'];
     
     if (kDebugMode) {
       print('👤 AppUserModel: User data: $user');
       print('👤 AppUserModel: Access token: ${json['accessToken']}');
       print('👤 AppUserModel: Refresh token: ${json['refreshToken']}');
+      print('👤 AppUserModel: isEmailVerified from JSON: ${user['isEmailVerified']}');
     }
 
     final model = AppUserModel(
@@ -54,14 +52,9 @@ class AppUserModel extends AppUser {
       refreshToken: json['refreshToken'] ?? '',
       picture: user['picture'],
       phno: user['phno'],
+      gender: user['gender'],
       wishlist: user['wishlist'] ?? [],
     );
-    
-    if (kDebugMode) {
-      print('👤 AppUserModel: Created model with ID: ${model.id}');
-      print('👤 AppUserModel: Created model with name: ${model.name}');
-      print('👤 AppUserModel: Created model with email: ${model.email}');
-    }
     
     return model;
   }
@@ -83,6 +76,7 @@ class AppUserModel extends AppUser {
         '__v': version,
         'picture': picture,
         'phno': phno,
+        'gender': gender,
         'wishlist': wishlist,
       },
       'accessToken': accessToken,
