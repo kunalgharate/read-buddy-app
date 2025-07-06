@@ -23,6 +23,7 @@ class AppUser {
   final String? phno;
   final List<dynamic>? wishlist;
 
+
   AppUser({
     required this.id,
     required this.name,
@@ -42,4 +43,6 @@ class AppUser {
     this.phno,
     this.wishlist,
   });
+
+
 }

@@ -26,4 +26,11 @@ class ApiConstants {
   static const int notFound = 404;
   static const int conflict = 409;
   static const int internalServerError = 500;
+
+  static const addCategory = '$baseUrl/categories';
+  static const updateCategory = '$baseUrl/categories'; // append /:id
+  static const deleteCategory = '$baseUrl/categories'; // append /:id
+
+//Banner Apis
+  static const createBanner = '$baseUrl/banners/';
 }

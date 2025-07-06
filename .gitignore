@@ -25,3 +25,19 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+/.idea/
+/linux/
+/macos/
+/windows/
+/.idea/
+/web/
+/macos/
+/linux/
+
+# IntelliJ IDEA files
+**/*.iml
+**/*.xml
+
+# Android Studio files
+*.iml
+*.xml

@@ -15,7 +15,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
-          _checkUserSession();
+      // Temporarily navigate to test login screen for debugging
+      Navigator.pushReplacementNamed(context, '/signin');
+      // _checkUserSession();
     });
   }
 
@@ -25,11 +27,11 @@ class _SplashScreenState extends State<SplashScreen> {
     final accessToken = await secureStorage.getAccessToken();
     final refreshToken = await secureStorage.getRefreshToken();
 
-    final hasValidSession = user != null && accessToken != null &&
-        refreshToken != null;
+    final hasValidSession =
+        user != null && accessToken != null && refreshToken != null;
 
-
-    print("user : ${user?.name} ${user?.email} ${user?.role} $accessToken $refreshToken");
+    print(
+        "user : ${user?.name} ${user?.email} ${user?.role} $accessToken $refreshToken");
     final isOnboardingCompleted = await secureStorage.getOnboardingStatus();
 
     if (!isOnboardingCompleted) {
@@ -49,7 +51,6 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +59,8 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/book_logo.png", height: 140), // <-- PNG logo here
+            Image.asset("assets/book_logo.png",
+                height: 140), // <-- PNG logo here
             const SizedBox(height: 16),
             Text(
               "ReadBuddy",
@@ -66,6 +68,15 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: Colors.green[800],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "Debug Mode - Test Login",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
