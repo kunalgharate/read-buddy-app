@@ -1,49 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-<<<<<<< HEAD
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
-<<<<<<< HEAD:lib/main.dart
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
-
-=======
-
-import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
-
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
->>>>>>> 745d498 (Fix: bookcrud logic + added main.dart)
 import 'core/di/injection.dart';
 import 'core/utils/app_bloc_observer.dart';
 import 'features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 import 'features/books/presentation/bloc/book_bloc.dart';
-<<<<<<< HEAD
 import 'features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'routes/app_router.dart';
-
-
-
-=======
-import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
-import '../core/di/injection.dart';
-import '../core/utils/app_bloc_observer.dart';
-import '../features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
-import '../features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
-import '../features/books/presentation/bloc/book_bloc.dart';
-import '../features/books/presentation/pages/book_page.dart';
-import '../features/category_crud/presentation/bloc/bloc/category_bloc.dart';
-import '../features/splash/splash_screen.dart';
-import '../features/user_preference/presentation/screens/question_screen.dart';
-import '../routes/app_router.dart';
 import 'package:google_fonts/google_fonts.dart';
->>>>>>> f426d93 (Feature =search_category/banner_ui is Done):lib/app/main.dart
-=======
-
-import 'features/category_crud/presentation/bloc/bloc/category_bloc.dart';
-
-import 'routes/app_router.dart';
-import 'package:google_fonts/google_fonts.dart';
->>>>>>> 745d498 (Fix: bookcrud logic + added main.dart)
 
 void main() {
   WidgetsFlutterBinding
@@ -64,15 +32,11 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => getIt<BookBloc>()),
         BlocProvider(create: (_) => getIt<SignInBloc>()),
-<<<<<<< HEAD
         BlocProvider(create: (_) => getIt<SignUpBloc>()),
         BlocProvider(create: (_) => getIt<SignInBloc>()),
         BlocProvider(create: (_) => getIt<BannerBloc>()),
-        
-=======
         BlocProvider(create: (_) => getIt<BannerBloc>()),
         BlocProvider(create: (_) => getIt<BookBloc>()),
->>>>>>> 745d498 (Fix: bookcrud logic + added main.dart)
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
@@ -86,10 +50,7 @@ class MyApp extends StatelessWidget {
           textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           useMaterial3: true,
         ),
-<<<<<<< HEAD
         home : const HomeScreen(),
-=======
->>>>>>> 745d498 (Fix: bookcrud logic + added main.dart)
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',
       ),

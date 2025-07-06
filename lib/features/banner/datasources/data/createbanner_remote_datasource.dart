@@ -28,7 +28,6 @@ class BannerRemoteDataSourceImpl implements BannerRemoteDataSource {
     required String bannerType,
     required File bannerImage,
   }) async {
-    print("form dataaaaaaaaaaa is ");
 
     print("Image path: ${bannerImage.path}");
     final fileExists = await bannerImage.exists();
@@ -55,7 +54,7 @@ class BannerRemoteDataSourceImpl implements BannerRemoteDataSource {
       print("Image path: ${bannerImage.path}");
 
       final response = await dio.post(
-        Api.createBanner,
+        ApiConstants.createBanner,
         data: formData,
         options: Options(
           headers: {

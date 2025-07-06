@@ -36,13 +36,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const DonationPage());
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
-<<<<<<< HEAD
       case '/verification':
         return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
-=======
       case '/banner':
         return MaterialPageRoute(builder: (_) => const BannerScreen());
->>>>>>> f426d93 (Feature:search_category/banner_ui is Done)
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
