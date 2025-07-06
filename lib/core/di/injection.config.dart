@@ -59,6 +59,14 @@ import '../../features/category_crud/domain/usecases/get_caategories.dart'
     as _i359;
 import '../../features/category_crud/domain/usecases/update_category.dart'
     as _i527;
+import '../../features/profile/data/remotesource/profile_remote_data_source.dart'
+    as _i192;
+import '../../features/profile/data/repositories/profile_repository_impl.dart'
+    as _i334;
+import '../../features/profile/domain/repositories/profile_repository.dart'
+    as _i894;
+import '../../features/profile/domain/usecases/update_profile_usecase.dart'
+    as _i478;
 import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
 import '../utils/secure_storage_utils.dart' as _i206;
 
@@ -74,8 +82,6 @@ extension GetItInjectableX on _i174.GetIt {
       environmentFilter,
     );
     gh.lazySingleton<_i206.SecureStorageUtil>(() => _i206.SecureStorageUtil());
-    gh.factory<_i133.ProfileBloc>(
-        () => _i133.ProfileBloc(gh<_i206.SecureStorageUtil>()));
     gh.factory<_i673.BookCrudRemoteDataSource>(
         () => _i673.BookCrudRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
     gh.factory<_i170.AuthRemoteDataSource>(
@@ -88,6 +94,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i906.BookRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
     gh.factory<_i674.BookRepository>(
         () => _i661.BookRepositoryImpl(gh<_i906.BookRemoteDataSource>()));
+    gh.lazySingleton<_i192.ProfileRemoteDataSource>(
+        () => _i192.ProfileRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
     gh.factory<_i187.CategoryRepository>(() =>
         _i574.CategoryRepositoryImpl(gh<_i212.CategoryRemoteDataSource>()));
     gh.factory<_i787.AuthRepository>(
@@ -118,9 +126,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i920.SignIn>(() => _i920.SignIn(gh<_i787.AuthRepository>()));
     gh.factory<_i30.VerifyEmailUseCase>(
         () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
+    gh.lazySingleton<_i894.ProfileRepository>(
+        () => _i334.ProfileRepositoryImpl(gh<_i192.ProfileRemoteDataSource>()));
     gh.factory<_i170.GoogleSignInBloc>(
         () => _i170.GoogleSignInBloc(gh<_i692.SignInWithGoogle>()));
+    gh.factory<_i478.UpdateProfileUseCase>(
+        () => _i478.UpdateProfileUseCase(gh<_i894.ProfileRepository>()));
     gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
+    gh.factory<_i133.ProfileBloc>(() => _i133.ProfileBloc(
+          gh<_i206.SecureStorageUtil>(),
+          gh<_i478.UpdateProfileUseCase>(),
+        ));
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),
           gh<_i30.VerifyEmailUseCase>(),
