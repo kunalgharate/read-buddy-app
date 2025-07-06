@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 class DioClient {
   static Dio createDio() {
     final dio = Dio();
-    
+
     // Add interceptors
     dio.interceptors.add(LogInterceptor(
       requestHeader: true,
@@ -18,7 +18,7 @@ class DioClient {
         }
       },
     ));
-    
+
     // Add custom interceptor for more detailed logging
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
@@ -49,30 +49,30 @@ class DioClient {
         handler.next(error);
       },
     ));
-    
+
     // Set longer timeout for slow servers (like Render.com free tier)
     // Increased timeouts for release builds and cold server starts
     dio.options.connectTimeout = const Duration(seconds: 120); // Increased from 60s
-    dio.options.receiveTimeout = const Duration(seconds: 180); // Increased from 90s  
+    dio.options.receiveTimeout = const Duration(seconds: 180); // Increased from 90s
     dio.options.sendTimeout = const Duration(seconds: 120);    // Increased from 60s
-    
+
     // Set default headers
     dio.options.headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'User-Agent': 'ReadBuddyApp/1.0.0',
     };
-    
+
     // Add retry interceptor for better reliability
     dio.interceptors.add(InterceptorsWrapper(
       onError: (error, handler) async {
         if (error.type == DioExceptionType.connectionTimeout ||
             error.type == DioExceptionType.receiveTimeout) {
-          
+
           if (kDebugMode) {
             print('🔄 Retrying request due to timeout...');
           }
-          
+
           // Retry once for timeout errors
           try {
             final response = await dio.request(
@@ -95,7 +95,7 @@ class DioClient {
         handler.next(error);
       },
     ));
-    
+
     return dio;
   }
 }

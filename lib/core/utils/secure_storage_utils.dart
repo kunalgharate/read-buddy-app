@@ -19,6 +19,8 @@ class SecureStorageUtil {
       '_id': appUser.id,
       'name': appUser.name,
       'email': appUser.email,
+      'gender': appUser.gender,
+      'phno': appUser.phno,
       'password': appUser.password,
       'role': appUser.role,
       'isPrime': appUser.isPrime,
@@ -42,6 +44,8 @@ class SecureStorageUtil {
      id: userJson['_id'] ?? '',
      name: userJson['name'] ?? '',
      email: userJson['email'] ?? '',
+     phno: userJson['phno'] ?? '',
+     gender: userJson['gender'] ?? '',
      password: userJson['password'] ?? '',
      role: userJson['role'] ?? '',
      isPrime: userJson['isPrime'] ?? false,
@@ -54,7 +58,6 @@ class SecureStorageUtil {
      accessToken: userJson['accessToken'] ?? '',
      refreshToken: userJson['refreshToken'] ?? '',
     );
-
     return appUser;
   }
 

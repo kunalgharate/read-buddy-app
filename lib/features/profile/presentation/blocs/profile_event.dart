@@ -22,6 +22,25 @@ class UpdateProfileFieldEvent extends ProfileEvent {
   List<Object?> get props => [field, value];
 }
 
+class UpdateProfileApiEvent extends ProfileEvent {
+  final String? name;
+  final String? phno;
+  final String? gender;
+  final String? dob;
+  final String? picture;
+
+  const UpdateProfileApiEvent({
+    this.name,
+    this.phno,
+    this.gender,
+    this.dob,
+    this.picture,
+  });
+
+  @override
+  List<Object?> get props => [name, phno, gender, dob, picture];
+}
+
 class UpdateProfilePhotoEvent extends ProfileEvent {
   final PhotoSource source;
 

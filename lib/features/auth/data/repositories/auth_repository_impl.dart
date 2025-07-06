@@ -21,24 +21,18 @@ class AuthRepositoryImpl implements AuthRepository {
 
 
   @override
-  Future signInUsingGoogle() {
-    // TODO: implement signInUsingGoogle
-    throw UnimplementedError();
-  }
-
-  @override
   Future<AppUser> registerUser(Map<String, dynamic> data) async {
     if (kDebugMode) {
       print('📦 AuthRepository: Starting user registration');
     }
-    
+
     try {
       final result = await remoteDataSource.registerUser(data);
-      
+
       if (kDebugMode) {
         print('📦 AuthRepository: Registration successful');
       }
-      
+
       return result;
     } catch (error) {
       if (kDebugMode) {
@@ -53,14 +47,14 @@ class AuthRepositoryImpl implements AuthRepository {
     if (kDebugMode) {
       print('📦 AuthRepository: Starting email verification');
     }
-    
+
     try {
       final result = await remoteDataSource.verifyEmail(email, code);
-      
+
       if (kDebugMode) {
         print('📦 AuthRepository: Email verification successful');
       }
-      
+
       return result;
     } catch (error) {
       if (kDebugMode) {
@@ -76,15 +70,15 @@ class AuthRepositoryImpl implements AuthRepository {
       print('📦 AuthRepository: Starting sign in');
       print('📦 AuthRepository: Email: $email');
     }
-    
+
     try {
       final result = await remoteDataSource.signIn(email: email, password: password);
-      
+
       if (kDebugMode) {
         print('📦 AuthRepository: Sign in successful');
         print('📦 AuthRepository: User: ${result.name}');
       }
-      
+
       return result;
     } catch (error) {
       if (kDebugMode) {
@@ -93,5 +87,10 @@ class AuthRepositoryImpl implements AuthRepository {
       }
       rethrow;
     }
+  }
+
+  @override
+  Future<AppUser> signInUsingGoogle({required String token}) {
+    return remoteDataSource.signInWithGoogle(token: token);
   }
 }

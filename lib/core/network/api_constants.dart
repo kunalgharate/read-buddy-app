@@ -6,6 +6,7 @@ class ApiConstants {
   static const String register = '$baseUrl/users/register';
   static const String verifyEmail = '$baseUrl/users/verify-email';
   static const String refreshToken = '$baseUrl/auth/refresh';
+  static const String loginWithGoogle = '$baseUrl/googleauth/google-auth';
 
   // User endpoints
   static const String users = '$baseUrl/users';
@@ -32,4 +33,6 @@ class ApiConstants {
 
 //Banner Apis
   static const createBanner = '$baseUrl/banners/';
+
+  static const String updateUserInfo = '$baseUrl/users/update-user-info';
 }

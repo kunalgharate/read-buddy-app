@@ -23,9 +23,11 @@ class ProfileFieldWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: isEditable ? Colors.grey.shade50 : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(
+            color: isEditable ? Colors.grey.shade200 : Colors.grey.shade300,
+          ),
         ),
         child: Row(
           children: [
@@ -79,6 +81,12 @@ class ProfileFieldWidget extends StatelessWidget {
                 Icons.chevron_right,
                 color: Colors.grey.shade400,
                 size: 20,
+              )
+            else
+              Icon(
+                Icons.lock_outline,
+                color: Colors.grey.shade400,
+                size: 18,
               ),
           ],
         ),

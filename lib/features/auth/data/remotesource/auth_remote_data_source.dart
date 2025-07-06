@@ -6,9 +6,11 @@ import '../../../../core/utils/network_utils.dart';
 import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AppUserModel> signIn({required String email, required String password});
+  Future<AppUserModel> signIn(
+      {required String email, required String password});
   Future<AppUserModel> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
+  Future<AppUserModel> signInWithGoogle({required String token});
 }
 
 @Injectable(as: AuthRemoteDataSource)
@@ -19,7 +21,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<AppUserModel> signIn({
-    required String email, 
+    required String email,
     required String password,
   }) async {
     if (kDebugMode) {
@@ -27,7 +29,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.login}');
       print('🌐 AuthRemoteDataSource: Email: $email');
     }
-    
+
     // Check network connectivity before making request
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
@@ -37,17 +39,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'No internet connection available',
       );
     }
-    
+
     try {
       final requestData = {
         'email': email.trim().toLowerCase(),
         'password': password,
       };
-      
+
       if (kDebugMode) {
         print('🌐 AuthRemoteDataSource: Request data: $requestData');
       }
-      
+
       final response = await _dio.post(
         ApiConstants.login,
         data: requestData,
@@ -60,19 +62,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (response.statusCode == ApiConstants.success) {
         final userModel = AppUserModel.fromJson(response.data);
-        
+
         if (kDebugMode) {
           print('🌐 AuthRemoteDataSource: User model created successfully');
           print('🌐 AuthRemoteDataSource: User name: ${userModel.name}');
         }
-        
+
         return userModel;
       }
-      
+
       if (kDebugMode) {
         print('🌐 AuthRemoteDataSource: Login failed with status: ${response.statusCode}');
       }
-      
+
       throw DioException(
         requestOptions: response.requestOptions,
         response: response,
@@ -94,7 +96,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       print('🌐 AuthRemoteDataSource: Starting registration API call');
       print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.register}');
     }
-    
+
     // Check network connectivity before making request
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
@@ -104,7 +106,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'No internet connection available',
       );
     }
-    
+
     try {
       // Clean and validate data
       final cleanData = {
@@ -127,7 +129,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         print('🌐 AuthRemoteDataSource: Registration response data: ${response.data}');
       }
 
-      if (response.statusCode == ApiConstants.success || 
+      if (response.statusCode == ApiConstants.success ||
           response.statusCode == ApiConstants.created) {
         return AppUserModel.fromJson(response.data);
       }
@@ -151,7 +153,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       print('🌐 AuthRemoteDataSource: Starting email verification API call');
       print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.verifyEmail}');
     }
-    
+
     // Check network connectivity before making request
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
@@ -161,7 +163,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'No internet connection available',
       );
     }
-    
+
     try {
       final response = await _dio.post(
         ApiConstants.verifyEmail,
@@ -188,6 +190,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (kDebugMode) {
         print('🌐 AuthRemoteDataSource: Email verification exception: $e');
       }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<AppUserModel> signInWithGoogle({required String token}) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.loginWithGoogle,
+        data: {
+          'token': token,
+        },
+      );
+      print('Response status: ${response.statusCode}');
+      print('Response data: ${response.data}');
+
+      if (response.statusCode == ApiConstants.success) {
+        return AppUserModel.fromJson(response.data);
+      }
+
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        message: 'Login failed',
+      );
+    } catch (e) {
       rethrow;
     }
   }

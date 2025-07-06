@@ -1,10 +1,12 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
+import '../../../auth/domain/entities/app_user.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../profile/presentation/pages/edit_screens/edit_email_screen.dart';
 import '../../../profile/presentation/pages/edit_screens/edit_mobile_screen.dart';
@@ -21,20 +23,15 @@ class ProfileTab extends StatefulWidget {
 }
 
 class _ProfileTabState extends State<ProfileTab> {
-  late final ProfileBloc _profileBloc;
-  final SecureStorageUtil _secureStorage = getIt<SecureStorageUtil>();
-
   @override
   void initState() {
     super.initState();
-    _profileBloc = getIt<ProfileBloc>();
-    _profileBloc.add(LoadProfileEvent());
-  }
-
-  @override
-  void dispose() {
-    _profileBloc.close();
-    super.dispose();
+    // Add the event after the widget is built to avoid the "bad state" error
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<ProfileBloc>().add(LoadProfileEvent());
+      }
+    });
   }
 
   void _openSettings() {
@@ -52,8 +49,8 @@ class _ProfileTabState extends State<ProfileTab> {
       ),
     );
 
-    if (result != null && result != currentName) {
-      _profileBloc.add(UpdateProfileFieldEvent(field: 'name', value: result));
+    if (result != null && result != currentName && mounted) {
+      context.read<ProfileBloc>().add(UpdateProfileFieldEvent(field: 'name', value: result));
     }
   }
 
@@ -65,9 +62,60 @@ class _ProfileTabState extends State<ProfileTab> {
       ),
     );
 
-    if (result != null && result != currentMobile) {
-      _profileBloc.add(UpdateProfileFieldEvent(field: 'mobile', value: result));
+    if (result != null && result != currentMobile && mounted) {
+      context.read<ProfileBloc>().add(UpdateProfileFieldEvent(field: 'mobile', value: result));
     }
+  }
+
+  void _showEmailLockedMessage() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.lock_outline,
+                color: Colors.orange.shade600,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Email Locked',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Email address cannot be changed as it\'s your primary account identifier. If you need to update your email, please contact support.',
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF3182CE),
+              ),
+              child: const Text(
+                'Got it',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _openEditEmail(String currentEmail) async {
@@ -78,8 +126,8 @@ class _ProfileTabState extends State<ProfileTab> {
       ),
     );
 
-    if (result != null && result != currentEmail) {
-      _profileBloc.add(UpdateProfileFieldEvent(field: 'email', value: result));
+    if (result != null && result != currentEmail && mounted) {
+      context.read<ProfileBloc>().add(UpdateProfileFieldEvent(field: 'email', value: result));
     }
   }
 
@@ -91,8 +139,8 @@ class _ProfileTabState extends State<ProfileTab> {
     //   ),
     // );
 
-    // if (result != null && result != currentGender) {
-    //   _profileBloc.add(UpdateProfileFieldEvent(field: 'gender', value: result));
+    // if (result != null && result != currentGender && mounted) {
+    //   context.read<ProfileBloc>().add(UpdateProfileFieldEvent(field: 'gender', value: result));
     // }
   }
 
@@ -128,7 +176,9 @@ class _ProfileTabState extends State<ProfileTab> {
                   title: 'Camera',
                   onTap: () {
                     Navigator.pop(context);
-                    _profileBloc.add(UpdateProfilePhotoEvent(source: PhotoSource.camera));
+                    if (mounted) {
+                      context.read<ProfileBloc>().add(UpdateProfilePhotoEvent(source: PhotoSource.camera));
+                    }
                   },
                 ),
 
@@ -139,7 +189,9 @@ class _ProfileTabState extends State<ProfileTab> {
                   title: 'Gallery',
                   onTap: () {
                     Navigator.pop(context);
-                    _profileBloc.add(UpdateProfilePhotoEvent(source: PhotoSource.gallery));
+                    if (mounted) {
+                      context.read<ProfileBloc>().add(UpdateProfilePhotoEvent(source: PhotoSource.gallery));
+                    }
                   },
                 ),
 
@@ -195,221 +247,265 @@ class _ProfileTabState extends State<ProfileTab> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => _profileBloc,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.pop(context),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'User Profile',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
           ),
-          title: const Text(
-            'User Profile',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          centerTitle: true,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 15.0),
-              child: GestureDetector(
-                onTap: _openSettings,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF3182CE),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.settings,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+        ),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 15.0),
+            child: GestureDetector(
+              onTap: _openSettings,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF3182CE),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                  size: 20,
                 ),
               ),
             ),
-          ],
-        ),
-        body: BlocConsumer<ProfileBloc, ProfileState>(
-          listener: (context, state) {
-            if (state is ProfileError) {
-              UiUtils.showErrorSnackBar(
-                context,
-                message: state.message,
-              );
-            } else if (state is ProfileUpdated) {
-              UiUtils.showSuccessSnackBar(
-                context,
-                message: 'Profile updated successfully',
-              );
-            }
-          },
-          builder: (context, state) {
-            if (state is ProfileLoading) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF3182CE),
+          ),
+        ],
+      ),
+      body: BlocConsumer<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileError) {
+            UiUtils.showErrorSnackBar(
+              context,
+              message: state.message,
+            );
+          } else if (state is ProfileUpdated) {
+            UiUtils.showSuccessSnackBar(
+              context,
+              message: 'Profile updated successfully',
+            );
+          }
+        },
+        builder: (context, state) {
+          // Handle loading state
+          if (state is ProfileLoading) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF3182CE),
+              ),
+            );
+          }
+
+          // Handle updating state - show current data with loading indicator
+          if (state is ProfileUpdating) {
+            return Stack(
+              children: [
+                _buildProfileContent(state.user),
+                Container(
+                  color: Colors.black.withOpacity(0.3),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF3182CE),
+                    ),
+                  ),
                 ),
-              );
-            }
+              ],
+            );
+          }
 
-            if (state is ProfileError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.grey.shade400,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Failed to load profile',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => _profileBloc.add(LoadProfileEvent()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3182CE),
-                      ),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final user = state is ProfileLoaded ? state.user : null;
-            if (user == null) {
-              return const Center(child: Text('No user data available'));
-            }
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+          // Handle error state
+          if (state is ProfileError) {
+            return Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 20),
-
-                  // Profile Photo
-                  ProfilePhotoWidget(
-                    imageUrl: user.picture,
-                    onTap: _showPhotoOptions,
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.grey.shade400,
                   ),
-
-                  const SizedBox(height: 30),
-
-                  // Profile Fields
-                  ProfileFieldWidget(
-                    icon: Icons.person_outline,
-                    label: 'Name',
-                    value: user.name.isNotEmpty ? user.name : 'Not set',
-                    onTap: () => _openEditName(user.name),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  ProfileFieldWidget(
-                    icon: Icons.phone_outlined,
-                    label: 'Mobile Number',
-                    value: user.phno?.isNotEmpty == true ? user.phno! : 'Not set',
-                    onTap: () => _openEditMobile(user.phno ?? ''),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  ProfileFieldWidget(
-                    icon: Icons.email_outlined,
-                    label: 'Email Id',
-                    value: user.email.isNotEmpty ? user.email : 'Not set',
-                    onTap: () => _openEditEmail(user.email),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  ProfileFieldWidget(
-                    icon: _getGenderIcon('Male'), // Default for now
-                    label: 'Gender',
-                    value: 'Not set', // Will be implemented when gender field is added to user model
-                    onTap: () => _openEditGender('Male'),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Account Status
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: user.isEmailVerified
-                          ? Colors.green.shade50
-                          : Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: user.isEmailVerified
-                            ? Colors.green.shade200
-                            : Colors.orange.shade200,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          user.isEmailVerified
-                              ? Icons.verified_user
-                              : Icons.warning_outlined,
-                          color: user.isEmailVerified
-                              ? Colors.green.shade600
-                              : Colors.orange.shade600,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.isEmailVerified
-                                    ? 'Account Verified'
-                                    : 'Email Not Verified',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: user.isEmailVerified
-                                      ? Colors.green.shade700
-                                      : Colors.orange.shade700,
-                                ),
-                              ),
-                              if (!user.isEmailVerified)
-                                Text(
-                                  'Please verify your email address',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.orange.shade600,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 16),
+                  Text(
+                    'Failed to load profile',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey.shade600,
                     ),
                   ),
-
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (mounted) {
+                        context.read<ProfileBloc>().add(LoadProfileEvent());
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3182CE),
+                    ),
+                    child: const Text('Retry'),
+                  ),
                 ],
               ),
             );
-          },
-        ),
+          }
+
+          // Handle loaded/updated states
+          final user = (state is ProfileLoaded) 
+              ? state.user 
+              : (state is ProfileUpdated) 
+                  ? state.user 
+                  : null;
+
+          if (user == null) {
+            return const Center(child: Text('No user data available'));
+          }
+
+          return _buildProfileContent(user);
+        },
+      ),
+    );
+  }
+
+  Widget _buildProfileContent(AppUser user) {
+    if (kDebugMode) {
+      print('🎨 ProfileTab: Building UI with user data:');
+      print('👤 UI User Name: "${user.name}"');
+      print('👤 UI User Email: "${user.email}"');
+      print('👤 UI User Phone: "${user.phno}"');
+      print('👤 UI User Gender: "${user.gender}"');
+      print('👤 UI User Picture: "${user.picture}"');
+      print('✅ UI User Email Verified: ${user.isEmailVerified}');
+    }
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 20),
+
+          // Profile Photo
+          ProfilePhotoWidget(
+            imageUrl: user.picture,
+            onTap: _showPhotoOptions,
+          ),
+
+          const SizedBox(height: 30),
+
+          // Profile Fields
+          ProfileFieldWidget(
+            icon: Icons.person_outline,
+            label: 'Name',
+            value: user.name.isNotEmpty ? user.name : 'Not set',
+            onTap: () => _openEditName(user.name),
+          ),
+
+          const SizedBox(height: 20),
+
+          ProfileFieldWidget(
+            icon: Icons.phone_outlined,
+            label: 'Mobile Number',
+            value: user.phno?.isNotEmpty == true ? user.phno! : 'Not set',
+            onTap: () => _openEditMobile(user.phno ?? ''),
+          ),
+
+          const SizedBox(height: 20),
+
+          GestureDetector(
+            onTap: _showEmailLockedMessage,
+            child: ProfileFieldWidget(
+              icon: Icons.email_outlined,
+              label: 'Email Id',
+              value: user.email.isNotEmpty ? user.email : 'Not set',
+              onTap: () {}, // Empty callback since we handle tap with GestureDetector
+              isEditable: false, // Lock the email field
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          ProfileFieldWidget(
+            icon: _getGenderIcon(user.gender ?? 'Not set'),
+            label: 'Gender',
+            value: user.gender?.isNotEmpty == true ? user.gender! : 'Not set',
+            onTap: () => _openEditGender(user.gender ?? ''),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Account Status
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: user.isEmailVerified
+                  ? Colors.green.shade50
+                  : Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: user.isEmailVerified
+                    ? Colors.green.shade200
+                    : Colors.orange.shade200,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  user.isEmailVerified
+                      ? Icons.verified_user
+                      : Icons.warning_outlined,
+                  color: user.isEmailVerified
+                      ? Colors.green.shade600
+                      : Colors.orange.shade600,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.isEmailVerified
+                            ? 'Account Verified'
+                            : 'Email Not Verified',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: user.isEmailVerified
+                              ? Colors.green.shade700
+                              : Colors.orange.shade700,
+                        ),
+                      ),
+                      if (!user.isEmailVerified)
+                        Text(
+                          'Please verify your email address',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.orange.shade600,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 40),
+        ],
       ),
     );
   }
