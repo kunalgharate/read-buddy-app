@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sing_up_page.dart';
+import 'package:read_buddy_app/features/banner/presentation/pages/banner.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 import 'package:read_buddy_app/features/donate/presentation/donation_page.dart';
@@ -35,8 +36,13 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const DonationPage());
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+<<<<<<< HEAD
       case '/verification':
         return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
+=======
+      case '/banner':
+        return MaterialPageRoute(builder: (_) => const BannerScreen());
+>>>>>>> f426d93 (Feature:search_category/banner_ui is Done)
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
