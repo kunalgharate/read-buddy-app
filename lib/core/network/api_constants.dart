@@ -35,4 +35,5 @@ class ApiConstants {
   static const createBanner = '$baseUrl/banners/';
 
   static const String updateUserInfo = '$baseUrl/users/update-user-info';
+  static const String uploadProfileImage = '$baseUrl/users/upload-profile-image';
 }

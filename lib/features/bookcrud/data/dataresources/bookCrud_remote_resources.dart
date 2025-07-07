@@ -12,7 +12,7 @@ import '../../../../core/network/api_constants.dart';
 abstract class BookCrudRemoteDataSource {
   Future<List<BookCrudModel>> getBooks();
   Future<BookCrudModel> getBookById(String id);
-  Future<void> addBook(BookCrudModel book);
+  Future<void> addBook(BookCrudModel book); // BookPayload , BookParams
   Future<void> updateBook(String id, BookCrudModel book);
   Future<void> deleteBook(String id);
 }

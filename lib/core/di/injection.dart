@@ -7,6 +7,8 @@ import 'package:injectable/injectable.dart';
 // Core
 import '../network/dio_client.dart';
 import '../utils/secure_storage_utils.dart';
+import '../services/image_picker_service.dart';
+import '../services/image_upload_service.dart';
 
 // Auth
 import '../../features/auth/data/remotesource/auth_remote_data_source.dart';
@@ -129,6 +131,12 @@ void _registerDataSources() {
   getIt.registerLazySingleton<BannerRemoteDataSource>(
     () => BannerRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
+
+  // Image Services
+  getIt.registerLazySingleton<ImagePickerService>(() => ImagePickerService());
+  getIt.registerLazySingleton<ImageUploadService>(
+    () => ImageUploadService(dio: getIt<Dio>()),
+  );
 }
 
 // ========================================
@@ -223,6 +231,8 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => ProfileBloc(
         getIt<SecureStorageUtil>(),
         getIt<UpdateProfileUseCase>(),
+        getIt<ImagePickerService>(),
+        getIt<ImageUploadService>(),
       ));
 
   // Books Blocs

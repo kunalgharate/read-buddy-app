@@ -68,6 +68,8 @@ import '../../features/profile/domain/repositories/profile_repository.dart'
 import '../../features/profile/domain/usecases/update_profile_usecase.dart'
     as _i478;
 import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
+import '../services/image_picker_service.dart' as _i644;
+import '../services/image_upload_service.dart' as _i606;
 import '../utils/secure_storage_utils.dart' as _i206;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -81,7 +83,10 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
+    gh.factory<_i644.ImagePickerService>(() => _i644.ImagePickerService());
     gh.lazySingleton<_i206.SecureStorageUtil>(() => _i206.SecureStorageUtil());
+    gh.factory<_i606.ImageUploadService>(
+        () => _i606.ImageUploadService(dio: gh<_i361.Dio>()));
     gh.factory<_i673.BookCrudRemoteDataSource>(
         () => _i673.BookCrudRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
     gh.factory<_i170.AuthRemoteDataSource>(
@@ -132,11 +137,13 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i170.GoogleSignInBloc(gh<_i692.SignInWithGoogle>()));
     gh.factory<_i478.UpdateProfileUseCase>(
         () => _i478.UpdateProfileUseCase(gh<_i894.ProfileRepository>()));
-    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
     gh.factory<_i133.ProfileBloc>(() => _i133.ProfileBloc(
           gh<_i206.SecureStorageUtil>(),
           gh<_i478.UpdateProfileUseCase>(),
+          gh<_i644.ImagePickerService>(),
+          gh<_i606.ImageUploadService>(),
         ));
+    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),
           gh<_i30.VerifyEmailUseCase>(),

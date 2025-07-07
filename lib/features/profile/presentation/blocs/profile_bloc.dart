@@ -2,6 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/services/image_picker_service.dart';
+import '../../../../core/services/image_upload_service.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../auth/domain/entities/app_user.dart';
@@ -16,10 +18,14 @@ enum PhotoSource { camera, gallery }
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final SecureStorageUtil _secureStorage;
   final UpdateProfileUseCase _updateProfileUseCase;
+  final ImagePickerService _imagePickerService;
+  final ImageUploadService _imageUploadService;
 
   ProfileBloc(
     this._secureStorage,
     this._updateProfileUseCase,
+    this._imagePickerService,
+    this._imageUploadService,
   ) : super(ProfileInitial()) {
     on<LoadProfileEvent>(_onLoadProfile);
     on<UpdateProfileFieldEvent>(_onUpdateProfileField);
@@ -89,13 +95,46 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(ProfileUpdating(currentUser));
     
     try {
-      // TODO: Implement image picker and upload functionality
-      // final imagePath = await _imagePickerService.pickImage(event.source);
-      // final imageUrl = await _imageUploadService.uploadImage(imagePath);
+      // Convert PhotoSource to ImageSource
+      final imageSource = event.source == PhotoSource.camera 
+          ? ImageSource.camera 
+          : ImageSource.gallery;
+      
+      // Pick image
+      final imageFile = await _imagePickerService.pickImage(imageSource);
+      if (imageFile == null) {
+        // User cancelled image selection
+        emit(ProfileLoaded(currentUser));
+        return;
+      }
 
-      // For now, just show a message
-      emit(const ProfileError('Photo update functionality will be implemented soon'));
-      emit(ProfileLoaded(currentUser));
+      // Validate image file
+      if (!_imageUploadService.validateImageFile(imageFile)) {
+        emit(const ProfileError('Invalid image file'));
+        emit(ProfileLoaded(currentUser));
+        return;
+      }
+
+      // Upload image and get URL
+      final imageUrl = await _imageUploadService.uploadProfileImage(imageFile);
+      
+      if (imageUrl.isEmpty) {
+        emit(const ProfileError('Failed to upload image'));
+        emit(ProfileLoaded(currentUser));
+        return;
+      }
+
+      // Update profile with new image URL
+      final updatedUserFromApi = await _updateProfileUseCase.call(
+        profileData: {'picture': imageUrl}
+      );
+
+      // Save updated user to secure storage
+      await _secureStorage.saveUser(updatedUserFromApi);
+      
+      emit(ProfileUpdated(updatedUserFromApi));
+      emit(ProfileLoaded(updatedUserFromApi));
+
     } catch (error) {
       final errorMessage = ErrorHandler.getErrorMessage(error);
       emit(ProfileError(errorMessage));

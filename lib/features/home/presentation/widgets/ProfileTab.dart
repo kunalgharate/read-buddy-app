@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/di/injection.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
@@ -16,7 +14,9 @@ import '../../../profile/presentation/widgets/profile_photo_widget.dart';
 import '../../../settings/settings_screen.dart';
 
 class ProfileTab extends StatefulWidget {
-  const ProfileTab({super.key});
+  final VoidCallback? onBackPressed;
+  
+  const ProfileTab({super.key, this.onBackPressed});
 
   @override
   State<ProfileTab> createState() => _ProfileTabState();
@@ -252,10 +252,6 @@ class _ProfileTabState extends State<ProfileTab> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           'User Profile',
           style: TextStyle(
