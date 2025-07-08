@@ -6,6 +6,7 @@ import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_nav_container.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
+import 'package:read_buddy_app/features/permissions/presentation/widgets/permission_guard.dart';
 import 'core/di/injection.dart';
 import 'core/utils/app_bloc_observer.dart';
 import 'features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
@@ -51,7 +52,9 @@ class MyApp extends StatelessWidget {
           textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           useMaterial3: true,
         ),
-        home : const BottomNavContainer(),
+        home : PermissionGuard(
+          child: const BottomNavContainer(),
+        ),
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',
       ),

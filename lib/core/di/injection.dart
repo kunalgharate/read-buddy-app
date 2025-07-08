@@ -9,6 +9,7 @@ import '../network/dio_client.dart';
 import '../utils/secure_storage_utils.dart';
 import '../services/image_picker_service.dart';
 import '../services/image_upload_service.dart';
+import '../services/permission_service.dart';
 
 // Auth
 import '../../features/auth/data/remotesource/auth_remote_data_source.dart';
@@ -68,6 +69,9 @@ import '../../features/banner/datasources/repositories/banner_repo_impl.dart';
 import '../../features/banner/domain/repository/banner_repository.dart';
 import '../../features/banner/domain/usecase/create_banner.dart';
 import '../../features/banner/presentation/bloc/banner_bloc.dart';
+
+// Permissions
+import '../../features/permissions/presentation/bloc/permission_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -137,6 +141,9 @@ void _registerDataSources() {
   getIt.registerLazySingleton<ImageUploadService>(
     () => ImageUploadService(dio: getIt<Dio>()),
   );
+
+  // Permission Service
+  getIt.registerLazySingleton<PermissionService>(() => PermissionService());
 }
 
 // ========================================
@@ -258,6 +265,11 @@ void _registerBlocs() {
   // Banner Blocs
   getIt.registerLazySingleton(() => BannerBloc(
         createBannerUsecase: getIt<CreateBannerUsecase>(),
+      ));
+
+  // Permission Blocs
+  getIt.registerLazySingleton(() => PermissionBloc(
+        getIt<PermissionService>(),
       ));
 }
 

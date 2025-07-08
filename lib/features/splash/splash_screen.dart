@@ -27,6 +27,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     final startTime = DateTime.now();
+
+    _navigateToSignIn();
     
     try {
       await _checkUserSession();
@@ -77,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen> {
       });
 
       // Navigate based on user role
-      _navigateBasedOnRole(sessionData.user!.role);
+    //  _navigateBasedOnRole(sessionData.user!.role);
       
     } catch (e) {
       debugPrint('Session check error: $e');

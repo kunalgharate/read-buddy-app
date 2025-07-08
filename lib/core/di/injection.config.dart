@@ -59,6 +59,8 @@ import '../../features/category_crud/domain/usecases/get_caategories.dart'
     as _i359;
 import '../../features/category_crud/domain/usecases/update_category.dart'
     as _i527;
+import '../../features/permissions/presentation/bloc/permission_bloc.dart'
+    as _i986;
 import '../../features/profile/data/remotesource/profile_remote_data_source.dart'
     as _i192;
 import '../../features/profile/data/repositories/profile_repository_impl.dart'
@@ -70,6 +72,7 @@ import '../../features/profile/domain/usecases/update_profile_usecase.dart'
 import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
 import '../services/image_picker_service.dart' as _i644;
 import '../services/image_upload_service.dart' as _i606;
+import '../services/permission_service.dart' as _i165;
 import '../utils/secure_storage_utils.dart' as _i206;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -84,7 +87,10 @@ extension GetItInjectableX on _i174.GetIt {
       environmentFilter,
     );
     gh.factory<_i644.ImagePickerService>(() => _i644.ImagePickerService());
+    gh.factory<_i165.PermissionService>(() => _i165.PermissionService());
     gh.lazySingleton<_i206.SecureStorageUtil>(() => _i206.SecureStorageUtil());
+    gh.factory<_i986.PermissionBloc>(
+        () => _i986.PermissionBloc(gh<_i165.PermissionService>()));
     gh.factory<_i606.ImageUploadService>(
         () => _i606.ImageUploadService(dio: gh<_i361.Dio>()));
     gh.factory<_i673.BookCrudRemoteDataSource>(
