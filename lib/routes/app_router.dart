@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sing_up_page.dart';
+import 'package:read_buddy_app/features/auth/presentation/widgets/auth_wrapper.dart';
 import 'package:read_buddy_app/features/banner/presentation/pages/banner.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 import 'package:read_buddy_app/features/donate/presentation/donation_page.dart';
-import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/bottom_nav_container.dart';
 import 'package:read_buddy_app/features/permissions/presentation/pages/permission_page.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/features/permissions/presentation/bloc/permission_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:read_buddy_app/features/permissions/presentation/bloc/permission
 import '../features/auth/presentation/widgets/email_verification_widget.dart';
 import '../features/books/presentation/pages/book_page.dart';
 import '../features/dashboard/presentation/screens/admin_dashboard_screen.dart';
+import '../features/home/presentation/screens/home_screen.dart';
 import '../features/onboarding/screens/onboarding_screens.dart';
 import '../features/splash/splash_screen.dart';
 
