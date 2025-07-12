@@ -6,6 +6,7 @@ import '../../../books/presentation/bloc/book_bloc.dart';
 import '../../../books/presentation/bloc/book_event.dart';
 import '../../../books/presentation/bloc/book_state.dart';
 import '../../../books/presentation/widgets/book_list_item.dart';
+// import 'package:read_buddy_app/core/di/injection.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -65,9 +66,7 @@ class HomeScreen extends StatelessWidget {
         },
         child: const Icon(Icons.refresh),
       ),
-    bottomNavigationBar: BottomNavWidget(),
+      bottomNavigationBar: BottomNavWidget(),
     );
   }
 }
-
-

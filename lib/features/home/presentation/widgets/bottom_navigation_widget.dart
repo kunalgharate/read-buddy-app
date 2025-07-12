@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/features/home/presentation/bloc/home_main_bloc.dart';
+import 'package:read_buddy_app/features/home/presentation/bloc/home_main_event.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/categoryTab.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/donationTab.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/mainTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dart';
-
-import '../../../books/presentation/pages/book_page.dart';
-
 
 class BottomNavWidget extends StatefulWidget {
   const BottomNavWidget({super.key});
@@ -19,11 +20,14 @@ class BottomNavWidget extends StatefulWidget {
 class _BottomNavWidgetState extends State<BottomNavWidget> {
   int currentIndex = 0;
 
-  final List<Widget> pages = const [
-    Maintab(),
-    CategoryTab(),
-    DonationTab(),
-    ProfileTab()
+  final List<Widget> pages = [
+    BlocProvider(
+      create: (_) => getIt<HomeMainBloc>()..add(FetchMainHomeData()),
+      child: const MainTab(),
+    ),
+    const CategoryTab(),
+    const DonationTab(),
+    const ProfileTab()
   ];
 
   final List<String> labels = ["Home", "Category", "Donation", "Profile"];
@@ -42,7 +46,6 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
           // Main content
           pages[currentIndex],
 
-
           Positioned(
             bottom: 0,
             left: 0,
@@ -60,14 +63,17 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
                 });
               },
               items: [
-SvgPicture.asset('assets/icons/home.svg', width: 28, height: 28, color: Colors.white),
-SvgPicture.asset('assets/icons/categories.svg', width: 28, height: 28, color: Colors.white),
-SvgPicture.asset('assets/icons/donation.svg', width: 28, height: 28, color: Colors.white),
-SvgPicture.asset('assets/icons/person.svg', width: 28, height: 28, color: Colors.white),
+                SvgPicture.asset('assets/icons/home.svg',
+                    width: 28, height: 28, color: Colors.white),
+                SvgPicture.asset('assets/icons/categories.svg',
+                    width: 28, height: 28, color: Colors.white),
+                SvgPicture.asset('assets/icons/donation.svg',
+                    width: 28, height: 28, color: Colors.white),
+                SvgPicture.asset('assets/icons/person.svg',
+                    width: 28, height: 28, color: Colors.white),
               ],
             ),
           ),
-
 
           Positioned(
             bottom: 0,
