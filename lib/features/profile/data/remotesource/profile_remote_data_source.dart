@@ -37,7 +37,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        return AppUserModel.fromJson(response.data['user'] ?? response.data);
+        // Pass the entire response to AppUserModel.fromJson
+        // The updated fromJson method will handle extracting the user data
+        return AppUserModel.fromJson(response.data);
       } else {
         throw DioException(
           requestOptions: response.requestOptions,

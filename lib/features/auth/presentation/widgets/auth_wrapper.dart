@@ -17,13 +17,15 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
-  bool _permissionsChecked = false;
+  bool _isLoading = true;
   bool _shouldShowPermissions = false;
 
   @override
   void initState() {
     super.initState();
-    _checkPermissionStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPermissionStatus();
+    });
   }
 
   Future<void> _checkPermissionStatus() async {
@@ -31,15 +33,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
       final prefs = await SharedPreferences.getInstance();
       final permissionsGranted = prefs.getBool('permissions_granted_${widget.userRole}') ?? false;
       
-      setState(() {
-        _permissionsChecked = true;
-        _shouldShowPermissions = !permissionsGranted;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _shouldShowPermissions = !permissionsGranted;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _permissionsChecked = true;
-        _shouldShowPermissions = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _shouldShowPermissions = true;
+        });
+      }
     }
   }
 
@@ -48,17 +54,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('permissions_granted_${widget.userRole}', true);
       
-      setState(() {
-        _shouldShowPermissions = false;
-      });
+      if (mounted) {
+        setState(() {
+          _shouldShowPermissions = false;
+        });
+      }
     } catch (e) {
-      // Handle error if needed
+      debugPrint('Error saving permission state: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_permissionsChecked) {
+    if (_isLoading) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(

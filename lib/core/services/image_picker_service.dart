@@ -15,7 +15,8 @@ class ImagePickerService {
       // Request permissions
       bool hasPermission = await _requestPermission(source);
       if (!hasPermission) {
-        throw Exception('Permission denied. Please grant ${source == ImageSource.camera ? 'camera' : 'gallery'} permission.');
+        final permissionName = source == ImageSource.camera ? 'camera' : 'gallery';
+        throw Exception('Permission denied. Please grant $permissionName permission to continue.');
       }
 
       // Pick image
@@ -33,6 +34,10 @@ class ImagePickerService {
       }
       return null;
     } catch (e) {
+      // Re-throw permission errors as-is for better handling
+      if (e.toString().contains('Permission denied')) {
+        rethrow;
+      }
       throw Exception('Failed to pick image: ${e.toString()}');
     }
   }

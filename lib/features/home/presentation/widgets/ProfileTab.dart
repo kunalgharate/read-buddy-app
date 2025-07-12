@@ -11,6 +11,8 @@ import '../../../profile/presentation/pages/edit_screens/edit_mobile_screen.dart
 import '../../../profile/presentation/pages/edit_screens/edit_name_screen.dart';
 import '../../../profile/presentation/widgets/profile_field_widget.dart';
 import '../../../profile/presentation/widgets/profile_photo_widget.dart';
+import '../../../profile/presentation/widgets/permission_helper.dart';
+import '../../../profile/presentation/widgets/gender_selection_bottom_sheet.dart';
 import '../../../settings/settings_screen.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -132,16 +134,52 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _openEditGender(String currentGender) async {
-    // final result = await Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => EditGenderScreen(currentGender: currentGender),
-    //   ),
-    // );
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return GenderSelectionBottomSheet(
+          currentGender: currentGender.isEmpty || currentGender == 'Not set' 
+              ? null 
+              : currentGender,
+          onGenderSelected: (String selectedGender) {
+            if (mounted) {
+              context.read<ProfileBloc>().add(
+                UpdateProfileFieldEvent(
+                  field: 'gender', 
+                  value: selectedGender,
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
 
-    // if (result != null && result != currentGender && mounted) {
-    //   context.read<ProfileBloc>().add(UpdateProfileFieldEvent(field: 'gender', value: result));
-    // }
+  void _handlePermissionError(String errorMessage) {
+    String permissionType = 'gallery';
+    if (errorMessage.toLowerCase().contains('camera')) {
+      permissionType = 'camera';
+    }
+    
+    PermissionHelper.showPermissionDialogIfNeeded(
+      context,
+      permissionType: permissionType,
+      onPermissionGranted: () {
+        // Retry the photo selection after permission is granted
+        final source = permissionType == 'camera' ? PhotoSource.camera : PhotoSource.gallery;
+        _handlePhotoSelection(source);
+      },
+    );
+  }
+
+  void _handlePhotoSelection(PhotoSource source) {
+    if (!mounted) return;
+    
+    // Try to update profile photo
+    context.read<ProfileBloc>().add(UpdateProfilePhotoEvent(source: source));
   }
 
   void _showPhotoOptions() {
@@ -176,9 +214,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   title: 'Camera',
                   onTap: () {
                     Navigator.pop(context);
-                    if (mounted) {
-                      context.read<ProfileBloc>().add(UpdateProfilePhotoEvent(source: PhotoSource.camera));
-                    }
+                    _handlePhotoSelection(PhotoSource.camera);
                   },
                 ),
 
@@ -189,9 +225,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   title: 'Gallery',
                   onTap: () {
                     Navigator.pop(context);
-                    if (mounted) {
-                      context.read<ProfileBloc>().add(UpdateProfilePhotoEvent(source: PhotoSource.gallery));
-                    }
+                    _handlePhotoSelection(PhotoSource.gallery);
                   },
                 ),
 
@@ -286,10 +320,15 @@ class _ProfileTabState extends State<ProfileTab> {
       body: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (state is ProfileError) {
-            UiUtils.showErrorSnackBar(
-              context,
-              message: state.message,
-            );
+            // Check if it's a permission error
+            if (state.message.toLowerCase().contains('permission denied')) {
+              _handlePermissionError(state.message);
+            } else {
+              UiUtils.showErrorSnackBar(
+                context,
+                message: state.message,
+              );
+            }
           } else if (state is ProfileUpdated) {
             UiUtils.showSuccessSnackBar(
               context,
@@ -438,7 +477,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ProfileFieldWidget(
             icon: _getGenderIcon(user.gender ?? 'Not set'),
             label: 'Gender',
-            value: user.gender?.isNotEmpty == true ? user.gender! : 'Not set',
+            value: _formatGenderDisplay(user.gender),
             onTap: () => _openEditGender(user.gender ?? ''),
           ),
 
@@ -506,14 +545,37 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
 
+  String _formatGenderDisplay(String? gender) {
+    if (gender == null || gender.isEmpty) {
+      return 'Not set';
+    }
+    
+    switch (gender.toLowerCase()) {
+      case 'male':
+        return 'Male';
+      case 'female':
+        return 'Female';
+      case 'other':
+        return 'Other';
+      case 'rather not to say':
+        return 'Rather not to say';
+      default:
+        return gender; // Return as-is if not recognized
+    }
+  }
+
   IconData _getGenderIcon(String gender) {
     switch (gender.toLowerCase()) {
       case 'male':
         return Icons.male;
       case 'female':
         return Icons.female;
-      default:
+      case 'other':
         return Icons.transgender;
+      case 'rather not to say':
+        return Icons.help_outline;
+      default:
+        return Icons.person_outline;
     }
   }
 }

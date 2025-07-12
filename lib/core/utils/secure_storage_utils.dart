@@ -61,6 +61,11 @@ class SecureStorageUtil {
     return appUser;
   }
 
+  /// Clear user data from secure storage
+  Future<void> clearUser() async {
+    await _storage.delete(key: "user");
+  }
+
   /// Save any key-value pair securely
   Future<void> write({required String key, required String value}) async {
     await _storage.write(key: key, value: value);
