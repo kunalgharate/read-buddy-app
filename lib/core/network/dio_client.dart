@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart'; // Required for DefaultHttpClientAdapter
 import 'package:flutter/foundation.dart';
 
 class DioClient {
@@ -32,7 +33,8 @@ class DioClient {
       },
       onResponse: (response, handler) {
         if (kDebugMode) {
-          print('✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+          print(
+              '✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
           print('✅ RESPONSE DATA: ${response.data}');
           print('✅ RESPONSE HEADERS: ${response.headers}');
         }
@@ -40,7 +42,8 @@ class DioClient {
       },
       onError: (error, handler) {
         if (kDebugMode) {
-          print('❌ ERROR[${error.response?.statusCode}] => PATH: ${error.requestOptions.path}');
+          print(
+              '❌ ERROR[${error.response?.statusCode}] => PATH: ${error.requestOptions.path}');
           print('❌ ERROR MESSAGE: ${error.message}');
           print('❌ ERROR RESPONSE: ${error.response?.data}');
           print('❌ ERROR TYPE: ${error.type}');
@@ -51,10 +54,9 @@ class DioClient {
     ));
 
     // Set longer timeout for slow servers (like Render.com free tier)
-    // Increased timeouts for release builds and cold server starts
-    dio.options.connectTimeout = const Duration(seconds: 120); // Increased from 60s
-    dio.options.receiveTimeout = const Duration(seconds: 180); // Increased from 90s
-    dio.options.sendTimeout = const Duration(seconds: 120);    // Increased from 60s
+    dio.options.connectTimeout = const Duration(seconds: 120);
+    dio.options.receiveTimeout = const Duration(seconds: 180);
+    dio.options.sendTimeout = const Duration(seconds: 120);
 
     // Set default headers
     dio.options.headers = {
@@ -63,17 +65,15 @@ class DioClient {
       'User-Agent': 'ReadBuddyApp/1.0.0',
     };
 
-    // Add retry interceptor for better reliability
+    // Add retry interceptor
     dio.interceptors.add(InterceptorsWrapper(
       onError: (error, handler) async {
         if (error.type == DioExceptionType.connectionTimeout ||
             error.type == DioExceptionType.receiveTimeout) {
-
           if (kDebugMode) {
             print('🔄 Retrying request due to timeout...');
           }
 
-          // Retry once for timeout errors
           try {
             final response = await dio.request(
               error.requestOptions.path,
@@ -95,6 +95,18 @@ class DioClient {
         handler.next(error);
       },
     ));
+
+    //Accept self-signed/invalid certs in development (fixes HandshakeException)
+    (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+        (client) {
+      client.badCertificateCallback = (cert, host, port) {
+        if (kDebugMode) {
+          print('⚠️ Accepting bad certificate from $host:$port');
+        }
+        return true;
+      };
+      return client;
+    };
 
     return dio;
   }

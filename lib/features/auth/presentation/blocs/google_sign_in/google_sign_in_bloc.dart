@@ -5,6 +5,9 @@ import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
 
+import '../../../../../core/di/injection.dart';
+import '../../../../../core/utils/secure_storage_utils.dart';
+
 part 'google_sign_in_event.dart';
 part 'google_sign_in_state.dart';
 
@@ -51,6 +54,14 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
 
       // Send ID token to backend
       final user = await signInWithGoogle(SignInGoogleParams(token: idToken));
+
+// ✅ Save access & refresh tokens securely
+      final secureStorage = getIt<SecureStorageUtil>();
+
+      await secureStorage.saveTokens(
+        accessToken: user.accessToken,
+        refreshToken: user.refreshToken,
+      );
 
       emit(GoogleSignInSuccess(user));
     } catch (e) {
