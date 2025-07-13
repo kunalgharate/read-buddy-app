@@ -12,14 +12,14 @@ import 'package:read_buddy_app/features/home/presentation/bloc/home_main_state.d
 
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-class MainTab extends StatefulWidget {
-  const MainTab({super.key});
+class Maintab extends StatefulWidget {
+  const Maintab({super.key});
 
   @override
-  State<MainTab> createState() => _MainTabState();
+  State<Maintab> createState() => _MainTabState();
 }
 
-class _MainTabState extends State<MainTab> {
+class _MainTabState extends State<Maintab> {
   final ScrollController _scrollController = ScrollController();
   bool _isAppBarVisible = true;
   double _lastOffset = 0;
