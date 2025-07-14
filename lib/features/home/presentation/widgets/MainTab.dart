@@ -10,6 +10,9 @@ import 'package:read_buddy_app/features/home/domain/entities/book_entity.dart';
 import 'package:read_buddy_app/features/home/presentation/bloc/home_main_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/bloc/home_main_state.dart';
 
+import '../../../../core/utils/secure_storage_utils.dart';
+import '../bloc/home_main_event.dart';
+
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class Maintab extends StatefulWidget {
@@ -27,6 +30,11 @@ class _MainTabState extends State<Maintab> {
   @override
   void initState() {
     super.initState();
+    SecureStorageUtil().getUser().then((user) {
+      if (user != null) {
+        context.read<HomeMainBloc>().add(FetchMainHomeData(user.id));
+      }
+    });
 
     _scrollController.addListener(() {
       double offset = _scrollController.offset;
@@ -241,6 +249,7 @@ class LatestBook extends StatelessWidget {
           ),
           items: books
               .map((book) => BookCard(
+                    bookId: book.id,
                     title: book.title,
                     category: book.category,
                     donor: book.donor,
@@ -284,6 +293,7 @@ class Recommended extends StatelessWidget {
             ),
             items: books
                 .map((book) => RecommendedBookCard(
+                      bookId: book.id,
                       title: book.title,
                       category: book.category,
                       donor: book.donor,

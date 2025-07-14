@@ -97,6 +97,7 @@
 
 //   RecommendedBookCardEntity toRecommendedEntity() {
 //     return RecommendedBookCardEntity(
+//       id: id,
 //       title: title,
 //       category: category ?? '',
 //       donor: author,
@@ -109,6 +110,7 @@
 
 //   LatestBookEntity toLatestEntity() {
 //     return LatestBookEntity(
+//       id: id,
 //       title: title,
 //       category: category ?? '',
 //       donor: author,
@@ -183,6 +185,7 @@ class BookResponseModel {
 
   RecommendedBookCardEntity toRecommendedEntity() {
     return RecommendedBookCardEntity(
+      id: id,
       title: title,
       category: category,
       donor: donor,
@@ -195,6 +198,7 @@ class BookResponseModel {
 
   LatestBookEntity toLatestEntity() {
     return LatestBookEntity(
+      id: id,
       title: title,
       category: category,
       donor: donor,

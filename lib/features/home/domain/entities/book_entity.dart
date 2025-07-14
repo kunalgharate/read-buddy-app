@@ -1,4 +1,5 @@
 class LatestBookEntity {
+  final String id;
   final String title;
   final String category;
   final String donor;
@@ -8,6 +9,7 @@ class LatestBookEntity {
   final String duration;
 
   LatestBookEntity({
+    required this.id,
     required this.title,
     required this.category,
     required this.donor,
@@ -19,6 +21,7 @@ class LatestBookEntity {
 }
 
 class RecommendedBookCardEntity {
+  final String id;
   final String title;
   final String category;
   final String donor;
@@ -28,6 +31,7 @@ class RecommendedBookCardEntity {
   final String duration;
 
   RecommendedBookCardEntity({
+    required this.id,
     required this.title,
     required this.category,
     required this.donor,
