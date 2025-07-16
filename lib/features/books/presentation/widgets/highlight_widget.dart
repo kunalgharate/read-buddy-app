@@ -1,8 +1,4 @@
 // Third Widget
-<<<<<<< Updated upstream
-import 'dart:ui';
-=======
->>>>>>> Stashed changes
 
 import 'package:flutter/material.dart';
 
@@ -38,16 +34,9 @@ class HighlightWidget extends StatelessWidget {
           const Text(
             'Highlight',
             style: TextStyle(
-<<<<<<< Updated upstream
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: Colors.black,
-            ),
-=======
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Color.fromRGBO(5, 46, 68, 1)),
->>>>>>> Stashed changes
           ),
           const SizedBox(height: 16),
           Column(
@@ -75,32 +64,20 @@ class HighlightWidget extends StatelessWidget {
           Text(
             '$label - ',
             style: TextStyle(
-<<<<<<< Updated upstream
-              fontSize: 16,
-              color: Colors.grey[800],
-              fontWeight: FontWeight.w600,
-=======
               fontSize: 14,
               color: Color.fromRGBO(20, 20, 20, 1),
               fontWeight: FontWeight.w400,
               wordSpacing: 0,
->>>>>>> Stashed changes
             ),
           ),
           Expanded(
             child: Text(
               value,
               style: TextStyle(
-<<<<<<< Updated upstream
-                fontSize: 16,
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
-=======
                 fontSize: 14,
                 color: Color.fromRGBO(20, 20, 20, 1),
                 fontWeight: FontWeight.w400,
                 wordSpacing: 0,
->>>>>>> Stashed changes
               ),
             ),
           ),

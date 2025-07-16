@@ -2,14 +2,8 @@ import 'package:flutter/material.dart';
 
 class AboutBookWidget extends StatelessWidget {
   final String about;
-<<<<<<< Updated upstream
+
   const AboutBookWidget({super.key, required this.about});
-=======
-  const AboutBookWidget({
-    super.key,
-    required this.about,
-  });
->>>>>>> Stashed changes
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +24,7 @@ class AboutBookWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
-<<<<<<< Updated upstream
-                color: Colors.black,
-=======
                 color: Color.fromRGBO(5, 46, 68, 1),
->>>>>>> Stashed changes
               ),
             ),
           ),
@@ -43,19 +33,12 @@ class AboutBookWidget extends StatelessWidget {
             about,
             // 'The Design of Everyday Things explains how good design makes everyday objects easy and enjoyable to use. It shows how small changes can make products more useful and how understanding people\'s behavior leads to better design.',
             style: TextStyle(
-<<<<<<< Updated upstream
-              fontSize: 16,
-              color: Colors.grey[700],
-              height: 1.6,
-              fontWeight: FontWeight.w500,
-=======
               fontSize: 14,
               color: Color.fromRGBO(20, 20, 20, 1),
               height: 1.6,
               fontWeight: FontWeight.w400,
               wordSpacing: 0,
               fontFamily: 'popins',
->>>>>>> Stashed changes
             ),
           ),
         ],
