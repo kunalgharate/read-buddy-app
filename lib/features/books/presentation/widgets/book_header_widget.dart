@@ -40,7 +40,9 @@ class _BookHeaderWidgetState extends State<BookHeaderWidget> {
               IconButton(
                 icon:
                     const Icon(Icons.arrow_back, color: Colors.black, size: 28),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
               Row(
                 children: [
