@@ -79,10 +79,12 @@ class _MainTabState extends State<Maintab> {
                       padding: const EdgeInsets.only(top: 90),
                       children: [
                         DonateCard(),
-                        SectionTitle(title: "Latest"),
+                        // Latest Book Suggestions
                         LatestBook(books: state.latestBooks),
-                        SectionTitle(title: "Recommended for you"),
+
+                        // SectionTitle(title: "Recommended for you"),
                         Recommended(books: state.recommendedBooks),
+
                         CardDetails(stats: state.stats.first),
                         const SizedBox(height: 50),
                       ],
@@ -182,9 +184,9 @@ class DonateCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const Text(
+                  "Donate books and help someone learn, grow, and succeed.",
                   softWrap: true,
                   maxLines: 3,
-                  "Donate books and help someone learn, grow, and succeed. serfsdfdfgdfgertgdrfgvdgxdfvd",
                   style: TextStyle(fontSize: 12),
                 ),
                 const SizedBox(height: 12),
@@ -198,7 +200,10 @@ class DonateCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text("Donate"),
+                  child: const Text("Donate",
+                      style: TextStyle(
+                        color: Color(0xFF052E44),
+                      )),
                 ),
               ],
             ),
@@ -210,7 +215,7 @@ class DonateCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(5.66),
             child: Image.asset(
-              'assets/icons/Group.png',
+              'assets/im.png',
               width: 96.26,
               height: 136,
               fit: BoxFit.cover,
@@ -231,37 +236,45 @@ class LatestBook extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final double sliderHeight =
-          constraints.maxHeight < 400 ? constraints.maxHeight - 30 : 332;
-      return Container(
-        height: sliderHeight + 27,
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(8),
-        child: CarouselSlider(
-          options: CarouselOptions(
-            height: sliderHeight,
-            enableInfiniteScroll: false,
-            enlargeCenterPage: false,
-            viewportFraction: 0.6, // controls how wide each item is
-            padEnds: false,
-          ),
-          items: books
-              .map((book) => BookCard(
-                    bookId: book.id,
-                    title: book.title,
-                    category: book.category,
-                    donor: book.donor,
-                    format: book.format,
-                    duration: book.duration,
-                    imageUrl: book.imageUrl,
-                    formatUrl: book.formatUrl,
-                  ))
-              .toList(),
-        ),
-      );
-    });
+    if (books.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      children: [
+        SectionTitle(title: "Latest Book Suggestions"),
+        LayoutBuilder(builder: (context, constraints) {
+          final double sliderHeight =
+              constraints.maxHeight < 400 ? constraints.maxHeight - 30 : 332;
+          return Container(
+            height: sliderHeight + 27,
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(8),
+            child: CarouselSlider(
+              options: CarouselOptions(
+                height: sliderHeight,
+                enableInfiniteScroll: false,
+                enlargeCenterPage: false,
+                viewportFraction: 0.6, // controls how wide each item is
+                padEnds: false,
+              ),
+              items: books
+                  .map((book) => BookCard(
+                        bookId: book.id,
+                        title: book.title,
+                        category: book.category,
+                        donor: book.donor,
+                        format: book.format,
+                        duration: book.duration,
+                        imageUrl: book.imageUrl,
+                        formatUrl: book.formatUrl,
+                      ))
+                  .toList(),
+            ),
+          );
+        }),
+      ],
+    );
   }
 }
 
@@ -274,38 +287,46 @@ class Recommended extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double sliderHeight =
-            constraints.maxHeight < 400 ? constraints.maxHeight - 30 : 356;
-        return Container(
-          width: double.infinity,
-          height: sliderHeight + 27,
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          padding: const EdgeInsets.all(8),
-          child: CarouselSlider(
-            options: CarouselOptions(
-              height: sliderHeight,
-              enableInfiniteScroll: false,
-              enlargeCenterPage: false,
-              viewportFraction: 0.6, // controls how wide each item is
-              padEnds: false,
-            ),
-            items: books
-                .map((book) => RecommendedBookCard(
-                      bookId: book.id,
-                      title: book.title,
-                      category: book.category,
-                      donor: book.donor,
-                      format: book.format,
-                      duration: book.duration,
-                      imageUrl: book.imageUrl,
-                      formatUrl: book.formatUrl,
-                    ))
-                .toList(),
-          ),
-        );
-      },
+    if (books.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      children: [
+        SectionTitle(title: "Recommended for you"),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final double sliderHeight =
+                constraints.maxHeight < 400 ? constraints.maxHeight - 30 : 356;
+            return Container(
+              width: double.infinity,
+              height: sliderHeight + 27,
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.all(8),
+              child: CarouselSlider(
+                options: CarouselOptions(
+                  height: sliderHeight,
+                  enableInfiniteScroll: false,
+                  enlargeCenterPage: false,
+                  viewportFraction: 0.6, // controls how wide each item is
+                  padEnds: false,
+                ),
+                items: books
+                    .map((book) => RecommendedBookCard(
+                          bookId: book.id,
+                          title: book.title,
+                          category: book.category,
+                          donor: book.donor,
+                          format: book.format,
+                          duration: book.duration,
+                          imageUrl: book.imageUrl,
+                          formatUrl: book.formatUrl,
+                        ))
+                    .toList(),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
