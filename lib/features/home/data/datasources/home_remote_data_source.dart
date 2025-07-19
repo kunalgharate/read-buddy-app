@@ -47,11 +47,11 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
       final response = await dio.get(
         'https://readbuddy-server.onrender.com/api/recommend/$id',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        // options: Options(
+        //   headers: {
+        //     'Authorization': 'Bearer $token',
+        //   },
+        // ),
       );
 
       if (response.statusCode == 200) {
@@ -79,93 +79,90 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       )
     ];
   }
-  // @override
-  // Future<List<StatModel>> fetchStats() async {
-  //   try {
-  //     final response =
-  //         await dio.get('https://readbuddy-server.onrender.com/api/stats');
-
-  //     if (response.statusCode == 200) {
-  //       final List<dynamic> data = response.data;
-  //       return data.map((json) => StatModel.fromJson(json)).toList();
-  //     } else {
-  //       throw Exception('Failed to load stats');
-  //     }
-  //   } catch (e) {
-  //     throw Exception('Error fetching stats: $e');
-  //   }
-  // }
 }
-
-
-// @LazySingleton(as: HomeRemoteDataSource)
-// class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 //   @override
-//   Future<List<BookResponseModel>> fetchLatestBooks(String id) async {
-//     await Future.delayed(Duration(milliseconds: 300));
-//     return [
-//       BookResponseModel(
-//         id: id,
-//         title: "Wings of Fire",
-//         category: "Biography",
-//         donor: "Rahul Sir",
-//         format: "E Book",
-//         duration: "3 Days",
-//         imageUrl: 'assets/icons/Screenshot 2025-06-30 111125.png',
-//         formatUrl: 'assets/icons/Fiction.png',
-//       ),
-//       BookResponseModel(
-//         id: id,
-//         title: "Wings of Fire",
-//         category: "Biography",
-//         donor: "Rahul Sir",
-//         format: "E Book",
-//         duration: "3 Days",
-//         imageUrl: 'assets/icons/Screenshot 2025-06-30 111125.png',
-//         formatUrl: 'assets/icons/Fiction.png',
-//       ),
-//       BookResponseModel(
-//         id: id,
-//         title: "Wings of Fire",
-//         category: "Biography",
-//         donor: "Rahul Sir",
-//         format: "E Book",
-//         duration: "3 Days",
-//         imageUrl: 'assets/icons/Screenshot 2025-06-30 111125.png',
-//         formatUrl: 'assets/icons/Fiction.png',
-//       ),
-//       BookResponseModel(
-//         id: id,
-//         title: "Wings of Fire",
-//         category: "Biography",
-//         donor: "Rahul Sir",
-//         format: "E Book",
-//         duration: "3 Days",
-//         imageUrl: 'assets/icons/Screenshot 2025-06-30 111125.png',
-//         formatUrl: 'assets/icons/Fiction.png',
-//       ),
-//       BookResponseModel(
-//         id: id,
-//         title: "Wings of Fire",
-//         category: "Biography",
-//         donor: "Rahul Sir",
-//         format: "E Book",
-//         duration: "3 Days",
-//         imageUrl: 'assets/icons/Screenshot 2025-06-30 111125.png',
-//         formatUrl: 'assets/icons/Fiction.png',
-//       ),
-//       BookResponseModel(
-//         id: id,
-//         title: "Wings of Fire",
-//         category: "Biography",
-//         donor: "Rahul Sir",
-//         format: "E Book",
-//         duration: "3 Days",
-//         imageUrl: 'assets/icons/Screenshot 2025-06-30 111125.png',
-//         formatUrl: 'assets/icons/Fiction.png',
-//       ),
-//     ];
+//   Future<List<StatModel>> fetchStats() async {
+//     try {
+//       final response =
+//           await dio.get('https://readbuddy-server.onrender.com/api/stats');
+
+//       if (response.statusCode == 200) {
+//         final List<dynamic> data = response.data;
+//         return data.map((json) => StatModel.fromJson(json)).toList();
+//       } else {
+//         throw Exception('Failed to load stats');
+//       }
+//     } catch (e) {
+//       throw Exception('Error fetching stats: $e');
+//     }
 //   }
+// }
+
+// Future<List<BookResponseModel>> fetchLatestBooks(String id) async {
+//   await Future.delayed(Duration(milliseconds: 300));
+//   return [
+//     BookResponseModel(
+//       id: 'book1',
+//       title: "Wings of Fire",
+//       category: "Biography",
+//       donor: "Rahul Sir",
+//       format: "E Book",
+//       duration: "3 Days",
+//       imageUrl: 'https://example.com/images/wings_of_fire.jpg',
+//       formatUrl: 'assets/icons/Fiction.png',
+//     ),
+//     BookResponseModel(
+//       id: 'book2',
+//       title: "The Alchemist",
+//       category: "Fiction",
+//       donor: "Paulo Coelho",
+//       format: "Audio",
+//       duration: "5 Days",
+//       imageUrl: 'https://example.com/images/the_alchemist.jpg',
+//       formatUrl: 'assets/icons/Fiction.png',
+//     ),
+//     BookResponseModel(
+//       id: 'book3',
+//       title: "1984",
+//       category: "Dystopian",
+//       donor: "George Orwell",
+//       format: "E Book",
+//       duration: "4 Days",
+//       imageUrl: 'https://example.com/images/1984.jpg',
+//       formatUrl: 'assets/icons/Fiction.png',
+//     ),
+//     BookResponseModel(
+//       id: 'book4',
+//       title: "To Kill a Mockingbird",
+//       category: "Classic",
+//       donor: "Harper Lee",
+//       format: "Audio",
+//       duration: "6 Days",
+//       imageUrl: 'https://example.com/images/to_kill_a_mockingbird.jpg',
+//       formatUrl: 'assets/icons/Fiction.png',
+//     ),
+//     BookResponseModel(
+//       id: 'book5',
+//       title: "The Great Gatsby",
+//       category: "Classic",
+//       donor: "F. Scott Fitzgerald",
+//       format: "E Book",
+//       duration: "3 Days",
+//       imageUrl: 'https://example.com/images/the_great_gatsby.jpg',
+//       formatUrl: 'assets/icons/Fiction.png',
+//     ),
+//     BookResponseModel(
+//       id: 'book6',
+//       title: "Moby Dick",
+//       category: "Adventure",
+//       donor: "Herman Melville",
+//       format: "Audio",
+//       duration: "7 Days",
+//       imageUrl: 'https://example.com/images/moby_dick.jpg',
+//       formatUrl: 'assets/icons/Fiction.png',
+//     ),
+//   ];
+// }
 
 //   @override
 //   Future<List<BookResponseModel>> fetchRecommendedBooks(String id) async {

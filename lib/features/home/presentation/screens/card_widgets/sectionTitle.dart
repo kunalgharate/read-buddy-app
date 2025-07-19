@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../pages/book_list.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
-
-  const SectionTitle({super.key, required this.title});
+  final String apiEndpoint;
+  const SectionTitle({
+    super.key,
+    required this.title,
+    required this.apiEndpoint,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +31,22 @@ class SectionTitle extends StatelessWidget {
           ),
           //Icon have to added how a image icon
 
-          Image.asset(
-            'assets/icons/tabler_arrow-right.png',
-            height: 24,
-            width: 24,
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookListPage(
+                      title: title,
+                      apiEndpoint: apiEndpoint,
+                    ),
+                  ));
+            },
+            child: Image.asset(
+              'assets/icons/tabler_arrow-right.png',
+              height: 24,
+              width: 24,
+            ),
           ),
         ],
       ),

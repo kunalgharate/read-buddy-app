@@ -23,9 +23,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<BookCrudBloc>().add(LoadBookCrudById(
-        id: widget
-            .bookId)); // Dispatch event to load book details with named parameter 'id'
+    context.read<BookCrudBloc>().add(LoadBookCrudById(id: widget.bookId));
   }
 
   @override

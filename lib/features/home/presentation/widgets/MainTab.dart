@@ -230,18 +230,43 @@ class DonateCard extends StatelessWidget {
 //BookDetailsWidget-----------------------------
 
 //Latest Book Suggestions--------------------------------------
-class LatestBook extends StatelessWidget {
+class LatestBook extends StatefulWidget {
   final List<LatestBookEntity> books;
   const LatestBook({super.key, required this.books});
 
   @override
+  State<LatestBook> createState() => _LatestBookState();
+}
+
+class _LatestBookState extends State<LatestBook> {
+  String _userId;
+  _LatestBookState() : _userId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    SecureStorageUtil().getUser().then((user) {
+      if (user != null) {
+        setState(() {
+          _userId = user.id;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (books.isEmpty) {
+    if (widget.books.isEmpty) {
       return const SizedBox.shrink();
     }
+    String apiEndpoint =
+        'https://readbuddy-server.onrender.com/api/getmostrequestedbook/$_userId';
     return Column(
       children: [
-        SectionTitle(title: "Latest Book Suggestions"),
+        SectionTitle(
+          title: "Latest Book Suggestions",
+          apiEndpoint: apiEndpoint,
+        ),
         LayoutBuilder(builder: (context, constraints) {
           final double sliderHeight =
               constraints.maxHeight < 400 ? constraints.maxHeight - 30 : 332;
@@ -258,7 +283,7 @@ class LatestBook extends StatelessWidget {
                 viewportFraction: 0.6, // controls how wide each item is
                 padEnds: false,
               ),
-              items: books
+              items: widget.books
                   .map((book) => BookCard(
                         bookId: book.id,
                         title: book.title,
@@ -281,18 +306,43 @@ class LatestBook extends StatelessWidget {
 //Book Card for recommendation -----------------------------
 
 //Recommended Section-----------------------
-class Recommended extends StatelessWidget {
+class Recommended extends StatefulWidget {
   final List<RecommendedBookCardEntity> books;
   const Recommended({super.key, required this.books});
 
   @override
+  State<Recommended> createState() => _RecommendedState();
+}
+
+class _RecommendedState extends State<Recommended> {
+  String _userId;
+  _RecommendedState() : _userId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    SecureStorageUtil().getUser().then((user) {
+      if (user != null) {
+        setState(() {
+          _userId = user.id;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (books.isEmpty) {
+    if (widget.books.isEmpty) {
       return const SizedBox.shrink();
     }
+    String apiEndpoint =
+        'https://readbuddy-server.onrender.com/api/recommend/$_userId';
     return Column(
       children: [
-        SectionTitle(title: "Recommended for you"),
+        SectionTitle(
+          title: "Recommended for you",
+          apiEndpoint: apiEndpoint,
+        ),
         LayoutBuilder(
           builder: (context, constraints) {
             final double sliderHeight =
@@ -310,7 +360,7 @@ class Recommended extends StatelessWidget {
                   viewportFraction: 0.6, // controls how wide each item is
                   padEnds: false,
                 ),
-                items: books
+                items: widget.books
                     .map((book) => RecommendedBookCard(
                           bookId: book.id,
                           title: book.title,
