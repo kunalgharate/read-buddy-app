@@ -105,24 +105,24 @@ class RecommendedBookCard extends StatelessWidget {
                     ),
 
                     // Lock icon — UNCHANGED
-                    if (showLockIcon) // Conditionally render the lock icon
-                      Positioned(
-                        top: 171,
-                        left: 135,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          // child: const Icon(
-                          //   Icons.lock_open,
-                          //   color: Colors.white,
-                          //   size: 20,
-                          // ),
-                        ),
-                      ),
+                    // if (showLockIcon) // Conditionally render the lock icon
+                    //   Positioned(
+                    //     top: 171,
+                    //     left: 135,
+                    //     child: Container(
+                    //       width: 32,
+                    //       height: 32,
+                    //       decoration: BoxDecoration(
+                    //         color: Colors.black.withOpacity(0.3),
+                    //         borderRadius: BorderRadius.circular(8),
+                    //       ),
+                    //       child: const Icon(
+                    //         Icons.lock_open,
+                    //         color: Colors.white,
+                    //         size: 20,
+                    //       ),
+                    //     ),
+                    //   ),
                   ],
                 ),
 
