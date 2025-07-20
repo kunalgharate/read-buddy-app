@@ -45,23 +45,23 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
               child: Column(
                 children: [
                   BookHeaderWidget(
-                    title: book.title,
-                    writter: book.author,
-                    description: book.description,
-                    donator: book.ownerName ?? "Unknown",
+                    title: capitalizeWords(book.title),
+                    writter: capitalizeWords(book.author),
+                    description: capitalizeFirstLetter(book.description),
+                    donator: capitalizeFirstLetter(book.ownerName ?? "Unknown"),
                     ratings: "6",
                     coverImageUrl: book.coverImageUrl,
                   ),
                   AboutBookWidget(
-                    about: book.description,
+                    about: capitalizeFirstLetter(book.description),
                   ),
                   HighlightWidget(
-                    category: book.category,
-                    author: book.author,
-                    genre: book.genre,
-                    bookLang: book.language,
+                    category: capitalizeWords(book.category),
+                    author: capitalizeWords(book.author),
+                    genre: capitalizeWords(book.genre),
+                    bookLang: capitalizeWords(book.language),
                     pages: book.pages?.toString() ?? 'N/A',
-                    fromat: book.format,
+                    fromat: capitalizeWords(book.format),
                   ),
                   BlocBuilder<ReviewBloc, ReviewState>(
                     builder: (context, state) {
@@ -77,14 +77,11 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
                         return Column(
                           children: state.reviews.map((review) {
                             return ReviewWidget(
-                              name: review.reviewerName,
-                              timestamp:
-                                  '', // Update if your model has timestamp
-                              review: review.comment,
-                              imageUrl: review
-                                  .reviewerImageUrl, // You may need to add this to ReviewWidget
-                              rating: review
-                                  .rating, // Also add this to ReviewWidget if missing
+                              name: capitalizeFirstLetter(review.reviewerName),
+                              timestamp: '',
+                              review: capitalizeFirstLetter(review.comment),
+                              imageUrl: review.reviewerImageUrl,
+                              rating: review.rating,
                             );
                           }).toList(),
                         );
@@ -114,4 +111,16 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
       ),
     );
   }
+}
+
+String capitalizeFirstLetter(String text) {
+  if (text.isEmpty) return text;
+  return text[0].toUpperCase() + text.substring(1);
+}
+
+String capitalizeWords(String text) {
+  return text.split(' ').map((word) {
+    if (word.isEmpty) return word;
+    return word[0].toUpperCase() + word.substring(1);
+  }).join(' ');
 }

@@ -146,7 +146,8 @@ class RecommendedBookCard extends StatelessWidget {
                               .spaceEvenly, //Balanced vertical spacing
                           children: [
                             Text(
-                              title,
+                              title.substring(0, 1).toUpperCase() +
+                                  title.substring(1),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -160,7 +161,8 @@ class RecommendedBookCard extends StatelessWidget {
                               SizedBox(
                                 height: showLockIcon ? null : 0,
                                 child: Text(
-                                  category,
+                                  category.substring(0, 1).toUpperCase() +
+                                      category.substring(1),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -176,7 +178,7 @@ class RecommendedBookCard extends StatelessWidget {
                               SizedBox(
                                 height: showLockIcon ? null : 0,
                                 child: Text(
-                                  "Donated by $donor",
+                                  "Donated by ${donor.isNotEmpty ? donor[0].toUpperCase() + donor.substring(1) : " "}",
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -223,7 +225,8 @@ class RecommendedBookCard extends StatelessWidget {
                                     ),
                                     SizedBox(width: 5),
                                     Text(
-                                      format,
+                                      format.substring(0, 1).toUpperCase() +
+                                          format.substring(1),
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,

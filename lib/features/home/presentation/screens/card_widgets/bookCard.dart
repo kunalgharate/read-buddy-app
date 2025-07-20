@@ -115,7 +115,9 @@ class BookCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(title,
+                            Text(
+                                title.substring(0, 1).toUpperCase() +
+                                    title.substring(1),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -125,7 +127,9 @@ class BookCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis),
                             if (showLockIcon)
-                              Text(category,
+                              Text(
+                                  category.substring(0, 1).toUpperCase() +
+                                      category.substring(1),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -133,7 +137,8 @@ class BookCard extends StatelessWidget {
                                       fontSize: 14,
                                       color: Color.fromRGBO(20, 20, 20, 1))),
                             if (showLockIcon)
-                              Text("Donated by $donor",
+                              Text(
+                                  "Donated by ${donor.isNotEmpty ? donor[0].toUpperCase() + donor.substring(1) : " "}",
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -171,7 +176,9 @@ class BookCard extends StatelessWidget {
                                     height: 16,
                                   ),
                                   SizedBox(width: 5),
-                                  Text(format,
+                                  Text(
+                                      format.substring(0, 1).toUpperCase() +
+                                          format.substring(1),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(

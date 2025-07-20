@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:read_buddy_app/features/books/screens/book_details_screen.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/card_widgets/bookCard.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/card_widgets/main_drawer.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/card_widgets/recommendedBookCard.dart';
@@ -227,8 +228,7 @@ class DonateCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  // "TITLE:-From Your Shelf to Their Future ",
+                  capitalizeWords(title),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
