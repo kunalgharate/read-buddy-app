@@ -26,6 +26,7 @@ class _MainTabState extends State<Maintab> {
   final ScrollController _scrollController = ScrollController();
   bool _isAppBarVisible = true;
   double _lastOffset = 0;
+  int _current = 0;
 
   @override
   void initState() {
@@ -79,11 +80,47 @@ class _MainTabState extends State<Maintab> {
                       padding: const EdgeInsets.only(top: 90),
                       children: [
                         if (state.banners.isNotEmpty)
-                          DonateCard(
-                            title: state.banners.first.title,
-                            imageUrl: state.banners.first.imageUrl,
-                            id: state.banners.first.id,
+                          CarouselSlider.builder(
+                            itemCount: state.banners.length,
+                            itemBuilder: (context, index, realIndex) {
+                              final banner = state.banners[index];
+                              return DonateCard(
+                                title: banner.title,
+                                imageUrl: banner.imageUrl,
+                                id: banner.id,
+                              );
+                            },
+                            options: CarouselOptions(
+                              height: 200,
+                              enlargeCenterPage: true,
+                              viewportFraction: 1.0,
+                              autoPlay: true,
+                              autoPlayInterval: Duration(seconds: 5),
+                              onPageChanged: (index, reason) {
+                                setState(() => _current = index);
+                              },
+                            ),
                           ),
+                        // 🔘 Dot Indicators
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children:
+                              List.generate(state.banners.length, (index) {
+                            return Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _current == index
+                                    ? Colors.black
+                                    : Colors.grey.shade400,
+                              ),
+                            );
+                          }),
+                        ),
+
                         // Latest Book Suggestions
                         LatestBook(books: state.latestBooks),
 

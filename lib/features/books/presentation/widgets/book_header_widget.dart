@@ -7,6 +7,7 @@ class BookHeaderWidget extends StatefulWidget {
   final String description;
   final String donator;
   final String ratings;
+  final String coverImageUrl;
 
   const BookHeaderWidget({
     super.key,
@@ -15,6 +16,7 @@ class BookHeaderWidget extends StatefulWidget {
     required this.description,
     required this.donator,
     required this.ratings,
+    required this.coverImageUrl,
   });
 
   @override
@@ -89,56 +91,112 @@ class _BookHeaderWidgetState extends State<BookHeaderWidget> {
                       ),
                     ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.title,
-                          // Title of the book
-                          // 'The DESIGN\nof EVERYDAY\nTHINGS',
-                          textAlign: TextAlign.center,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.black,
-                            height: 0.9,
+                  child: widget.coverImageUrl != null &&
+                          widget.coverImageUrl!.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            widget.coverImageUrl!,
+                            width: 150,
+                            height: 220,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              // fallback to existing widget if image fails to load
+                              return Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      widget.title,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.black,
+                                        height: 0.9,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.coffee,
+                                        size: 35,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 15),
+                                    Text(
+                                      widget.writter,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.black,
+                                        height: 0.9,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.title,
+                                textAlign: TextAlign.center,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.black,
+                                  height: 0.9,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.coffee,
+                                  size: 35,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              Text(
+                                widget.writter,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black,
+                                  height: 0.9,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.coffee,
-                            size: 35,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          // Writter name
-                          widget.writter,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          // 'DON\nNORMAN',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.black,
-                            height: 0.9,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
                 const SizedBox(width: 8),
                 Container(
