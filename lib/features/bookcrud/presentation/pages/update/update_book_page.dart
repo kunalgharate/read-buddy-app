@@ -349,6 +349,7 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                         additionalImages: [],
                         description: '',
                         notes: '',
+                        pages: null,
                       );
                       widget.onContinue(book);
                     } else {

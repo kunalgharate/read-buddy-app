@@ -3,8 +3,18 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:read_buddy_app/features/home/domain/repositories/main_repository.dart';
+import 'package:read_buddy_app/features/home/domain/usecase/usecases.dart';
+import 'package:read_buddy_app/features/home/presentation/bloc/home_main_bloc.dart';
 
 // Core
+import '../../features/books/data/datasources/review_remote_data_source.dart';
+import '../../features/books/data/repositories/review_repository_impl.dart';
+import '../../features/books/domain/repositories/review_repository.dart';
+import '../../features/books/domain/usecases/get_reviews.dart';
+import '../../features/books/presentation/bloc/review/review_bloc.dart';
+import '../../features/home/data/datasources/home_remote_data_source.dart';
+import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../network/dio_client.dart';
 import '../utils/secure_storage_utils.dart';
 
@@ -129,6 +139,12 @@ void _registerDataSources() {
   getIt.registerLazySingleton<BannerRemoteDataSource>(
     () => BannerRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
+  getIt.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSourceImpl(getIt<Dio>(), getIt<SecureStorageUtil>()),
+  );
+  getIt.registerLazySingleton<ReviewRemoteDataSource>(
+    () => ReviewRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
 }
 
 // ========================================
@@ -169,6 +185,15 @@ void _registerRepositories() {
   getIt.registerLazySingleton<BannerRepository>(
     () => BannerRepoImpl(remoteDataSource: getIt<BannerRemoteDataSource>()),
   );
+  getIt.registerLazySingleton<HomeRepository>(
+    () => HomeRepositoryImpl(getIt<HomeRemoteDataSource>()),
+  );
+  getIt.registerLazySingleton<ReviewRepository>(
+    () => ReviewRepositoryImpl(
+      getIt<ReviewRemoteDataSource>(),
+      remoteDataSource: getIt<ReviewRemoteDataSource>(),
+    ),
+  );
 }
 
 // ========================================
@@ -178,33 +203,56 @@ void _registerUseCases() {
   // Auth Use Cases
   getIt.registerLazySingleton(() => SignIn(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => SignInWithGoogle(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => RegisterUserUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(
+      () => RegisterUserUseCase(getIt<AuthRepository>()));
+  getIt
+      .registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
 
   // Profile Use Cases
-  getIt.registerLazySingleton(() => UpdateProfileUseCase(getIt<ProfileRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateProfileUseCase(getIt<ProfileRepository>()));
 
   // Books Use Cases
   getIt.registerLazySingleton(() => GetBooks(getIt<BookRepository>()));
 
   // Book CRUD Use Cases
-  getIt.registerLazySingleton(() => AddBookUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => GetBooksUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => GetBookByIdUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => UpdateBookUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => DeleteBookusecase(getIt<BookCrudRepository>()));
+  getIt
+      .registerLazySingleton(() => AddBookUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => GetBooksUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => GetBookByIdUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateBookUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteBookusecase(getIt<BookCrudRepository>()));
 
   // User Use Cases
-  getIt.registerLazySingleton(() => GetUserListUseCase(getIt<UserRepository>()));
+  getIt
+      .registerLazySingleton(() => GetUserListUseCase(getIt<UserRepository>()));
 
   // Category CRUD Use Cases
-  getIt.registerLazySingleton(() => AddCategoryUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => DeleteCategoryUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => GetCategoriesUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => UpdateCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => AddCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => GetCategoriesUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateCategoryUsecase(getIt<CategoryRepository>()));
 
   // Banner Use Cases
-  getIt.registerLazySingleton(() => CreateBannerUsecase(getIt<BannerRepository>()));
+  getIt.registerLazySingleton(
+      () => CreateBannerUsecase(getIt<BannerRepository>()));
+  getIt.registerLazySingleton(
+      () => GetLatestBooksUseCase(getIt<HomeRepository>()));
+  getIt.registerLazySingleton(
+      () => GetRecommendedBooksUseCase(getIt<HomeRepository>()));
+  getIt.registerLazySingleton(() => GetStatsUseCase(getIt<HomeRepository>()));
+  getIt.registerLazySingleton(
+    () => GetReviewsUseCase(repository: getIt<ReviewRepository>()),
+  );
+  getIt.registerLazySingleton(() => GetBannersUseCase(getIt<HomeRepository>()));
 }
 
 // ========================================
@@ -213,7 +261,8 @@ void _registerUseCases() {
 void _registerBlocs() {
   // Auth Blocs
   getIt.registerLazySingleton(() => SignInBloc(getIt<SignIn>()));
-  getIt.registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
+  getIt
+      .registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
   getIt.registerLazySingleton(() => SignUpBloc(
         getIt<RegisterUserUseCase>(),
         getIt<VerifyEmailUseCase>(),
@@ -249,6 +298,16 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => BannerBloc(
         createBannerUsecase: getIt<CreateBannerUsecase>(),
       ));
+  getIt.registerLazySingleton(() => HomeMainBloc(
+        getLatestBooksUseCase: getIt<GetLatestBooksUseCase>(),
+        getRecommendedBooksUsecase: getIt<GetRecommendedBooksUseCase>(),
+        getStatsUseCase: getIt<GetStatsUseCase>(),
+        getBannersUseCase: getIt<GetBannersUseCase>(),
+      ));
+
+  // Review Bloc
+  getIt.registerLazySingleton(
+      () => ReviewBloc(getReviews: getIt<GetReviewsUseCase>()));
 }
 
 // ========================================

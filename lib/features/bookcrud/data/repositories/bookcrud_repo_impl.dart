@@ -17,7 +17,8 @@ class BookCrudRepositoryImpl implements BookCrudRepository {
 
   @override
   Future<BookCrudEntity> getBookById(String id) async {
-    return await remoteDataSource.getBookById(id);
+    final bookModel = await remoteDataSource.getBookById(id);
+    return bookModel;
   }
 
   @override

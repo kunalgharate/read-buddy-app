@@ -22,7 +22,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
   final Dio dio;
 
   BookCrudRemoteDataSourceImpl({required this.dio});
-  
+
   @override
   Future<List<BookCrudModel>> getBooks() async {
     try {
@@ -61,9 +61,14 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
       }
 
       print("✅ Book by id  fetched successfully");
-      print(response.data['book']);
+      print(response.data);
 
-      return BookCrudModel.fromJson(response.data['book']);
+      // Adjusted to parse response.data directly, as API returns book object directly
+      if (response.data == null) {
+        throw Exception('Book data is null');
+      }
+
+      return BookCrudModel.fromJson(response.data);
     } catch (e, stackTrace) {
       print("❌ Error fetching book by ID: $e");
       print("🔍 StackTrace: $stackTrace");
@@ -211,7 +216,8 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
   @override
   Future<void> updateBook(String id, BookCrudModel book) async {
-    final response = await dio.put('${ApiConstants.books}/$id', data: book.toJson());
+    final response =
+        await dio.put('${ApiConstants.books}/$id', data: book.toJson());
 
     if (response.statusCode != 200) {
       throw Exception('Failed to update book');
