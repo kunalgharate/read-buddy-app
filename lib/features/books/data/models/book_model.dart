@@ -51,22 +51,14 @@ import '../../domain/entities/book.dart';
 
 // features/books/data/models/book_model.dart
 
-import '../../domain/entities/book.dart';
-
 class BookModel extends Book {
-  BookModel({
-    required String id,
-    required String title,
-    required String bookimage,
-    required BookCategory book_category,
+  const BookModel({
+    required super.id,
+    required super.title,
+    required super.bookimage,
+    required super.book_category,
     required List<String> authors,
-  }) : super(
-          id: id,
-          title: title,
-          bookimage: bookimage,
-          book_category: book_category,
-          // authors: authors,
-        );
+  });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
     final categoryJson = json['category'];

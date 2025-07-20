@@ -78,7 +78,12 @@ class _MainTabState extends State<Maintab> {
                       controller: _scrollController,
                       padding: const EdgeInsets.only(top: 90),
                       children: [
-                        DonateCard(),
+                        if (state.banners.isNotEmpty)
+                          DonateCard(
+                            title: state.banners.first.title,
+                            imageUrl: state.banners.first.imageUrl,
+                            id: state.banners.first.id,
+                          ),
                         // Latest Book Suggestions
                         LatestBook(books: state.latestBooks),
 
@@ -152,7 +157,16 @@ class _MainTabState extends State<Maintab> {
 //Donate Section -----------------------------------------------
 
 class DonateCard extends StatelessWidget {
-  const DonateCard({super.key});
+  final String title;
+  final String id;
+  final String imageUrl;
+
+  const DonateCard({
+    super.key,
+    required this.title,
+    required this.id,
+    required this.imageUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -175,8 +189,9 @@ class DonateCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "TITLE:-From Your Shelf to Their Future ",
+                Text(
+                  title,
+                  // "TITLE:-From Your Shelf to Their Future ",
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -193,7 +208,7 @@ class DonateCard extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: Color.fromRGBO(44, 224, 127, 1),
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     shape: RoundedRectangleBorder(
@@ -214,11 +229,13 @@ class DonateCard extends StatelessWidget {
           // Right: Book Image
           ClipRRect(
             borderRadius: BorderRadius.circular(5.66),
-            child: Image.asset(
-              'assets/im.png',
+            child: Image.network(
+              imageUrl,
               width: 96.26,
               height: 136,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.image_not_supported),
             ),
           ),
         ],

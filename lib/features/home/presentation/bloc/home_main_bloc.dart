@@ -9,10 +9,12 @@ class HomeMainBloc extends Bloc<HomeMainEvent, HomeMainState> {
   final GetLatestBooksUseCase getLatestBooksUseCase;
   final GetRecommendedBooksUseCase getRecommendedBooksUsecase;
   final GetStatsUseCase getStatsUseCase;
+  final GetBannersUseCase getBannersUseCase;
   HomeMainBloc({
     required this.getLatestBooksUseCase,
     required this.getRecommendedBooksUsecase,
     required this.getStatsUseCase,
+    required this.getBannersUseCase,
   }) : super(HomeMainInitial()) {
     on<FetchMainHomeData>((event, emit) async {
       emit(HomeMainLoading());
@@ -20,10 +22,12 @@ class HomeMainBloc extends Bloc<HomeMainEvent, HomeMainState> {
         final latestBooks = await getLatestBooksUseCase(event.id);
         final recommendedBooks = await getRecommendedBooksUsecase(event.id);
         final stats = await getStatsUseCase();
+        final banners = await getBannersUseCase();
         emit(HomeMainLoaded(
           latestBooks: latestBooks,
           recommendedBooks: recommendedBooks,
           stats: stats,
+          banners: banners,
         ));
       } catch (e, stackTrace) {
         print('Error in HomeMainBloc: $e');

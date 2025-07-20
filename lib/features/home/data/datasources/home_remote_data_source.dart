@@ -7,6 +7,7 @@ abstract class HomeRemoteDataSource {
   Future<List<BookResponseModel>> fetchLatestBooks(String id);
   Future<List<BookResponseModel>> fetchRecommendedBooks(String id);
   Future<List<StatModel>> fetchStats();
+  Future<List<BannerModel>> fetchBanners();
 }
 
 @LazySingleton(as: HomeRemoteDataSource)
@@ -47,11 +48,11 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
       final response = await dio.get(
         'https://readbuddy-server.onrender.com/api/recommend/$id',
-        // options: Options(
-        //   headers: {
-        //     'Authorization': 'Bearer $token',
-        //   },
-        // ),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
       );
 
       if (response.statusCode == 200) {
@@ -78,6 +79,14 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         deleveries: '5',
       )
     ];
+  }
+
+  @override
+  Future<List<BannerModel>> fetchBanners() async {
+    final response =
+        await dio.get('https://readbuddy-server.onrender.com/api/banners');
+    final List<dynamic> jsonList = response.data;
+    return jsonList.map((json) => BannerModel.fromJson(json)).toList();
   }
 }
 //   @override

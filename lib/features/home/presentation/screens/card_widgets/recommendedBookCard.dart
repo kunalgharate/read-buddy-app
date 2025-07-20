@@ -116,11 +116,11 @@ class RecommendedBookCard extends StatelessWidget {
                             color: Colors.black.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
-                            Icons.lock_open,
-                            color: Colors.white,
-                            size: 20,
-                          ),
+                          // child: const Icon(
+                          //   Icons.lock_open,
+                          //   color: Colors.white,
+                          //   size: 20,
+                          // ),
                         ),
                       ),
                   ],
@@ -232,14 +232,14 @@ class RecommendedBookCard extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              Text(
-                                duration,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.red,
-                                ),
-                              ),
+                              // Text(
+                              //   duration,
+                              //   style: const TextStyle(
+                              //     fontSize: 12,
+                              //     fontWeight: FontWeight.w500,
+                              //     color: Colors.red,
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),

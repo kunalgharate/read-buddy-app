@@ -27,4 +27,10 @@ class HomeRepositoryImpl implements HomeRepository {
     final stat = await remoteDataSource.fetchStats();
     return stat.map((model) => model.toEntity()).toList();
   }
+
+  @override
+  Future<List<BannerEntity>> getBanners() async {
+    final banners = await remoteDataSource.fetchBanners();
+    return banners.map((e) => e.toEntity()).toList();
+  }
 }

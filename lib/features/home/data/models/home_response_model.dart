@@ -1,3 +1,4 @@
+// impddort 'package:read_buddy_app/features/banner/datasources/model/banner_model.dart';
 import 'package:read_buddy_app/features/home/domain/entities/book_entity.dart';
 
 class BookResponseModel {
@@ -84,4 +85,24 @@ class StatModel {
       deleveries: deleveries,
     );
   }
+}
+
+class BannerModel extends BannerEntity {
+  BannerModel({
+    required super.id,
+    required super.title,
+    required super.imageUrl,
+  });
+  factory BannerModel.fromJson(Map<String, dynamic> json) {
+    return BannerModel(
+      id: json['_id'] ?? '',
+      title: json['title'] ?? '',
+      imageUrl: json['imageUrl'] ?? '',
+    );
+  }
+  BannerEntity toEntity() => BannerEntity(
+        id: id,
+        title: title,
+        imageUrl: imageUrl,
+      );
 }

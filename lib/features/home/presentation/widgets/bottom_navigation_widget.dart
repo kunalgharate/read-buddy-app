@@ -10,6 +10,7 @@ import 'package:read_buddy_app/features/home/presentation/widgets/categoryTab.da
 import 'package:read_buddy_app/features/home/presentation/widgets/donationTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dart';
 
+import '../../../../core/utils/secure_storage_utils.dart';
 import 'MainTab.dart';
 
 class BottomNavWidget extends StatefulWidget {
@@ -34,11 +35,11 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
   }
 
   Future<void> _loadUserId() async {
-    // final storage = getIt<SecureStorageUtil>();
-    // final user = await storage.getUser();
+    final storage = getIt<SecureStorageUtil>();
+    final user = await storage.getUser();
 
     setState(() {
-      id = "684aff3caca1aecadee14063";
+      id = user?.id;
       isLoading = false;
     });
   }

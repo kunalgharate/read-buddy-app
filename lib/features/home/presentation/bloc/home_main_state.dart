@@ -15,15 +15,17 @@ class HomeMainLoaded extends HomeMainState {
   final List<LatestBookEntity> latestBooks;
   final List<RecommendedBookCardEntity> recommendedBooks;
   final List<StatEntity> stats;
+  final List<BannerEntity> banners;
 
   const HomeMainLoaded({
     required this.latestBooks,
     required this.recommendedBooks,
     required this.stats,
+    required this.banners,
   });
 
   @override
-  List<Object> get props => [latestBooks, recommendedBooks, stats];
+  List<Object> get props => [latestBooks, recommendedBooks, stats, banners];
 }
 
 class HomeMainError extends HomeMainState {

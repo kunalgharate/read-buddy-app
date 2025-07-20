@@ -119,9 +119,10 @@ class BookCard extends StatelessWidget {
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
+                                  wordSpacing: 0,
                                   color: Color.fromRGBO(5, 46, 68, 1),
                                 ),
-                                maxLines: 2,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis),
                             if (showLockIcon)
                               Text(category,
@@ -179,9 +180,9 @@ class BookCard extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Text(duration,
-                                style: const TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w500)),
+                            // Text(duration,
+                            //     style: const TextStyle(
+                            //         fontSize: 12, fontWeight: FontWeight.w500)),
                           ],
                         ),
                       )

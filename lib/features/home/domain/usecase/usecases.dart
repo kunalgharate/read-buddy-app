@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:injectable/injectable.dart';
+import 'package:read_buddy_app/features/banner/domain/repository/banner_repository.dart';
 
 import '../entities/book_entity.dart';
 import '../repositories/main_repository.dart';
@@ -38,4 +39,12 @@ class GetStatsUseCase {
     final stats = await repository.fetchStats();
     return stats;
   }
+}
+
+@injectable
+class GetBannersUseCase {
+  final HomeRepository repository;
+  GetBannersUseCase(this.repository);
+
+  Future<List<BannerEntity>> call() async => await repository.getBanners();
 }
