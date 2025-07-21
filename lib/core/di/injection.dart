@@ -96,6 +96,12 @@ void configureDependencies() {
 // ========================================
 // UTILS & CORE DEPENDENCIES
 // ========================================
+/*************  ✨ Windsurf Command ⭐  *************/
+/// Registers utils and core dependencies.
+///
+/// Registers [SecureStorageUtil] and [Dio] as lazy singletons.
+///
+/*******  a161d38e-e86d-48a1-b698-2196feba6d6c  *******/
 void _registerUtils() {
   getIt.registerLazySingleton<SecureStorageUtil>(() => SecureStorageUtil());
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
@@ -298,7 +304,7 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => BannerBloc(
         createBannerUsecase: getIt<CreateBannerUsecase>(),
       ));
-  getIt.registerLazySingleton(() => HomeMainBloc(
+  getIt.registerFactory(() => HomeMainBloc(
         getLatestBooksUseCase: getIt<GetLatestBooksUseCase>(),
         getRecommendedBooksUsecase: getIt<GetRecommendedBooksUseCase>(),
         getStatsUseCase: getIt<GetStatsUseCase>(),
