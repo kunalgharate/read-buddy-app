@@ -146,8 +146,7 @@ class RecommendedBookCard extends StatelessWidget {
                               .spaceEvenly, //Balanced vertical spacing
                           children: [
                             Text(
-                              title.substring(0, 1).toUpperCase() +
-                                  title.substring(1),
+                              capitalizeWords(title),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(

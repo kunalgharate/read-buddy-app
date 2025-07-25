@@ -1,8 +1,26 @@
 // Sixth Widget -
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/features/books/screens/book_details_screen.dart';
+import '../../data/models/book_model.dart';
+import '../../domain/entities/book.dart';
+import '../bloc/wishlist_bloc.dart';
+import '../pages/request_book.dart';
 
 class ActionButtonsWidget extends StatelessWidget {
-  const ActionButtonsWidget({super.key});
+  final String id;
+  final String title;
+  final String imageUrl;
+  final String donor;
+  final String genre;
+  const ActionButtonsWidget({
+    super.key,
+    required this.title,
+    required this.imageUrl,
+    required this.donor,
+    required this.genre,
+    required this.id,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +33,16 @@ class ActionButtonsWidget extends StatelessWidget {
               height: 54,
               child: OutlinedButton(
                 onPressed: () {
-                  // I have to show a snackbar so what to do
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("Ädd to statuis is presesd"),
-                    duration: Duration(seconds: 4),
-                  ));
+                  final book = Book(
+                    id: id,
+                    title: capitalizeWords(title),
+                    bookCategory: BookCategory(
+                        id: id, category_name: capitalizeWords(genre)),
+                    bookimage: imageUrl,
+                    bookId: '',
+                  );
+
+                  context.read<WishlistCubit>().addBook(book);
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFFD1D5DB), width: 1.5),
@@ -30,11 +53,11 @@ class ActionButtonsWidget extends StatelessWidget {
                   foregroundColor: Color(0xFF374151),
                 ),
                 child: const Text(
-                  'Add to My Book',
+                  'Add to WishList',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF374151),
+                    fontWeight: FontWeight.w500,
+                    color: Color.fromRGBO(5, 5, 5, 1),
                   ),
                 ),
               ),
@@ -46,13 +69,20 @@ class ActionButtonsWidget extends StatelessWidget {
               height: 54,
               child: ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("Request to book is pressed"),
-                    duration: Duration(seconds: 4),
-                  ));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RequestBookPage(
+                        title: title,
+                        imageUrl: imageUrl,
+                        donor: donor,
+                        genre: genre,
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF10B981),
+                  backgroundColor: Color(0xFF2CE07F),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -64,8 +94,8 @@ class ActionButtonsWidget extends StatelessWidget {
                   'Request to Book',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    color: Color.fromRGBO(5, 46, 68, 1),
                   ),
                 ),
               ),

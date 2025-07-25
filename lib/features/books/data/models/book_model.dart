@@ -6,21 +6,21 @@ import '../../domain/entities/book.dart';
 //       {required String id,
 //       required String title,
 //       required String bookimage,
-//       required BookCategory book_category
+//       required BookCategory bookCategory
 //       // required List<String> authors,
 //       })
 //       : super(
 //             id: id,
 //             title: title,
 //             bookimage: bookimage,
-//             book_category: book_category);
+//             bookCategory: bookCategory);
 
 //   factory BookModel.fromJson(Map<String, dynamic> json) {
 //     return BookModel(
 //         id: json['_id'],
 //         title: json['title'] ?? 'Unknown Title',
 //         bookimage: json['coverImageUrl'] ?? "Unkown Image",
-//         book_category: BookCategory.fromJson(json['category'])
+//         bookCategory: BookCategory.fromJson(json['category'])
 //         //  authors: json['authors'],
 //         );
 //   }
@@ -30,7 +30,7 @@ import '../../domain/entities/book.dart';
 //         'title': title,
 //         // 'authors': authors,
 //         'bokimage': bookimage,
-//         'book_caategory': book_category
+//         'book_caategory': bookCategory
 //       };
 // }
 
@@ -56,8 +56,9 @@ class BookModel extends Book {
     required super.id,
     required super.title,
     required super.bookimage,
-    required super.book_category,
+    required super.bookCategory,
     required List<String> authors,
+    required super.bookId,
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
@@ -68,10 +69,9 @@ class BookModel extends Book {
       id: json['_id'] ?? '',
       title: json['title'] ?? 'Unknown Title',
       bookimage: json['coverImageUrl'] ?? 'Unknown Image',
-      book_category:
-          categoryJson != null && categoryJson is Map<String, dynamic>
-              ? BookCategory.fromJson(categoryJson)
-              : BookCategory(id: '', category_name: 'Unknown Category'),
+      bookCategory: categoryJson != null && categoryJson is Map<String, dynamic>
+          ? BookCategory.fromJson(categoryJson)
+          : BookCategory(id: '', category_name: 'Unknown Category'),
       authors: authorsJson != null && authorsJson is List
           ? List<String>.from(authorsJson.expand((e) {
               if (e is List) {
@@ -82,6 +82,7 @@ class BookModel extends Book {
               return [];
             }))
           : [],
+      bookId: '',
     );
   }
 
@@ -89,7 +90,7 @@ class BookModel extends Book {
         '_id': id,
         'title': title,
         'bookimage': bookimage,
-        'book_category': book_category.toJson(),
+        'bookCategory': bookCategory.toJson(),
         //'authors': authors,
       };
 }

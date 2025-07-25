@@ -28,9 +28,9 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
     try {
       final googleSignIn = GoogleSignIn(
         clientId:
-            '792931872361-65ua42e9thn46io3cvbfrugti3abg1jf.apps.googleusercontent.com',
+            '792931872361-abtre7ui8uk6tifu4a6p8d3tu00aseoc.apps.googleusercontent.com',
         serverClientId:
-            '792931872361-grsna194klu8012esqdfpdg51k8agt1r.apps.googleusercontent.com',
+            '792931872361-es8t0vqgrrtj562c3sc1jus7smkkqqhh.apps.googleusercontent.com',
       );
 
       final account = await googleSignIn.signIn();

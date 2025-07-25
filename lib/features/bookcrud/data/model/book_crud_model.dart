@@ -4,6 +4,7 @@ import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart'
 
 class BookCrudModel extends BookCrudEntity {
   final List<String> additionalImageUrls;
+  @override
   final int? pages;
   @override
   final File? coversingleImage;
@@ -72,7 +73,8 @@ class BookCrudModel extends BookCrudEntity {
       additionalImages: [], // Cannot get File from API
       description: json['description'] ?? "",
       notes: json['notes'] ?? "",
-      coversingleImage: null,
+      coversingleImage:
+          json['coverImageUrl'] != null ? File(json['coverImageUrl']) : null,
       pages: json['pages'] ?? 0,
     );
   }

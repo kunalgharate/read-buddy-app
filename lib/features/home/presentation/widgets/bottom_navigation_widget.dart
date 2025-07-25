@@ -44,15 +44,21 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
     });
   }
 
-  List<Widget> get pages => [
-        BlocProvider(
-          create: (_) => getIt<HomeMainBloc>()..add(FetchMainHomeData(id!)),
-          child: const Maintab(),
-        ),
-        const CategoryTab(),
-        const DonationTab(),
-        const ProfileTab()
-      ];
+  List<Widget> buildPages() {
+    return [
+      id != null
+          ? BlocProvider(
+              create: (_) => getIt<HomeMainBloc>()..add(FetchMainHomeData(id!)),
+              child: const Maintab(),
+            )
+          : const Center(
+              child: Text("User not found. Please try logging in again."),
+            ),
+      const CategoryTab(),
+      const DonationTab(),
+      const ProfileTab(),
+    ];
+  }
 
   final List<String> labels = ["Home", "Category", "Donation", "Profile"];
 
@@ -73,7 +79,7 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          pages[currentIndex],
+          buildPages()[currentIndex],
           Positioned(
             bottom: 0,
             left: 0,

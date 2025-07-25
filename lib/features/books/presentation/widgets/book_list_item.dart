@@ -1,8 +1,13 @@
 // lib/features/books/presentation/widgets/book_list_item.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
 import '../../domain/entities/book.dart';
+import '../../domain/usecases/get_reviews.dart';
 import '../../screens/book_details_screen.dart';
+import '../bloc/review/review_bloc.dart';
+import '../bloc/review/review_event.dart';
 
 class BookListItem extends StatelessWidget {
   final Book book;
@@ -13,10 +18,21 @@ class BookListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        // The corrected navigation logic
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => BookDetailsScreen(bookId: book.id),
+            builder: (context) {
+              // Use BlocProvider to create and provide the ReviewBloc for this route
+              return BlocProvider(
+                create: (context) => ReviewBloc(
+                    getReviews: getIt<
+                        GetReviewsUseCase>()) // Pass GetReviewsUseCase instance
+                  ..add(FetchReviews(
+                      book.id)), // Dispatch an initial event to load reviews
+                child: BookDetailsScreen(bookId: book.id),
+              );
+            },
           ),
         );
       },
@@ -74,7 +90,7 @@ class BookListItem extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
-                book.book_category.category_name,
+                book.bookCategory.category_name,
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ),

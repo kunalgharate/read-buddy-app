@@ -13,6 +13,7 @@ import '../../features/books/data/repositories/review_repository_impl.dart';
 import '../../features/books/domain/repositories/review_repository.dart';
 import '../../features/books/domain/usecases/get_reviews.dart';
 import '../../features/books/presentation/bloc/review/review_bloc.dart';
+import '../../features/books/presentation/bloc/wishlist_bloc.dart';
 import '../../features/home/data/datasources/home_remote_data_source.dart';
 import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../network/dio_client.dart';
@@ -96,12 +97,10 @@ void configureDependencies() {
 // ========================================
 // UTILS & CORE DEPENDENCIES
 // ========================================
-/*************  ✨ Windsurf Command ⭐  *************/
 /// Registers utils and core dependencies.
 ///
 /// Registers [SecureStorageUtil] and [Dio] as lazy singletons.
 ///
-/*******  a161d38e-e86d-48a1-b698-2196feba6d6c  *******/
 void _registerUtils() {
   getIt.registerLazySingleton<SecureStorageUtil>(() => SecureStorageUtil());
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
@@ -322,4 +321,5 @@ void _registerBlocs() {
 void _registerCubits() {
   // User Cubits
   getIt.registerLazySingleton(() => UserCubit(getIt<GetUserListUseCase>()));
+  getIt.registerLazySingleton<WishlistCubit>(() => WishlistCubit());
 }
