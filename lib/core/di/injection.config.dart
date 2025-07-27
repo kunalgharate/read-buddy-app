@@ -59,6 +59,13 @@ import '../../features/category_crud/domain/usecases/get_caategories.dart'
     as _i359;
 import '../../features/category_crud/domain/usecases/update_category.dart'
     as _i527;
+import '../../features/home/data/datasources/home_remote_data_source.dart'
+    as _i362;
+import '../../features/home/data/repositories/home_repository_impl.dart'
+    as _i76;
+import '../../features/home/domain/repositories/main_repository.dart' as _i174;
+import '../../features/home/domain/usecase/usecases.dart' as _i142;
+import '../../features/home/presentation/bloc/home_main_bloc.dart' as _i255;
 import '../../features/permissions/presentation/bloc/permission_bloc.dart'
     as _i986;
 import '../../features/profile/data/remotesource/profile_remote_data_source.dart'
@@ -112,6 +119,11 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i661.BookRepositoryImpl(gh<_i906.BookRemoteDataSource>()));
     gh.lazySingleton<_i192.ProfileRemoteDataSource>(
         () => _i192.ProfileRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
+    gh.lazySingleton<_i362.HomeRemoteDataSource>(
+        () => _i362.HomeRemoteDataSourceImpl(
+              gh<_i361.Dio>(),
+              gh<_i206.SecureStorageUtil>(),
+            ));
     gh.factory<_i187.CategoryRepository>(() =>
         _i574.CategoryRepositoryImpl(gh<_i212.CategoryRemoteDataSource>()));
     gh.factory<_i787.AuthRepository>(
@@ -154,6 +166,8 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i644.ImagePickerService>(),
           gh<_i606.ImageUploadService>(),
         ));
+    gh.lazySingleton<_i174.HomeRepository>(
+        () => _i76.HomeRepositoryImpl(gh<_i362.HomeRemoteDataSource>()));
     gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),
@@ -165,6 +179,20 @@ extension GetItInjectableX on _i174.GetIt {
           addBookCrud: gh<_i900.AddBookUsecase>(),
           updateBookCrud: gh<_i161.UpdateBookUsecase>(),
           deleteBookCrud: gh<_i836.DeleteBookusecase>(),
+        ));
+    gh.factory<_i142.GetLatestBooksUseCase>(
+        () => _i142.GetLatestBooksUseCase(gh<_i174.HomeRepository>()));
+    gh.factory<_i142.GetRecommendedBooksUseCase>(
+        () => _i142.GetRecommendedBooksUseCase(gh<_i174.HomeRepository>()));
+    gh.factory<_i142.GetStatsUseCase>(
+        () => _i142.GetStatsUseCase(gh<_i174.HomeRepository>()));
+    gh.factory<_i142.GetBannersUseCase>(
+        () => _i142.GetBannersUseCase(gh<_i174.HomeRepository>()));
+    gh.factory<_i255.HomeMainBloc>(() => _i255.HomeMainBloc(
+          getLatestBooksUseCase: gh<_i142.GetLatestBooksUseCase>(),
+          getRecommendedBooksUsecase: gh<_i142.GetRecommendedBooksUseCase>(),
+          getStatsUseCase: gh<_i142.GetStatsUseCase>(),
+          getBannersUseCase: gh<_i142.GetBannersUseCase>(),
         ));
     return this;
   }

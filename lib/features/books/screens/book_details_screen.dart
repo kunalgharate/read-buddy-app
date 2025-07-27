@@ -5,9 +5,6 @@ import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_cru
 import 'package:read_buddy_app/features/books/presentation/widgets/book_header_widget.dart';
 
 import '../../bookcrud/presentation/bloc/bloc/book_crud_event.dart';
-import '../presentation/bloc/review/review_bloc.dart';
-import '../presentation/bloc/review/review_event.dart';
-import '../presentation/bloc/review/review_state.dart';
 import '../presentation/widgets/about_book_widget.dart';
 import '../presentation/widgets/action_buttons_widget.dart';
 import '../presentation/widgets/highlight_widget.dart';
@@ -27,7 +24,6 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
   void initState() {
     super.initState();
     context.read<BookCrudBloc>().add(LoadBookCrudById(id: widget.bookId));
-    context.read<ReviewBloc>().add(FetchReviews()); //widget.bookId
   }
 
   @override
@@ -63,37 +59,17 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
                     pages: book.pages?.toString() ?? 'N/A',
                     fromat: capitalizeWords(book.format),
                   ),
-                  BlocBuilder<ReviewBloc, ReviewState>(
-                    builder: (context, state) {
-                      if (state is ReviewLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state is ReviewLoaded) {
-                        if (state.reviews.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text('No reviews yet.'),
-                          );
-                        }
-                        return Column(
-                          children: state.reviews.map((review) {
-                            return ReviewWidget(
-                              name: capitalizeFirstLetter(review.reviewerName),
-                              timestamp: '',
-                              review: capitalizeFirstLetter(review.comment),
-                              imageUrl: review.reviewerImageUrl,
-                              rating: review.rating,
-                            );
-                          }).toList(),
-                        );
-                      } else if (state is ReviewError) {
-                        return Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(state.message,
-                              style: const TextStyle(color: Colors.red)),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
+                  // Reviews section - placeholder for future implementation
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      'Reviews feature coming soon...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ),
                   SimilarBooksWidget(),
                   ActionButtonsWidget(),
