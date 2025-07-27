@@ -42,6 +42,11 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
       id = user?.id;
       isLoading = false;
     });
+
+    // Trigger the BLoC event after getting the user ID
+    if (id != null && mounted) {
+      context.read<HomeMainBloc>().add(FetchMainHomeData(id!));
+    }
   }
 
   List<Widget> buildPages() {

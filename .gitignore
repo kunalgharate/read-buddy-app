@@ -25,19 +25,52 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
-/.idea/
+
+# Platform-specific directories
 /linux/
 /macos/
 /windows/
-/.idea/
 /web/
-/macos/
-/linux/
 
-# IntelliJ IDEA files
-**/*.iml
-**/*.xml
-
-# Android Studio files
+# IDE and Editor files
+# IntelliJ IDEA / Android Studio
+.idea/
 *.iml
-*.xml
+*.iws
+*.ipr
+
+# Visual Studio Code
+.vscode/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.log

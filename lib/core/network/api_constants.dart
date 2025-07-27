@@ -5,7 +5,7 @@ class ApiConstants {
   static const String login = '$baseUrl/users/login';
   static const String register = '$baseUrl/users/register';
   static const String verifyEmail = '$baseUrl/users/verify-email';
-  static const String refreshToken = '$baseUrl/auth/refresh';
+  static const String refreshToken = '$baseUrl/users/refresh-token'; // Correct endpoint
   static const String loginWithGoogle = '$baseUrl/googleauth/google-auth';
 
   // User endpoints
@@ -35,4 +35,5 @@ class ApiConstants {
   static const createBanner = '$baseUrl/banners/';
 
   static const String updateUserInfo = '$baseUrl/users/update-user-info';
+  static const String uploadProfileImage = '$baseUrl/users/upload-profile-image';
 }

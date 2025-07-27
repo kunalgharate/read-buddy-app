@@ -12,7 +12,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   // Constants
-  static const Duration _splashDuration = Duration(seconds: 2);
   static const Duration _minimumSplashTime = Duration(milliseconds: 1500);
   
   // State
@@ -22,7 +21,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeApp();
+    // Add a small delay to ensure the widget is fully built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _initializeApp();
+      });
+    });
   }
 
   Future<void> _initializeApp() async {
@@ -32,7 +36,13 @@ class _SplashScreenState extends State<SplashScreen> {
       await _checkUserSession();
     } catch (e) {
       debugPrint('Splash screen error: $e');
+      // Ensure minimum splash time before navigation
+      final elapsedTime = DateTime.now().difference(startTime);
+      if (elapsedTime < _minimumSplashTime) {
+        await Future.delayed(_minimumSplashTime - elapsedTime);
+      }
       _navigateToSignIn();
+      return;
     }
 
     // Ensure minimum splash time for better UX
@@ -43,8 +53,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkUserSession() async {
-    setState(() {
-      _statusMessage = 'Checking session...';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _statusMessage = 'Checking session...';
+        });
+      }
     });
 
     try {
@@ -72,8 +86,12 @@ class _SplashScreenState extends State<SplashScreen> {
         return;
       }
 
-      setState(() {
-        _statusMessage = 'Welcome back, ${sessionData.user!.name}!';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'Welcome back, ${sessionData.user!.name}!';
+          });
+        }
       });
 
       // Navigate based on user role
@@ -133,22 +151,28 @@ class _SplashScreenState extends State<SplashScreen> {
 
   // Navigation methods
   void _navigateToOnboarding() {
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/onboarding');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/onboarding');
+      }
+    });
   }
 
   void _navigateToSignIn() {
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/signin');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/signin');
+      }
+    });
   }
 
   void _navigateBasedOnRole(String role) {
-    if (!mounted) return;
-    
-    final route = role == 'admin' ? '/admin' : '/home';
-    Navigator.pushReplacementNamed(context, route);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
+      final route = role == 'admin' ? '/admin' : '/home';
+      Navigator.pushReplacementNamed(context, route);
+    });
   }
 
   @override

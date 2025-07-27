@@ -59,6 +59,15 @@ import '../../features/category_crud/domain/usecases/get_caategories.dart'
     as _i359;
 import '../../features/category_crud/domain/usecases/update_category.dart'
     as _i527;
+import '../../features/home/data/datasources/home_remote_data_source.dart'
+    as _i362;
+import '../../features/home/data/repositories/home_repository_impl.dart'
+    as _i76;
+import '../../features/home/domain/repositories/main_repository.dart' as _i174;
+import '../../features/home/domain/usecase/usecases.dart' as _i142;
+import '../../features/home/presentation/bloc/home_main_bloc.dart' as _i255;
+import '../../features/permissions/presentation/bloc/permission_bloc.dart'
+    as _i986;
 import '../../features/profile/data/remotesource/profile_remote_data_source.dart'
     as _i192;
 import '../../features/profile/data/repositories/profile_repository_impl.dart'
@@ -68,6 +77,11 @@ import '../../features/profile/domain/repositories/profile_repository.dart'
 import '../../features/profile/domain/usecases/update_profile_usecase.dart'
     as _i478;
 import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
+import '../services/image_picker_service.dart' as _i644;
+import '../services/image_upload_service.dart' as _i606;
+import '../services/notification_service.dart' as _i941;
+import '../services/permission_service.dart' as _i165;
+import '../services/permission_storage_service.dart' as _i282;
 import '../utils/secure_storage_utils.dart' as _i206;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -81,7 +95,16 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
+    gh.factory<_i165.PermissionService>(() => _i165.PermissionService());
+    gh.factory<_i941.NotificationService>(() => _i941.NotificationService());
+    gh.factory<_i282.PermissionStorageService>(
+        () => _i282.PermissionStorageService());
+    gh.factory<_i644.ImagePickerService>(() => _i644.ImagePickerService());
     gh.lazySingleton<_i206.SecureStorageUtil>(() => _i206.SecureStorageUtil());
+    gh.factory<_i986.PermissionBloc>(
+        () => _i986.PermissionBloc(gh<_i165.PermissionService>()));
+    gh.factory<_i606.ImageUploadService>(
+        () => _i606.ImageUploadService(dio: gh<_i361.Dio>()));
     gh.factory<_i673.BookCrudRemoteDataSource>(
         () => _i673.BookCrudRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
     gh.factory<_i170.AuthRemoteDataSource>(
@@ -96,6 +119,11 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i661.BookRepositoryImpl(gh<_i906.BookRemoteDataSource>()));
     gh.lazySingleton<_i192.ProfileRemoteDataSource>(
         () => _i192.ProfileRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
+    gh.lazySingleton<_i362.HomeRemoteDataSource>(
+        () => _i362.HomeRemoteDataSourceImpl(
+              gh<_i361.Dio>(),
+              gh<_i206.SecureStorageUtil>(),
+            ));
     gh.factory<_i187.CategoryRepository>(() =>
         _i574.CategoryRepositoryImpl(gh<_i212.CategoryRemoteDataSource>()));
     gh.factory<_i787.AuthRepository>(
@@ -132,11 +160,15 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i170.GoogleSignInBloc(gh<_i692.SignInWithGoogle>()));
     gh.factory<_i478.UpdateProfileUseCase>(
         () => _i478.UpdateProfileUseCase(gh<_i894.ProfileRepository>()));
-    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
     gh.factory<_i133.ProfileBloc>(() => _i133.ProfileBloc(
           gh<_i206.SecureStorageUtil>(),
           gh<_i478.UpdateProfileUseCase>(),
+          gh<_i644.ImagePickerService>(),
+          gh<_i606.ImageUploadService>(),
         ));
+    gh.lazySingleton<_i174.HomeRepository>(
+        () => _i76.HomeRepositoryImpl(gh<_i362.HomeRemoteDataSource>()));
+    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),
           gh<_i30.VerifyEmailUseCase>(),
@@ -147,6 +179,20 @@ extension GetItInjectableX on _i174.GetIt {
           addBookCrud: gh<_i900.AddBookUsecase>(),
           updateBookCrud: gh<_i161.UpdateBookUsecase>(),
           deleteBookCrud: gh<_i836.DeleteBookusecase>(),
+        ));
+    gh.factory<_i142.GetLatestBooksUseCase>(
+        () => _i142.GetLatestBooksUseCase(gh<_i174.HomeRepository>()));
+    gh.factory<_i142.GetRecommendedBooksUseCase>(
+        () => _i142.GetRecommendedBooksUseCase(gh<_i174.HomeRepository>()));
+    gh.factory<_i142.GetStatsUseCase>(
+        () => _i142.GetStatsUseCase(gh<_i174.HomeRepository>()));
+    gh.factory<_i142.GetBannersUseCase>(
+        () => _i142.GetBannersUseCase(gh<_i174.HomeRepository>()));
+    gh.factory<_i255.HomeMainBloc>(() => _i255.HomeMainBloc(
+          getLatestBooksUseCase: gh<_i142.GetLatestBooksUseCase>(),
+          getRecommendedBooksUsecase: gh<_i142.GetRecommendedBooksUseCase>(),
+          getStatsUseCase: gh<_i142.GetStatsUseCase>(),
+          getBannersUseCase: gh<_i142.GetBannersUseCase>(),
         ));
     return this;
   }

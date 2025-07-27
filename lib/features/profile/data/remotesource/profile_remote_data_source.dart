@@ -4,7 +4,6 @@ import 'package:read_buddy_app/core/network/api_constants.dart';
 import 'package:read_buddy_app/features/auth/data/models/app_user_model.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
-import '../../../auth/domain/entities/app_user.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<AppUserModel> updateProfile({
@@ -37,7 +36,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        return AppUserModel.fromJson(response.data['user'] ?? response.data);
+        // Pass the entire response to AppUserModel.fromJson
+        // The updated fromJson method will handle extracting the user data
+        return AppUserModel.fromJson(response.data);
       } else {
         throw DioException(
           requestOptions: response.requestOptions,

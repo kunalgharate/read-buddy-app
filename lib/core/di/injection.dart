@@ -18,6 +18,9 @@ import '../../features/home/data/datasources/home_remote_data_source.dart';
 import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../network/dio_client.dart';
 import '../utils/secure_storage_utils.dart';
+import '../services/image_picker_service.dart';
+import '../services/image_upload_service.dart';
+import '../services/permission_service.dart';
 
 // Auth
 import '../../features/auth/data/remotesource/auth_remote_data_source.dart';
@@ -77,6 +80,9 @@ import '../../features/banner/datasources/repositories/banner_repo_impl.dart';
 import '../../features/banner/domain/repository/banner_repository.dart';
 import '../../features/banner/domain/usecase/create_banner.dart';
 import '../../features/banner/presentation/bloc/banner_bloc.dart';
+
+// Permissions
+import '../../features/permissions/presentation/bloc/permission_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -147,9 +153,15 @@ void _registerDataSources() {
   getIt.registerLazySingleton<HomeRemoteDataSource>(
     () => HomeRemoteDataSourceImpl(getIt<Dio>(), getIt<SecureStorageUtil>()),
   );
-  getIt.registerLazySingleton<ReviewRemoteDataSource>(
-    () => ReviewRemoteDataSourceImpl(dio: getIt<Dio>()),
+
+  // Image Services
+  getIt.registerLazySingleton<ImagePickerService>(() => ImagePickerService());
+  getIt.registerLazySingleton<ImageUploadService>(
+    () => ImageUploadService(dio: getIt<Dio>()),
   );
+
+  // Permission Service
+  getIt.registerLazySingleton<PermissionService>(() => PermissionService());
 }
 
 // ========================================
@@ -192,12 +204,6 @@ void _registerRepositories() {
   );
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(getIt<HomeRemoteDataSource>()),
-  );
-  getIt.registerLazySingleton<ReviewRepository>(
-    () => ReviewRepositoryImpl(
-      getIt<ReviewRemoteDataSource>(),
-      remoteDataSource: getIt<ReviewRemoteDataSource>(),
-    ),
   );
 }
 
@@ -254,9 +260,6 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => GetRecommendedBooksUseCase(getIt<HomeRepository>()));
   getIt.registerLazySingleton(() => GetStatsUseCase(getIt<HomeRepository>()));
-  getIt.registerLazySingleton(
-    () => GetReviewsUseCase(repository: getIt<ReviewRepository>()),
-  );
   getIt.registerLazySingleton(() => GetBannersUseCase(getIt<HomeRepository>()));
 }
 
@@ -277,6 +280,8 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => ProfileBloc(
         getIt<SecureStorageUtil>(),
         getIt<UpdateProfileUseCase>(),
+        getIt<ImagePickerService>(),
+        getIt<ImageUploadService>(),
       ));
 
   // Books Blocs
@@ -309,10 +314,6 @@ void _registerBlocs() {
         getStatsUseCase: getIt<GetStatsUseCase>(),
         getBannersUseCase: getIt<GetBannersUseCase>(),
       ));
-
-  // Review Bloc
-  getIt.registerLazySingleton(
-      () => ReviewBloc(getReviews: getIt<GetReviewsUseCase>()));
 }
 
 // ========================================
