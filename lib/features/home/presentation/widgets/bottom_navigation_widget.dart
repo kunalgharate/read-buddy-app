@@ -42,13 +42,15 @@ class _BottomNavWidgetState extends State<BottomNavWidget> {
       id = user?.id;
       isLoading = false;
     });
+    
+    // Trigger the BLoC event after getting the user ID
+    if (id != null && mounted) {
+      context.read<HomeMainBloc>().add(FetchMainHomeData(id!));
+    }
   }
 
   List<Widget> get pages => [
-        BlocProvider(
-          create: (_) => getIt<HomeMainBloc>()..add(FetchMainHomeData(id!)),
-          child: const Maintab(),
-        ),
+        const Maintab(),
         const CategoryTab(),
         const DonationTab(),
         const ProfileTab()

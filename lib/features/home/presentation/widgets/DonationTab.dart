@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'Format_screen.dart'; 
+import '../../../donate/presentation/donate_money.dart';
+import 'Format_screen.dart'; // Assuming this is your BookFormatScreen
 
 class DonationTab extends StatelessWidget {
   const DonationTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Donation Tab'),
-    );
+    return const MainScreen();
   }
 }
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -251,12 +251,12 @@ class BookDonationScreen extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF4CAF50),
+                            color: Color(0xFF4CAF50),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Completed',
                             style: TextStyle(
                               color: Colors.white,
@@ -296,12 +296,12 @@ class BookDonationScreen extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFC107),
+                            color: Color(0xFFFFC107),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Pending',
                             style: TextStyle(
                               color: Colors.white,
@@ -318,9 +318,9 @@ class BookDonationScreen extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // Donate Book Section
+              // Donation Section
               const Text(
-                'Donate Book',
+                'Donation',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -329,7 +329,7 @@ class BookDonationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Donate Button
+              // Donate Book Button
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -357,7 +357,48 @@ class BookDonationScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 8),
                       Text(
-                        'Donate a Book',
+                        'Donate Book',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16), // Space between buttons
+
+              // Donate Money Button
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MoneyDonationScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4CAF50),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.add, // Changed icon to 'add'
+                        size: 24,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Donate Money',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

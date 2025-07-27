@@ -68,6 +68,14 @@ class _MainTabState extends State<Maintab> {
       body: SafeArea(
         child: BlocBuilder<HomeMainBloc, HomeMainState>(
           builder: (context, state) {
+            // Add null safety check
+            final bloc = context.read<HomeMainBloc>();
+            if (bloc.isClosed) {
+              return const Center(
+                child: Text('Session expired. Please restart the app.'),
+              );
+            }
+            
             if (state is HomeMainLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is HomeMainLoaded) {

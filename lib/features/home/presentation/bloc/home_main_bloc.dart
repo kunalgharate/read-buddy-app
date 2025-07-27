@@ -17,22 +17,31 @@ class HomeMainBloc extends Bloc<HomeMainEvent, HomeMainState> {
     required this.getBannersUseCase,
   }) : super(HomeMainInitial()) {
     on<FetchMainHomeData>((event, emit) async {
+      // Check if BLoC is closed before processing
+      if (isClosed) return;
+      
       emit(HomeMainLoading());
       try {
         final latestBooks = await getLatestBooksUseCase(event.id);
         final recommendedBooks = await getRecommendedBooksUsecase(event.id);
         final stats = await getStatsUseCase();
         final banners = await getBannersUseCase();
-        emit(HomeMainLoaded(
-          latestBooks: latestBooks,
-          recommendedBooks: recommendedBooks,
-          stats: stats,
-          banners: banners,
-        ));
+        
+        // Check again before emitting in case BLoC was closed during async operations
+        if (!isClosed) {
+          emit(HomeMainLoaded(
+            latestBooks: latestBooks,
+            recommendedBooks: recommendedBooks,
+            stats: stats,
+            banners: banners,
+          ));
+        }
       } catch (e, stackTrace) {
         print('Error in HomeMainBloc: $e');
         print('Stack trace: $stackTrace');
-        emit(HomeMainError("Fails to load"));
+        if (!isClosed) {
+          emit(HomeMainError("Failed to load home data"));
+        }
       }
     });
   }

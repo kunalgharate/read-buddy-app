@@ -4,6 +4,7 @@ import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/g
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:read_buddy_app/features/home/presentation/bloc/home_main_bloc.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'core/di/injection.dart';
 import 'core/utils/app_bloc_observer.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
+        BlocProvider(create: (_) => getIt<HomeMainBloc>()),
       ],
       child: MaterialApp(
         title: "Read Buddy",
