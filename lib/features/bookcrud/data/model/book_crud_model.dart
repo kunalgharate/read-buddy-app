@@ -4,6 +4,7 @@ import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart'
 
 class BookCrudModel extends BookCrudEntity {
   final List<String> additionalImageUrls;
+  final int? pages;
   @override
   final File? coversingleImage;
 
@@ -30,6 +31,7 @@ class BookCrudModel extends BookCrudEntity {
     super.ownerName,
     required super.location,
     this.coversingleImage,
+    required this.pages,
     required super.coverImageUrl,
     required super.additionalImages,
     List<String>? additionalImageUrls,
@@ -71,6 +73,7 @@ class BookCrudModel extends BookCrudEntity {
       description: json['description'] ?? "",
       notes: json['notes'] ?? "",
       coversingleImage: null,
+      pages: json['pages'] ?? 0,
     );
   }
 
@@ -132,6 +135,7 @@ class BookCrudModel extends BookCrudEntity {
       description: book.description,
       notes: book.notes,
       coversingleImage: book.coversingleImage,
+      pages: book.pages,
     );
   }
 
@@ -204,6 +208,7 @@ class BookCrudModel extends BookCrudEntity {
       additionalImageUrls: additionalImageUrls ?? this.additionalImageUrls,
       description: description ?? this.description,
       notes: notes ?? this.notes,
+      pages: pages,
     );
   }
 }

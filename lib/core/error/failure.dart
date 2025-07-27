@@ -6,7 +6,7 @@ abstract class Failure {
 }
 
 class ServerFailure extends Failure {
-  ServerFailure(String message) : super(message);
+  ServerFailure(super.message);
 }
 
 class NetworkFailure extends Failure {
