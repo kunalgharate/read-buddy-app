@@ -380,8 +380,6 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                     return;
                   }
                   if (_formKey.currentState!.validate()) {
-                    final imageFile = File(selectedImages.first!.path);
-
                     print("tagssssssss");
                     print(_tags.length);
                     final completeBook = widget.bookCrudModel.copyWith(
