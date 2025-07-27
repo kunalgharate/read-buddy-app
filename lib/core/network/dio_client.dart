@@ -145,6 +145,7 @@ class TokenRefreshInterceptor extends Interceptor {
       print('🔐 Status Code: ${err.response?.statusCode}');
       print('🔐 Path: ${err.requestOptions.path}');
       print('🔐 Response: ${err.response?.data}');
+      print('🔐 Request Headers: ${err.requestOptions.headers}');
     }
 
     // Check if it's a token-related error (401 or 403 with token error)
@@ -174,12 +175,16 @@ class TokenRefreshInterceptor extends Interceptor {
       try {
         _isRefreshing = true;
         
+        if (kDebugMode) {
+          print('🔐 TokenRefresh: Starting token refresh process');
+        }
+        
         // Attempt to refresh the token
         final refreshSuccess = await _refreshToken();
         
         if (refreshSuccess) {
           if (kDebugMode) {
-            print('🔐 TokenRefresh: Token refreshed successfully');
+            print('🔐 TokenRefresh: Token refreshed successfully, retrying original request');
           }
           
           // Retry the original request
@@ -190,7 +195,7 @@ class TokenRefreshInterceptor extends Interceptor {
           await _processQueuedRequests();
         } else {
           if (kDebugMode) {
-            print('🔐 TokenRefresh: Token refresh failed');
+            print('🔐 TokenRefresh: Token refresh failed, clearing session');
           }
           
           // Clear user session and redirect to login
@@ -201,6 +206,7 @@ class TokenRefreshInterceptor extends Interceptor {
         if (kDebugMode) {
           print('🔐 TokenRefresh: Exception during token refresh');
           print('🔐 Error: $refreshError');
+          print('🔐 Stack trace: ${refreshError is Error ? refreshError.stackTrace : 'No stack trace'}');
         }
         
         await _handleRefreshFailure();
@@ -211,6 +217,9 @@ class TokenRefreshInterceptor extends Interceptor {
       }
     } else {
       // Not a token error, pass through
+      if (kDebugMode) {
+        print('🔐 TokenRefresh: Not a token error, passing through');
+      }
       handler.next(err);
     }
   }
@@ -220,8 +229,16 @@ class TokenRefreshInterceptor extends Interceptor {
     final statusCode = err.response?.statusCode;
     final responseData = err.response?.data;
     
+    if (kDebugMode) {
+      print('🔐 TokenRefresh: Checking if token error - Status: $statusCode');
+      print('🔐 TokenRefresh: Response data: $responseData');
+    }
+    
     // Check for 401 Unauthorized
     if (statusCode == 401) {
+      if (kDebugMode) {
+        print('🔐 TokenRefresh: 401 Unauthorized detected');
+      }
       return true;
     }
     
@@ -231,12 +248,23 @@ class TokenRefreshInterceptor extends Interceptor {
         final error = responseData['error']?.toString().toLowerCase() ?? '';
         final message = responseData['message']?.toString().toLowerCase() ?? '';
         
-        return error.contains('token') || 
-               error.contains('expired') || 
-               error.contains('invalid') ||
-               message.contains('token') || 
-               message.contains('expired') || 
-               message.contains('invalid');
+        // Check for your specific error message: "Invalid or expired token"
+        final isTokenError = error.contains('token') || 
+                            error.contains('expired') || 
+                            error.contains('invalid') ||
+                            message.contains('token') || 
+                            message.contains('expired') || 
+                            message.contains('invalid') ||
+                            error == 'invalid or expired token' ||
+                            message == 'invalid or expired token';
+        
+        if (kDebugMode) {
+          print('🔐 TokenRefresh: 403 Forbidden - Is token error: $isTokenError');
+          print('🔐 TokenRefresh: Error message: "$error"');
+          print('🔐 TokenRefresh: Message: "$message"');
+        }
+        
+        return isTokenError;
       }
     }
     
@@ -273,40 +301,151 @@ class TokenRefreshInterceptor extends Interceptor {
         return false;
       }
 
+      if (kDebugMode) {
+        print('🔐 TokenRefresh: Using refresh token: ${refreshToken.substring(0, 20)}...');
+        print('🔐 TokenRefresh: Refresh token length: ${refreshToken.length}');
+      }
+
       // Create a new Dio instance to avoid interceptor loops
       final refreshDio = Dio();
-      refreshDio.options.baseUrl = ApiConstants.baseUrl;
       refreshDio.options.headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'User-Agent': 'ReadBuddyApp/1.0.0',
       };
 
-      final response = await refreshDio.post(
-        '/auth/refresh-token', // You'll need to add this endpoint to your server
-        data: {'refreshToken': refreshToken},
-      );
+      // Set timeouts
+      refreshDio.options.connectTimeout = const Duration(seconds: 30);
+      refreshDio.options.receiveTimeout = const Duration(seconds: 30);
+      refreshDio.options.sendTimeout = const Duration(seconds: 30);
 
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data as Map<String, dynamic>;
-        final newAccessToken = data['accessToken'] as String?;
-        final newRefreshToken = data['refreshToken'] as String?;
+      // Use the correct endpoint
+      final endpoint = '${ApiConstants.baseUrl}/users/refresh-token';
 
-        if (newAccessToken != null) {
-          // Save new tokens
-          await getIt<SecureStorageUtil>().saveTokens(
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken ?? refreshToken,
-          );
-
-          if (kDebugMode) {
-            print('🔐 TokenRefresh: New tokens saved');
-          }
-          return true;
+      // Try first approach: refresh token in request body
+      try {
+        if (kDebugMode) {
+          print('🔐 TokenRefresh: Trying endpoint: $endpoint');
+          print('🔐 TokenRefresh: Approach 1 - Sending refresh token in request body');
         }
+
+        final requestData = {'refreshToken': refreshToken};
+        if (kDebugMode) {
+          print('🔐 TokenRefresh: Request data: $requestData');
+        }
+
+        final response = await refreshDio.post(
+          endpoint,
+          data: requestData,
+        );
+
+        if (kDebugMode) {
+          print('🔐 TokenRefresh: Response status: ${response.statusCode}');
+          print('🔐 TokenRefresh: Response data: ${response.data}');
+        }
+
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data as Map<String, dynamic>;
+          final newAccessToken = data['accessToken'] as String?;
+          final newRefreshToken = data['refreshToken'] as String?;
+
+          if (newAccessToken != null) {
+            // Save new tokens using SecureStorageUtil
+            await getIt<SecureStorageUtil>().saveTokens(
+              accessToken: newAccessToken,
+              refreshToken: newRefreshToken ?? refreshToken,
+            );
+
+            if (kDebugMode) {
+              print('🔐 TokenRefresh: New tokens saved successfully');
+              print('🔐 TokenRefresh: New access token: ${newAccessToken.substring(0, 20)}...');
+              if (newRefreshToken != null) {
+                print('🔐 TokenRefresh: New refresh token: ${newRefreshToken.substring(0, 20)}...');
+              }
+            }
+            return true;
+          } else {
+            if (kDebugMode) {
+              print('🔐 TokenRefresh: No access token in response');
+            }
+          }
+        } else {
+          if (kDebugMode) {
+            print('🔐 TokenRefresh: Invalid response status or data');
+          }
+        }
+      } catch (bodyError) {
+        if (kDebugMode) {
+          print('🔐 TokenRefresh: Body approach failed: $bodyError');
+          if (bodyError is DioException) {
+            print('🔐 TokenRefresh: Status code: ${bodyError.response?.statusCode}');
+            print('🔐 TokenRefresh: Response: ${bodyError.response?.data}');
+          }
+        }
+
+        // If body approach failed with "Token required", try Authorization header approach
+        if (bodyError is DioException && 
+            bodyError.response?.statusCode == 401 &&
+            bodyError.response?.data?.toString().contains('Token required') == true) {
+          
+          try {
+            if (kDebugMode) {
+              print('🔐 TokenRefresh: Approach 2 - Trying with Authorization header');
+            }
+
+            // Try with Authorization header
+            final headerResponse = await refreshDio.post(
+              endpoint,
+              options: Options(
+                headers: {
+                  'Authorization': 'Bearer $refreshToken',
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'User-Agent': 'ReadBuddyApp/1.0.0',
+                },
+              ),
+            );
+
+            if (kDebugMode) {
+              print('🔐 TokenRefresh: Header approach - Response status: ${headerResponse.statusCode}');
+              print('🔐 TokenRefresh: Header approach - Response data: ${headerResponse.data}');
+            }
+
+            if (headerResponse.statusCode == 200 && headerResponse.data != null) {
+              final data = headerResponse.data as Map<String, dynamic>;
+              final newAccessToken = data['accessToken'] as String?;
+              final newRefreshToken = data['refreshToken'] as String?;
+
+              if (newAccessToken != null) {
+                // Save new tokens using SecureStorageUtil
+                await getIt<SecureStorageUtil>().saveTokens(
+                  accessToken: newAccessToken,
+                  refreshToken: newRefreshToken ?? refreshToken,
+                );
+
+                if (kDebugMode) {
+                  print('🔐 TokenRefresh: Header approach - New tokens saved successfully');
+                  print('🔐 TokenRefresh: Header approach - New access token: ${newAccessToken.substring(0, 20)}...');
+                }
+                return true;
+              }
+            }
+          } catch (headerError) {
+            if (kDebugMode) {
+              print('🔐 TokenRefresh: Header approach also failed: $headerError');
+              if (headerError is DioException) {
+                print('🔐 TokenRefresh: Header Status code: ${headerError.response?.statusCode}');
+                print('🔐 TokenRefresh: Header Response: ${headerError.response?.data}');
+              }
+            }
+          }
+        }
+        
+        return false;
       }
 
       if (kDebugMode) {
-        print('🔐 TokenRefresh: Invalid refresh response');
+        print('🔐 TokenRefresh: Token refresh failed - no valid response');
       }
       return false;
     } catch (e) {

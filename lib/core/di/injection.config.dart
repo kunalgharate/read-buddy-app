@@ -72,7 +72,9 @@ import '../../features/profile/domain/usecases/update_profile_usecase.dart'
 import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
 import '../services/image_picker_service.dart' as _i644;
 import '../services/image_upload_service.dart' as _i606;
+import '../services/notification_service.dart' as _i941;
 import '../services/permission_service.dart' as _i165;
+import '../services/permission_storage_service.dart' as _i282;
 import '../utils/secure_storage_utils.dart' as _i206;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -86,8 +88,11 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
-    gh.factory<_i644.ImagePickerService>(() => _i644.ImagePickerService());
     gh.factory<_i165.PermissionService>(() => _i165.PermissionService());
+    gh.factory<_i941.NotificationService>(() => _i941.NotificationService());
+    gh.factory<_i282.PermissionStorageService>(
+        () => _i282.PermissionStorageService());
+    gh.factory<_i644.ImagePickerService>(() => _i644.ImagePickerService());
     gh.lazySingleton<_i206.SecureStorageUtil>(() => _i206.SecureStorageUtil());
     gh.factory<_i986.PermissionBloc>(
         () => _i986.PermissionBloc(gh<_i165.PermissionService>()));

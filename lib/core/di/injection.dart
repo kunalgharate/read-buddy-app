@@ -11,6 +11,7 @@ import '../services/image_picker_service.dart';
 import '../services/image_upload_service.dart';
 import '../services/permission_service.dart';
 
+
 // Auth
 import '../../features/auth/data/remotesource/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -141,6 +142,8 @@ void _registerDataSources() {
   getIt.registerLazySingleton<ImageUploadService>(
     () => ImageUploadService(dio: getIt<Dio>()),
   );
+
+
 
   // Permission Service
   getIt.registerLazySingleton<PermissionService>(() => PermissionService());

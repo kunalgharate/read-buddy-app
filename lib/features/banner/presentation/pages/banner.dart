@@ -9,7 +9,7 @@ import 'package:read_buddy_app/core/utils/image_helper.dart';
 import 'package:read_buddy_app/core/theme/text_styles.dart';
 import 'package:read_buddy_app/core/widgets/my_buttons.dart';
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
-import 'package:read_buddy_app/features/auth/presentation/pages/sing_up_page.dart';
+
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 
 class BannerScreen extends StatefulWidget {

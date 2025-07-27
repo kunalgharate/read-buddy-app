@@ -18,7 +18,7 @@ class ImageUploadService {
       
       // Create form data
       final formData = FormData.fromMap({
-        'image': await MultipartFile.fromFile(
+        'picture': await MultipartFile.fromFile(
           imageFile.path,
           filename: 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg',
         ),
@@ -36,8 +36,16 @@ class ImageUploadService {
       );
 
       if (response.statusCode == 200) {
-        // Assuming the API returns the image URL in response.data['imageUrl']
-        return response.data['imageUrl'] ?? response.data['url'] ?? '';
+        // Extract the image URL from the response
+        if (response.data['user'] != null && response.data['user']['picture'] != null) {
+          return response.data['user']['picture'];
+        } else if (response.data['imageUrl'] != null) {
+          return response.data['imageUrl'];
+        } else if (response.data['url'] != null) {
+          return response.data['url'];
+        } else {
+          throw Exception('Image URL not found in response');
+        }
       } else {
         throw DioException(
           requestOptions: response.requestOptions,

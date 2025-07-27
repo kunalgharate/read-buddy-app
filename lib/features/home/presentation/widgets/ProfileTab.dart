@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/ui_utils.dart';
+
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../profile/presentation/pages/edit_screens/edit_email_screen.dart';
@@ -433,6 +434,8 @@ class _ProfileTabState extends State<ProfileTab> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 20),
+
+
 
           // Profile Photo
           ProfilePhotoWidget(

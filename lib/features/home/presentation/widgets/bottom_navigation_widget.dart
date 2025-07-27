@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dart';
-
-import '../../../books/presentation/pages/book_page.dart';
 
 
 class BottomNavWidget extends StatelessWidget {

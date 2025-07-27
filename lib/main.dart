@@ -12,7 +12,6 @@ import 'features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 import 'features/books/presentation/bloc/book_bloc.dart';
 import 'features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'features/splash/splash_screen.dart';
-import 'features/splash/splash_screen.dart';
 import 'routes/app_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 

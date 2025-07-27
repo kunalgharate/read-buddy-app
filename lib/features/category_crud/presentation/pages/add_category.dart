@@ -9,7 +9,6 @@ import 'package:read_buddy_app/core/utils/image_helper.dart';
 
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
-import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 
 class AddCategory extends StatefulWidget {
   const AddCategory({super.key});

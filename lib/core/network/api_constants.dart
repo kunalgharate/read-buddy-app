@@ -5,7 +5,7 @@ class ApiConstants {
   static const String login = '$baseUrl/users/login';
   static const String register = '$baseUrl/users/register';
   static const String verifyEmail = '$baseUrl/users/verify-email';
-  static const String refreshToken = '$baseUrl/auth/refresh-token'; // Add this endpoint
+  static const String refreshToken = '$baseUrl/users/refresh-token'; // Correct endpoint
   static const String loginWithGoogle = '$baseUrl/googleauth/google-auth';
 
   // User endpoints
