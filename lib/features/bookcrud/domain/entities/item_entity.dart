@@ -4,7 +4,7 @@ class Item extends Equatable {
   final String id;
   final String name;
 
-  Item({required this.id, required this.name});
+  const Item({required this.id, required this.name});
 
   @override
   // TODO: implement props

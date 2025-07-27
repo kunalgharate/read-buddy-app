@@ -92,14 +92,14 @@ class ReviewWidget extends StatelessWidget {
                   height: 50,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(25),
-                    child: Image.network(
-                      imageUrl.isNotEmpty
-                          ? imageUrl
-                          : 'https://example.com/placeholder.png',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.person, size: 50),
-                    ),
+                    child: imageUrl.isNotEmpty
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.person, size: 50),
+                          )
+                        : const Icon(Icons.person, size: 50),
                   ),
                 ),
                 const SizedBox(width: 12),

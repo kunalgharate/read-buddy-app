@@ -10,25 +10,20 @@ class BottomSheetCart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // BlocBuilder rebuilds UI when WishlistCubit state changes
     return BlocBuilder<WishlistCubit, WishlistState>(
       builder: (context, state) {
-        final wishlistBooks = state.books; // Get the current wishlist items
+        final wishlistBooks = state.books;
 
         return Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 12), // Padding inside bottom sheet
-          height: MediaQuery.of(context).size.height *
-              0.6, // Bottom sheet takes 60% of screen height
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          height: MediaQuery.of(context).size.height * 0.6,
           decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(
-                top: Radius.circular(16)), // Rounded top corners
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Row: Title and Close Button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -56,33 +51,56 @@ class BottomSheetCart extends StatelessWidget {
                     : ListView.builder(
                         itemCount:
                             wishlistBooks.length, // Number of wishlist items
+                        padding: const EdgeInsets.only(top: 8),
                         itemBuilder: (context, index) {
                           final book = wishlistBooks[index]; // Single book item
-                          return ListTile(
-                            leading: Image.network(
-                              book.bookimage,
-                              width: 40,
-                              height: 60,
-                              fit: BoxFit.cover, // Book image
-                              errorBuilder: (_, __, ___) => const Icon(
-                                  Icons.broken_image), // Fallback image
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.grey.shade300),
+                              ),
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  book.bookimage,
+                                  width: 50,
+                                  height: 70,
+                                  fit: BoxFit.cover, // Book image
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.broken_image,
+                                      size: 40), // Fallback image
+                                ),
+                              ),
+                              title: Text(
+                                book.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ), // Book title
+                              subtitle: Text(
+                                "Category: ${book.bookCategory.category_name}",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ), // Optional: book category
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete_outline,
+                                    color: Colors.redAccent),
+                                tooltip: 'Remove from Wishlist',
+                                onPressed: () {
+                                  context
+                                      .read<WishlistCubit>()
+                                      .removeBook(book);
+                                },
+                              ),
                             ),
-                            title: Text(
-                              book.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ), // Book title
-                            subtitle: Text(
-                              "Category: ${book.bookCategory.category_name}",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ), // Optional: book category
                           );
                         },
                       ),

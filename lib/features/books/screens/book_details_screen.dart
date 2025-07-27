@@ -14,6 +14,7 @@ import '../presentation/widgets/about_book_widget.dart';
 import '../presentation/widgets/action_buttons_widget.dart';
 import '../presentation/widgets/bottom_sheet_cart.dart';
 import '../presentation/widgets/highlight_widget.dart';
+import '../presentation/widgets/view_wishlist_button_widget.dart';
 import '../presentation/widgets/review_widget.dart';
 import '../presentation/widgets/similar_books_widget.dart';
 
@@ -26,15 +27,36 @@ class BookDetailsScreen extends StatefulWidget {
 }
 
 class _BookDetailsScreenState extends State<BookDetailsScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showFabOnScroll = true;
+
   @override
   void initState() {
     super.initState();
     context.read<BookCrudBloc>().add(LoadBookCrudById(id: widget.bookId));
     context.read<ReviewBloc>().add(FetchReviews(widget.bookId));
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (!_scrollController.hasClients) return;
+
+    final atBottom = _scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent;
+
+    final bool shouldShow = !atBottom;
+
+    if (shouldShow != _showFabOnScroll) {
+      setState(() {
+        _showFabOnScroll = shouldShow;
+      });
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -50,96 +72,105 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
             final book = state.book;
 
             return SafeArea(
-              child: Stack(
-                children: [
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    child: Column(
-                      children: [
-                        BookHeaderWidget(
-                          title: capitalizeWords(book.title),
-                          writter: capitalizeWords(book.author),
-                          description: capitalizeFirstLetter(book.description),
-                          donator: capitalizeFirstLetter(
-                              book.ownerName ?? "Unknown"),
-                          ratings: "6",
-                          coverImageUrl: book.coverImageUrl,
-                        ),
-                        AboutBookWidget(
-                            about: capitalizeFirstLetter(book.description)),
-                        HighlightWidget(
-                          category: capitalizeWords(book.category),
-                          author: capitalizeWords(book.author),
-                          genre: capitalizeWords(book.genre),
-                          bookLang: capitalizeWords(book.language),
-                          pages: book.pages?.toString() ?? 'N/A',
-                          fromat: capitalizeWords(book.format),
-                        ),
-                        BlocBuilder<ReviewBloc, ReviewState>(
-                          builder: (context, state) {
-                            if (state is ReviewLoading) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            } else if (state is ReviewLoaded) {
-                              if (state.reviews.isEmpty) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Text('No reviews yet.'),
-                                );
-                              }
+              child: BlocBuilder<WishlistCubit, WishlistState>(
+                builder: (context, wishlistState) {
+                  final isWishlistNotEmpty = wishlistState.books.isNotEmpty;
+                  // The FAB is visible only if the wishlist has items AND the user has scrolled up from the bottom.
+                  final isFabVisible = isWishlistNotEmpty && _showFabOnScroll;
 
-                              // Display only the first review
-                              final firstReview = state.reviews.first;
+                  return Stack(
+                    children: [
+                      SingleChildScrollView(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.only(bottom: 5.0),
+                        child: Column(
+                          children: [
+                            BookHeaderWidget(
+                              title: capitalizeWords(book.title),
+                              writter: capitalizeWords(book.author),
+                              description:
+                                  capitalizeFirstLetter(book.description),
+                              donator: capitalizeFirstLetter(
+                                  book.ownerName ?? "Unknown"),
+                              ratings: "6",
+                              coverImageUrl: book.coverImageUrl,
+                            ),
+                            AboutBookWidget(
+                                about: capitalizeFirstLetter(book.description)),
+                            HighlightWidget(
+                              category: capitalizeWords(book.category),
+                              author: capitalizeWords(book.author),
+                              genre: capitalizeWords(book.genre),
+                              bookLang: capitalizeWords(book.language),
+                              pages: book.pages?.toString() ?? 'N/A',
+                              fromat: capitalizeWords(book.format),
+                            ),
+                            BlocBuilder<ReviewBloc, ReviewState>(
+                              builder: (context, state) {
+                                if (state is ReviewLoading) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (state is ReviewLoaded) {
+                                  if (state.reviews.isEmpty) {
+                                    return const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text('No reviews yet.'),
+                                    );
+                                  }
 
-                              return Column(
-                                children: [
-                                  ReviewWidget(
-                                    name: capitalizeFirstLetter(
-                                        firstReview.reviewerName),
-                                    timestamp: '',
-                                    review: capitalizeFirstLetter(
-                                        firstReview.comment),
-                                    imageUrl:
-                                        firstReview.reviewerImageUrl ?? '',
-                                    rating: firstReview.rating ?? 0.0,
-                                    allReviews: state
-                                        .reviews, // Pass all reviews to ReviewWidget
-                                  ),
-                                ],
-                              );
-                            } else if (state is ReviewError) {
-                              return Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(state.message,
-                                    style: const TextStyle(color: Colors.red)),
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          },
+                                  // Display only the first review
+                                  final firstReview = state.reviews.first;
+
+                                  return Column(
+                                    children: [
+                                      ReviewWidget(
+                                        name: capitalizeFirstLetter(
+                                            firstReview.reviewerName),
+                                        timestamp: '',
+                                        review: capitalizeFirstLetter(
+                                            firstReview.comment),
+                                        imageUrl:
+                                            firstReview.reviewerImageUrl ?? '',
+                                        rating: firstReview.rating ?? 0.0,
+                                        allReviews: state
+                                            .reviews, // Pass all reviews to ReviewWidget
+                                      ),
+                                    ],
+                                  );
+                                } else if (state is ReviewError) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text(state.message,
+                                        style:
+                                            const TextStyle(color: Colors.red)),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                            SimilarBooksWidget(),
+                            // The ActionButtonsWidget is now always visible at the bottom of the content.
+                            ActionButtonsWidget(
+                              title: book.title,
+                              imageUrl: book.coverImageUrl,
+                              donor: book.ownerName ?? "Unknown",
+                              genre: book.genre,
+                              id: book.id!,
+                            ),
+                            if (isWishlistNotEmpty)
+                              const ViewWishlistButtonWidget(),
+                          ],
                         ),
-                        SimilarBooksWidget(),
-                        ActionButtonsWidget(
-                          title: book.title,
-                          imageUrl: book.coverImageUrl,
-                          donor: book.ownerName ?? "Unknown",
-                          genre: book.genre,
-                          id: '',
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // ✅ Floating wishlist button
-                  BlocBuilder<WishlistCubit, WishlistState>(
-                    builder: (context, state) {
-                      if (state.books.isEmpty) return const SizedBox.shrink();
-
-                      return Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: ElevatedButton.icon(
+                      ),
+                      if (isFabVisible)
+                        Positioned(
+                          bottom: 16,
+                          right: 16,
+                          child: FloatingActionButton(
                             onPressed: () {
+                              context
+                                  .read<WishlistCubit>()
+                                  .showMenuPermanently();
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
@@ -150,25 +181,22 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
                                 builder: (_) => const BottomSheetCart(),
                               );
                             },
-                            icon: const Icon(Icons.shopping_cart_checkout),
-                            label: const Text("View Wishlist",
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w600)),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 16),
-                              backgroundColor: Colors.green[400],
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                            backgroundColor:
+                                const Color(0xFF2CE07F).withOpacity(0.75),
+                            elevation: 4.0,
+                            child: Badge(
+                              label:
+                                  Text(wishlistState.books.length.toString()),
+                              child: const Icon(
+                                Icons.shopping_cart_checkout,
+                                color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
             );
           } else if (state is BookCrudError) {

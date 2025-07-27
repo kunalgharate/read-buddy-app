@@ -69,4 +69,10 @@ class WishlistCubit extends Cubit<WishlistState> {
       isMenuPermanentlyClosed: false,
     ));
   }
+
+  void showMenuPermanently() {
+    emit(state.copyWith(
+      isMenuVisible: true,
+    ));
+  }
 }

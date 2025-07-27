@@ -91,12 +91,11 @@ class _BookHeaderWidgetState extends State<BookHeaderWidget> {
                       ),
                     ],
                   ),
-                  child: widget.coverImageUrl != null &&
-                          widget.coverImageUrl!.isNotEmpty
+                  child: widget.coverImageUrl.isNotEmpty
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.network(
-                            widget.coverImageUrl!,
+                            widget.coverImageUrl,
                             width: 150,
                             height: 220,
                             fit: BoxFit.cover,
