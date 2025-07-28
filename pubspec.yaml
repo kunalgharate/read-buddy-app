@@ -9,7 +9,6 @@ version: 1.0.0+1
 environment:
   sdk: ">=3.5.0 <4.0.0"
 
-
 dependencies:
   flutter:
     sdk: flutter
@@ -33,6 +32,7 @@ dependencies:
   shared_preferences: ^2.5.3
   geocoding: ^4.0.0
   geolocator: ^14.0.2
+  firebase_core: ^4.0.0
 
 dev_dependencies:
   flutter_test:

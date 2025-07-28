@@ -1,10 +1,11 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
-import 'package:read_buddy_app/features/home/presentation/bloc/home_main_bloc.dart';
+
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'package:read_buddy_app/features/splash/splash_screen.dart';
 import 'core/di/injection.dart';
@@ -15,13 +16,14 @@ import 'features/books/presentation/bloc/book_bloc.dart';
 import 'features/books/presentation/bloc/review/review_bloc.dart';
 import 'features/books/presentation/bloc/wishlist_bloc.dart';
 import 'features/category_crud/presentation/bloc/bloc/category_bloc.dart';
-import 'features/splash/splash_screen.dart';
+
 import 'routes/app_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding
       .ensureInitialized(); // Ensures that Flutter bindings are initialized
+  await Firebase.initializeApp();
   configureDependencies();
   Bloc.observer =
       AppBlocObserver(); // Initialize all dependencies (before runApp())
@@ -57,7 +59,6 @@ class MyApp extends StatelessWidget {
           textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           useMaterial3: true,
         ),
-        home: const SplashScreen(),
         home: const SplashScreen(),
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "937940898039",
+    "project_id": "readbuddy-8c97a",
+    "storage_bucket": "readbuddy-8c97a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:937940898039:android:eaa9265bb21cc2f8d703f2",
+        "android_client_info": {
+          "package_name": "com.example.read_buddy_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRzXH6ewCNN2I5HMPQ8oqC_7SGiPwY5xk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
