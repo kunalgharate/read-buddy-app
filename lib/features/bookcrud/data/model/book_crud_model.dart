@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
 
 class BookCrudModel extends BookCrudEntity {
+  @override
   final List<String> additionalImageUrls;
   @override
   final File? coversingleImage;

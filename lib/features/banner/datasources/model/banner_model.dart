@@ -11,13 +11,15 @@ class BannerModel extends BannerEntity {
   final String bannerType;
   @override
   final String bannerImage;
-
+  @override
+  final String? id;
   const BannerModel({
     required this.title,
     this.link,
     this.description,
     required this.bannerType,
     required this.bannerImage,
+    this.id,
   }) : super(
           title: title,
           link: link,
@@ -28,16 +30,18 @@ class BannerModel extends BannerEntity {
 
   factory BannerModel.fromJson(Map<String, dynamic> json) {
     return BannerModel(
+      id: json['_id'],
       title: json['title'] ?? "title",
       link: json['link'],
-      description: json['description'],
+      description: json['desc'],
       bannerType: json['bannerType'] ?? "bannerType",
-      bannerImage: json['bannerImage'] ?? "bannerImage",
+      bannerImage: json['imageUrl'] ?? "bannerImage",
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      "id": id,
       'title': title,
       'link': link,
       'description': description,

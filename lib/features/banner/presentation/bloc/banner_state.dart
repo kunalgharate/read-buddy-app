@@ -12,12 +12,12 @@ final class BannerInitial extends BannerState {}
 final class BannerLoading extends BannerState {}
 
 final class BannerLoaded extends BannerState {
-  final BannerModel banner;
+  final List<BannerEntity> banners;
 
-  const BannerLoaded(this.banner);
+  const BannerLoaded({required this.banners});
 
   @override
-  List<Object> get props => [banner];
+  List<Object> get props => [banners];
 }
 
 final class BannerError extends BannerState {
@@ -27,4 +27,8 @@ final class BannerError extends BannerState {
 
   @override
   List<Object> get props => [message];
+}
+
+final class BannerUpdateSuccess extends BannerState {
+  const BannerUpdateSuccess();
 }

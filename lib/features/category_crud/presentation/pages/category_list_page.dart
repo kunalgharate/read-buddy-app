@@ -190,7 +190,8 @@ class _CategoryListPageState extends State<CategoryListPage> {
       padding: const EdgeInsets.all(8),
       child: Card(
         color: Colors.white,
-        shape: const BeveledRectangleBorder(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
           side: BorderSide(
             color: Colors.black,
             width: 0.5,
@@ -201,20 +202,26 @@ class _CategoryListPageState extends State<CategoryListPage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CachedNetworkImage(
-                imageUrl: category.imageUrl,
-                height: 100,
-                width: 100,
-                placeholder: (context, url) =>
-                    const Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-                fit: BoxFit.cover,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(
+                  imageUrl: category.imageUrl,
+                  height: 120,
+                  width: 100,
+                  placeholder: (context, url) =>
+                      const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(
+                      height: 10,
+                    ),
                     Text(
                       category.title,
                       style: const TextStyle(
@@ -225,7 +232,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                     ),
                     const SizedBox(height: 8),
                     Wrap(
-                      spacing: 5,
+                      spacing: 2,
                       children: [
                         TextButton(
                           onPressed: () {},
@@ -237,7 +244,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                           ),
                           child: Text(
-                            category.parentCategory ?? "Category",
+                            category.parentCategory,
                             style: const TextStyle(
                               color: Color.fromARGB(255, 6, 86, 150),
                             ),

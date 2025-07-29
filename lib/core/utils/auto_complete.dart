@@ -3,20 +3,21 @@ import 'package:flutter/material.dart';
 class GenericAutocomplete<T extends Object> extends StatelessWidget {
   final List<T> options;
   final TextEditingController controller;
+
   final String Function(T) displayString;
   final void Function(T) onSelected;
   final String? Function(String?)? validator;
   final String hintText;
 
   const GenericAutocomplete({
-    Key? key,
+    super.key,
     required this.options,
     required this.controller,
     required this.displayString,
     required this.onSelected,
     this.validator,
     this.hintText = 'Search',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

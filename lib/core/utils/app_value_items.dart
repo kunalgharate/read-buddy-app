@@ -1,4 +1,5 @@
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/entities/search_location_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/user_entity.dart';
 
 class BookValueItems {
@@ -43,4 +44,10 @@ class BookValueItems {
   ];
 
   static List<UserEntity> usersList = [];
+
+  static List<SearchLocationEntity> locationsuggestions = [];
+}
+
+class CategoryItems {
+  static List<Item> parentCategoryItems = [];
 }

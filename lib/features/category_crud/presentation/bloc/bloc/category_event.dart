@@ -12,30 +12,34 @@ class LoadCategories extends CategoryEvent {}
 
 class AddCategoryEvent extends CategoryEvent {
   final String title;
-  final String category;
+  final String description;
+  final String? parentCategoryId;
   final File image;
 
   const AddCategoryEvent(
-      {required this.title, required this.category, required this.image});
+      {required this.title,
+      required this.description,
+      this.parentCategoryId,
+      required this.image});
 
   @override
-  List<Object?> get props => [title, category, image];
+  List<Object?> get props => [title, description, parentCategoryId, image];
 }
 
 class UpdateCategoryEvent extends CategoryEvent {
   final String id;
   final String title;
-  final String category;
+  final String description;
   final File? image;
 
   const UpdateCategoryEvent(
       {required this.id,
       required this.title,
-      required this.category,
+      required this.description,
       required this.image});
 
   @override
-  List<Object?> get props => [id, title, category, image];
+  List<Object?> get props => [id, title, description, image];
 }
 
 class DeleteCategoryEvent extends CategoryEvent {

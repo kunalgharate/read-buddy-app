@@ -5,9 +5,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:read_buddy_app/core/theme/text_styles.dart';
+import 'package:read_buddy_app/core/utils/app_value_items.dart';
+import 'package:read_buddy_app/core/utils/auto_complete.dart';
 import 'package:read_buddy_app/core/utils/image_helper.dart';
 
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 
@@ -24,7 +28,7 @@ class _AddCategoryState extends State<AddCategory> {
   TextEditingController titleContoller = TextEditingController();
   TextEditingController parentCategoryController = TextEditingController();
   TextEditingController categoryDescController = TextEditingController();
-
+  Item? selectedCategory;
   List<XFile?> selectedImages = [];
 
   @override
@@ -62,67 +66,109 @@ class _AddCategoryState extends State<AddCategory> {
                 hintText: " Enter Title",
                 obscureText: false,
                 isContentPadding: true,
+                digitsOnly: false,
                 keyboardType: TextInputType.text,
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Title is required' : null,
               ),
               const SizedBox(height: 16),
               Text('Parent Category', style: labelStyle),
-              MyTextField(
+              GenericAutocomplete<Item>(
+                options: CategoryItems.parentCategoryItems,
                 controller: parentCategoryController,
-                hintText: " Parent Category",
-                obscureText: false,
-                isContentPadding: true,
-                keyboardType: TextInputType.text,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Parent Category is required'
-                    : null,
+                displayString: (item) => item.name,
+                onSelected: (Item item) {
+                  selectedCategory = item;
+                  parentCategoryController.text =
+                      item.name; // update controller with name
+                  print('Selected: ID=${item.id}, Name=${item.name}');
+                },
+                hintText: 'Search Categories',
               ),
               const SizedBox(height: 16),
-              Text('Image', style: labelStyle),
-              InkWell(
-                onTap: dialogpermission,
-                child: Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Image', style: TextStyles.labelStyle),
+                  IconButton(
+                    onPressed: dialogpermission,
+                    icon: const Icon(Icons.cloud_upload),
                   ),
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.cloud_upload, color: Colors.grey),
-                        SizedBox(height: 4),
-                        Text("Upload Images",
-                            style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                  ),
-                ),
+                ],
               ),
-              if (selectedImages.isNotEmpty)
-                SizedBox(
-                  height: 100,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: selectedImages.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0, top: 10),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(selectedImages[index]!.path),
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+              Container(
+                height: 180, // Same height as cover image
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
                 ),
+                child: selectedImages.isEmpty
+                    ? const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 4),
+                            Text(
+                              "Upload  Images",
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: selectedImages.length,
+                        itemBuilder: (context, index) {
+                          return Stack(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.all(8.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    File(selectedImages[index]!.path),
+                                    width: 160,
+                                    height: 180,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 12,
+                                right: 12,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedImages.removeAt(index);
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 3,
+                                          offset: Offset(1, 1),
+                                        )
+                                      ],
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.red,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+              ),
               const SizedBox(height: 16),
               Text('Category Description (Optional)', style: labelStyle),
               MyTextField(
@@ -170,11 +216,13 @@ class _AddCategoryState extends State<AddCategory> {
       }
 
       final imageFile = File(selectedImages.first!.path);
-
+      print(
+          "selected category Id isssssss from add category -->${selectedCategory?.id}");
       // Dispatch BLoC event
       context.read<CategoryBloc>().add(AddCategoryEvent(
             title: titleContoller.text.trim(),
-            category: parentCategoryController.text.trim(),
+            description: categoryDescController.text.trim(),
+            parentCategoryId: selectedCategory?.id,
             image: imageFile,
           ));
 
@@ -221,20 +269,13 @@ class _AddCategoryState extends State<AddCategory> {
 
   Future<void> onUploadTap(ImageSource source) async {
     try {
-      if (source == ImageSource.gallery) {
-        final images = await ImagePickerHelper.pickMultipleImages();
-        if (images != null && images.isNotEmpty) {
-          setState(() => selectedImages = images);
-        }
-      } else {
-        final image = await ImagePicker().pickImage(source: source);
-        if (image != null) {
-          setState(() => selectedImages = [image]);
-        }
+      final image = await ImagePicker().pickImage(source: source);
+      if (image != null) {
+        setState(() => selectedImages = [image]); // Always single image
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image(s): $e')),
+        SnackBar(content: Text('Failed to pick image: $e')),
       );
     }
   }

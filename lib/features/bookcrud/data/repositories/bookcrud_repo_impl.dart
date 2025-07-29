@@ -36,4 +36,9 @@ class BookCrudRepositoryImpl implements BookCrudRepository {
   Future<void> deleteBook(String id) async {
     await remoteDataSource.deleteBook(id);
   }
+
+  @override
+  Future<List<BookCrudEntity>> searchBooks(String query) async {
+    return await remoteDataSource.searchBooks(query);
+  }
 }

@@ -12,10 +12,10 @@ class UpdateCategoryUsecase {
   Future<void> call({
     required String id,
     required String title,
-    required String parentCategory,
+    required String description,
     File? image,
   }) {
     return repository.updateCategory(
-        id: id, title: title, parentCategory: parentCategory, image: image);
+        id: id, title: title, description: description, image: image);
   }
 }

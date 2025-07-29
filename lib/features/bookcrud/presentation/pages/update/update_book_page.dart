@@ -2,7 +2,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/core/utils/auto_complete.dart';
 import 'package:read_buddy_app/core/utils/book_validators.dart';
-import 'package:read_buddy_app/core/utils/book_value_items.dart';
+import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
@@ -12,6 +12,7 @@ import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_cru
 
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 
 class UpdateBookPage extends StatefulWidget {
   final Function onContinue;
@@ -40,6 +41,7 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
   @override
   void initState() {
     context.read<BookCrudBloc>().add(LoadBookCrudById(id: widget.id));
+    context.read<CategoryBloc>().add(LoadCategories());
     selectedFormat = BookValueItems().bookFormats[0];
     super.initState();
   }
@@ -70,10 +72,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
     print("Genreeeeeeeeeeeeeeeeeee ${book.format}");
     bookTitleController.text = book.title;
     authorController.text = book.author;
-
+    print("caaategory Id ===${book.category}");
     final categoryItem = BookValueItems.bookCategories.firstWhere(
       (item) => item.id == book.categoryId,
-      orElse: () => Item(id: '', name: 'Unknown'),
+      orElse: () => Item(id: '', name: book.category),
     );
 
     selectedCategory = categoryItem;

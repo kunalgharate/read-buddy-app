@@ -55,17 +55,23 @@ class MyTextField extends StatelessWidget {
       keyboardType: keyboardType,
       focusNode: focusNode,
       inputFormatters: [
-        if (digitsOnly) FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(length),
+        if (digitsOnly)
+          FilteringTextInputFormatter.digitsOnly
+        else
+          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+        if (length != null) LengthLimitingTextInputFormatter(length),
       ],
-      style: Theme.of(context).textTheme.titleLarge,
+
+      style: Theme.of(context).textTheme.titleMedium,
       cursorColor: const Color.fromARGB(255, 70, 69, 71),
       // (ThemeBloc.systemIsDark) ? AppColors.lightAubergine30 : AppColors.darkAubergine90,
       onTap: onTap,
+
       textInputAction: TextInputAction.next,
       onChanged: onChanged,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       readOnly: isReadOnly,
+
       decoration: InputDecoration(
         suffixIcon: suffixIcon,
         prefixIcon: prefixIcon,

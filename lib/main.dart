@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
+        BlocProvider(create: (_) => getIt<LocationCubit>()),
       ],
       child: MaterialApp(
         title: "Read Buddy",
@@ -51,7 +53,7 @@ class MyApp extends StatelessWidget {
           textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           useMaterial3: true,
         ),
-        home : const HomeScreen(),
+        home: const HomeScreen(),
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',
       ),

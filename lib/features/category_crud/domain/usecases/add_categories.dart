@@ -9,13 +9,15 @@ class AddCategoryUsecase {
 
   Future<void> call({
     required String title,
-    required String parentCategory,
+    required String description,
+    String? parentCategoryId,
     required File image,
   }) {
     print("usecase ADDDDDDDDDDD calling");
     return repository.addCategory(
       title: title,
-      parentCategory: parentCategory,
+      description: description,
+      parentCategoryId: parentCategoryId,
       image: image,
     );
   }

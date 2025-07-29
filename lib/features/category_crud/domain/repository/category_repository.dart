@@ -7,13 +7,14 @@ abstract class CategoryRepository {
   Future<List<CategoryEntity>> getCategories();
   Future<void> addCategory({
     required String title,
-    required String parentCategory,
+    required String description,
+    String? parentCategoryId,
     required File image,
   });
   Future<void> updateCategory({
     required String id,
     required String title,
-    required String parentCategory,
+    required String description,
     required File? image,
   });
   Future<void> deleteCategory(String id);
