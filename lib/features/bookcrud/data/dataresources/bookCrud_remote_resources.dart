@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/core/utils/book_value_items.dart';
+import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/item_model.dart';
@@ -11,6 +11,7 @@ import '../../../../core/network/api_constants.dart';
 
 abstract class BookCrudRemoteDataSource {
   Future<List<BookCrudModel>> getBooks();
+  Future<List<BookCrudModel>> searchBooks(String query);
   Future<BookCrudModel> getBookById(String id);
   Future<void> addBook(BookCrudModel book);
   Future<void> updateBook(String id, BookCrudModel book);
@@ -22,7 +23,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
   final Dio dio;
 
   BookCrudRemoteDataSourceImpl({required this.dio});
-  
+
   @override
   Future<List<BookCrudModel>> getBooks() async {
     try {
@@ -34,11 +35,6 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
       }
 
       return (response.data as List).map((json) {
-        // ✅ Safely extract category object from each book
-        final categoryJson = json['category'];
-        if (categoryJson != null) {
-          BookValueItems.bookCategories.add(ItemModel.fromJson(categoryJson));
-        }
         return BookCrudModel.fromJson(json);
       }).toList();
     } catch (e, stackTrace) {
@@ -61,57 +57,15 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
       }
 
       print("✅ Book by id  fetched successfully");
-      print(response.data['book']);
+      print(response.data);
 
-      return BookCrudModel.fromJson(response.data['book']);
+      return BookCrudModel.fromJson(response.data);
     } catch (e, stackTrace) {
       print("❌ Error fetching book by ID: $e");
       print("🔍 StackTrace: $stackTrace");
       rethrow;
     }
   }
-
-  // @override
-  // Future<BookCrudModel> getBookById(String id) async {
-  //   print("get book by id.........");
-  //   final response = await dio.get('${Api.books}/$id');
-
-  //   if (response.statusCode != 200) {
-  //     throw Exception('Failed to load book details');
-  //   }
-
-  //   return BookCrudModel.fromJson(response.data);
-  // }
-
-  // @override
-  // Future<void> addBook(BookCrudModel book) async {
-  //   try {
-  //     print("📦 Adding book...");
-  //     print(book.toJson());
-  //     final response = await dio.post(
-  //       Api.books,
-  //       options: Options(
-  //         headers: {
-  //           'Authorization': 'Bearer $token',
-  //         },
-  //       ),
-  //       data: book.toJson(),
-  //     );
-
-  //     print("📨 Response status: ${response.statusCode}");
-
-  //     if (response.statusCode != 201 && response.statusCode != 200) {
-  //       throw Exception(
-  //           '❌ Failed to add book. Status code: ${response.statusCode}');
-  //     }
-
-  //     print("✅ Book added successfully.");
-  //   } catch (e, stackTrace) {
-  //     print("❌ Error adding book: $e");
-  //     print("🔍 StackTrace: $stackTrace");
-  //     rethrow;
-  //   }
-  // }
 
   @override
   Future<void> addBook(BookCrudModel book) async {
@@ -134,13 +88,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
         "category": book.category,
         "ownerId": book.ownerId,
         "description": book.description,
-        // "coverImage": "4dmwuh.jpg",
-        "coverImage": book.coversingleImage?.path ?? "",
-        // "coverImage": await MultipartFile.fromFile(
-        //   book.coversingleImage!.path,
-        //   filename: book.coversingleImage!.path.split('/').last,
-        // ),
-
+        "coverImage": await MultipartFile.fromFile(book.coversingleImage!.path),
         "city": "chandigarh",
         "state": "chandigarh",
         "country": "india",
@@ -148,12 +96,14 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
         "latitude": "26.77",
         "longitude": "77.88",
         "number_of_copies": book.numberOfCopies.toString(),
-        "additionalImages": book.additionalImages.map((file) {
-          return file.path.split('/').last;
-        }).toList(),
-
-        // "additionalImages":
-        //     book.additionalImages.map((f) => f.path.split('/').last).toList(),
+        "additionalImages": await Future.wait(
+          book.additionalImages.map((file) async {
+            return await MultipartFile.fromFile(
+              file.path,
+              filename: file.path.split('/').last,
+            );
+          }),
+        )
       });
 
       print("formmmmm data");
@@ -211,7 +161,8 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
   @override
   Future<void> updateBook(String id, BookCrudModel book) async {
-    final response = await dio.put('${ApiConstants.books}/$id', data: book.toJson());
+    final response =
+        await dio.put('${ApiConstants.books}/$id', data: book.toJson());
 
     if (response.statusCode != 200) {
       throw Exception('Failed to update book');
@@ -242,6 +193,29 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
       } else {
         print("Unexpected error: $e");
       }
+    }
+  }
+
+  @override
+  Future<List<BookCrudModel>> searchBooks(String query) async {
+    try {
+      print("🔍 Searching books $query");
+      final response = await dio.get(
+        "${ApiConstants.searchBooks}/$query",
+      );
+
+      if (response.statusCode != ApiConstants.success) {
+        throw Exception(
+            'Failed to load books. Status code: ${response.statusCode}');
+      }
+
+      return (response.data as List).map((json) {
+        return BookCrudModel.fromJson(json);
+      }).toList();
+    } catch (e, stackTrace) {
+      print("❌ Error fetching searching books: $e");
+      print("🔍 StackTrace: $stackTrace");
+      rethrow; // rethrowing allows the error to be handled further up the chain (e.g., in Bloc)
     }
   }
 }

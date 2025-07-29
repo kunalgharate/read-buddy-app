@@ -56,7 +56,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Response status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Response status: ${response.statusCode}');
         print('🌐 AuthRemoteDataSource: Response data: ${response.data}');
       }
 
@@ -72,7 +73,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Login failed with status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Login failed with status: ${response.statusCode}');
       }
 
       throw DioException(
@@ -125,8 +127,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Registration response status: ${response.statusCode}');
-        print('🌐 AuthRemoteDataSource: Registration response data: ${response.data}');
+        print(
+            '🌐 AuthRemoteDataSource: Registration response status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Registration response data: ${response.data}');
       }
 
       if (response.statusCode == ApiConstants.success ||
@@ -174,7 +178,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Verification response status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Verification response status: ${response.statusCode}');
       }
 
       if (response.statusCode == ApiConstants.success) {

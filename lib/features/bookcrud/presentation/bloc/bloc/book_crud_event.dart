@@ -2,6 +2,12 @@ import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart'
 
 abstract class BookCrudEvent {}
 
+class SearchBook extends BookCrudEvent {
+  final String query;
+
+  SearchBook(this.query);
+}
+
 class LoadBookCrudList extends BookCrudEvent {}
 
 class LoadBookCrudById extends BookCrudEvent {

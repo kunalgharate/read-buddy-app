@@ -8,7 +8,7 @@ class BookCrudLoading extends BookCrudState {}
 
 class BookCrudListLoaded extends BookCrudState {
   final List<BookCrudEntity> booksCollection;
-  BookCrudListLoaded(this.booksCollection);
+  BookCrudListLoaded({required this.booksCollection});
 }
 
 class BookCrudDetailLoaded extends BookCrudState {

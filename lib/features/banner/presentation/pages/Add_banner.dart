@@ -12,14 +12,14 @@ import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sing_up_page.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 
-class BannerScreen extends StatefulWidget {
-  const BannerScreen({super.key});
+class AddBanner extends StatefulWidget {
+  const AddBanner({super.key});
 
   @override
-  State<BannerScreen> createState() => _BannerScreenState();
+  State<AddBanner> createState() => _AddBannerState();
 }
 
-class _BannerScreenState extends State<BannerScreen> {
+class _AddBannerState extends State<AddBanner> {
   List<XFile?> selectedImages = [];
   String? BannerType;
   TextEditingController BannerTypeController = TextEditingController();
@@ -53,51 +53,89 @@ class _BannerScreenState extends State<BannerScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Banner Images', style: TextStyles.labelStyle),
-                InkWell(
-                  onTap: dialogpermission,
-                  child: Container(
-                    height: 150,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Banner Image', style: TextStyles.labelStyle),
+                    IconButton(
+                      onPressed: dialogpermission,
+                      icon: const Icon(Icons.cloud_upload),
                     ),
-                    child: const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.cloud_upload, color: Colors.grey),
-                          SizedBox(height: 4),
-                          Text("Upload Images",
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.grey)),
-                        ],
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
-                if (selectedImages.isNotEmpty)
-                  SizedBox(
-                    height: 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: selectedImages.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0, top: 10),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              File(selectedImages[index]!.path),
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                  child: selectedImages.isEmpty
+                      ? const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(height: 4),
+                              Text(
+                                "Upload Images",
+                                style:
+                                    TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: selectedImages.length,
+                          itemBuilder: (context, index) {
+                            return Stack(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.all(8.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(selectedImages[index]!.path),
+                                      width: 160, // ✅ Matches previous style
+                                      height: 180,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 12,
+                                  right: 12,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedImages.removeAt(index);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            blurRadius: 3,
+                                            offset: Offset(1, 1),
+                                          )
+                                        ],
+                                      ),
+                                      padding: const EdgeInsets.all(4),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                ),
                 const SizedBox(height: 16),
                 DropdownSearch<String>(
                   selectedItem: BannerType,
@@ -139,7 +177,7 @@ class _BannerScreenState extends State<BannerScreen> {
                 const Text('Banner Link', style: TextStyles.labelStyle),
                 MyTextField(
                   controller: BannerlinkController,
-                  // validator: BookFormValidator.validateBannerLink,
+                  validator: BookFormValidator.validateBannerLink,
                   hintText: "Banner link",
                   obscureText: false,
                   keyboardType: TextInputType.text,
@@ -148,25 +186,47 @@ class _BannerScreenState extends State<BannerScreen> {
                 const SizedBox(height: 16),
                 CustomElevatedButton(
                   text: 'Submit',
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Handle form submission
+                      if (selectedImages.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('Please upload at least one image')),
+                        );
+                        return;
+                      }
+                      final url = BannerlinkController.text.trim();
+
+                      final isDomain =
+                          await BookFormValidator.isDomainReachable(url);
+
+                      if (!isDomain) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text("The URL domain is not reachable")),
+                        );
+                        return; // stop execution if not reachable
+                      }
+
                       context.read<BannerBloc>().add(CreateBannerEvent(
                             title: BannerTitleController.text,
                             link: BannerlinkController.text.isNotEmpty
                                 ? BannerlinkController.text
                                 : null,
-                            description:
-                                BannerDescriptionController.text.isNotEmpty
-                                    ? BannerDescriptionController.text
-                                    : null,
+                            description: BannerDescriptionController.text,
+                            // BannerDescriptionController.text.isNotEmpty
+                            //     ? BannerDescriptionController.text
+                            //     : null,
                             bannerType: BannerTypeController.text,
                             bannerImage: File(selectedImages[0]!.path),
                           ));
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text('Banner submitted successfully!')),
                       );
+                      Navigator.pop(context);
                     }
                   },
                 )

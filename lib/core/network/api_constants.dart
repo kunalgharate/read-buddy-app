@@ -13,9 +13,12 @@ class ApiConstants {
 
   // Book endpoints
   static const String books = '$baseUrl/books';
+  static const String searchBooks = '$baseUrl/searchbook/search';
 
   // Category endpoints
   static const String categories = '$baseUrl/categories';
+
+  static const String olaMap = '$baseUrl/ola/address?input';
 
   // HTTP Status Codes
   static const int success = 200;
@@ -32,7 +35,7 @@ class ApiConstants {
   static const deleteCategory = '$baseUrl/categories'; // append /:id
 
 //Banner Apis
-  static const createBanner = '$baseUrl/banners/';
+  static const Banner = '$baseUrl/banners';
 
   static const String updateUserInfo = '$baseUrl/users/update-user-info';
 }

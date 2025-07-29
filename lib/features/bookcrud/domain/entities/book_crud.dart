@@ -118,6 +118,7 @@ class BookCrudEntity extends Equatable {
   final List<File> additionalImages;
   final String description;
   final String notes;
+  final List<String>? additionalImageUrls;
   final File? coversingleImage; // 👈 Newly added field
 
   const BookCrudEntity({
@@ -146,6 +147,7 @@ class BookCrudEntity extends Equatable {
     required this.additionalImages,
     required this.description,
     required this.notes,
+    this.additionalImageUrls,
     this.coversingleImage, // 👈 Constructor update
   });
 

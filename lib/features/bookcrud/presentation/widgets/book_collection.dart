@@ -12,52 +12,82 @@ class BooksCollection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Card(
-        color: Colors.white,
-        shape: const BeveledRectangleBorder(
-          side: BorderSide(
-            color: Colors.black, // ✅ Border color
-            width: 1 / 2, // ✅ Border width
-          ),
+    return Card(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: Colors.black,
+          width: 1 / 2,
         ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CachedNetworkImage(
-              imageUrl: bookcollection.coverImageUrl,
-              height: 100,
-              width: 100,
-              placeholder: (context, url) =>
-                  const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-              fit: BoxFit.cover,
+            SizedBox(
+              width: 8,
+            ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                imageUrl: bookcollection.coverImageUrl,
+                height: 120,
+                width: 100,
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              // ✅ Wrap the Column with Expanded
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(
                     height: 10,
                   ),
-                  Text(
-                    bookcollection.title,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    bookcollection.author,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              bookcollection.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              bookcollection.author,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            updatedialog(context, bookcollection);
+                          },
+                          icon: const Icon(
+                            Icons.more_vert,
+                            size: 24,
+                            color: Colors.black,
+                          ))
+                    ],
                   ),
                   Row(
                     children: [
@@ -67,8 +97,8 @@ class BooksCollection extends StatelessWidget {
                               backgroundColor: Colors.green,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5))),
-                          child: const Text(
-                            "Motivation",
+                          child: Text(
+                            bookcollection.category,
                             style: TextStyle(
                                 color: Color.fromARGB(255, 6, 86, 150)),
                           )),
@@ -81,8 +111,8 @@ class BooksCollection extends StatelessWidget {
                               backgroundColor: Colors.green,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5))),
-                          child: const Text(
-                            "E-Book",
+                          child: Text(
+                            bookcollection.format,
                             style: TextStyle(
                                 color: Color.fromARGB(255, 6, 86, 150)),
                           ))
@@ -94,15 +124,6 @@ class BooksCollection extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton(
-                onPressed: () {
-                  updatedialog(context, bookcollection);
-                },
-                icon: const Icon(
-                  Icons.more_vert,
-                  size: 25,
-                  color: Colors.black,
-                ))
           ],
         ),
       ),
@@ -129,7 +150,7 @@ void updatedialog(BuildContext context, BookCrudEntity book) async {
               onTap: () {
                 Navigator.pop(context);
                 print("Your book id is ${book.id}");
-                Navigator.pushReplacement(
+                Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (_) => UpdateBookStepper(

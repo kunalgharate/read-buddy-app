@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class BannerEntity extends Equatable {
+  final String? id;
   final String title;
   final String? link;
   final String? description;
@@ -8,6 +9,7 @@ class BannerEntity extends Equatable {
   final String bannerImage;
 
   const BannerEntity({
+    this.id,
     required this.title,
     this.link,
     this.description,
@@ -17,5 +19,5 @@ class BannerEntity extends Equatable {
 
   @override
   List<Object?> get props =>
-      [title, link, description, bannerType, bannerImage];
+      [id, title, link, description, bannerType, bannerImage];
 }

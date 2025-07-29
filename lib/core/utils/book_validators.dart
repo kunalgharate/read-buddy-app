@@ -1,4 +1,8 @@
 // validator.dart
+import 'dart:io';
+
+import 'package:read_buddy_app/core/utils/app_value_items.dart';
+
 class BookFormValidators {
   static String? requiredField(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -93,6 +97,10 @@ class BookFormValidator {
   static String? validateCategory(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Category is required';
+    } else if (!BookValueItems.bookCategories.any(
+        (category) => category.name.toLowerCase() == value.toLowerCase())) {
+      print(BookValueItems.bookCategories);
+      return "Select a valid category";
     }
     return null;
   }
@@ -205,7 +213,22 @@ class BookFormValidator {
   static String? validateBannerLink(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Banner Link is  required';
+    } else {
+      final uri = Uri.tryParse(value);
+      final bool islink = uri != null && uri.isAbsolute;
+      print("link validation is  $islink");
+
+      return islink ? null : "Please Enter valid Url start with http://";
     }
-    return null;
+  }
+
+  static Future<bool> isDomainReachable(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      final result = await InternetAddress.lookup(uri.host);
+      return result.isNotEmpty && result.first.rawAddress.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
   }
 }

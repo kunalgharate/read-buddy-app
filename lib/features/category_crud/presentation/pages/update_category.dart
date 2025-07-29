@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:read_buddy_app/core/theme/text_styles.dart';
 import 'package:read_buddy_app/core/utils/image_helper.dart';
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
@@ -55,7 +56,8 @@ class _UpdateCategoryPageState extends State<UpdateCategoryPage> {
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
-            child: Column(children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const SizedBox(height: 16),
               const Text('Title', style: _labelStyle),
               MyTextField(
@@ -79,104 +81,107 @@ class _UpdateCategoryPageState extends State<UpdateCategoryPage> {
                     value == null || value.isEmpty ? 'Title is required' : null,
               ),
               const SizedBox(height: 16),
-              const Text('Image', style: _labelStyle),
-              InkWell(
-                onTap: dialogpermission,
-                child: Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Image', style: TextStyles.labelStyle),
+                  IconButton(
+                    onPressed: dialogpermission,
+                    icon: const Icon(Icons.cloud_upload),
                   ),
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.cloud_upload, color: Colors.grey),
-                        SizedBox(height: 4),
-                        Text("Upload Images",
-                            style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                  ),
-                ),
+                ],
               ),
-              Images.isNotEmpty
-                  ? SizedBox(
-                      height: 100,
-                      child: ListView.builder(
+              Container(
+                height: 180,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: (Images.isNotEmpty || selectedImages.isNotEmpty)
+                    ? ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: Images.length,
+                        padding: const EdgeInsets.all(8),
+                        itemCount: Images.isNotEmpty
+                            ? Images.length
+                            : selectedImages.length,
                         itemBuilder: (context, index) {
+                          final isNetworkImage = Images.isNotEmpty;
+
                           return Padding(
-                            padding: const EdgeInsets.only(right: 8.0, top: 10),
+                            padding: const EdgeInsets.only(right: 8.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Stack(
                                 children: [
-                                  CachedNetworkImage(
-                                    imageUrl: Images[index],
-                                    height: 100,
-                                    width: 100,
-                                    placeholder: (context, url) => const Center(
-                                        child: CircularProgressIndicator()),
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(Icons.error),
-                                    fit: BoxFit.cover,
-                                  ),
-                                  // Image.network(
-                                  //   Images[index],
-                                  //   width: 100,
-                                  //   height: 100,
-                                  //   fit: BoxFit.cover,
-                                  // ),
+                                  // ✅ Show Network or Local Image
+                                  isNetworkImage
+                                      ? CachedNetworkImage(
+                                          imageUrl: Images[index],
+                                          width: 160,
+                                          height: 160,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) =>
+                                              const Center(
+                                                  child:
+                                                      CircularProgressIndicator()),
+                                          errorWidget: (context, url, error) =>
+                                              const Icon(Icons.error),
+                                        )
+                                      : Image.file(
+                                          File(selectedImages[index]!.path),
+                                          width: 160,
+                                          height: 160,
+                                          fit: BoxFit.cover,
+                                        ),
+
+                                  // ✅ Close Button
                                   Positioned(
-                                    top: -10,
-                                    right: -10,
-                                    height: 30,
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      child: IconButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              Images.removeAt(index);
-                                            });
-                                          },
-                                          icon: const Icon(
-                                            Icons.close,
-                                            color: Colors.red,
-                                            size: 20,
-                                          )),
+                                    top: 5,
+                                    right: 5,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          if (isNetworkImage) {
+                                            Images.removeAt(index);
+                                          } else {
+                                            selectedImages.removeAt(index);
+                                          }
+                                        });
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black26,
+                                              blurRadius: 3,
+                                              offset: Offset(1, 1),
+                                            )
+                                          ],
+                                        ),
+                                        padding: const EdgeInsets.all(4),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.red,
+                                          size: 18,
+                                        ),
+                                      ),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
                           );
                         },
+                      )
+                    : const Center(
+                        child: Text(
+                          "Upload Images",
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
                       ),
-                    )
-                  : SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: selectedImages.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0, top: 10),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                File(selectedImages[index]!.path),
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+              ),
               const SizedBox(height: 16),
               const Text('Category Description (Optional)', style: _labelStyle),
               MyTextField(
@@ -225,7 +230,7 @@ class _UpdateCategoryPageState extends State<UpdateCategoryPage> {
       context.read<CategoryBloc>().add(UpdateCategoryEvent(
             id: widget.category.id,
             title: titleController.text,
-            category: parentController.text,
+            description: categoryDescController.text.trim(),
 
             image: imageFile, // or use FilePicker/ImagePicker if needed
           ));
@@ -235,12 +240,12 @@ class _UpdateCategoryPageState extends State<UpdateCategoryPage> {
 
   void _submitFormwithoutImage() {
     if (_formKey.currentState!.validate()) {
-      // if (selectedImages.isEmpty) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     const SnackBar(content: Text('Please upload at least one image')),
-      //   );
-      //   return;
-      // }
+      if (Images.isEmpty && selectedImages.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please upload at least one image')),
+        );
+        return;
+      }
 
       //final imageFile = File(selectedImages.first!.path);
 
@@ -248,9 +253,11 @@ class _UpdateCategoryPageState extends State<UpdateCategoryPage> {
       context.read<CategoryBloc>().add(UpdateCategoryEvent(
             id: widget.category.id,
             title: titleController.text,
-            category: parentController.text,
+            description: categoryDescController.text.trim(),
 
-            image: null, // or use FilePicker/ImagePicker if needed
+            image: selectedImages.isNotEmpty
+                ? File(selectedImages.first!.path)
+                : File(Images.first), // or use FilePicker/ImagePicker if needed
           ));
       Navigator.pop(context);
     }
@@ -295,20 +302,13 @@ class _UpdateCategoryPageState extends State<UpdateCategoryPage> {
 
   Future<void> onUploadTap(ImageSource source) async {
     try {
-      if (source == ImageSource.gallery) {
-        final images = await ImagePickerHelper.pickMultipleImages();
-        if (images != null && images.isNotEmpty) {
-          setState(() => selectedImages = images);
-        }
-      } else {
-        final image = await ImagePicker().pickImage(source: source);
-        if (image != null) {
-          setState(() => selectedImages = [image]);
-        }
+      final image = await ImagePicker().pickImage(source: source);
+      if (image != null) {
+        setState(() => selectedImages = [image]); // Always single image
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image(s): $e')),
+        SnackBar(content: Text('Failed to pick image: $e')),
       );
     }
   }

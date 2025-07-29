@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:read_buddy_app/core/theme/text_styles.dart';
 import 'package:read_buddy_app/core/utils/auto_complete.dart';
 import 'package:read_buddy_app/core/utils/book_validators.dart';
-import 'package:read_buddy_app/core/utils/book_value_items.dart';
+import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/core/utils/image_helper.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
@@ -41,12 +43,12 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
   final TextEditingController locationController = TextEditingController();
 
   final TextEditingController imagesUploadController = TextEditingController();
-  final TextEditingController descriptionController =
-      TextEditingController(); // Added
-  final TextEditingController tagController = TextEditingController(); // Added
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController tagController = TextEditingController();
   UserEntity? selectedUser;
   final List<String> _tags = [];
-  List<File> Images = [];
+  String? cover_image;
+  List<String> Images = [];
   List<XFile?> selectedImages = [];
 
   @override
@@ -98,16 +100,19 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
     notesController.text = book.notes;
     locationController.text = book.location;
     descriptionController.text = book.description;
-
+    ownerIdController.text = book.ownerName ?? "hhoo";
+    cover_image = book.coverImageUrl;
+    print("coverImageUrl is $cover_image");
+    Images.addAll(book.additionalImageUrls ?? []);
     // Tags
     _tags.clear();
-    _tags.addAll(book.tags ?? []);
+    _tags.addAll(book.tags);
 
     // // Owner ID
     final matchedUser = BookValueItems.usersList.firstWhere(
       (user) => user.id == book.ownerId,
       orElse: () => UserEntity(
-          id: book.ownerId ?? '',
+          id: book.ownerId,
           name: book.ownerName ?? "unkonwnn",
           userRole: '',
           isEmailVerified: true,
@@ -124,8 +129,6 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
     );
     selectedUser = matchedUser;
     ownerIdController.text = matchedUser.name;
-
-    Images = book.additionalImages ?? [];
 
     // If you want to show selected images as preview, you would need to
     // write those base64 strings to temporary files.
@@ -150,7 +153,6 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                     color: Color.fromARGB(255, 4, 33, 83)),
               ),
               const SizedBox(height: 16),
-
               MyTextField(
                 controller: conditionController,
                 validator: BookFormValidator.validateCondition,
@@ -186,13 +188,12 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                 onSelected: (UserEntity user) {
                   selectedUser = user;
                   ownerIdController.text =
-                      user.name; // update controller with name
+                      user.id; // update controller with name
                   print('Selected: ID=${user.id}, Name=${user.name}');
                 }, // ✅ renamed for clarity
-                validator: BookFormValidator.validateCategory,
-                hintText: 'Search Categories',
-              ),
 
+                hintText: 'Search Owner Names',
+              ),
               const SizedBox(height: 16),
               const Text('Location', style: _labelStyle),
               MyTextField(
@@ -204,130 +205,241 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                 suffixIcon: const Icon(Icons.map),
               ),
               const SizedBox(height: 16),
-
-              const Text('Book Images', style: _labelStyle),
-
-              InkWell(
-                onTap: dialogpermission,
-                child: Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Cover Image', style: TextStyles.labelStyle),
+                  IconButton(
+                    onPressed: singleImagePermission,
+                    icon: const Icon(Icons.cloud_upload),
                   ),
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.cloud_upload, color: Colors.grey),
-                        SizedBox(height: 4),
-                        Text("Upload Images",
-                            style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                  ),
-                ),
+                ],
               ),
-
-              Images.isNotEmpty
-                  ? SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: Images.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0, top: 10),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Stack(
-                                children: [
-                                  // if (Images[index] != null &&
-                                  //     Images[index].isNotEmpty)
-                                  //   Image.network(
-                                  //     Images[index],
-                                  //     width: 100,
-                                  //     height: 100,
-                                  //     fit: BoxFit.cover,
-                                  //     errorBuilder:
-                                  //         (context, error, stackTrace) =>
-                                  //             const Icon(Icons.broken_image,
-                                  //                 size: 60, color: Colors.grey),
-                                  //   )
-                                  // else
-                                  //   const Icon(Icons.broken_image,
-                                  //       size: 100, color: Colors.grey),
-                                  Positioned(
-                                    top: -10,
-                                    right: -10,
-                                    height: 30,
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      child: IconButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              Images.removeAt(index);
-                                            });
-                                          },
-                                          icon: const Icon(
-                                            Icons.close,
-                                            color: Colors.red,
-                                            size: 20,
-                                          )),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  : SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: selectedImages.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0, top: 10),
-                            child: ClipRRect(
+              Container(
+                height: 200, // Increased height to match image size
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: selectedCoverImageFile != null
+                      ? Stack(
+                          children: [
+                            ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.file(
-                                File(selectedImages[index]!.path),
-                                width: 100,
-                                height: 100,
+                                File(selectedCoverImageFile!.path),
+                                width: double.infinity,
+                                height: 180,
                                 fit: BoxFit.cover,
                               ),
                             ),
-                          );
-                        },
+                            Positioned(
+                              top: 5,
+                              right: 5,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedCoverImageFile = null;
+                                  });
+                                },
+                                child: _buildCloseButton(),
+                              ),
+                            ),
+                          ],
+                        )
+                      : (cover_image != null && cover_image!.isNotEmpty)
+                          ? Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: CachedNetworkImage(
+                                    imageUrl: cover_image!,
+                                    width: double.infinity,
+                                    height: 180,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => const Center(
+                                        child: CircularProgressIndicator()),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 5,
+                                  right: 5,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        cover_image = null;
+                                      });
+                                    },
+                                    child: _buildCloseButton(),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const Center(
+                              child: Text(
+                                "Upload Cover Image",
+                                style:
+                                    TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('Book Images', style: _labelStyle),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Book Images', style: TextStyle(fontSize: 16)),
+                  IconButton(
+                    onPressed: () {
+                      if (Images.length + selectedImages.length >= 5) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Maximum 5 images allowed')),
+                        );
+                      } else {
+                        dialogpermission();
+                      }
+                    },
+                    icon: const Icon(Icons.cloud_upload),
+                  ),
+                ],
+              ),
+              Container(
+                height: (Images.isEmpty && selectedImages.isEmpty) ? 150 : 300,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: (Images.isEmpty && selectedImages.isEmpty)
+                    ? const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.cloud_upload, color: Colors.grey),
+                            SizedBox(height: 4),
+                            Text(
+                              "Upload Book Images",
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView(
+                        scrollDirection: Axis.vertical,
+                        children: [
+                          ...List.generate(Images.length, (index) {
+                            return Stack(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.all(8.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: CachedNetworkImage(
+                                      imageUrl: Images[index],
+                                      width: double.infinity,
+                                      height: 180,
+                                      placeholder: (context, url) =>
+                                          const Center(
+                                              child:
+                                                  CircularProgressIndicator()),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        Images.removeAt(index);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            blurRadius: 3,
+                                            offset: Offset(1, 1),
+                                          )
+                                        ],
+                                      ),
+                                      padding: const EdgeInsets.all(5),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+
+                          // ✅ Local Selected Images (Vertical List)
+                          ...List.generate(selectedImages.length, (index) {
+                            return Stack(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.all(8.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(selectedImages[index]!.path),
+                                      width: double.infinity,
+                                      height: 180,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedImages.removeAt(index);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            blurRadius: 3,
+                                            offset: Offset(1, 1),
+                                          )
+                                        ],
+                                      ),
+                                      padding: const EdgeInsets.all(5),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
                       ),
-                    ),
-
-              // if (selectedImages.isNotEmpty)
-              //   SizedBox(
-              //     height: 100,
-              //     child: ListView.builder(
-              //       scrollDirection: Axis.horizontal,
-              //       itemCount: selectedImages.length,
-              //       itemBuilder: (context, index) {
-              //         return Padding(
-              //           padding: const EdgeInsets.only(right: 8.0, top: 10),
-              //           child: ClipRRect(
-              //             borderRadius: BorderRadius.circular(8),
-              //             child: Image.file(
-              //               File(selectedImages[index]!.path),
-              //               width: 100,
-              //               height: 100,
-              //               fit: BoxFit.cover,
-              //             ),
-              //           ),
-              //         );
-              //       },
-              //     ),
-              //   ),
-
+              ),
               const SizedBox(height: 16),
               const Text('Book Description', style: _labelStyle),
               MyTextField(
@@ -365,7 +477,6 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                         ))
                     .toList(),
               ),
-
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
@@ -380,7 +491,14 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                     return;
                   }
                   if (_formKey.currentState!.validate()) {
-                    final imageFile = File(selectedImages.first!.path);
+                    if (Images.isEmpty && selectedImages.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please upload an image')),
+                      );
+                      return;
+                    }
+
+                    // final imageFile = File(selectedImages.first!.path);
 
                     print("tagssssssss");
                     print(_tags.length);
@@ -388,13 +506,17 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                       condition: conditionController.text,
                       location: locationController.text,
                       ownerId: selectedUser!.id,
-                      coverImageUrl: '',
-                      // additionalImages: base64Images,
-                      //additionalImages: additionalUrls,
+                      // coversingleImage: selectedCoverImageFile,
+                      additionalImages: selectedImages.isNotEmpty
+                          ? selectedImages
+                              .map((xfile) => File(xfile!.path))
+                              .toList()
+                          : Images.isNotEmpty
+                              ? Images.map((imgPath) => File(imgPath)).toList()
+                              : null,
                       description: descriptionController.text,
                       notes: notesController.text,
                       tags: _tags,
-                      // tags: tagController.text.split(''),
                     );
                     print("Commmmmmmplete Boookk");
 
@@ -404,6 +526,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('updating form...')),
                     );
+                    Navigator.pop(context);
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -418,24 +541,6 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                   style: TextStyle(color: Color.fromARGB(255, 4, 33, 83)),
                 ),
               ),
-              // const SizedBox(height: 16),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     Navigator.pop(context);
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     minimumSize: const Size(double.infinity, 50),
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(10),
-              //     ),
-              //   ),
-              //   child: const Text(
-              //     "No Change",
-              //     style: TextStyle(
-              //         color: Color.fromARGB(255, 4, 33, 83),
-              //         fontWeight: FontWeight.bold),
-              //   ),
-              // ),
               const SizedBox(height: 30),
             ],
           ),
@@ -506,12 +611,30 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
       if (source == ImageSource.gallery) {
         final images = await ImagePickerHelper.pickMultipleImages();
         if (images != null && images.isNotEmpty) {
-          setState(() => selectedImages = images);
+          setState(() {
+            int available = 5 - selectedImages.length;
+            if (available > 0) {
+              selectedImages.addAll(images.take(available));
+            }
+            if (selectedImages.length >= 5) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Maximum 5 images allowed')),
+              );
+            }
+          });
         }
       } else {
         final image = await ImagePicker().pickImage(source: source);
         if (image != null) {
-          setState(() => selectedImages = [image]);
+          setState(() {
+            if (selectedImages.length < 5) {
+              selectedImages.add(image);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Maximum 5 images allowed')),
+              );
+            }
+          });
         }
       }
     } catch (e) {
@@ -520,6 +643,82 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
       );
     }
   }
+
+  void singleImagePermission() async {
+    await showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Camera"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await onUploadSingleImage(ImageSource.camera);
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.image),
+                title: const Text("Gallery"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await onUploadSingleImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  File? selectedCoverImageFile;
+  Future<void> onUploadSingleImage(ImageSource source) async {
+    try {
+      final pickedImage = await ImagePicker().pickImage(source: source);
+      if (pickedImage == null) return;
+
+      final file = File(pickedImage.path);
+
+      setState(() {
+        selectedCoverImageFile = file;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to pick image: $e')),
+      );
+    }
+  }
+}
+
+Widget _buildCloseButton() {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black26,
+          blurRadius: 3,
+          offset: Offset(1, 1),
+        )
+      ],
+    ),
+    padding: const EdgeInsets.all(5),
+    child: const Icon(
+      Icons.close,
+      color: Colors.red,
+      size: 20,
+    ),
+  );
 }
 
 const TextStyle _labelStyle = TextStyle(

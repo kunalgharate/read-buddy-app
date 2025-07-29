@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/utils/app_value_items.dart';
+import 'package:read_buddy_app/features/bookcrud/data/model/item_model.dart';
+import 'package:read_buddy_app/features/category_crud/data/model/parent_category_model.dart';
 import '../../../../../core/network/api_constants.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 import 'package:read_buddy_app/features/category_crud/data/model/category_model.dart';
@@ -13,14 +16,15 @@ abstract class CategoryRemoteDataSource {
 
   Future<void> addCategory({
     required String title,
-    required String parentCategory,
+    required String description,
+    String? parentCategoryId,
     required File image,
   });
 
   Future<void> updateCategory({
     required String id,
     required String title,
-    required String parentCategory,
+    required String description,
     File? image,
   });
 
@@ -36,17 +40,22 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   @override
   Future<List<CategoryModel>> getCategories() async {
     try {
-      final response = await dio.get(ApiConstants.categories); // e.g. '/categories'
+      final response =
+          await dio.get(ApiConstants.categories); // e.g. '/categories'
 
       print("Fetched categories response");
-
+      CategoryItems.parentCategoryItems.clear();
+      BookValueItems.bookCategories.clear();
       if (response.statusCode != 200) {
         throw Exception('Failed to load categories');
       }
 
-      return (response.data as List)
-          .map((json) => CategoryModel.fromJson(json))
-          .toList();
+      return (response.data as List).map((json) {
+        BookValueItems.bookCategories.add(ItemModel.fromJson(json));
+        CategoryItems.parentCategoryItems
+            .add(parentCategoryModel.fromJson(json));
+        return CategoryModel.fromJson(json);
+      }).toList();
     } catch (e) {
       if (e is DioException) {
         print("Dio error: ${e.message}");
@@ -56,14 +65,15 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       } else {
         print("Unexpected error: $e");
       }
-      rethrow; // Optional: if you want the error to propagate up
+      rethrow;
     }
   }
 
   @override
   Future<void> addCategory({
     required String title,
-    required String parentCategory,
+    required String description,
+    String? parentCategoryId,
     required File image,
   }) async {
     print("form dataaaaaaaaaaa is ");
@@ -81,13 +91,16 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
       final formData = FormData.fromMap({
         'name': title,
-        'description': parentCategory,
+        'description': description,
+        if (parentCategoryId != null && parentCategoryId.isNotEmpty)
+          'parentCategoryId': parentCategoryId,
         'image': await MultipartFile.fromFile(image.path),
       });
       print("token: $token");
       print("Form data created: $formData");
       print("Sending title: $title");
-      print("Sending parent_category: $parentCategory");
+      print("Sending parent_category: $description");
+      print("Sending parent_category__Id: $parentCategoryId");
       print("Sending file name: ${image.path.split('/').last}");
 
       final response = await dio.post(
@@ -123,14 +136,14 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   Future<void> updateCategory({
     required String id,
     required String title,
-    required String parentCategory,
+    required String description,
     File? image,
   }) async {
     try {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
       final Map<String, dynamic> formMap = {
         'name': title,
-        'description': parentCategory,
+        'description': description,
       };
 
       if (image != null) {

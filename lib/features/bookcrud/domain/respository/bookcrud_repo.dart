@@ -6,6 +6,9 @@ abstract class BookCrudRepository {
   /// Get all books
   Future<List<BookCrudEntity>> getBooks();
 
+  /// Search books by query
+  Future<List<BookCrudEntity>> searchBooks(String query);
+
   /// Get a single book by ID
   Future<BookCrudEntity> getBookById(String id);
 

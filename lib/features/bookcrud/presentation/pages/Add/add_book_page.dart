@@ -1,12 +1,14 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/utils/auto_complete.dart';
 import 'package:read_buddy_app/core/utils/book_validators.dart';
-import 'package:read_buddy_app/core/utils/book_value_items.dart';
+import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/Add/add_book_page2.dart';
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
+import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 
 class AddBookPage extends StatefulWidget {
   final Function onContinue;
@@ -34,6 +36,8 @@ class _AddBookPageState extends State<AddBookPage> {
   @override
   void initState() {
     selectedFormat = BookValueItems().bookFormats[0];
+
+    context.read<CategoryBloc>().add(LoadCategories());
     super.initState();
   }
 
@@ -133,6 +137,7 @@ class _AddBookPageState extends State<AddBookPage> {
                 controller: pagesController,
                 validator: BookFormValidator.validatePages,
                 hintText: " Enter pages",
+                digitsOnly: true,
                 obscureText: false,
                 keyboardType: TextInputType.number,
               ),
@@ -149,7 +154,8 @@ class _AddBookPageState extends State<AddBookPage> {
                 validator: BookFormValidator.validateISBN,
                 hintText: " Enter ISBN",
                 obscureText: false,
-                keyboardType: TextInputType.text,
+                digitsOnly: true,
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               Row(
@@ -297,17 +303,34 @@ class _AddBookPageState extends State<AddBookPage> {
                       widget.onContinue(book);
                     } else {
                       // One or more fields are invalid, show errors
+                      //remove this below after finish your work
+                      final book = BookCrudModel(
+                        title: bookTitleController.text,
+                        author: authorController.text,
+                        category: selectedCategory?.id ?? "",
+                        genre: selectedGenre ?? '',
+                        format: selectedFormat ?? '',
+                        language: selectedLanguage ?? '',
+                        isbn: isbnController.text,
+                        publisher: publisherController.text,
+                        publicationYear: int.tryParse(yearController.text) ?? 0,
+                        numberOfCopies: int.tryParse(pagesController.text) ?? 1,
+                        isAvailable: true,
+                        status: "available",
+                        edition: '',
+                        condition: '',
+                        tags: [],
+                        location: '',
+                        ownerId: '',
+                        coverImageUrl: '',
+                        additionalImages: [],
+                        description: '',
+                        notes: '',
+                        additionalImageUrls: [],
+                      );
+                      widget.onContinue(book);
                     }
                   },
-                  // onPressed: () {
-
-                  //   // Navigator.push(
-                  //   //     context,
-                  //   //     MaterialPageRoute(
-                  //   //         builder: (context) => AddBookPage2(
-                  //   //               onBack: () {},
-                  //   //             )));
-                  // },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     minimumSize: const Size(double.infinity, 50),

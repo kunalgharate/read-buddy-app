@@ -1,3 +1,4 @@
+// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 // **************************************************************************
@@ -37,6 +38,7 @@ import '../../features/bookcrud/domain/usecases/add_book.dart' as _i900;
 import '../../features/bookcrud/domain/usecases/delete_book.dart' as _i836;
 import '../../features/bookcrud/domain/usecases/get_books.dart' as _i701;
 import '../../features/bookcrud/domain/usecases/get_books_by_id.dart' as _i328;
+import '../../features/bookcrud/domain/usecases/search_book.dart' as _i194;
 import '../../features/bookcrud/domain/usecases/update_book.dart' as _i161;
 import '../../features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart'
     as _i747;
@@ -100,36 +102,46 @@ extension GetItInjectableX on _i174.GetIt {
         _i574.CategoryRepositoryImpl(gh<_i212.CategoryRemoteDataSource>()));
     gh.factory<_i787.AuthRepository>(
         () => _i153.AuthRepositoryImpl(gh<_i170.AuthRemoteDataSource>()));
-    gh.factory<_i161.UpdateBookUsecase>(
-        () => _i161.UpdateBookUsecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i900.AddBookUsecase>(
         () => _i900.AddBookUsecase(gh<_i344.BookCrudRepository>()));
-    gh.factory<_i328.GetBookByIdUsecase>(
-        () => _i328.GetBookByIdUsecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i836.DeleteBookusecase>(
         () => _i836.DeleteBookusecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i701.GetBooksUsecase>(
         () => _i701.GetBooksUsecase(gh<_i344.BookCrudRepository>()));
+    gh.factory<_i328.GetBookByIdUsecase>(
+        () => _i328.GetBookByIdUsecase(gh<_i344.BookCrudRepository>()));
+    gh.factory<_i194.SearchBookUsecase>(
+        () => _i194.SearchBookUsecase(gh<_i344.BookCrudRepository>()));
+    gh.factory<_i161.UpdateBookUsecase>(
+        () => _i161.UpdateBookUsecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i581.GetBooks>(
         () => _i581.GetBooks(gh<_i674.BookRepository>()));
     gh.factory<_i903.BookBloc>(() => _i903.BookBloc(gh<_i581.GetBooks>()));
     gh.factory<_i665.DeleteCategoryUsecase>(
         () => _i665.DeleteCategoryUsecase(gh<_i187.CategoryRepository>()));
-    gh.factory<_i527.UpdateCategoryUsecase>(
-        () => _i527.UpdateCategoryUsecase(gh<_i187.CategoryRepository>()));
     gh.factory<_i359.GetCategoriesUsecase>(
         () => _i359.GetCategoriesUsecase(gh<_i187.CategoryRepository>()));
+    gh.factory<_i527.UpdateCategoryUsecase>(
+        () => _i527.UpdateCategoryUsecase(gh<_i187.CategoryRepository>()));
     gh.factory<_i241.RegisterUserUseCase>(
         () => _i241.RegisterUserUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i920.SignIn>(() => _i920.SignIn(gh<_i787.AuthRepository>()));
     gh.factory<_i692.SignInWithGoogle>(
         () => _i692.SignInWithGoogle(gh<_i787.AuthRepository>()));
-    gh.factory<_i920.SignIn>(() => _i920.SignIn(gh<_i787.AuthRepository>()));
     gh.factory<_i30.VerifyEmailUseCase>(
         () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
     gh.lazySingleton<_i894.ProfileRepository>(
         () => _i334.ProfileRepositoryImpl(gh<_i192.ProfileRemoteDataSource>()));
     gh.factory<_i170.GoogleSignInBloc>(
         () => _i170.GoogleSignInBloc(gh<_i692.SignInWithGoogle>()));
+    gh.factory<_i747.BookCrudBloc>(() => _i747.BookCrudBloc(
+          searchBooks: gh<_i194.SearchBookUsecase>(),
+          getBooksCrud: gh<_i701.GetBooksUsecase>(),
+          getBookByIdCrud: gh<_i328.GetBookByIdUsecase>(),
+          addBookCrud: gh<_i900.AddBookUsecase>(),
+          updateBookCrud: gh<_i161.UpdateBookUsecase>(),
+          deleteBookCrud: gh<_i836.DeleteBookusecase>(),
+        ));
     gh.factory<_i478.UpdateProfileUseCase>(
         () => _i478.UpdateProfileUseCase(gh<_i894.ProfileRepository>()));
     gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
@@ -140,13 +152,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),
           gh<_i30.VerifyEmailUseCase>(),
-        ));
-    gh.factory<_i747.BookCrudBloc>(() => _i747.BookCrudBloc(
-          getBooksCrud: gh<_i701.GetBooksUsecase>(),
-          getBookByIdCrud: gh<_i328.GetBookByIdUsecase>(),
-          addBookCrud: gh<_i900.AddBookUsecase>(),
-          updateBookCrud: gh<_i161.UpdateBookUsecase>(),
-          deleteBookCrud: gh<_i836.DeleteBookusecase>(),
         ));
     return this;
   }

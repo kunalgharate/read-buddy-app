@@ -3,6 +3,15 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:read_buddy_app/features/banner/domain/usecase/delete_banner.dart';
+import 'package:read_buddy_app/features/banner/domain/usecase/get_banner.dart';
+import 'package:read_buddy_app/features/banner/domain/usecase/update_banner.dart';
+import 'package:read_buddy_app/features/bookcrud/data/repositories/search_location_repo_impl.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/respository/search_location_repo.dart';
+
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_book.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_location.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
 
 // Core
 import '../network/dio_client.dart';
@@ -37,6 +46,8 @@ import '../../features/books/presentation/bloc/book_bloc.dart';
 // Book CRUD
 import '../../features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
 import '../../features/bookcrud/data/dataresources/user_remote_resources.dart';
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/search_location_remote_resources.dart';
+
 import '../../features/bookcrud/data/repositories/bookcrud_repo_impl.dart';
 import '../../features/bookcrud/data/repositories/user_repo_impl.dart';
 import '../../features/bookcrud/domain/respository/bookcrud_repo.dart';
@@ -120,6 +131,11 @@ void _registerDataSources() {
     () => UserRemoteResourcesImpl(dio: getIt<Dio>()),
   );
 
+  // Search Location Data Sources
+  getIt.registerLazySingleton<SearchLocationRemoteResources>(
+    () => SearchLocationRemoteResourcesImpl(dio: getIt<Dio>()),
+  );
+
   // Category CRUD Data Sources
   getIt.registerLazySingleton<CategoryRemoteDataSource>(
     () => CategoryRemoteDataSourceImpl(dio: getIt<Dio>()),
@@ -160,6 +176,11 @@ void _registerRepositories() {
     () => UserRepositoryImpl(getIt<UserRemoteResources>()),
   );
 
+//Search Location Repositories
+  getIt.registerLazySingleton<SearchLocationRepository>(
+    () => SearchLocationRepoImpl(getIt<SearchLocationRemoteResources>()),
+  );
+
   // Category CRUD Repositories
   getIt.registerLazySingleton<CategoryRepository>(
     () => CategoryRepositoryImpl(getIt<CategoryRemoteDataSource>()),
@@ -178,33 +199,59 @@ void _registerUseCases() {
   // Auth Use Cases
   getIt.registerLazySingleton(() => SignIn(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => SignInWithGoogle(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => RegisterUserUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(
+      () => RegisterUserUseCase(getIt<AuthRepository>()));
+  getIt
+      .registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
 
   // Profile Use Cases
-  getIt.registerLazySingleton(() => UpdateProfileUseCase(getIt<ProfileRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateProfileUseCase(getIt<ProfileRepository>()));
 
   // Books Use Cases
   getIt.registerLazySingleton(() => GetBooks(getIt<BookRepository>()));
 
   // Book CRUD Use Cases
-  getIt.registerLazySingleton(() => AddBookUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => GetBooksUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => GetBookByIdUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => UpdateBookUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => DeleteBookusecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => SearchBookUsecase(getIt<BookCrudRepository>()));
+  getIt
+      .registerLazySingleton(() => AddBookUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => GetBooksUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => GetBookByIdUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateBookUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteBookusecase(getIt<BookCrudRepository>()));
 
   // User Use Cases
-  getIt.registerLazySingleton(() => GetUserListUseCase(getIt<UserRepository>()));
+  getIt
+      .registerLazySingleton(() => GetUserListUseCase(getIt<UserRepository>()));
+
+  // Search Location Use Cases
+  getIt.registerLazySingleton(
+      () => SearchLocationUsecase(getIt<SearchLocationRepository>()));
 
   // Category CRUD Use Cases
-  getIt.registerLazySingleton(() => AddCategoryUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => DeleteCategoryUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => GetCategoriesUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => UpdateCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => AddCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => GetCategoriesUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateCategoryUsecase(getIt<CategoryRepository>()));
 
   // Banner Use Cases
-  getIt.registerLazySingleton(() => CreateBannerUsecase(getIt<BannerRepository>()));
+  getIt
+      .registerLazySingleton(() => GetBannerUsecase(getIt<BannerRepository>()));
+  getIt.registerLazySingleton(
+      () => CreateBannerUsecase(getIt<BannerRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateBannerUsecase(getIt<BannerRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteBannerUsecase(getIt<BannerRepository>()));
 }
 
 // ========================================
@@ -213,7 +260,8 @@ void _registerUseCases() {
 void _registerBlocs() {
   // Auth Blocs
   getIt.registerLazySingleton(() => SignInBloc(getIt<SignIn>()));
-  getIt.registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
+  getIt
+      .registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
   getIt.registerLazySingleton(() => SignUpBloc(
         getIt<RegisterUserUseCase>(),
         getIt<VerifyEmailUseCase>(),
@@ -230,6 +278,7 @@ void _registerBlocs() {
 
   // Book CRUD Blocs
   getIt.registerLazySingleton(() => BookCrudBloc(
+        searchBooks: getIt<SearchBookUsecase>(),
         addBookCrud: getIt<AddBookUsecase>(),
         getBooksCrud: getIt<GetBooksUsecase>(),
         getBookByIdCrud: getIt<GetBookByIdUsecase>(),
@@ -247,8 +296,10 @@ void _registerBlocs() {
 
   // Banner Blocs
   getIt.registerLazySingleton(() => BannerBloc(
-        createBannerUsecase: getIt<CreateBannerUsecase>(),
-      ));
+      getBannerUsecase: getIt<GetBannerUsecase>(),
+      createBannerUsecase: getIt<CreateBannerUsecase>(),
+      updateBannerUsecase: getIt<UpdateBannerUsecase>(),
+      deleteBannerUsecase: getIt<DeleteBannerUsecase>()));
 }
 
 // ========================================
@@ -257,4 +308,7 @@ void _registerBlocs() {
 void _registerCubits() {
   // User Cubits
   getIt.registerLazySingleton(() => UserCubit(getIt<GetUserListUseCase>()));
+
+  getIt.registerLazySingleton(
+      () => LocationCubit(getIt<SearchLocationUsecase>()));
 }

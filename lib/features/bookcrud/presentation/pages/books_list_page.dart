@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
@@ -18,8 +20,31 @@ class _BooksListPageState extends State<BooksListPage> {
 
   @override
   void initState() {
+    searchBookController.addListener(_onSearchChanged);
     context.read<BookCrudBloc>().add(LoadBookCrudList());
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    searchBookController.removeListener(_onSearchChanged);
+    searchBookController.dispose();
+    super.dispose();
+  }
+
+  Timer? _debounce;
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      final query = searchBookController.text.trim();
+      if (query.length >= 3) {
+        context.read<BookCrudBloc>().add(SearchBook(query));
+      } else if (query.isEmpty) {
+        context.read<BookCrudBloc>().add(LoadBookCrudList());
+      }
+    });
   }
 
   @override
@@ -44,6 +69,7 @@ class _BooksListPageState extends State<BooksListPage> {
               child: TextField(
                 cursorColor: Colors.grey,
                 controller: searchBookController,
+                onChanged: (value) => _onSearchChanged(),
                 decoration: InputDecoration(
                     hintText: 'Search Book',
                     prefixIcon: Icon(Icons.search),
