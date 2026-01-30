@@ -78,6 +78,14 @@ import '../../features/banner/domain/repository/banner_repository.dart';
 import '../../features/banner/domain/usecase/create_banner.dart';
 import '../../features/banner/presentation/bloc/banner_bloc.dart';
 
+// Questionaries
+import '../../features/questionaries/data/questions_data_source.dart';
+import '../../features/questionaries/data/repositories/question_repository_impl.dart';
+import '../../features/questionaries/domain/repositories/question_repository.dart';
+import '../../features/questionaries/domain/usecases/get_questions_usecase.dart';
+import '../../features/questionaries/domain/usecases/submit_answers_usecase.dart';
+import '../../features/questionaries/presentation/bloc/question_bloc.dart';
+
 final getIt = GetIt.instance;
 
 @InjectableInit(
@@ -145,6 +153,11 @@ void _registerDataSources() {
   getIt.registerLazySingleton<BannerRemoteDataSource>(
     () => BannerRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
+
+  // Questionaries Data Sources
+  getIt.registerLazySingleton<QuestionLocalDataSource>(
+    () => QuestionLocalDataSourceImpl(),
+  );
 }
 
 // ========================================
@@ -189,6 +202,11 @@ void _registerRepositories() {
   // Banner Repositories
   getIt.registerLazySingleton<BannerRepository>(
     () => BannerRepoImpl(remoteDataSource: getIt<BannerRemoteDataSource>()),
+  );
+
+  // Questionaries Repositories
+  getIt.registerLazySingleton<QuestionRepository>(
+    () => QuestionRepositoryImpl(getIt<QuestionLocalDataSource>()),
   );
 }
 
@@ -252,6 +270,11 @@ void _registerUseCases() {
       () => UpdateBannerUsecase(getIt<BannerRepository>()));
   getIt.registerLazySingleton(
       () => DeleteBannerUsecase(getIt<BannerRepository>()));
+
+  // Questionaries Use Cases
+  getIt.registerLazySingleton(
+      () => GetQuestionsUseCase(getIt<QuestionRepository>()));
+  getIt.registerLazySingleton(() => SubmitAnswersUseCase());
 }
 
 // ========================================
@@ -300,6 +323,12 @@ void _registerBlocs() {
       createBannerUsecase: getIt<CreateBannerUsecase>(),
       updateBannerUsecase: getIt<UpdateBannerUsecase>(),
       deleteBannerUsecase: getIt<DeleteBannerUsecase>()));
+
+  // Questionaries Blocs
+  getIt.registerFactory(() => QuestionBloc(
+        getQuestions: getIt<GetQuestionsUseCase>(),
+        submitAnswers: getIt<SubmitAnswersUseCase>(),
+      ));
 }
 
 // ========================================
