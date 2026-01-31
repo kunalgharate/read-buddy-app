@@ -7,6 +7,7 @@ import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/locati
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
+import 'package:read_buddy_app/features/questionaries/presentation/screens/questions_screens.dart';
 import 'core/di/injection.dart';
 import 'core/utils/app_bloc_observer.dart';
 import 'features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
