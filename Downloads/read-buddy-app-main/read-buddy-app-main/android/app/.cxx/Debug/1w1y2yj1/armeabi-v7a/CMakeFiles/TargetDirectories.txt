@@ -1,0 +1,2 @@
+D:/Read_Buddy_1/read-buddy-app-1/android/app/.cxx/Debug/1w1y2yj1/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/Read_Buddy_1/read-buddy-app-1/android/app/.cxx/Debug/1w1y2yj1/armeabi-v7a/CMakeFiles/rebuild_cache.dir
