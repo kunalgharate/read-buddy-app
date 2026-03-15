@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:read_buddy_app/features/onboarding/widgets/onboarding_widget.dart';
-
-import '../../../core/di/injection.dart';
-import '../../../core/utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/utils/secure_storage_utils.dart';
+import '../widgets/onboarding_widget.dart';
+import 'onboarding_questionaire.dart';
 
 
 class OnboardingScreen extends StatefulWidget {
@@ -46,7 +47,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeIn,
       );
     } else {
-      // TODO: Navigate to home/login/etc
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>  SignInScreen(),
+        ),
+      );
     }
   }
 
@@ -99,10 +105,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           onPressed: () {
                             final secureStorage = getIt<SecureStorageUtil>();
                             secureStorage.saveOnboardingStatus(true);
-                            Navigator.pushNamed(context, '/signin');
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                builder: (_) =>  SignInScreen()));
                           },
                           child: const Text(
-                            "Sign in",
+                            "Sign In",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,

@@ -1,0 +1,61 @@
+[
+  {
+    "id": 1,
+    "question": "What type of books do you enjoy reading the most?",
+    "type": "multi_select",
+    "options": [
+      "Fiction",
+      "Non Fiction",
+      "Fantasy",
+      "Business & Productivity",
+      "Biographies",
+      "Mystery & Thriller",
+      "Self Help"
+    ]
+  },
+  {
+    "id": 2,
+    "question": "How often do you read books?",
+    "type": "single_select",
+    "options": [
+      "Daily",
+      "A few times a week",
+      "Occasionally",
+      "Rarely"
+    ]
+  },
+  {
+    "id": 3,
+    "question": "What is your preferred reading format?",
+    "type": "single_select",
+    "options": [
+      "E-books",
+      "Physical books",
+      "Audiobooks",
+      "Mix of all"
+    ]
+  },
+  {
+    "id": 4,
+    "question": "When do you usually read?",
+    "type": "multi_select",
+    "options": [
+      "Morning",
+      "Afternoon",
+      "Night",
+      "During commute",
+      "Before bed"
+    ]
+  },
+  {
+    "id": 5,
+    "question": "How many pages do you usually read in a day?",
+    "type": "single_select",
+    "options": [
+      "Less than 10",
+      "10-20",
+      "20-40",
+      "More than 40"
+    ]
+  }
+]
