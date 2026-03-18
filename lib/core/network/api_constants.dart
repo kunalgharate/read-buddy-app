@@ -38,4 +38,18 @@ class ApiConstants {
   static const Banner = '$baseUrl/banners';
 
   static const String updateUserInfo = '$baseUrl/users/update-user-info';
+  // Onboarding Endpoints
+  static const String getAllQuestions = '$baseUrl/onboarding/questions';
+  static const String getQuestion = '$baseUrl/onboarding/question'; // append /:id
+
+  static const String setUserPreferences =
+      '$baseUrl/onboarding/preference';
+
+  static const String updateUserPreference =
+      '$baseUrl/onboarding/preference';
+
+  static const String resetUserPreference =
+      '$baseUrl/onboarding/preference';
+
+  static const String setOnboardingStatus = '$baseUrl/users/onboarding-status';
 }

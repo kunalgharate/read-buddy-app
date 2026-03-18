@@ -7,6 +7,7 @@ class AppUser {
   final bool isPrime;
   final int finesDue;
   final bool isEmailVerified;
+  final bool onboardingCompleted; // ← ADDED
   final List<dynamic> badges;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -18,7 +19,6 @@ class AppUser {
   final String? gender;
   final List<dynamic>? wishlist;
 
-
   AppUser({
     required this.id,
     required this.name,
@@ -28,6 +28,7 @@ class AppUser {
     required this.isPrime,
     required this.finesDue,
     required this.isEmailVerified,
+    required this.onboardingCompleted, // ← ADDED
     required this.badges,
     required this.createdAt,
     required this.updatedAt,
@@ -39,6 +40,4 @@ class AppUser {
     this.gender,
     this.wishlist,
   });
-
-
 }
