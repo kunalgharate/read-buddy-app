@@ -7,6 +7,7 @@ import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_p
 import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 import 'package:read_buddy_app/features/donate/presentation/donation_page.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
+import 'package:read_buddy_app/features/question_crud/presentation/pages/question_list_page.dart';
 
 import '../features/auth/presentation/widgets/email_verification_widget.dart';
 import '../features/books/presentation/pages/book_page.dart';
@@ -41,6 +42,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
       case '/banner':
         return MaterialPageRoute(builder: (_) => const BannersList());
+      case '/questions':
+        return MaterialPageRoute(builder: (_) => const QuestionListPage());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
