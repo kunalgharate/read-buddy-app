@@ -2,25 +2,18 @@ import 'package:dio/dio.dart';
 import '../models/question_model.dart';
 import '../../domain/entities/question_entity.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
+import '../../../../core/network/api_constants.dart';
 
 class QuestionRemoteDataSource {
   final Dio _dio;
   final SecureStorageUtil _storage;
-  final String baseUrl = 'https://readbuddy-server.onrender.com/api/onboarding';
+  final String baseUrl = ApiConstants.onboarding;
 
   QuestionRemoteDataSource(this._dio, this._storage);
 
   // GET - Fetch all questions
   Future<List<QuestionEntity>> getQuestions() async {
     try {
-      print('🔑 Using token refresh system for getting questions');
-      
-      // Debug: Check if tokens exist in storage
-      final accessToken = await _storage.getAccessToken();
-      final refreshToken = await _storage.getRefreshToken();
-      print('🔑 Access token exists: ${accessToken != null && accessToken.isNotEmpty}');
-      print('🔑 Refresh token exists: ${refreshToken != null && refreshToken.isNotEmpty}');
-      
       // Interceptor automatically adds token and handles refresh
       final response = await _dio.get('$baseUrl/questions');
       

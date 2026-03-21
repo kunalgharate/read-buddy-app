@@ -52,6 +52,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
   void removeOption(int index) {
     if (optionControllers.length > 2) {
       setState(() {
+        optionControllers[index].dispose();
         optionControllers.removeAt(index);
       });
     } else {
@@ -101,16 +102,34 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
         await _updateQuestionUseCase.call(newQuestion);
       }
 
+      // ✅ P1 Fix: Check mounted before navigation after async operation
+      if (!mounted) return;
+
       Navigator.pop(context, newQuestion);
     } catch (e) {
+      // ✅ P1 Fix: Check mounted before using context in catch
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error saving question: $e')),
       );
     } finally {
+      // ✅ P1 Fix: Check mounted before setState in finally block
+      if (!mounted) return;
+      
       setState(() {
         _isLoading = false;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    questionController.dispose();
+    for (var controller in optionControllers) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 
   @override

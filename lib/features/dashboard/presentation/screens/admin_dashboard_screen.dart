@@ -1,10 +1,47 @@
 import 'package:flutter/material.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
+import '../../../question_crud/domain/usecases/get_questions.dart' as QuestionCrudUseCases;
 import '../widgets/dashboard_box_widget.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  int _questionCount = 0;
+  bool _isLoadingQuestions = true;
+  
+  late final QuestionCrudUseCases.GetQuestions _getQuestionsUseCase;
+
+  @override
+  void initState() {
+    super.initState();
+    _getQuestionsUseCase = getIt<QuestionCrudUseCases.GetQuestions>();
+    _loadQuestionCount();
+  }
+
+  Future<void> _loadQuestionCount() async {
+    try {
+      final questions = await _getQuestionsUseCase.call();
+      if (mounted) {
+        setState(() {
+          _questionCount = questions.length;
+          _isLoadingQuestions = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _questionCount = 0;
+          _isLoadingQuestions = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +158,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                   DashboardBoxWidget(
                     title: 'Questions',
-                    count: 5,
+                    count: _isLoadingQuestions ? 0 : _questionCount,
                     icon: Icons.quiz,
                     onPressed: () {
                       Navigator.of(context).pushNamed('/questions');

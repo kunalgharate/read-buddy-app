@@ -18,6 +18,9 @@ class ApiConstants {
   // Category endpoints
   static const String categories = '$baseUrl/categories';
 
+  // Onboarding endpoints
+  static const String onboarding = '$baseUrl/onboarding';
+
   static const String olaMap = '$baseUrl/ola/address?input';
 
   // HTTP Status Codes

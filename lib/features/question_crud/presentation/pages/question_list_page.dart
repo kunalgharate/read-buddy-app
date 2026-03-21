@@ -34,14 +34,22 @@ class _QuestionListPageState extends State<QuestionListPage> {
     
     try {
       final questions = await _getQuestionsUseCase.call();
+
+      if (!mounted) return;
+      
       setState(() {
         _questions = questions;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+      
       setState(() {
         _isLoading = false;
       });
+
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading questions: $e')),
       );
@@ -56,8 +64,13 @@ class _QuestionListPageState extends State<QuestionListPage> {
       ),
     );
 
+    if (!mounted) return;
+
     if (result != null) {
       await loadQuestions();
+
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Question added')),
       );
@@ -72,8 +85,13 @@ class _QuestionListPageState extends State<QuestionListPage> {
       ),
     );
 
+    if (!mounted) return;
+
     if (result != null) {
       await loadQuestions();
+
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Question updated')),
       );
@@ -83,11 +101,19 @@ class _QuestionListPageState extends State<QuestionListPage> {
   Future<void> deleteQuestion(String id) async {
     try {
       await _deleteQuestionUseCase.call(id);
+
+      if (!mounted) return;
+      
       await loadQuestions();
+
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Question deleted')),
       );
     } catch (e) {
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error deleting question: $e')),
       );
