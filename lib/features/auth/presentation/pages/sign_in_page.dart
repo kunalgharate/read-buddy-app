@@ -80,38 +80,6 @@ class _SignInScreenState extends State<SignInScreen> {
   void _navigateToSignUp() => Navigator.pushReplacementNamed(context, '/signup');
   void _navigateToForgotPassword() => Navigator.pushNamed(context, '/forgot-password');
 
-  // Debug dialog
-  void _showDebugDialog(BuildContext context, String errorMessage) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Error Details'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Error Message:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(errorMessage),
-              const SizedBox(height: 16),
-              const Text('Debug Info:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text('Email: ${_emailController.text}'),
-              Text('Server: https://readbuddy-server.onrender.com/api/users/login'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
   // User handling methods
   Future<void> _handleUserSuccess(user) async {
     final secureStorage = getIt<SecureStorageUtil>();

@@ -27,6 +27,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _loadQuestionCount() async {
     try {
       final questions = await _getQuestionsUseCase.call();
+      print('📊 Dashboard: Loaded ${questions.length} questions');
       if (mounted) {
         setState(() {
           _questionCount = questions.length;
@@ -160,8 +161,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     title: 'Questions',
                     count: _isLoadingQuestions ? 0 : _questionCount,
                     icon: Icons.quiz,
-                    onPressed: () {
-                      Navigator.of(context).pushNamed('/questions');
+                    onPressed: () async {
+                      await Navigator.of(context).pushNamed('/questions');
+                      _loadQuestionCount();
                     },
                   ),
                 ],
