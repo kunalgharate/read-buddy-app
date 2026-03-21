@@ -139,7 +139,6 @@ class _SignInScreenState extends State<SignInScreen> {
               await _handleUserSuccess(state.user);
             } else if (state is SignInFailure) {
               UiUtils.showErrorSnackBar(context, message: state.errorMessage);
-              _showDebugDialog(context, state.errorMessage);
             }
           },
         ),
