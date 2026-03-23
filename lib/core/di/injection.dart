@@ -86,6 +86,15 @@ import '../../features/questionaries/domain/usecases/get_questions_usecase.dart'
 import '../../features/questionaries/domain/usecases/submit_answers_usecase.dart';
 import '../../features/questionaries/presentation/bloc/question_bloc.dart';
 
+// Question CRUD
+import '../../features/question_crud/data/datasources/question_remote_datasource.dart' as QuestionCrudData;
+import '../../features/question_crud/data/repositories/question_repository_impl.dart' as QuestionCrudData;
+import '../../features/question_crud/domain/repositories/question_repository.dart' as QuestionCrudDomain;
+import '../../features/question_crud/domain/usecases/get_questions.dart' as QuestionCrudUseCases;
+import '../../features/question_crud/domain/usecases/add_question.dart' as QuestionCrudUseCases;
+import '../../features/question_crud/domain/usecases/update_question.dart' as QuestionCrudUseCases;
+import '../../features/question_crud/domain/usecases/delete_question.dart' as QuestionCrudUseCases;
+
 final getIt = GetIt.instance;
 
 @InjectableInit(
@@ -158,6 +167,14 @@ void _registerDataSources() {
   getIt.registerLazySingleton<QuestionLocalDataSource>(
     () => QuestionLocalDataSourceImpl(),
   );
+
+  // Question CRUD Data Sources
+  getIt.registerLazySingleton<QuestionCrudData.QuestionRemoteDataSource>(
+    () => QuestionCrudData.QuestionRemoteDataSource(
+      getIt<Dio>(),
+      getIt<SecureStorageUtil>(),
+    ),
+  );
 }
 
 // ========================================
@@ -207,6 +224,11 @@ void _registerRepositories() {
   // Questionaries Repositories
   getIt.registerLazySingleton<QuestionRepository>(
     () => QuestionRepositoryImpl(getIt<QuestionLocalDataSource>()),
+  );
+
+  // Question CRUD Repositories
+  getIt.registerLazySingleton<QuestionCrudDomain.QuestionRepository>(
+    () => QuestionCrudData.QuestionRepositoryImpl(getIt<QuestionCrudData.QuestionRemoteDataSource>()),
   );
 }
 
@@ -275,6 +297,12 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => GetQuestionsUseCase(getIt<QuestionRepository>()));
   getIt.registerLazySingleton(() => SubmitAnswersUseCase());
+
+  // Question CRUD Use Cases
+  getIt.registerLazySingleton(() => QuestionCrudUseCases.GetQuestions(getIt<QuestionCrudDomain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => QuestionCrudUseCases.AddQuestion(getIt<QuestionCrudDomain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => QuestionCrudUseCases.UpdateQuestion(getIt<QuestionCrudDomain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => QuestionCrudUseCases.DeleteQuestion(getIt<QuestionCrudDomain.QuestionRepository>()));
 }
 
 // ========================================
