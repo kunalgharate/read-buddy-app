@@ -27,18 +27,18 @@ class SignIn {
       print('🎯 SignIn UseCase: Starting sign in');
       print('🎯 SignIn UseCase: Email: ${params.email}');
     }
-    
+
     try {
       final result = await repository.signIn(
         email: params.email,
         password: params.password,
       );
-      
+
       if (kDebugMode) {
         print('🎯 SignIn UseCase: Repository call successful');
         print('🎯 SignIn UseCase: User received: ${result.name}');
       }
-      
+
       return result;
     } catch (error) {
       if (kDebugMode) {

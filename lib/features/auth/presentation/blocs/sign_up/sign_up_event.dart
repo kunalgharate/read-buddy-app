@@ -3,7 +3,6 @@ part of 'sign_up_bloc.dart';
 @immutable
 sealed class SignUpEvent {}
 
-
 class RegisterUserEvent extends SignUpEvent {
   final Map<String, dynamic> userData;
   RegisterUserEvent(this.userData);

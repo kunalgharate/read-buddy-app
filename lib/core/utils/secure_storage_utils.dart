@@ -32,7 +32,7 @@ class SecureStorageUtil {
       'createdAt': appUser.createdAt.toIso8601String(),
       'updatedAt': appUser.updatedAt.toIso8601String(),
       '__v': appUser.version,
-      'accessToken': appUser.accessToken,   // ← ADDED
+      'accessToken': appUser.accessToken, // ← ADDED
       'refreshToken': appUser.refreshToken, // ← ADDED
     });
     await _storage.write(key: 'user', value: userJson);
@@ -62,7 +62,7 @@ class SecureStorageUtil {
       createdAt: DateTime.parse(u['createdAt']),
       updatedAt: DateTime.parse(u['updatedAt']),
       version: u['__v'] ?? 0,
-      accessToken: u['accessToken'] ?? '',   // ← FIXED
+      accessToken: u['accessToken'] ?? '', // ← FIXED
       refreshToken: u['refreshToken'] ?? '', // ← FIXED
     );
   }

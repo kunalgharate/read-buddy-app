@@ -6,7 +6,6 @@ import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../remotesource/auth_remote_data_source.dart';
 
-
 @Injectable(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -18,7 +17,6 @@ class AuthRepositoryImpl implements AuthRepository {
     // TODO: implement forgetPassword
     throw UnimplementedError();
   }
-
 
   @override
   Future<AppUser> registerUser(Map<String, dynamic> data) async {
@@ -65,14 +63,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AppUser> signIn({required String email, required String password}) async {
+  Future<AppUser> signIn(
+      {required String email, required String password}) async {
     if (kDebugMode) {
       print('📦 AuthRepository: Starting sign in');
       print('📦 AuthRepository: Email: $email');
     }
 
     try {
-      final result = await remoteDataSource.signIn(email: email, password: password);
+      final result =
+          await remoteDataSource.signIn(email: email, password: password);
 
       if (kDebugMode) {
         print('📦 AuthRepository: Sign in successful');

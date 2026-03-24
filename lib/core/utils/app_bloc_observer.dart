@@ -15,7 +15,8 @@ class AppBlocObserver extends BlocObserver {
     super.onTransition(bloc, transition);
     // Only log in debug mode
     if (const bool.fromEnvironment('dart.vm.product') == false) {
-      _debugLog('[Bloc Transition] ${bloc.runtimeType} => ${transition.currentState} -> ${transition.nextState}');
+      _debugLog(
+          '[Bloc Transition] ${bloc.runtimeType} => ${transition.currentState} -> ${transition.nextState}');
     }
   }
 
@@ -24,7 +25,8 @@ class AppBlocObserver extends BlocObserver {
     super.onChange(bloc, change);
     // Only log in debug mode
     if (const bool.fromEnvironment('dart.vm.product') == false) {
-      _debugLog('[Bloc Change] ${bloc.runtimeType} => ${change.currentState} -> ${change.nextState}');
+      _debugLog(
+          '[Bloc Change] ${bloc.runtimeType} => ${change.currentState} -> ${change.nextState}');
     }
   }
 
@@ -44,7 +46,11 @@ class AppBlocObserver extends BlocObserver {
     final errorString = error.toString();
     // Remove sensitive information from error messages
     return errorString
-        .replaceAll(RegExp(r'password["\s]*[:=]["\s]*[^,}\s]*', caseSensitive: false), 'password: [REDACTED]')
-        .replaceAll(RegExp(r'token["\s]*[:=]["\s]*[^,}\s]*', caseSensitive: false), 'token: [REDACTED]');
+        .replaceAll(
+            RegExp(r'password["\s]*[:=]["\s]*[^,}\s]*', caseSensitive: false),
+            'password: [REDACTED]')
+        .replaceAll(
+            RegExp(r'token["\s]*[:=]["\s]*[^,}\s]*', caseSensitive: false),
+            'token: [REDACTED]');
   }
 }

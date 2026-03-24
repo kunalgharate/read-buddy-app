@@ -11,5 +11,4 @@ class GetBooks {
   GetBooks(this.repository);
 
   Future<List<Book>> call() => repository.getBooks();
-
 }

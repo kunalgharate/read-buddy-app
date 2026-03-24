@@ -46,7 +46,7 @@ class _OnboardingQuestionnaireView extends StatelessWidget {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const HomeScreen()),
-                (route) => false,
+            (route) => false,
           );
         }
         if (state is OnboardingError) {
@@ -114,9 +114,9 @@ class _OnboardingQuestionnaireView extends StatelessWidget {
   }
 
   Widget _buildQuestionnaire(
-      BuildContext context,
-      OnboardingQuestionsLoaded state,
-      ) {
+    BuildContext context,
+    OnboardingQuestionsLoaded state,
+  ) {
     final question = state.currentQuestion;
     final selectedAnswers = state.answers[question.id] ?? [];
 
@@ -195,11 +195,11 @@ class _OnboardingQuestionnaireView extends StatelessWidget {
                       answer: answer,
                       isSelected: isSelected,
                       onTap: () => context.read<OnboardingBloc>().add(
-                        SelectAnswerEvent(
-                          question: question,
-                          answer: answer,
-                        ),
-                      ),
+                            SelectAnswerEvent(
+                              question: question,
+                              answer: answer,
+                            ),
+                          ),
                     );
                   },
                 ),
@@ -236,16 +236,16 @@ class _OnboardingQuestionnaireView extends StatelessWidget {
                       onPressed: selectedAnswers.isEmpty
                           ? null
                           : () {
-                        if (state.isLastQuestion) {
-                          context
-                              .read<OnboardingBloc>()
-                              .add(SubmitPreferencesEvent());
-                        } else {
-                          context
-                              .read<OnboardingBloc>()
-                              .add(NextQuestionEvent());
-                        }
-                      },
+                              if (state.isLastQuestion) {
+                                context
+                                    .read<OnboardingBloc>()
+                                    .add(SubmitPreferencesEvent());
+                              } else {
+                                context
+                                    .read<OnboardingBloc>()
+                                    .add(NextQuestionEvent());
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2CE07F),
                         disabledBackgroundColor: Colors.grey.shade300,

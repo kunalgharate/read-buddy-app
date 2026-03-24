@@ -11,7 +11,8 @@ class EmailVerificationScreen extends StatelessWidget {
   EmailVerificationScreen({super.key});
 
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
-  final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _controllers =
+      List.generate(6, (_) => TextEditingController());
 
   Widget _buildCodeBox(int index, BuildContext context) {
     return SizedBox(
@@ -61,7 +62,7 @@ class EmailVerificationScreen extends StatelessWidget {
     );
   }
 
-  void _verifyOTP(BuildContext context,String email) {
+  void _verifyOTP(BuildContext context, String email) {
     String otp = _controllers.map((c) => c.text).join();
 
     if (otp.length != 6) {
@@ -72,11 +73,9 @@ class EmailVerificationScreen extends StatelessWidget {
         ),
       );
       return;
+    } else {
+      BlocProvider.of<SignUpBloc>(context).add(VerifyEmailEvent(email, otp));
     }
-    else
-      {
-        BlocProvider.of<SignUpBloc>(context).add(VerifyEmailEvent(email,otp));
-      }
   }
 
   void _resendCode(BuildContext context, String email) {
@@ -91,18 +90,20 @@ class EmailVerificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<SignUpBloc, SignUpState>(
-  listener: (context, state) async {
-    if (state is SignUpUserVerified) {
-      final secureStorage = getIt<SecureStorageUtil>();
-      await secureStorage.saveUser(state.user);
-      await secureStorage.saveTokens(accessToken: state.user.accessToken, refreshToken:  state.user.refreshToken);
+      listener: (context, state) async {
+        if (state is SignUpUserVerified) {
+          final secureStorage = getIt<SecureStorageUtil>();
+          await secureStorage.saveUser(state.user);
+          await secureStorage.saveTokens(
+              accessToken: state.user.accessToken,
+              refreshToken: state.user.refreshToken);
 
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-    }
-  },
-  child: BlocBuilder<SignUpBloc, SignUpState>(
-      builder: (context, signUpBlocState) {
-        if(signUpBlocState is SignUpSuccess) {
+          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        }
+      },
+      child: BlocBuilder<SignUpBloc, SignUpState>(
+          builder: (context, signUpBlocState) {
+        if (signUpBlocState is SignUpSuccess) {
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
@@ -148,11 +149,13 @@ class EmailVerificationScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(6, (index) => _buildCodeBox(index, context)),
+                    children: List.generate(
+                        6, (index) => _buildCodeBox(index, context)),
                   ),
                   const SizedBox(height: 32),
                   GestureDetector(
-                    onTap: () => _resendCode(context, signUpBlocState.user.email),
+                    onTap: () =>
+                        _resendCode(context, signUpBlocState.user.email),
                     child: const Text.rich(
                       TextSpan(
                         text: 'If you did not receive code? ',
@@ -177,14 +180,15 @@ class EmailVerificationScreen extends StatelessWidget {
                   const SizedBox(height: 48),
                   CustomButton(
                     text: 'Continue',
-                    onPressed: () => _verifyOTP(context,signUpBlocState.user.email),
+                    onPressed: () =>
+                        _verifyOTP(context, signUpBlocState.user.email),
                     backgroundColor: const Color(0xFF00C853),
                   ),
                 ],
               ),
             ),
           );
-        } else if(signUpBlocState is SignUpLoading) {
+        } else if (signUpBlocState is SignUpLoading) {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
@@ -196,8 +200,7 @@ class EmailVerificationScreen extends StatelessWidget {
             child: Text('Something went wrong'),
           ),
         );
-      }
-    ),
-);
+      }),
+    );
   }
 }

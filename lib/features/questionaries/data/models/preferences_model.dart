@@ -15,10 +15,10 @@ class PreferenceModel {
   });
 
   Map<String, dynamic> toJson() => {
-    'genres': genres,
-    'formats': formats,
-    'preferredTimes': preferredTimes,
-    'frequency': frequency,
-    'pagesPerSession': pagesPerSession,
-  };
+        'genres': genres,
+        'formats': formats,
+        'preferredTimes': preferredTimes,
+        'frequency': frequency,
+        'pagesPerSession': pagesPerSession,
+      };
 }

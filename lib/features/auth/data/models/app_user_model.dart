@@ -32,7 +32,8 @@ class AppUserModel extends AppUser {
       print('👤 AppUserModel: Access token: ${json['accessToken']}');
       print('👤 AppUserModel: Refresh token: ${json['refreshToken']}');
       print('👤 AppUserModel: isEmailVerified: ${user['isEmailVerified']}');
-      print('👤 AppUserModel: onboardingCompleted: ${user['onboardingCompleted']}'); // ← ADDED
+      print(
+          '👤 AppUserModel: onboardingCompleted: ${user['onboardingCompleted']}'); // ← ADDED
     }
 
     return AppUserModel(

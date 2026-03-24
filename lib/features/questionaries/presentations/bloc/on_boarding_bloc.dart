@@ -24,7 +24,6 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     required this.deletePreferencesUseCase,
     required this.setOnboardingStatusUseCase,
   }) : super(OnboardingInitial()) {
-
     on<FetchQuestionsEvent>(_onFetchQuestions);
     on<SelectAnswerEvent>(_onSelectAnswer);
     on<NextQuestionEvent>(_onNextQuestion);
@@ -33,9 +32,9 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   }
 
   Future<void> _onFetchQuestions(
-      FetchQuestionsEvent event,
-      Emitter<OnboardingState> emit,
-      ) async {
+    FetchQuestionsEvent event,
+    Emitter<OnboardingState> emit,
+  ) async {
     emit(OnboardingLoading());
     try {
       final questions = await getQuestionsUseCase();
@@ -54,9 +53,9 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   }
 
   void _onSelectAnswer(
-      SelectAnswerEvent event,
-      Emitter<OnboardingState> emit,
-      ) {
+    SelectAnswerEvent event,
+    Emitter<OnboardingState> emit,
+  ) {
     if (state is! OnboardingQuestionsLoaded) return;
     final current = state as OnboardingQuestionsLoaded;
 
@@ -70,9 +69,8 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     } else {
       // Toggle for multi-selection
       if (selected.contains(event.answer)) {
-        updatedAnswers[questionId] = selected
-            .where((a) => a != event.answer)
-            .toList();
+        updatedAnswers[questionId] =
+            selected.where((a) => a != event.answer).toList();
       } else {
         updatedAnswers[questionId] = [...selected, event.answer];
       }
@@ -82,9 +80,9 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   }
 
   void _onNextQuestion(
-      NextQuestionEvent event,
-      Emitter<OnboardingState> emit,
-      ) {
+    NextQuestionEvent event,
+    Emitter<OnboardingState> emit,
+  ) {
     if (state is! OnboardingQuestionsLoaded) return;
     final current = state as OnboardingQuestionsLoaded;
     if (current.isLastQuestion) return;
@@ -92,9 +90,9 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   }
 
   void _onPreviousQuestion(
-      PreviousQuestionEvent event,
-      Emitter<OnboardingState> emit,
-      ) {
+    PreviousQuestionEvent event,
+    Emitter<OnboardingState> emit,
+  ) {
     if (state is! OnboardingQuestionsLoaded) return;
     final current = state as OnboardingQuestionsLoaded;
     if (current.isFirstQuestion) return;
@@ -102,9 +100,9 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   }
 
   Future<void> _onSubmitPreferences(
-      SubmitPreferencesEvent event,
-      Emitter<OnboardingState> emit,
-      ) async {
+    SubmitPreferencesEvent event,
+    Emitter<OnboardingState> emit,
+  ) async {
     if (state is! OnboardingQuestionsLoaded) return;
     final current = state as OnboardingQuestionsLoaded;
 
@@ -129,9 +127,9 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
 
   /// Maps collected answers to the preference body shape
   Map<String, dynamic> _buildPreferenceBody(
-      List<QuestionEntity> questions,
-      Map<String, List<String>> answers,
-      ) {
+    List<QuestionEntity> questions,
+    Map<String, List<String>> answers,
+  ) {
     List<String> genres = [];
     List<String> formats = [];
     List<String> preferredTimes = [];

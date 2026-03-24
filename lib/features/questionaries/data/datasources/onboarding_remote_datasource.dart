@@ -32,7 +32,7 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<List<QuestionModel>> getQuestions() async {
     final response = await dio.get(
-      ApiConstants.getAllQuestions,         // ← was hardcoded URL
+      ApiConstants.getAllQuestions, // ← was hardcoded URL
       options: await _authOptions,
     );
     return (response.data as List)
@@ -43,7 +43,7 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<void> setPreferences(Map<String, dynamic> body) async {
     await dio.post(
-      ApiConstants.setUserPreferences,      // ← was hardcoded URL
+      ApiConstants.setUserPreferences, // ← was hardcoded URL
       data: body,
       options: await _authOptions,
     );
@@ -52,7 +52,7 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<void> updatePreferences(Map<String, dynamic> body) async {
     await dio.patch(
-      ApiConstants.updateUserPreference,    // ← was hardcoded URL
+      ApiConstants.updateUserPreference, // ← was hardcoded URL
       data: body,
       options: await _authOptions,
     );
@@ -61,7 +61,7 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<void> deletePreferences() async {
     await dio.delete(
-      ApiConstants.resetUserPreference,     // ← was hardcoded URL
+      ApiConstants.resetUserPreference, // ← was hardcoded URL
       options: await _authOptions,
     );
   }
@@ -69,7 +69,7 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<void> setOnboardingStatus() async {
     await dio.put(
-      ApiConstants.setOnboardingStatus,     // ← was hardcoded URL
+      ApiConstants.setOnboardingStatus, // ← was hardcoded URL
       data: {'status': true},
       options: await _authOptions,
     );

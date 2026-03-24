@@ -118,47 +118,47 @@ void _registerUtils() {
 void _registerDataSources() {
   // Auth
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-        () => AuthRemoteDataSourceImpl(dio: getIt<Dio>()),
+    () => AuthRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
   // Profile
   getIt.registerLazySingleton<ProfileRemoteDataSource>(
-        () => ProfileRemoteDataSourceImpl(dio: getIt<Dio>()),
+    () => ProfileRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
   // Books
   getIt.registerLazySingleton<BookRemoteDataSource>(
-        () => BookRemoteDataSourceImpl(dio: getIt<Dio>()),
+    () => BookRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
   // Book CRUD
   getIt.registerLazySingleton<BookCrudRemoteDataSource>(
-        () => BookCrudRemoteDataSourceImpl(dio: getIt<Dio>()),
+    () => BookCrudRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
   // User
   getIt.registerLazySingleton<UserRemoteResources>(
-        () => UserRemoteResourcesImpl(dio: getIt<Dio>()),
+    () => UserRemoteResourcesImpl(dio: getIt<Dio>()),
   );
 
   // Search Location
   getIt.registerLazySingleton<SearchLocationRemoteResources>(
-        () => SearchLocationRemoteResourcesImpl(dio: getIt<Dio>()),
+    () => SearchLocationRemoteResourcesImpl(dio: getIt<Dio>()),
   );
 
   // Category CRUD
   getIt.registerLazySingleton<CategoryRemoteDataSource>(
-        () => CategoryRemoteDataSourceImpl(dio: getIt<Dio>()),
+    () => CategoryRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
   // Banner
   getIt.registerLazySingleton<BannerRemoteDataSource>(
-        () => BannerRemoteDataSourceImpl(dio: getIt<Dio>()),
+    () => BannerRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
   // Questionaries
   getIt.registerLazySingleton<OnboardingRemoteDataSource>(
-        () => OnboardingRemoteDataSourceImpl(
+    () => OnboardingRemoteDataSourceImpl(
       dio: getIt<Dio>(),
       secureStorage: getIt<SecureStorageUtil>(),
     ),
@@ -171,47 +171,47 @@ void _registerDataSources() {
 void _registerRepositories() {
   // Auth
   getIt.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(getIt<AuthRemoteDataSource>()),
+    () => AuthRepositoryImpl(getIt<AuthRemoteDataSource>()),
   );
 
   // Profile
   getIt.registerLazySingleton<ProfileRepository>(
-        () => ProfileRepositoryImpl(getIt<ProfileRemoteDataSource>()),
+    () => ProfileRepositoryImpl(getIt<ProfileRemoteDataSource>()),
   );
 
   // Books
   getIt.registerLazySingleton<BookRepository>(
-        () => BookRepositoryImpl(getIt<BookRemoteDataSource>()),
+    () => BookRepositoryImpl(getIt<BookRemoteDataSource>()),
   );
 
   // Book CRUD
   getIt.registerLazySingleton<BookCrudRepository>(
-        () => BookCrudRepositoryImpl(getIt<BookCrudRemoteDataSource>()),
+    () => BookCrudRepositoryImpl(getIt<BookCrudRemoteDataSource>()),
   );
 
   // User
   getIt.registerLazySingleton<UserRepository>(
-        () => UserRepositoryImpl(getIt<UserRemoteResources>()),
+    () => UserRepositoryImpl(getIt<UserRemoteResources>()),
   );
 
   // Search Location
   getIt.registerLazySingleton<SearchLocationRepository>(
-        () => SearchLocationRepoImpl(getIt<SearchLocationRemoteResources>()),
+    () => SearchLocationRepoImpl(getIt<SearchLocationRemoteResources>()),
   );
 
   // Category CRUD
   getIt.registerLazySingleton<CategoryRepository>(
-        () => CategoryRepositoryImpl(getIt<CategoryRemoteDataSource>()),
+    () => CategoryRepositoryImpl(getIt<CategoryRemoteDataSource>()),
   );
 
   // Banner
   getIt.registerLazySingleton<BannerRepository>(
-        () => BannerRepoImpl(remoteDataSource: getIt<BannerRemoteDataSource>()),
+    () => BannerRepoImpl(remoteDataSource: getIt<BannerRemoteDataSource>()),
   );
 
   // Questionaries
   getIt.registerLazySingleton<OnboardingRepository>(
-        () => OnboardingRepositoryImpl(getIt<OnboardingRemoteDataSource>()),
+    () => OnboardingRepositoryImpl(getIt<OnboardingRemoteDataSource>()),
   );
 }
 
@@ -222,47 +222,71 @@ void _registerUseCases() {
   // Auth
   getIt.registerLazySingleton(() => SignIn(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => SignInWithGoogle(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => RegisterUserUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(
+      () => RegisterUserUseCase(getIt<AuthRepository>()));
+  getIt
+      .registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
 
   // Profile
-  getIt.registerLazySingleton(() => UpdateProfileUseCase(getIt<ProfileRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateProfileUseCase(getIt<ProfileRepository>()));
 
   // Books
   getIt.registerLazySingleton(() => GetBooks(getIt<BookRepository>()));
 
   // Book CRUD
-  getIt.registerLazySingleton(() => SearchBookUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => AddBookUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => GetBooksUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => GetBookByIdUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => UpdateBookUsecase(getIt<BookCrudRepository>()));
-  getIt.registerLazySingleton(() => DeleteBookusecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => SearchBookUsecase(getIt<BookCrudRepository>()));
+  getIt
+      .registerLazySingleton(() => AddBookUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => GetBooksUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => GetBookByIdUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateBookUsecase(getIt<BookCrudRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteBookusecase(getIt<BookCrudRepository>()));
 
   // User
-  getIt.registerLazySingleton(() => GetUserListUseCase(getIt<UserRepository>()));
+  getIt
+      .registerLazySingleton(() => GetUserListUseCase(getIt<UserRepository>()));
 
   // Search Location
-  getIt.registerLazySingleton(() => SearchLocationUsecase(getIt<SearchLocationRepository>()));
+  getIt.registerLazySingleton(
+      () => SearchLocationUsecase(getIt<SearchLocationRepository>()));
 
   // Category CRUD
-  getIt.registerLazySingleton(() => AddCategoryUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => DeleteCategoryUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => GetCategoriesUsecase(getIt<CategoryRepository>()));
-  getIt.registerLazySingleton(() => UpdateCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => AddCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteCategoryUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => GetCategoriesUsecase(getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateCategoryUsecase(getIt<CategoryRepository>()));
 
   // Banner
-  getIt.registerLazySingleton(() => GetBannerUsecase(getIt<BannerRepository>()));
-  getIt.registerLazySingleton(() => CreateBannerUsecase(getIt<BannerRepository>()));
-  getIt.registerLazySingleton(() => UpdateBannerUsecase(getIt<BannerRepository>()));
-  getIt.registerLazySingleton(() => DeleteBannerUsecase(getIt<BannerRepository>()));
+  getIt
+      .registerLazySingleton(() => GetBannerUsecase(getIt<BannerRepository>()));
+  getIt.registerLazySingleton(
+      () => CreateBannerUsecase(getIt<BannerRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateBannerUsecase(getIt<BannerRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteBannerUsecase(getIt<BannerRepository>()));
 
   // Questionaries
-  getIt.registerLazySingleton(() => GetQuestionsUseCase(getIt<OnboardingRepository>()));
-  getIt.registerLazySingleton(() => SetPreferencesUseCase(getIt<OnboardingRepository>()));
-  getIt.registerLazySingleton(() => UpdatePreferencesUseCase(getIt<OnboardingRepository>()));
-  getIt.registerLazySingleton(() => DeletePreferencesUseCase(getIt<OnboardingRepository>()));
-  getIt.registerLazySingleton(() => SetOnboardingStatusUseCase(getIt<OnboardingRepository>()));
+  getIt.registerLazySingleton(
+      () => GetQuestionsUseCase(getIt<OnboardingRepository>()));
+  getIt.registerLazySingleton(
+      () => SetPreferencesUseCase(getIt<OnboardingRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdatePreferencesUseCase(getIt<OnboardingRepository>()));
+  getIt.registerLazySingleton(
+      () => DeletePreferencesUseCase(getIt<OnboardingRepository>()));
+  getIt.registerLazySingleton(
+      () => SetOnboardingStatusUseCase(getIt<OnboardingRepository>()));
 }
 
 // ========================================
@@ -271,55 +295,56 @@ void _registerUseCases() {
 void _registerBlocs() {
   // Auth
   getIt.registerLazySingleton(() => SignInBloc(getIt<SignIn>()));
-  getIt.registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
+  getIt
+      .registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
   getIt.registerLazySingleton(() => SignUpBloc(
-    getIt<RegisterUserUseCase>(),
-    getIt<VerifyEmailUseCase>(),
-  ));
+        getIt<RegisterUserUseCase>(),
+        getIt<VerifyEmailUseCase>(),
+      ));
 
   // Profile
   getIt.registerLazySingleton(() => ProfileBloc(
-    getIt<SecureStorageUtil>(),
-    getIt<UpdateProfileUseCase>(),
-  ));
+        getIt<SecureStorageUtil>(),
+        getIt<UpdateProfileUseCase>(),
+      ));
 
   // Books
   getIt.registerLazySingleton(() => BookBloc(getIt<GetBooks>()));
 
   // Book CRUD
   getIt.registerLazySingleton(() => BookCrudBloc(
-    searchBooks: getIt<SearchBookUsecase>(),
-    addBookCrud: getIt<AddBookUsecase>(),
-    getBooksCrud: getIt<GetBooksUsecase>(),
-    getBookByIdCrud: getIt<GetBookByIdUsecase>(),
-    updateBookCrud: getIt<UpdateBookUsecase>(),
-    deleteBookCrud: getIt<DeleteBookusecase>(),
-  ));
+        searchBooks: getIt<SearchBookUsecase>(),
+        addBookCrud: getIt<AddBookUsecase>(),
+        getBooksCrud: getIt<GetBooksUsecase>(),
+        getBookByIdCrud: getIt<GetBookByIdUsecase>(),
+        updateBookCrud: getIt<UpdateBookUsecase>(),
+        deleteBookCrud: getIt<DeleteBookusecase>(),
+      ));
 
   // Category CRUD
   getIt.registerLazySingleton(() => CategoryBloc(
-    getCategories: getIt<GetCategoriesUsecase>(),
-    addCategory: getIt<AddCategoryUsecase>(),
-    updateCategory: getIt<UpdateCategoryUsecase>(),
-    deleteCategory: getIt<DeleteCategoryUsecase>(),
-  ));
+        getCategories: getIt<GetCategoriesUsecase>(),
+        addCategory: getIt<AddCategoryUsecase>(),
+        updateCategory: getIt<UpdateCategoryUsecase>(),
+        deleteCategory: getIt<DeleteCategoryUsecase>(),
+      ));
 
   // Banner
   getIt.registerLazySingleton(() => BannerBloc(
-    getBannerUsecase: getIt<GetBannerUsecase>(),
-    createBannerUsecase: getIt<CreateBannerUsecase>(),
-    updateBannerUsecase: getIt<UpdateBannerUsecase>(),
-    deleteBannerUsecase: getIt<DeleteBannerUsecase>(),
-  ));
+        getBannerUsecase: getIt<GetBannerUsecase>(),
+        createBannerUsecase: getIt<CreateBannerUsecase>(),
+        updateBannerUsecase: getIt<UpdateBannerUsecase>(),
+        deleteBannerUsecase: getIt<DeleteBannerUsecase>(),
+      ));
 
   // Questionaries — registerFactory for fresh instance per screen
   getIt.registerFactory(() => OnboardingBloc(
-    getQuestionsUseCase: getIt<GetQuestionsUseCase>(),
-    setPreferencesUseCase: getIt<SetPreferencesUseCase>(),
-    updatePreferencesUseCase: getIt<UpdatePreferencesUseCase>(),
-    deletePreferencesUseCase: getIt<DeletePreferencesUseCase>(),
-    setOnboardingStatusUseCase: getIt<SetOnboardingStatusUseCase>(),
-  ));
+        getQuestionsUseCase: getIt<GetQuestionsUseCase>(),
+        setPreferencesUseCase: getIt<SetPreferencesUseCase>(),
+        updatePreferencesUseCase: getIt<UpdatePreferencesUseCase>(),
+        deletePreferencesUseCase: getIt<DeletePreferencesUseCase>(),
+        setOnboardingStatusUseCase: getIt<SetOnboardingStatusUseCase>(),
+      ));
 }
 
 // ========================================
@@ -327,5 +352,6 @@ void _registerBlocs() {
 // ========================================
 void _registerCubits() {
   getIt.registerLazySingleton(() => UserCubit(getIt<GetUserListUseCase>()));
-  getIt.registerLazySingleton(() => LocationCubit(getIt<SearchLocationUsecase>()));
+  getIt.registerLazySingleton(
+      () => LocationCubit(getIt<SearchLocationUsecase>()));
 }

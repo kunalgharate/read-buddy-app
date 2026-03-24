@@ -1,6 +1,5 @@
 // presentation/bloc/onboarding_event.dart
 
-
 import '../../domain/entity/onboarding_question_entity.dart';
 
 abstract class OnboardingEvent {}
@@ -14,6 +13,7 @@ class SelectAnswerEvent extends OnboardingEvent {
 }
 
 class NextQuestionEvent extends OnboardingEvent {}
+
 class PreviousQuestionEvent extends OnboardingEvent {}
 
 class SubmitPreferencesEvent extends OnboardingEvent {}

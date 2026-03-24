@@ -26,9 +26,8 @@ class QuestionCard extends StatelessWidget {
               : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? const Color(0xFF2CE07F)
-                : const Color(0xFFE2E8F0),
+            color:
+                isSelected ? const Color(0xFF2CE07F) : const Color(0xFFE2E8F0),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -39,9 +38,7 @@ class QuestionCard extends StatelessWidget {
                 answer,
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: isSelected
-                      ? FontWeight.w600
-                      : FontWeight.w400,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected
                       ? const Color(0xFF1E2939)
                       : const Color(0xFF5B6675),

@@ -31,8 +31,7 @@ class DashboardBoxWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (icon != null)
-              Icon(icon, size: 32, color: Colors.teal),
+            if (icon != null) Icon(icon, size: 32, color: Colors.teal),
             Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(count.toString(), style: const TextStyle(fontSize: 20)),
             ElevatedButton(

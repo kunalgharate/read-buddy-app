@@ -1,4 +1,3 @@
-
 import 'package:injectable/injectable.dart';
 
 import '../entities/app_user.dart';
@@ -11,5 +10,6 @@ class RegisterUserUseCase {
 
   RegisterUserUseCase(this.repository);
 
-  Future<AppUser> call(Map<String, dynamic> data) => repository.registerUser(data);
+  Future<AppUser> call(Map<String, dynamic> data) =>
+      repository.registerUser(data);
 }

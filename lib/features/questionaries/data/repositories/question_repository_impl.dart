@@ -21,10 +21,8 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
       remoteDataSource.updatePreferences(preferences);
 
   @override
-  Future<void> deletePreferences() =>
-      remoteDataSource.deletePreferences();
+  Future<void> deletePreferences() => remoteDataSource.deletePreferences();
 
   @override
-  Future<void> setOnboardingStatus() =>
-      remoteDataSource.setOnboardingStatus();
+  Future<void> setOnboardingStatus() => remoteDataSource.setOnboardingStatus();
 }
