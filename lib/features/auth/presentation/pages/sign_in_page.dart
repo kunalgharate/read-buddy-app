@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
+import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
 import '../blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../blocs/sign_in/sign_in_bloc.dart';
 import '../widgets/custom_button_widget.dart';
@@ -26,7 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   // Constants
   static const _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-  
+
   // Colors
   static const _primaryColor = Color(0xFF3182CE);
   static const _textColor = Color(0xFF1E2939);
@@ -104,9 +104,26 @@ class _SignInScreenState extends State<SignInScreen> {
                 context,
                 message: 'Welcome back, ${state.user.name}!',
               );
-              await _handleUserSuccess(state.user);
+
+              final secureStorage = getIt<SecureStorageUtil>();
+              await secureStorage.saveUser(state.user);
+              await secureStorage.saveTokens(
+                accessToken: state.user.accessToken,
+                refreshToken: state.user.refreshToken,
+              );
+
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const OnboardingQuestionnaire(),
+                ),
+              );
             } else if (state is SignInFailure) {
-              UiUtils.showErrorSnackBar(context, message: state.errorMessage);
+              UiUtils.showErrorSnackBar(
+                context,
+                message: state.errorMessage,
+              );
             }
           },
         ),
@@ -117,12 +134,29 @@ class _SignInScreenState extends State<SignInScreen> {
                 context,
                 message: 'Google Sign-In successful! Welcome ${state.user.name}',
               );
-              await _handleUserSuccess(state.user);
+
+              final secureStorage = getIt<SecureStorageUtil>();
+              await secureStorage.saveUser(state.user);
+              await secureStorage.saveTokens(
+                accessToken: state.user.accessToken,
+                refreshToken: state.user.refreshToken,
+              );
+
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const OnboardingQuestionnaire(),
+                ),
+              );
             } else if (state is GoogleSignInFailure) {
-              UiUtils.showErrorSnackBar(context, message: state.errorMessage);
+              UiUtils.showErrorSnackBar(
+                context,
+                message: state.errorMessage,
+              );
             }
           },
-        ),
+        )
       ],
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -296,17 +330,17 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
             child: isLoading
                 ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
                 : const Text(
-                    'Sign In',
-                    style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
-                  ),
+              'Sign In',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
+            ),
           ),
         );
       },

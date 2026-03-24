@@ -1,7 +1,13 @@
+
 import 'package:flutter/material.dart';
-import 'dart:async';
-import '../../core/di/injection.dart';
-import '../../core/utils/secure_storage_utils.dart';
+import 'package:flutter/services.dart';
+import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_preferences.dart';
+import '../../../../core/utils/secure_storage_utils.dart';
+import '../home/presentation/screens/home_screen.dart';
+import '../onboarding/onboarding_screens.dart';
+import '../questionaries/presentations/pages/onboarding_questionaire.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -10,255 +16,172 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  // Constants
-  static const Duration _splashDuration = Duration(seconds: 2);
-  static const Duration _minimumSplashTime = Duration(milliseconds: 1500);
-  
-  // State
-  bool _isLoading = true;
-  String _statusMessage = 'Loading...';
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
 
   @override
   void initState() {
     super.initState();
-    _initializeApp();
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
+
+    _scaleAnim = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
+
+    _animController.forward();
+
+    // Wait for animation then check auth
+    Future.delayed(const Duration(milliseconds: 2000), _checkAuth);
   }
 
-  Future<void> _initializeApp() async {
-    final startTime = DateTime.now();
-    
-    try {
-      await _checkUserSession();
-    } catch (e) {
-      debugPrint('Splash screen error: $e');
-      _navigateToSignIn();
+  Future<void> _checkAuth() async {
+    final hasSeen = await AppPreferences.hasSeenOnboarding();
+
+    if (!mounted) return;
+
+    // First time ever — show intro slides
+    if (!hasSeen) {
+      _navigate(const OnboardingScreen());
+      return;
     }
 
-    // Ensure minimum splash time for better UX
-    final elapsedTime = DateTime.now().difference(startTime);
-    if (elapsedTime < _minimumSplashTime) {
-      await Future.delayed(_minimumSplashTime - elapsedTime);
+    final isLoggedIn = await AppPreferences.isLoggedIn();
+
+    if (!mounted) return;
+
+    if (!isLoggedIn) {
+      _navigate(const SignInScreen());
+      return;
     }
-  }
 
-  Future<void> _checkUserSession() async {
-    setState(() {
-      _statusMessage = 'Checking session...';
-    });
+    // Logged in — get saved user
+    final secureStorage = getIt<SecureStorageUtil>();
+    final user = await secureStorage.getUser();
 
-    try {
-      final secureStorage = getIt<SecureStorageUtil>();
-      
-      // Check onboarding status first
-      final isOnboardingCompleted = await secureStorage.getOnboardingStatus();
-      if (!isOnboardingCompleted) {
-        _navigateToOnboarding();
-        return;
-      }
+    if (!mounted) return;
 
-      // Get user session data
-      final sessionData = await _getSessionData(secureStorage);
-      
-      if (!sessionData.hasValidSession) {
-        _navigateToSignIn();
-        return;
-      }
+    if (user == null) {
+      // Corrupted state — reset
+      await AppPreferences.clear();
+      if (!mounted) return;
+      _navigate(const SignInScreen());
+      return;
+    }
 
-      // Validate token (basic validation - you might want to add API call for server validation)
-      if (!_isTokenValid(sessionData.accessToken!)) {
-        await _clearInvalidSession(secureStorage);
-        _navigateToSignIn();
-        return;
-      }
-
-      setState(() {
-        _statusMessage = 'Welcome back, ${sessionData.user!.name}!';
-      });
-
-      // Navigate based on user role
-      _navigateBasedOnRole(sessionData.user!.role);
-      
-    } catch (e) {
-      debugPrint('Session check error: $e');
-      _navigateToSignIn();
+    // Route based on onboardingCompleted
+    if (user.onboardingCompleted) {
+      _navigate(const HomeScreen());
+    } else {
+      _navigate(const OnboardingQuestionnaire());
     }
   }
 
-  Future<SessionData> _getSessionData(SecureStorageUtil secureStorage) async {
-    // Get all session data in parallel for better performance
-    final results = await Future.wait([
-      secureStorage.getUser(),
-      secureStorage.getAccessToken(),
-      secureStorage.getRefreshToken(),
-    ]);
-
-    return SessionData(
-      user: results[0] as dynamic,
-      accessToken: results[1] as String?,
-      refreshToken: results[2] as String?,
+  void _navigate(Widget screen) {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 600),
+        pageBuilder: (_, __, ___) => screen,
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
     );
   }
 
-  bool _isTokenValid(String token) {
-    try {
-      // Basic token validation - check if it's not empty and has reasonable length
-      if (token.isEmpty || token.length < 10) {
-        return false;
-      }
-
-      // You can add more sophisticated validation here:
-      // - JWT token expiry check
-      // - Token format validation
-      // - Server-side validation call
-      
-      return true;
-    } catch (e) {
-      debugPrint('Token validation error: $e');
-      return false;
-    }
-  }
-
-  Future<void> _clearInvalidSession(SecureStorageUtil secureStorage) async {
-    try {
-      await Future.wait([
-        secureStorage.clearTokens(),
-        secureStorage.delete(key: 'user'),
-      ]);
-      debugPrint('Invalid session cleared');
-    } catch (e) {
-      debugPrint('Error clearing session: $e');
-    }
-  }
-
-  // Navigation methods
-  void _navigateToOnboarding() {
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/onboarding');
-    }
-  }
-
-  void _navigateToSignIn() {
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/signin');
-    }
-  }
-
-  void _navigateBasedOnRole(String role) {
-    if (!mounted) return;
-    
-    final route = role == 'admin' ? '/admin' : '/home';
-    Navigator.pushReplacementNamed(context, route);
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Center(
+      body: Center(
+        child: AnimatedBuilder(
+          animation: _animController,
+          builder: (context, child) {
+            return FadeTransition(
+              opacity: _fadeAnim,
+              child: ScaleTransition(
+                scale: _scaleAnim,
+                child: child,
+              ),
+            );
+          },
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _buildLogo(),
-              const SizedBox(height: 16),
-              _buildAppTitle(),
-              const SizedBox(height: 32),
-              _buildLoadingIndicator(),
-              const SizedBox(height: 16),
-              _buildStatusMessage(),
+              // Logo / Icon
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2CE07F),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2CE07F).withOpacity(0.3),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.menu_book_rounded,
+                  size: 52,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              // App name
+              const Text(
+                'ReadBuddy',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E2939),
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Your reading companion',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.grey.shade500,
+                  letterSpacing: 0.2,
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  Widget _buildLogo() {
-    return Hero(
-      tag: 'app_logo',
-      child: Image.asset(
-        "assets/book_logo.png",
-        height: 140,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            height: 140,
-            width: 140,
-            decoration: BoxDecoration(
-              color: Colors.green[100],
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              Icons.book,
-              size: 80,
-              color: Colors.green[800],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildAppTitle() {
-    return Text(
-      "ReadBuddy",
-      style: TextStyle(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: Colors.green[800],
-        letterSpacing: 1.2,
-      ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return AnimatedOpacity(
-      opacity: _isLoading ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 300),
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.green[600]!),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusMessage() {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: Text(
-        _statusMessage,
-        key: ValueKey(_statusMessage),
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[600],
-          fontWeight: FontWeight.w500,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-}
-
-// Helper class for session data
-class SessionData {
-  final dynamic user;
-  final String? accessToken;
-  final String? refreshToken;
-
-  SessionData({
-    required this.user,
-    required this.accessToken,
-    required this.refreshToken,
-  });
-
-  bool get hasValidSession =>
-      user != null && 
-      accessToken != null && 
-      refreshToken != null &&
-      accessToken!.isNotEmpty &&
-      refreshToken!.isNotEmpty;
 }

@@ -5,7 +5,6 @@ class DashboardBoxWidget extends StatelessWidget {
   final int count;
   final IconData? icon;
   final Color? color;
-  final bool isLoading;
 
   final void Function() onPressed;
   const DashboardBoxWidget({
@@ -15,7 +14,6 @@ class DashboardBoxWidget extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.color,
-    this.isLoading = false,
   });
 
   @override

@@ -30,7 +30,6 @@ class ErrorHandler {
       print('🚨 ErrorHandler: Response data: ${error.response?.data}');
       print('🚨 ErrorHandler: Error type: ${error.type}');
       print('🚨 ErrorHandler: Error message: ${error.message}');
-      print('🚨 ErrorHandler: Full error: $error');
     }
     
     String message;

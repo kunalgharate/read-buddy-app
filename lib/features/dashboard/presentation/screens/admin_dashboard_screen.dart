@@ -1,48 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
-import '../../../question_crud/domain/usecases/get_questions.dart' as QuestionCrudUseCases;
 import '../widgets/dashboard_box_widget.dart';
 
-class AdminDashboardScreen extends StatefulWidget {
+class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
-
-  @override
-  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
-}
-
-class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  int _questionCount = 0;
-  bool _isLoadingQuestions = true;
-  
-  late final QuestionCrudUseCases.GetQuestions _getQuestionsUseCase;
-
-  @override
-  void initState() {
-    super.initState();
-    _getQuestionsUseCase = getIt<QuestionCrudUseCases.GetQuestions>();
-    _loadQuestionCount();
-  }
-
-  Future<void> _loadQuestionCount() async {
-    try {
-      final questions = await _getQuestionsUseCase.call();
-      print('📊 Dashboard: Loaded ${questions.length} questions');
-      if (mounted) {
-        setState(() {
-          _questionCount = questions.length;
-          _isLoadingQuestions = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _questionCount = 0;
-          _isLoadingQuestions = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,15 +117,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     icon: Icons.people,
                     onPressed: () {
                       Navigator.of(context).pushNamed('/banner');
-                    },
-                  ),
-                  DashboardBoxWidget(
-                    title: 'Questions',
-                    count: _isLoadingQuestions ? 0 : _questionCount,
-                    icon: Icons.quiz,
-                    onPressed: () async {
-                      await Navigator.of(context).pushNamed('/questions');
-                      _loadQuestionCount();
                     },
                   ),
                 ],
