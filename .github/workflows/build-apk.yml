@@ -34,4 +34,4 @@ jobs:
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 3
+          retention-days: 5
