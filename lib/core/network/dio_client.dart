@@ -1,15 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../utils/app_interceptor.dart';
 
 class DioClient {
   static Dio createDio() {
     final dio = Dio();
-    final secureStorage = FlutterSecureStorage();
-
-    // Add AppInterceptor for automatic token management
-    dio.interceptors.add(AppInterceptor(secureStorage, dio));
 
     // Add interceptors
     dio.interceptors.add(LogInterceptor(

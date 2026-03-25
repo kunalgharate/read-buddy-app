@@ -1,28 +1,34 @@
-// lib/features/questionaries/data/models/question_model.dart
+// onboarding/data/model/onboarding_question_model.dart
 
-import '../../domain/entities/question_entity.dart';
+import '../../domain/entity/onboarding_question_entity.dart'; // ← correct import
 
 class QuestionModel extends QuestionEntity {
   const QuestionModel({
     required super.id,
     required super.question,
-    required super.options,
-    required super.type,
+    required super.answers,
+    required super.quesType,
   });
 
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
     return QuestionModel(
-      id: json['id'] as int,
-      question: json['question'] as String,
-      options: (json['options'] as List<dynamic>).cast<String>(),
-      type: json['type'] == 'single' ? QuestionType.single : QuestionType.multiple,
+      id: json['_id'] ?? '',
+      question: json['question'] ?? '',
+      answers: List<String>.from(json['answers'] ?? []),
+      quesType: json['quesType'] == 'singleSelection'
+          ? QuestionType.singleSelection
+          : QuestionType.multiSelection,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'question': question,
-        'options': options,
-        'type': type == QuestionType.single ? 'single' : 'multiple',
-      };
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'question': question,
+      'answers': answers,
+      'quesType': quesType == QuestionType.singleSelection
+          ? 'singleSelection'
+          : 'multiSelection',
+    };
+  }
 }

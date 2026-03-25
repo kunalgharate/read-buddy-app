@@ -1,0 +1,1 @@
+cd /workspace && rm -rf android && echo "Android folder removed"
