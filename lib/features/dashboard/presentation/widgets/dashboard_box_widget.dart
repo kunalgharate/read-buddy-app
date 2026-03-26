@@ -5,7 +5,6 @@ class DashboardBoxWidget extends StatelessWidget {
   final int count;
   final IconData? icon;
   final Color? color;
-  final bool isLoading;
 
   final void Function() onPressed;
   const DashboardBoxWidget({
@@ -15,7 +14,6 @@ class DashboardBoxWidget extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.color,
-    this.isLoading = false,
   });
 
   @override
@@ -33,8 +31,7 @@ class DashboardBoxWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (icon != null)
-              Icon(icon, size: 32, color: Colors.teal),
+            if (icon != null) Icon(icon, size: 32, color: Colors.teal),
             Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(count.toString(), style: const TextStyle(fontSize: 20)),
             ElevatedButton(

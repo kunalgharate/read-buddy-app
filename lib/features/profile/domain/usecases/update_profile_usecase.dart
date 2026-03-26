@@ -11,7 +11,6 @@ class UpdateProfileUseCase {
   Future<AppUser> call({
     required Map<String, String> profileData,
   }) async {
-   return await repository.updateProfile(profileData:profileData);
+    return await repository.updateProfile(profileData: profileData);
   }
-
 }

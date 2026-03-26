@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 
-
 class AppUserModel extends AppUser {
   AppUserModel({
     required super.id,
@@ -12,6 +11,7 @@ class AppUserModel extends AppUser {
     required super.isPrime,
     required super.finesDue,
     required super.isEmailVerified,
+    required super.onboardingCompleted, // ← ADDED
     required super.badges,
     required super.createdAt,
     required super.updatedAt,
@@ -25,17 +25,18 @@ class AppUserModel extends AppUser {
   });
 
   factory AppUserModel.fromJson(Map<String, dynamic> json) {
-
     final user = json['user'];
-    
+
     if (kDebugMode) {
       print('👤 AppUserModel: User data: $user');
       print('👤 AppUserModel: Access token: ${json['accessToken']}');
       print('👤 AppUserModel: Refresh token: ${json['refreshToken']}');
-      print('👤 AppUserModel: isEmailVerified from JSON: ${user['isEmailVerified']}');
+      print('👤 AppUserModel: isEmailVerified: ${user['isEmailVerified']}');
+      print(
+          '👤 AppUserModel: onboardingCompleted: ${user['onboardingCompleted']}'); // ← ADDED
     }
 
-    final model = AppUserModel(
+    return AppUserModel(
       id: user['_id'] ?? '',
       name: user['name'] ?? '',
       email: user['email'] ?? '',
@@ -44,6 +45,7 @@ class AppUserModel extends AppUser {
       isPrime: user['isPrime'] ?? false,
       finesDue: user['finesDue'] ?? 0,
       isEmailVerified: user['isEmailVerified'] ?? false,
+      onboardingCompleted: user['onboardingCompleted'] ?? false, // ← ADDED
       badges: List<dynamic>.from(user['badges'] ?? []),
       createdAt: DateTime.tryParse(user['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(user['updatedAt'] ?? '') ?? DateTime.now(),
@@ -55,8 +57,6 @@ class AppUserModel extends AppUser {
       gender: user['gender'],
       wishlist: user['wishlist'] ?? [],
     );
-    
-    return model;
   }
 
   Map<String, dynamic> toJson() {
@@ -70,6 +70,7 @@ class AppUserModel extends AppUser {
         'isPrime': isPrime,
         'finesDue': finesDue,
         'isEmailVerified': isEmailVerified,
+        'onboardingCompleted': onboardingCompleted, // ← ADDED
         'badges': badges,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),

@@ -1,14 +1,28 @@
-// lib/features/questionaries/data/repositories/question_repository_impl.dart
+// data/repositories/onboarding_repository_impl.dart
+import '../../domain/entity/onboarding_question_entity.dart';
+import '../../domain/repositories/onboarding_repository.dart';
+import '../datasources/onboarding_remote_datasource.dart';
 
-import '../../domain/entities/question_entity.dart';
-import '../../domain/repositories/question_repository.dart';
-import '../questions_data_source.dart';
+class OnboardingRepositoryImpl implements OnboardingRepository {
+  final OnboardingRemoteDataSource remoteDataSource;
 
-class QuestionRepositoryImpl implements QuestionRepository {
-  final QuestionLocalDataSource dataSource;
-
-  QuestionRepositoryImpl(this.dataSource);
+  OnboardingRepositoryImpl(this.remoteDataSource);
 
   @override
-  List<QuestionEntity> getQuestions() => dataSource.getQuestions();
+  Future<List<QuestionEntity>> getQuestions() =>
+      remoteDataSource.getQuestions();
+
+  @override
+  Future<void> setPreferences(Map<String, dynamic> preferences) =>
+      remoteDataSource.setPreferences(preferences);
+
+  @override
+  Future<void> updatePreferences(Map<String, dynamic> preferences) =>
+      remoteDataSource.updatePreferences(preferences);
+
+  @override
+  Future<void> deletePreferences() => remoteDataSource.deletePreferences();
+
+  @override
+  Future<void> setOnboardingStatus() => remoteDataSource.setOnboardingStatus();
 }

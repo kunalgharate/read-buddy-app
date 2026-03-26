@@ -1,15 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../utils/app_interceptor.dart';
 
 class DioClient {
   static Dio createDio() {
     final dio = Dio();
-    final secureStorage = FlutterSecureStorage();
-
-    // Add AppInterceptor for automatic token management
-    dio.interceptors.add(AppInterceptor(secureStorage, dio));
 
     // Add interceptors
     dio.interceptors.add(LogInterceptor(
@@ -38,7 +32,8 @@ class DioClient {
       },
       onResponse: (response, handler) {
         if (kDebugMode) {
-          print('✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+          print(
+              '✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
           print('✅ RESPONSE DATA: ${response.data}');
           print('✅ RESPONSE HEADERS: ${response.headers}');
         }
@@ -46,7 +41,8 @@ class DioClient {
       },
       onError: (error, handler) {
         if (kDebugMode) {
-          print('❌ ERROR[${error.response?.statusCode}] => PATH: ${error.requestOptions.path}');
+          print(
+              '❌ ERROR[${error.response?.statusCode}] => PATH: ${error.requestOptions.path}');
           print('❌ ERROR MESSAGE: ${error.message}');
           print('❌ ERROR RESPONSE: ${error.response?.data}');
           print('❌ ERROR TYPE: ${error.type}');
@@ -58,9 +54,12 @@ class DioClient {
 
     // Set longer timeout for slow servers (like Render.com free tier)
     // Increased timeouts for release builds and cold server starts
-    dio.options.connectTimeout = const Duration(seconds: 120); // Increased from 60s
-    dio.options.receiveTimeout = const Duration(seconds: 180); // Increased from 90s
-    dio.options.sendTimeout = const Duration(seconds: 120);    // Increased from 60s
+    dio.options.connectTimeout =
+        const Duration(seconds: 120); // Increased from 60s
+    dio.options.receiveTimeout =
+        const Duration(seconds: 180); // Increased from 90s
+    dio.options.sendTimeout =
+        const Duration(seconds: 120); // Increased from 60s
 
     // Set default headers
     dio.options.headers = {
@@ -74,7 +73,6 @@ class DioClient {
       onError: (error, handler) async {
         if (error.type == DioExceptionType.connectionTimeout ||
             error.type == DioExceptionType.receiveTimeout) {
-
           if (kDebugMode) {
             print('🔄 Retrying request due to timeout...');
           }

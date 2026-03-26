@@ -18,9 +18,8 @@ class UiUtils {
             fontSize: 16,
           ),
         ),
-        backgroundColor: isError
-            ? const Color(0xFFE53E3E)
-            : const Color(0xFF38A169),
+        backgroundColor:
+            isError ? const Color(0xFFE53E3E) : const Color(0xFF38A169),
         duration: duration,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(

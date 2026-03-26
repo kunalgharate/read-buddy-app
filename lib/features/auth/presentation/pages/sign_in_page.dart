@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
+import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
 import '../blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../blocs/sign_in/sign_in_bloc.dart';
 import '../widgets/custom_button_widget.dart';
@@ -26,7 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   // Constants
   static const _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-  
+
   // Colors
   static const _primaryColor = Color(0xFF3182CE);
   static const _textColor = Color(0xFF1E2939);
@@ -64,11 +64,11 @@ class _SignInScreenState extends State<SignInScreen> {
   void _handleSignIn() {
     if (_formKey.currentState!.validate()) {
       context.read<SignInBloc>().add(
-        SignInRequest(
-          email: _emailController.text.trim().toLowerCase(),
-          password: _passwordController.text,
-        ),
-      );
+            SignInRequest(
+              email: _emailController.text.trim().toLowerCase(),
+              password: _passwordController.text,
+            ),
+          );
     }
   }
 
@@ -77,8 +77,10 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   // Navigation methods
-  void _navigateToSignUp() => Navigator.pushReplacementNamed(context, '/signup');
-  void _navigateToForgotPassword() => Navigator.pushNamed(context, '/forgot-password');
+  void _navigateToSignUp() =>
+      Navigator.pushReplacementNamed(context, '/signup');
+  void _navigateToForgotPassword() =>
+      Navigator.pushNamed(context, '/forgot-password');
 
   // User handling methods
   Future<void> _handleUserSuccess(user) async {
@@ -104,9 +106,26 @@ class _SignInScreenState extends State<SignInScreen> {
                 context,
                 message: 'Welcome back, ${state.user.name}!',
               );
-              await _handleUserSuccess(state.user);
+
+              final secureStorage = getIt<SecureStorageUtil>();
+              await secureStorage.saveUser(state.user);
+              await secureStorage.saveTokens(
+                accessToken: state.user.accessToken,
+                refreshToken: state.user.refreshToken,
+              );
+
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const OnboardingQuestionnaire(),
+                ),
+              );
             } else if (state is SignInFailure) {
-              UiUtils.showErrorSnackBar(context, message: state.errorMessage);
+              UiUtils.showErrorSnackBar(
+                context,
+                message: state.errorMessage,
+              );
             }
           },
         ),
@@ -115,14 +134,32 @@ class _SignInScreenState extends State<SignInScreen> {
             if (state is GoogleSignInSuccess) {
               UiUtils.showSuccessSnackBar(
                 context,
-                message: 'Google Sign-In successful! Welcome ${state.user.name}',
+                message:
+                    'Google Sign-In successful! Welcome ${state.user.name}',
               );
-              await _handleUserSuccess(state.user);
+
+              final secureStorage = getIt<SecureStorageUtil>();
+              await secureStorage.saveUser(state.user);
+              await secureStorage.saveTokens(
+                accessToken: state.user.accessToken,
+                refreshToken: state.user.refreshToken,
+              );
+
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const OnboardingQuestionnaire(),
+                ),
+              );
             } else if (state is GoogleSignInFailure) {
-              UiUtils.showErrorSnackBar(context, message: state.errorMessage);
+              UiUtils.showErrorSnackBar(
+                context,
+                message: state.errorMessage,
+              );
             }
           },
-        ),
+        )
       ],
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -245,7 +282,8 @@ class _SignInScreenState extends State<SignInScreen> {
       hintStyle: const TextStyle(color: _hintColor, fontSize: 18.0),
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       prefixIcon: Icon(prefixIcon, color: _labelColor),
       suffixIcon: suffixIcon,
       border: _buildOutlineInputBorder(_borderColor),
@@ -255,7 +293,8 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  OutlineInputBorder _buildOutlineInputBorder(Color color, {double width = 1.0}) {
+  OutlineInputBorder _buildOutlineInputBorder(Color color,
+      {double width = 1.0}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(8.0),
       borderSide: BorderSide(color: color, width: width),
@@ -291,7 +330,8 @@ class _SignInScreenState extends State<SignInScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: _primaryColor,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0)),
               elevation: 0,
             ),
             child: isLoading
@@ -305,7 +345,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   )
                 : const Text(
                     'Sign In',
-                    style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
+                    style:
+                        TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
                   ),
           ),
         );
@@ -328,7 +369,8 @@ class _SignInScreenState extends State<SignInScreen> {
           backgroundColor: Colors.grey.shade200,
           textColor: _textColor,
           icon: _buildGoogleIcon(),
-          onPressed: () => context.read<GoogleSignInBloc>().add(GoogleSignInRequested()),
+          onPressed: () =>
+              context.read<GoogleSignInBloc>().add(GoogleSignInRequested()),
         );
       },
     );
@@ -338,7 +380,8 @@ class _SignInScreenState extends State<SignInScreen> {
     return Container(
       width: 28,
       height: 28,
-      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.black),
+      decoration:
+          const BoxDecoration(shape: BoxShape.circle, color: Colors.black),
       alignment: Alignment.center,
       child: const Text(
         'G',

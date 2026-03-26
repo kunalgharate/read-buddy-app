@@ -1,4 +1,3 @@
-
 import 'package:injectable/injectable.dart';
 
 import '../entities/app_user.dart';
@@ -11,5 +10,6 @@ class VerifyEmailUseCase {
 
   VerifyEmailUseCase(this.repository);
 
-  Future<AppUser> call(String email, String code) => repository.verifyEmail(email, code);
+  Future<AppUser> call(String email, String code) =>
+      repository.verifyEmail(email, code);
 }

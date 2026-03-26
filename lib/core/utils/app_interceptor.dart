@@ -37,7 +37,8 @@ class AppInterceptor extends Interceptor {
   AppInterceptor(this._secureStorage, this._authDio);
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
     try {
       final accessToken = await _secureStorage.read(key: 'accessToken');
       if (accessToken != null && accessToken.isNotEmpty) {
@@ -58,7 +59,8 @@ class AppInterceptor extends Interceptor {
         final newAccessToken = await _refreshAccessToken();
         if (newAccessToken != null) {
           // Retry the original request with new token
-          final retryResponse = await _retryRequest(err.requestOptions, newAccessToken);
+          final retryResponse =
+              await _retryRequest(err.requestOptions, newAccessToken);
           return handler.resolve(retryResponse);
         }
       } catch (refreshError) {
@@ -70,9 +72,9 @@ class AppInterceptor extends Interceptor {
 
   bool _shouldAttemptTokenRefresh(DioException err) {
     return err.response?.statusCode == ApiConstants.unauthorized &&
-           !err.requestOptions.uri.path.contains('/auth/refresh') &&
-           !err.requestOptions.uri.path.contains('/login') &&
-           !err.requestOptions.uri.path.contains('/register');
+        !err.requestOptions.uri.path.contains('/auth/refresh') &&
+        !err.requestOptions.uri.path.contains('/login') &&
+        !err.requestOptions.uri.path.contains('/register');
   }
 
   Future<String?> _refreshAccessToken() async {
@@ -103,7 +105,8 @@ class AppInterceptor extends Interceptor {
     throw Exception('Token refresh failed');
   }
 
-  Future<Response> _retryRequest(RequestOptions options, String newAccessToken) async {
+  Future<Response> _retryRequest(
+      RequestOptions options, String newAccessToken) async {
     options.headers['Authorization'] = 'Bearer $newAccessToken';
     return await _authDio.fetch(options);
   }

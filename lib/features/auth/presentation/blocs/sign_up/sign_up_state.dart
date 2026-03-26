@@ -20,7 +20,7 @@ class SignUpUserVerified extends SignUpState {
 class SignUpError extends SignUpState {
   final String message;
   final bool isUserAlreadyExists;
-  
+
   SignUpError({
     required this.message,
     this.isUserAlreadyExists = false,

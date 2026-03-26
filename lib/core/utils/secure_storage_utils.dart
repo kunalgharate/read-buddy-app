@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
-
 import '../../features/auth/domain/entities/app_user.dart';
 
 @lazySingleton
@@ -13,6 +11,7 @@ class SecureStorageUtil {
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
+  // ─── User ────────────────────────────────────────────────────────────────
 
   Future<void> saveUser(AppUser appUser) async {
     final userJson = jsonEncode({
@@ -21,67 +20,55 @@ class SecureStorageUtil {
       'email': appUser.email,
       'gender': appUser.gender,
       'phno': appUser.phno,
+      'picture': appUser.picture,
       'password': appUser.password,
       'role': appUser.role,
       'isPrime': appUser.isPrime,
       'finesDue': appUser.finesDue,
       'isEmailVerified': appUser.isEmailVerified,
+      'onboardingCompleted': appUser.onboardingCompleted, // ← ADDED
       'badges': appUser.badges,
+      'wishlist': appUser.wishlist,
       'createdAt': appUser.createdAt.toIso8601String(),
       'updatedAt': appUser.updatedAt.toIso8601String(),
       '__v': appUser.version,
+      'accessToken': appUser.accessToken, // ← ADDED
+      'refreshToken': appUser.refreshToken, // ← ADDED
     });
-    await _storage.write(key: "user", value: userJson);
+    await _storage.write(key: 'user', value: userJson);
   }
 
   Future<AppUser?> getUser() async {
-    final jsonString = await _storage.read(key: "user");
+    final jsonString = await _storage.read(key: 'user');
     if (jsonString == null) return null;
-    final Map<String, dynamic> userJson = jsonDecode(jsonString);
 
+    final Map<String, dynamic> u = jsonDecode(jsonString);
 
-   final appUser=  AppUser(
-     id: userJson['_id'] ?? '',
-     name: userJson['name'] ?? '',
-     email: userJson['email'] ?? '',
-     phno: userJson['phno'] ?? '',
-     gender: userJson['gender'] ?? '',
-     password: userJson['password'] ?? '',
-     role: userJson['role'] ?? '',
-     isPrime: userJson['isPrime'] ?? false,
-     finesDue: userJson['finesDue'] ?? 0,
-     isEmailVerified: userJson['isEmailVerified'] ?? false,
-     badges: userJson['badges'] ?? [],
-     createdAt: DateTime.parse(userJson['createdAt']),
-     updatedAt: DateTime.parse(userJson['updatedAt']),
-     version: userJson['__v'] ?? 0,
-     accessToken: userJson['accessToken'] ?? '',
-     refreshToken: userJson['refreshToken'] ?? '',
+    return AppUser(
+      id: u['_id'] ?? '',
+      name: u['name'] ?? '',
+      email: u['email'] ?? '',
+      phno: u['phno'] ?? '',
+      gender: u['gender'] ?? '',
+      picture: u['picture'],
+      password: u['password'] ?? '',
+      role: u['role'] ?? '',
+      isPrime: u['isPrime'] ?? false,
+      finesDue: u['finesDue'] ?? 0,
+      isEmailVerified: u['isEmailVerified'] ?? false,
+      onboardingCompleted: u['onboardingCompleted'] ?? false, // ← ADDED
+      badges: u['badges'] ?? [],
+      wishlist: u['wishlist'] ?? [],
+      createdAt: DateTime.parse(u['createdAt']),
+      updatedAt: DateTime.parse(u['updatedAt']),
+      version: u['__v'] ?? 0,
+      accessToken: u['accessToken'] ?? '', // ← FIXED
+      refreshToken: u['refreshToken'] ?? '', // ← FIXED
     );
-    return appUser;
   }
 
-  /// Save any key-value pair securely
-  Future<void> write({required String key, required String value}) async {
-    await _storage.write(key: key, value: value);
-  }
+  // ─── Tokens ───────────────────────────────────────────────────────────────
 
-  /// Read value for a given key
-  Future<String?> read({required String key}) async {
-    return await _storage.read(key: key);
-  }
-
-  /// Delete a specific key
-  Future<void> delete({required String key}) async {
-    await _storage.delete(key: key);
-  }
-
-  /// Delete all keys
-  Future<void> clearAll() async {
-    await _storage.deleteAll();
-  }
-
-  /// Save tokens specifically
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
@@ -90,26 +77,39 @@ class SecureStorageUtil {
     await write(key: 'refreshToken', value: refreshToken);
   }
 
-  /// Get access token
   Future<String?> getAccessToken() async => read(key: 'accessToken');
-
-  /// Get refresh token
   Future<String?> getRefreshToken() async => read(key: 'refreshToken');
-
-  /// Clear tokens only
   Future<void> clearTokens() async {
     await delete(key: 'accessToken');
     await delete(key: 'refreshToken');
   }
 
-  /// Get onboarding status
+  // ─── Onboarding status ────────────────────────────────────────────────────
+
   Future<bool> getOnboardingStatus() async {
     final status = await read(key: 'onboardingStatus');
     return status == 'true';
   }
 
-  /// Save onboarding status
   Future<void> saveOnboardingStatus(bool status) async {
     await write(key: 'onboardingStatus', value: status.toString());
+  }
+
+  // ─── Generic ──────────────────────────────────────────────────────────────
+
+  Future<void> write({required String key, required String value}) async {
+    await _storage.write(key: key, value: value);
+  }
+
+  Future<String?> read({required String key}) async {
+    return await _storage.read(key: key);
+  }
+
+  Future<void> delete({required String key}) async {
+    await _storage.delete(key: key);
+  }
+
+  Future<void> clearAll() async {
+    await _storage.deleteAll();
   }
 }
