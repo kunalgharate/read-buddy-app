@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/ui_utils.dart';
 import '../blocs/sign_up/sign_up_bloc.dart';
 import '../widgets/custom_button_widget.dart';
-import '../widgets/email_verification_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});

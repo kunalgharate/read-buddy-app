@@ -82,19 +82,6 @@ class _SignInScreenState extends State<SignInScreen> {
   void _navigateToForgotPassword() =>
       Navigator.pushNamed(context, '/forgot-password');
 
-  // User handling methods
-  Future<void> _handleUserSuccess(user) async {
-    final secureStorage = getIt<SecureStorageUtil>();
-    await secureStorage.saveUser(user);
-    await secureStorage.saveTokens(
-      accessToken: user.accessToken,
-      refreshToken: user.refreshToken,
-    );
-
-    final route = user.role == 'admin' ? '/admin' : '/home';
-    Navigator.pushReplacementNamed(context, route);
-  }
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
