@@ -86,7 +86,6 @@ import '../../features/questionaries/domain/usecases/update_user_preferences.dar
 import '../../features/questionaries/domain/usecases/delete_user_preferences.dart';
 import '../../features/questionaries/domain/usecases/set_onboarding_status.dart';
 import '../../features/questionaries/presentations/bloc/on_boarding_bloc.dart';
-import '../../features/questionaries/presentations/bloc/on_boarding_event.dart';
 
 // Question CRUD (Admin)
 import '../../features/question_crud/data/datasources/question_remote_datasource.dart'
