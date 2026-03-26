@@ -119,6 +119,14 @@ class AdminDashboardScreen extends StatelessWidget {
                       Navigator.of(context).pushNamed('/banner');
                     },
                   ),
+                  DashboardBoxWidget(
+                    title: 'Questions',
+                    count: 0,
+                    icon: Icons.quiz,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/questions');
+                    },
+                  ),
                 ],
               ),
             ),

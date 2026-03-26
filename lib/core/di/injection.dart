@@ -88,6 +88,22 @@ import '../../features/questionaries/domain/usecases/set_onboarding_status.dart'
 import '../../features/questionaries/presentations/bloc/on_boarding_bloc.dart';
 import '../../features/questionaries/presentations/bloc/on_boarding_event.dart';
 
+// Question CRUD (Admin)
+import '../../features/question_crud/data/datasources/question_remote_datasource.dart'
+    as QuestionCrudData;
+import '../../features/question_crud/data/repositories/question_repository_impl.dart'
+    as QuestionCrudData;
+import '../../features/question_crud/domain/repositories/question_repository.dart'
+    as QuestionCrudDomain;
+import '../../features/question_crud/domain/usecases/get_questions.dart'
+    as QuestionCrudUseCases;
+import '../../features/question_crud/domain/usecases/add_question.dart'
+    as QuestionCrudUseCases;
+import '../../features/question_crud/domain/usecases/update_question.dart'
+    as QuestionCrudUseCases;
+import '../../features/question_crud/domain/usecases/delete_question.dart'
+    as QuestionCrudUseCases;
+
 final getIt = GetIt.instance;
 
 @InjectableInit(
@@ -163,6 +179,14 @@ void _registerDataSources() {
       secureStorage: getIt<SecureStorageUtil>(),
     ),
   );
+
+  // Question CRUD (Admin)
+  getIt.registerLazySingleton<QuestionCrudData.QuestionRemoteDataSource>(
+    () => QuestionCrudData.QuestionRemoteDataSource(
+      getIt<Dio>(),
+      getIt<SecureStorageUtil>(),
+    ),
+  );
 }
 
 // ========================================
@@ -212,6 +236,12 @@ void _registerRepositories() {
   // Questionaries
   getIt.registerLazySingleton<OnboardingRepository>(
     () => OnboardingRepositoryImpl(getIt<OnboardingRemoteDataSource>()),
+  );
+
+  // Question CRUD (Admin)
+  getIt.registerLazySingleton<QuestionCrudDomain.QuestionRepository>(
+    () => QuestionCrudData.QuestionRepositoryImpl(
+        getIt<QuestionCrudData.QuestionRemoteDataSource>()),
   );
 }
 
@@ -287,6 +317,16 @@ void _registerUseCases() {
       () => DeletePreferencesUseCase(getIt<OnboardingRepository>()));
   getIt.registerLazySingleton(
       () => SetOnboardingStatusUseCase(getIt<OnboardingRepository>()));
+
+  // Question CRUD (Admin)
+  getIt.registerLazySingleton(() => QuestionCrudUseCases.GetQuestions(
+      getIt<QuestionCrudDomain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => QuestionCrudUseCases.AddQuestion(
+      getIt<QuestionCrudDomain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => QuestionCrudUseCases.UpdateQuestion(
+      getIt<QuestionCrudDomain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => QuestionCrudUseCases.DeleteQuestion(
+      getIt<QuestionCrudDomain.QuestionRepository>()));
 }
 
 // ========================================
