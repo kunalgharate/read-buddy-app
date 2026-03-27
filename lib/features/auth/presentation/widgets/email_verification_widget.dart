@@ -97,7 +97,9 @@ class EmailVerificationScreen extends StatelessWidget {
               accessToken: state.user.accessToken,
               refreshToken: state.user.refreshToken);
 
-          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          if (!context.mounted) return;
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/onboarding-questionnaire', (route) => false);
         }
       },
       child: BlocBuilder<SignUpBloc, SignUpState>(

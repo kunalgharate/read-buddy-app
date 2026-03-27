@@ -102,12 +102,18 @@ class _SignInScreenState extends State<SignInScreen> {
               );
 
               if (!context.mounted) return;
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const OnboardingQuestionnaire(),
-                ),
-              );
+              if (state.user.role == 'admin') {
+                Navigator.pushReplacementNamed(context, '/admin');
+              } else if (state.user.onboardingCompleted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OnboardingQuestionnaire(),
+                  ),
+                );
+              }
             } else if (state is SignInFailure) {
               UiUtils.showErrorSnackBar(
                 context,
@@ -133,12 +139,18 @@ class _SignInScreenState extends State<SignInScreen> {
               );
 
               if (!context.mounted) return;
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const OnboardingQuestionnaire(),
-                ),
-              );
+              if (state.user.role == 'admin') {
+                Navigator.pushReplacementNamed(context, '/admin');
+              } else if (state.user.onboardingCompleted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OnboardingQuestionnaire(),
+                  ),
+                );
+              }
             } else if (state is GoogleSignInFailure) {
               UiUtils.showErrorSnackBar(
                 context,

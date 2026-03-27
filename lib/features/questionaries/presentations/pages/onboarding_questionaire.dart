@@ -130,6 +130,30 @@ class _OnboardingQuestionnaireView extends StatelessWidget {
             children: [
               const SizedBox(height: 24),
 
+              // Skip & Progress
+              Row(
+                children: [
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text(
+                      'Skip',
+                      style: TextStyle(
+                        color: Color(0xFF5B6675),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
               // Progress bar
               Row(
                 children: [

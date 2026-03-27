@@ -39,6 +39,9 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const DonationPage());
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case '/onboarding-questionnaire':
+        return MaterialPageRoute(
+            builder: (_) => const OnboardingQuestionnaire());
       case '/verification':
         return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
       case '/banner':
