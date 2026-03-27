@@ -6,7 +6,9 @@ import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.da
 import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dart';
 
-import '../../../auth/presentation/pages/sign_in_page.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_preferences.dart';
+import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../books/presentation/bloc/book_bloc.dart';
 import '../../../books/presentation/bloc/book_event.dart';
 import '../../../books/presentation/bloc/book_state.dart';
@@ -33,9 +35,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final actions = [
       ElevatedButton(
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const SignInScreen()));
+          onPressed: () async {
+            final secureStorage = getIt<SecureStorageUtil>();
+            await secureStorage.clearAll();
+            await AppPreferences.clear();
+            if (!context.mounted) return;
+            Navigator.pushReplacementNamed(context, '/signin');
           },
           child: const Icon(Icons.logout)),
     ];

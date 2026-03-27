@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../widgets/dashboard_box_widget.dart';
 
@@ -15,9 +16,11 @@ class AdminDashboardScreen extends StatelessWidget {
         actions: [
           //logout action
           IconButton(
-            onPressed: () {
+            onPressed: () async {
               final secureStorage = getIt<SecureStorageUtil>();
-              secureStorage.clearAll();
+              await secureStorage.clearAll();
+              await AppPreferences.clear();
+              if (!context.mounted) return;
               Navigator.pushReplacementNamed(context, '/signin');
             },
             icon: const Icon(Icons.logout),
