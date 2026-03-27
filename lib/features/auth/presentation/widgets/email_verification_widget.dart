@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../blocs/sign_up/sign_up_bloc.dart';
 import 'custom_button_widget.dart';
@@ -96,6 +97,7 @@ class EmailVerificationScreen extends StatelessWidget {
           await secureStorage.saveTokens(
               accessToken: state.user.accessToken,
               refreshToken: state.user.refreshToken);
+          await AppPreferences.setLoggedIn(true);
 
           if (!context.mounted) return;
           Navigator.pushNamedAndRemoveUntil(
