@@ -5,14 +5,19 @@ import '../../../../core/network/api_constants.dart';
 
 class QuestionRemoteDataSource {
   final Dio _dio;
+  final SecureStorageUtil _storage;
   final String baseUrl = ApiConstants.onboarding;
 
-  QuestionRemoteDataSource(this._dio, SecureStorageUtil storage);
+  QuestionRemoteDataSource(this._dio, this._storage);
 
-  // GET - Fetch all questions
+  Future<Options> get _authOptions async {
+    final token = await _storage.getAccessToken() ?? '';
+    return Options(headers: {'Authorization': 'Bearer $token'});
+  }
+
+  // GET - Fetch all questions (no auth needed)
   Future<List<QuestionEntity>> getQuestions() async {
     try {
-      // Interceptor automatically adds token and handles refresh
       final response = await _dio.get('$baseUrl/questions');
 
       List<QuestionEntity> questions =
@@ -35,8 +40,8 @@ class QuestionRemoteDataSource {
             : 'multiSelection',
       };
 
-      // Interceptor automatically adds token and handles refresh
-      await _dio.post('$baseUrl/question', data: requestData);
+      await _dio.post('$baseUrl/question',
+          data: requestData, options: await _authOptions);
     } catch (e) {
       throw Exception('Failed to add question: $e');
     }
@@ -53,8 +58,8 @@ class QuestionRemoteDataSource {
             : 'multiSelection',
       };
 
-      // Interceptor automatically adds token and handles refresh
-      await _dio.put('$baseUrl/question/${question.id}', data: requestData);
+      await _dio.put('$baseUrl/question/${question.id}',
+          data: requestData, options: await _authOptions);
     } catch (e) {
       throw Exception('Failed to update question: $e');
     }
@@ -63,8 +68,7 @@ class QuestionRemoteDataSource {
   // DELETE - Remove question
   Future<void> deleteQuestion(String id) async {
     try {
-      // Interceptor automatically adds token and handles refresh
-      await _dio.delete('$baseUrl/question/$id');
+      await _dio.delete('$baseUrl/question/$id', options: await _authOptions);
     } catch (e) {
       throw Exception('Failed to delete question: $e');
     }
