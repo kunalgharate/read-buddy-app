@@ -124,24 +124,27 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     }
   }
 
-  /// Maps collected answers to the preference body shape
+  /// Maps collected answers to the API request body
   Map<String, dynamic> _buildPreferenceBody(
     List<QuestionEntity> questions,
     Map<String, List<String>> answers,
   ) {
-    final List<Map<String, dynamic>> preferences = [];
+    final List<Map<String, dynamic>> responses = [];
 
     for (final question in questions) {
       final selected = answers[question.id] ?? [];
       if (selected.isEmpty) continue;
 
-      preferences.add({
+      responses.add({
         'questionId': question.id,
         'question': question.question,
         'selectedAnswers': selected,
       });
     }
 
-    return {'preferences': preferences};
+    return {
+      'responses': responses,
+      'isOnboardingComplete': true,
+    };
   }
 }
