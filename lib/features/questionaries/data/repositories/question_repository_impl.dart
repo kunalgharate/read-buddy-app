@@ -13,6 +13,10 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
       remoteDataSource.getQuestions();
 
   @override
+  Future<Map<String, List<String>>> getSavedPreferences() =>
+      remoteDataSource.getSavedPreferences();
+
+  @override
   Future<void> setPreferences(Map<String, dynamic> preferences) =>
       remoteDataSource.setPreferences(preferences);
 

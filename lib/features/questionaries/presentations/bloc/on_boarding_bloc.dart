@@ -41,10 +41,14 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
         emit(OnboardingError('No questions available'));
         return;
       }
+
+      // Fetch previously saved preferences and pre-select answers
+      final saved = await getQuestionsUseCase.repository.getSavedPreferences();
+
       emit(OnboardingQuestionsLoaded(
         questions: questions,
         currentIndex: 0,
-        answers: {},
+        answers: saved,
       ));
     } catch (e) {
       emit(OnboardingError('Failed to load questions: ${e.toString()}'));
