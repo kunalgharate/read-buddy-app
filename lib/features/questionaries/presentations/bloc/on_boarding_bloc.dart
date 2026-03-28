@@ -1,6 +1,5 @@
 // presentation/bloc/onboarding_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/preferences_model.dart';
 import '../../domain/entity/onboarding_question_entity.dart';
 import '../../domain/usecases/delete_user_preferences.dart';
 import '../../domain/usecases/get_questions.dart';
@@ -42,10 +41,14 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
         emit(OnboardingError('No questions available'));
         return;
       }
+
+      // Fetch previously saved preferences and pre-select answers
+      final saved = await getQuestionsUseCase.repository.getSavedPreferences();
+
       emit(OnboardingQuestionsLoaded(
         questions: questions,
         currentIndex: 0,
-        answers: {},
+        answers: saved,
       ));
     } catch (e) {
       emit(OnboardingError('Failed to load questions: ${e.toString()}'));
@@ -125,36 +128,27 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     }
   }
 
-  /// Maps collected answers to the preference body shape
+  /// Maps collected answers to the API request body
   Map<String, dynamic> _buildPreferenceBody(
     List<QuestionEntity> questions,
     Map<String, List<String>> answers,
   ) {
-    List<String> genres = [];
-    List<String> formats = [];
-    List<String> preferredTimes = [];
+    final List<Map<String, dynamic>> responses = [];
 
     for (final question in questions) {
-      final q = question.question.toLowerCase();
       final selected = answers[question.id] ?? [];
       if (selected.isEmpty) continue;
 
-      if (q.contains('format')) {
-        formats = selected;
-      } else if (q.contains('when') || q.contains('time')) {
-        preferredTimes = selected;
-      } else if (q.contains('type') ||
-          q.contains('genre') ||
-          q.contains('enjoy')) {
-        genres = [...genres, ...selected];
-      }
-      // Language question is intentionally skipped — not in preference body
+      responses.add({
+        'questionId': question.id,
+        'question': question.question,
+        'selectedAnswers': selected,
+      });
     }
 
-    return PreferenceModel(
-      genres: genres,
-      formats: formats,
-      preferredTimes: preferredTimes,
-    ).toJson();
+    return {
+      'responses': responses,
+      'isOnboardingComplete': true,
+    };
   }
 }

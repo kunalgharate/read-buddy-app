@@ -38,6 +38,9 @@ class ApiConstants {
   static const Banner = '$baseUrl/banners';
 
   static const String updateUserInfo = '$baseUrl/users/update-user-info';
+  // Onboarding base
+  static const String onboarding = '$baseUrl/onboarding';
+
   // Onboarding Endpoints
   static const String getAllQuestions = '$baseUrl/onboarding/questions';
   static const String getQuestion =

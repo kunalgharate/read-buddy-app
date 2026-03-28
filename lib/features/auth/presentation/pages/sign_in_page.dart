@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
 import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
@@ -82,19 +83,6 @@ class _SignInScreenState extends State<SignInScreen> {
   void _navigateToForgotPassword() =>
       Navigator.pushNamed(context, '/forgot-password');
 
-  // User handling methods
-  Future<void> _handleUserSuccess(user) async {
-    final secureStorage = getIt<SecureStorageUtil>();
-    await secureStorage.saveUser(user);
-    await secureStorage.saveTokens(
-      accessToken: user.accessToken,
-      refreshToken: user.refreshToken,
-    );
-
-    final route = user.role == 'admin' ? '/admin' : '/home';
-    Navigator.pushReplacementNamed(context, route);
-  }
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -113,14 +101,21 @@ class _SignInScreenState extends State<SignInScreen> {
                 accessToken: state.user.accessToken,
                 refreshToken: state.user.refreshToken,
               );
+              await AppPreferences.setLoggedIn(true);
 
               if (!context.mounted) return;
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const OnboardingQuestionnaire(),
-                ),
-              );
+              if (state.user.role == 'admin') {
+                Navigator.pushReplacementNamed(context, '/admin');
+              } else if (state.user.onboardingCompleted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OnboardingQuestionnaire(),
+                  ),
+                );
+              }
             } else if (state is SignInFailure) {
               UiUtils.showErrorSnackBar(
                 context,
@@ -144,14 +139,21 @@ class _SignInScreenState extends State<SignInScreen> {
                 accessToken: state.user.accessToken,
                 refreshToken: state.user.refreshToken,
               );
+              await AppPreferences.setLoggedIn(true);
 
               if (!context.mounted) return;
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const OnboardingQuestionnaire(),
-                ),
-              );
+              if (state.user.role == 'admin') {
+                Navigator.pushReplacementNamed(context, '/admin');
+              } else if (state.user.onboardingCompleted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OnboardingQuestionnaire(),
+                  ),
+                );
+              }
             } else if (state is GoogleSignInFailure) {
               UiUtils.showErrorSnackBar(
                 context,

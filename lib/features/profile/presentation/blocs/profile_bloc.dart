@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/secure_storage_utils.dart';

@@ -37,17 +37,12 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
       }
 
       final auth = await account.authentication;
-      final accessToken = auth.accessToken;
       final idToken = auth.idToken;
 
       if (idToken == null) {
         emit(GoogleSignInFailure("ID token is null"));
         return;
       }
-
-      // Optionally log or use accessToken if needed
-      print("Access Token: $accessToken");
-      print("ID Token: $idToken");
 
       // Send ID token to backend
       final user = await signInWithGoogle(SignInGoogleParams(token: idToken));

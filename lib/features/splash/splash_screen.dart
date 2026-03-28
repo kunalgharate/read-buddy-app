@@ -5,6 +5,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../home/presentation/screens/home_screen.dart';
+import '../dashboard/presentation/screens/admin_dashboard_screen.dart';
 import '../onboarding/onboarding_screens.dart';
 import '../questionaries/presentations/pages/onboarding_questionaire.dart';
 
@@ -91,7 +92,9 @@ class _SplashScreenState extends State<SplashScreen>
     }
 
     // Route based on onboardingCompleted
-    if (user.onboardingCompleted) {
+    if (user.role == 'admin') {
+      _navigate(const AdminDashboardScreen());
+    } else if (user.onboardingCompleted) {
       _navigate(const HomeScreen());
     } else {
       _navigate(const OnboardingQuestionnaire());

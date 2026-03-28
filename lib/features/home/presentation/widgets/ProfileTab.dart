@@ -2,12 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/di/injection.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
-import '../../../profile/presentation/pages/edit_screens/edit_email_screen.dart';
 import '../../../profile/presentation/pages/edit_screens/edit_mobile_screen.dart';
 import '../../../profile/presentation/pages/edit_screens/edit_name_screen.dart';
 import '../../../profile/presentation/widgets/profile_field_widget.dart';
@@ -119,21 +116,6 @@ class _ProfileTabState extends State<ProfileTab> {
         );
       },
     );
-  }
-
-  void _openEditEmail(String currentEmail) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditEmailScreen(currentEmail: currentEmail),
-      ),
-    );
-
-    if (result != null && result != currentEmail && mounted) {
-      context
-          .read<ProfileBloc>()
-          .add(UpdateProfileFieldEvent(field: 'email', value: result));
-    }
   }
 
   void _openEditGender(String currentGender) async {

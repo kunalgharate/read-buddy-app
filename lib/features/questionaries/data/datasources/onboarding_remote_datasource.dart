@@ -7,6 +7,7 @@ import '../models/question_model.dart';
 
 abstract class OnboardingRemoteDataSource {
   Future<List<QuestionModel>> getQuestions();
+  Future<Map<String, List<String>>> getSavedPreferences();
   Future<void> setPreferences(Map<String, dynamic> body);
   Future<void> updatePreferences(Map<String, dynamic> body);
   Future<void> deletePreferences();
@@ -32,12 +33,33 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
   @override
   Future<List<QuestionModel>> getQuestions() async {
     final response = await dio.get(
-      ApiConstants.getAllQuestions, // ← was hardcoded URL
+      ApiConstants.getAllQuestions,
       options: await _authOptions,
     );
     return (response.data as List)
         .map((q) => QuestionModel.fromJson(q))
         .toList();
+  }
+
+  @override
+  Future<Map<String, List<String>>> getSavedPreferences() async {
+    try {
+      final response = await dio.get(
+        ApiConstants.setUserPreferences,
+        options: await _authOptions,
+      );
+      final data = response.data as Map<String, dynamic>;
+      final responses = data['responses'] as List? ?? [];
+      final Map<String, List<String>> saved = {};
+      for (final r in responses) {
+        final qId = r['questionId']?.toString() ?? '';
+        final answers = List<String>.from(r['selectedAnswers'] ?? []);
+        if (qId.isNotEmpty) saved[qId] = answers;
+      }
+      return saved;
+    } catch (_) {
+      return {};
+    }
   }
 
   @override
