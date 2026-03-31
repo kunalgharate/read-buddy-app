@@ -15,7 +15,6 @@ import '../features/auth/presentation/widgets/email_verification_widget.dart';
 import '../features/books/presentation/pages/book_page.dart';
 import '../features/dashboard/presentation/screens/admin_dashboard_screen.dart';
 import '../features/onboarding/onboarding_screens.dart';
-import '../features/profile/presentation/pages/screen/profile_screen.dart';
 import '../features/splash/splash_screen.dart';
 
 class AppRouter {
@@ -38,7 +37,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => VerifyOtpScreen(email: email),
         );
-        case '/reset-password':
+      case '/reset-password':
         return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
       case '/admin':
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
@@ -52,18 +51,18 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const DonationPage());
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
-      case '/profile':
-        return MaterialPageRoute(builder: (_) => const ProfileScreen());
       case '/onboarding-questionnaire':
         return MaterialPageRoute(
-            builder: (_) => const OnboardingQuestionnaire());
+          builder: (_) => const OnboardingQuestionnaire(),
+        );
       case '/verification':
         return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
       case '/banner':
         return MaterialPageRoute(builder: (_) => const BannersList());
       case '/onboarding-page':
         return MaterialPageRoute(
-            builder: (_) => const OnboardingQuestionnaire());
+          builder: (_) => const OnboardingQuestionnaire(),
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
