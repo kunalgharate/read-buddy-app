@@ -1,10 +1,8 @@
-// features/books/data/repositories/book_repository_impl.dart
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
-
 import '../../domain/repositories/auth_repository.dart';
 import '../remotesource/auth_remote_data_source.dart';
+import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 
 @Injectable(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
@@ -13,78 +11,10 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future forgetPassword() {
-    // TODO: implement forgetPassword
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<AppUser> registerUser(Map<String, dynamic> data) async {
-    if (kDebugMode) {
-      print('📦 AuthRepository: Starting user registration');
-    }
-
+  Future<AppUser> signIn({required String email, required String password}) async {
     try {
-      final result = await remoteDataSource.registerUser(data);
-
-      if (kDebugMode) {
-        print('📦 AuthRepository: Registration successful');
-      }
-
-      return result;
-    } catch (error) {
-      if (kDebugMode) {
-        print('📦 AuthRepository: Registration failed - $error');
-      }
-      rethrow;
-    }
-  }
-
-  @override
-  Future<AppUser> verifyEmail(String email, String code) async {
-    if (kDebugMode) {
-      print('📦 AuthRepository: Starting email verification');
-    }
-
-    try {
-      final result = await remoteDataSource.verifyEmail(email, code);
-
-      if (kDebugMode) {
-        print('📦 AuthRepository: Email verification successful');
-      }
-
-      return result;
-    } catch (error) {
-      if (kDebugMode) {
-        print('📦 AuthRepository: Email verification failed - $error');
-      }
-      rethrow;
-    }
-  }
-
-  @override
-  Future<AppUser> signIn(
-      {required String email, required String password}) async {
-    if (kDebugMode) {
-      print('📦 AuthRepository: Starting sign in');
-      print('📦 AuthRepository: Email: $email');
-    }
-
-    try {
-      final result =
-          await remoteDataSource.signIn(email: email, password: password);
-
-      if (kDebugMode) {
-        print('📦 AuthRepository: Sign in successful');
-        print('📦 AuthRepository: User: ${result.name}');
-      }
-
-      return result;
-    } catch (error) {
-      if (kDebugMode) {
-        print('📦 AuthRepository: Sign in failed');
-        print('📦 AuthRepository: Error: $error');
-      }
+      return await remoteDataSource.signIn(email: email, password: password);
+    } catch (e) {
       rethrow;
     }
   }
@@ -92,5 +22,53 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AppUser> signInUsingGoogle({required String token}) {
     return remoteDataSource.signInWithGoogle(token: token);
+  }
+
+  @override
+  Future<AppUser> registerUser(Map<String, dynamic> data) async {
+    try {
+      return await remoteDataSource.registerUser(data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<AppUser> verifyEmail(String email, String code) async {
+    try {
+      return await remoteDataSource.verifyEmail(email, code);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> sendOtp(String email) async {
+    if (kDebugMode) print('📦 AuthRepository: Sending OTP to $email');
+    try {
+      await remoteDataSource.sendOtp(email);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> verifyResetOtp(String email, String otp) async {
+    if (kDebugMode) print('📦 AuthRepository: Verifying OTP for $email');
+    try {
+      await remoteDataSource.verifyResetOtp(email, otp);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> changePassword(String email, String code, String newPassword) async {
+    if (kDebugMode) print('📦 AuthRepository: Changing password for $email');
+    try {
+      await remoteDataSource.changePassword(email, code, newPassword);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

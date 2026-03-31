@@ -7,10 +7,14 @@ class ApiConstants {
   static const String verifyEmail = '$baseUrl/users/verify-email';
   static const String refreshToken = '$baseUrl/auth/refresh';
   static const String loginWithGoogle = '$baseUrl/googleauth/google-auth';
-
+  static const String resendResetOtp = '$baseUrl/users/resend-reset-otp';
+  static const String changePassword  = '$baseUrl/users/reset-password';
+  static const String verifyOtp = '$baseUrl/users/verify-reset-otp';
   // User endpoints
   static const String users = '$baseUrl/users';
-
+// Profile endpoints
+  static const String getProfile = '$baseUrl/users/profile';
+  static const String updateAvatar = '$baseUrl/users/update-avatar';
   // Book endpoints
   static const String books = '$baseUrl/books';
   static const String searchBooks = '$baseUrl/searchbook/search';

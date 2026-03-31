@@ -6,11 +6,13 @@ import '../../../../core/utils/network_utils.dart';
 import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AppUserModel> signIn(
-      {required String email, required String password});
+  Future<AppUserModel> signIn({required String email, required String password});
   Future<AppUserModel> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
   Future<AppUserModel> signInWithGoogle({required String token});
+  Future<void> sendOtp(String email);
+  Future<void> verifyResetOtp(String email, String otp);
+  Future<void> changePassword(String email, String code, String newPassword);
 }
 
 @Injectable(as: AuthRemoteDataSource)
@@ -30,7 +32,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       print('🌐 AuthRemoteDataSource: Email: $email');
     }
 
-    // Check network connectivity before making request
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
       throw DioException(
@@ -41,40 +42,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     try {
-      final requestData = {
-        'email': email.trim().toLowerCase(),
-        'password': password,
-      };
-
-      if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Request data: $requestData');
-      }
-
       final response = await _dio.post(
         ApiConstants.login,
-        data: requestData,
+        data: {
+          'email': email.trim().toLowerCase(),
+          'password': password,
+        },
       );
 
-      if (kDebugMode) {
-        print(
-            '🌐 AuthRemoteDataSource: Response status: ${response.statusCode}');
-        print('🌐 AuthRemoteDataSource: Response data: ${response.data}');
-      }
-
       if (response.statusCode == ApiConstants.success) {
-        final userModel = AppUserModel.fromJson(response.data);
-
-        if (kDebugMode) {
-          print('🌐 AuthRemoteDataSource: User model created successfully');
-          print('🌐 AuthRemoteDataSource: User name: ${userModel.name}');
-        }
-
-        return userModel;
-      }
-
-      if (kDebugMode) {
-        print(
-            '🌐 AuthRemoteDataSource: Login failed with status: ${response.statusCode}');
+        return AppUserModel.fromJson(response.data);
       }
 
       throw DioException(
@@ -83,23 +60,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'Login failed with status: ${response.statusCode}',
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Exception occurred during sign in');
-        print('🌐 AuthRemoteDataSource: Exception type: ${e.runtimeType}');
-        print('🌐 AuthRemoteDataSource: Exception details: $e');
-      }
       rethrow;
     }
   }
 
   @override
   Future<AppUserModel> registerUser(Map<String, dynamic> data) async {
-    if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Starting registration API call');
-      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.register}');
-    }
-
-    // Check network connectivity before making request
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
       throw DioException(
@@ -110,28 +76,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     try {
-      // Clean and validate data
       final cleanData = {
         ...data,
         'email': data['email']?.toString().trim().toLowerCase(),
         'name': data['name']?.toString().trim(),
       };
 
-      if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Clean data: $cleanData');
-      }
-
-      final response = await _dio.post(
-        ApiConstants.register,
-        data: cleanData,
-      );
-
-      if (kDebugMode) {
-        print(
-            '🌐 AuthRemoteDataSource: Registration response status: ${response.statusCode}');
-        print(
-            '🌐 AuthRemoteDataSource: Registration response data: ${response.data}');
-      }
+      final response = await _dio.post(ApiConstants.register, data: cleanData);
 
       if (response.statusCode == ApiConstants.success ||
           response.statusCode == ApiConstants.created) {
@@ -144,21 +95,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'Registration failed',
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Registration exception: $e');
-      }
       rethrow;
     }
   }
 
   @override
   Future<AppUserModel> verifyEmail(String email, String code) async {
-    if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Starting email verification API call');
-      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.verifyEmail}');
-    }
-
-    // Check network connectivity before making request
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
       throw DioException(
@@ -177,11 +119,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         },
       );
 
-      if (kDebugMode) {
-        print(
-            '🌐 AuthRemoteDataSource: Verification response status: ${response.statusCode}');
-      }
-
       if (response.statusCode == ApiConstants.success) {
         return AppUserModel.fromJson(response.data);
       }
@@ -192,9 +129,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'Email verification failed',
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Email verification exception: $e');
-      }
       rethrow;
     }
   }
@@ -204,12 +138,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final response = await _dio.post(
         ApiConstants.loginWithGoogle,
-        data: {
-          'token': token,
-        },
+        data: {'token': token},
       );
-      print('Response status: ${response.statusCode}');
-      print('Response data: ${response.data}');
 
       if (response.statusCode == ApiConstants.success) {
         return AppUserModel.fromJson(response.data);
@@ -218,8 +148,116 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw DioException(
         requestOptions: response.requestOptions,
         response: response,
-        message: 'Login failed',
+        message: 'Google login failed',
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> sendOtp(String email) async {
+    if (kDebugMode) print('🌐 AuthRemoteDataSource: Sending OTP to $email');
+
+    final hasInternet = await NetworkUtils.hasInternetConnection();
+    if (!hasInternet) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ApiConstants.resendResetOtp),
+        type: DioExceptionType.connectionError,
+        message: 'No internet connection available',
+      );
+    }
+
+    try {
+      final response = await _dio.post(
+        ApiConstants.resendResetOtp,
+        data: {'email': email.trim().toLowerCase()},
+      );
+
+      if (kDebugMode) print('🌐 AuthRemoteDataSource: OTP sent ${response.statusCode}');
+
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to send OTP',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> verifyResetOtp(String email, String otp) async {
+    if (kDebugMode) print('🌐 AuthRemoteDataSource: Verifying OTP for $email');
+
+    final hasInternet = await NetworkUtils.hasInternetConnection();
+    if (!hasInternet) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ApiConstants.verifyOtp),
+        type: DioExceptionType.connectionError,
+        message: 'No internet connection available',
+      );
+    }
+
+    try {
+      final response = await _dio.post(
+        ApiConstants.verifyOtp,
+        data: {
+          'email': email.trim().toLowerCase(),
+          'code': otp.trim(),
+        },
+      );
+
+      if (kDebugMode) print('🌐 AuthRemoteDataSource: OTP verified ${response.statusCode}');
+
+      if (response.statusCode != ApiConstants.success) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'OTP verification failed',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> changePassword(
+      String email, String code, String newPassword) async {
+    if (kDebugMode) print('🌐 AuthRemoteDataSource: Changing password for $email');
+
+    final hasInternet = await NetworkUtils.hasInternetConnection();
+    if (!hasInternet) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ApiConstants.changePassword),
+        type: DioExceptionType.connectionError,
+        message: 'No internet connection available',
+      );
+    }
+
+    try {
+      final response = await _dio.post(
+        ApiConstants.changePassword,
+        data: {
+          'email': email.trim().toLowerCase(),
+          'code': code.trim(),
+          'newPassword': newPassword,
+        },
+      );
+
+      if (kDebugMode) print('🌐 AuthRemoteDataSource: Password changed ${response.statusCode}');
+
+      if (response.statusCode != ApiConstants.success) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Password change failed',
+        );
+      }
     } catch (e) {
       rethrow;
     }

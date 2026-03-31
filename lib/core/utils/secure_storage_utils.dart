@@ -94,7 +94,27 @@ class SecureStorageUtil {
   Future<void> saveOnboardingStatus(bool status) async {
     await write(key: 'onboardingStatus', value: status.toString());
   }
+// ─── Forgot Password Session ──────────────────────────────────────────────
 
+  Future<void> saveForgotPasswordSession({
+    required String email,
+    String? code,
+  }) async {
+    await write(key: 'fp_email', value: email);
+    if (code != null) await write(key: 'fp_code', value: code);
+  }
+
+  Future<Map<String, String?>> getForgotPasswordSession() async {
+    return {
+      'email': await read(key: 'fp_email'),
+      'code': await read(key: 'fp_code'),
+    };
+  }
+
+  Future<void> clearForgotPasswordSession() async {
+    await delete(key: 'fp_email');
+    await delete(key: 'fp_code');
+  }
   // ─── Generic ──────────────────────────────────────────────────────────────
 
   Future<void> write({required String key, required String value}) async {
@@ -112,4 +132,5 @@ class SecureStorageUtil {
   Future<void> clearAll() async {
     await _storage.deleteAll();
   }
+
 }
