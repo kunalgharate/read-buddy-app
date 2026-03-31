@@ -4,7 +4,10 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../auth/domain/entities/app_user.dart';
+import '../../domain/entities/user_profile.dart';
+import '../../domain/usecases/get_profile.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
+import '../../domain/usecases/update_user_avatar.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
@@ -14,120 +17,136 @@ enum PhotoSource { camera, gallery }
 @injectable
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final SecureStorageUtil _secureStorage;
+  final GetProfileUseCase _getProfileUseCase;
+  final UpdateAvatarUseCase _updateAvatarUseCase;
   final UpdateProfileUseCase _updateProfileUseCase;
 
   ProfileBloc(
-    this._secureStorage,
-    this._updateProfileUseCase,
-  ) : super(ProfileInitial()) {
+      this._secureStorage,
+      this._getProfileUseCase,
+      this._updateAvatarUseCase,
+      this._updateProfileUseCase,
+      ) : super(ProfileInitial()) {
     on<LoadProfileEvent>(_onLoadProfile);
+    on<UpdateAvatarEvent>(_onUpdateAvatar);
     on<UpdateProfileFieldEvent>(_onUpdateProfileField);
-    on<UpdateProfilePhotoEvent>(_onUpdateProfilePhoto);
     on<RefreshProfileEvent>(_onRefreshProfile);
   }
 
-  Future<void> _onLoadProfile(
-    LoadProfileEvent event,
-    Emitter<ProfileState> emit,
-  ) async {
-    emit(ProfileLoading());
+  // ─── GET /users/profile ───────────────────────────────────────────────────
 
+  Future<void> _onLoadProfile(
+      LoadProfileEvent event,
+      Emitter<ProfileState> emit,
+      ) async {
+    emit(ProfileLoading());
     try {
-      final user = await _secureStorage.getUser();
-      if (user != null) {
-        emit(ProfileLoaded(user));
-      } else {
-        emit(const ProfileError('No user data found. Please login again.'));
-      }
+      final profileUser = await _getProfileUseCase.call();
+      emit(ProfileLoaded(profileUser));
     } catch (error) {
-      final errorMessage = ErrorHandler.getErrorMessage(error);
-      emit(ProfileError(errorMessage));
+      // Fallback to cached AppUser from secure storage
+      try {
+        final cachedUser = await _secureStorage.getUser();
+        if (cachedUser != null) {
+          emit(ProfileLoaded(_appUserToProfileUser(cachedUser)));
+        } else {
+          emit(ProfileError(ErrorHandler.getErrorMessage(error)));
+        }
+      } catch (_) {
+        emit(ProfileError(ErrorHandler.getErrorMessage(error)));
+      }
     }
   }
 
-  Future<void> _onUpdateProfileField(
-    UpdateProfileFieldEvent event,
-    Emitter<ProfileState> emit,
-  ) async {
-    if (state is! ProfileLoaded) return;
+  // ─── PATCH /users/update-avatar ───────────────────────────────────────────
 
-    final currentState = state as ProfileLoaded;
-    final currentUser = currentState.user;
+  Future<void> _onUpdateAvatar(
+      UpdateAvatarEvent event,
+      Emitter<ProfileState> emit,
+      ) async {
+    final currentUser = _currentUser();
+    if (currentUser == null) return;
+
+    emit(ProfileUpdating(currentUser));
     try {
-      emit(ProfileUpdating(currentUser));
+      final updatedUser = await _updateAvatarUseCase.call(event.avatarName);
+      emit(AvatarUpdateSuccess(updatedUser));
+      emit(ProfileLoaded(updatedUser));
+    } catch (error) {
+      emit(ProfileError(ErrorHandler.getErrorMessage(error)));
+      emit(ProfileLoaded(currentUser));
+    }
+  }
+
+  // ─── PUT /users/update-user-info ──────────────────────────────────────────
+
+  Future<void> _onUpdateProfileField(
+      UpdateProfileFieldEvent event,
+      Emitter<ProfileState> emit,
+      ) async {
+    final currentUser = _currentUser();
+    if (currentUser == null) return;
+
+    emit(ProfileUpdating(currentUser));
+    try {
       final profileData = _validateInputs(key: event.field, value: event.value);
       if (profileData['error'] != null) {
         emit(ProfileError(profileData['error']!));
-        emit(ProfileLoaded(currentUser)); // Revert to previous state
+        emit(ProfileLoaded(currentUser));
         return;
       }
       profileData.remove('error');
-      final updatedUserFromApi =
-          await _updateProfileUseCase.call(profileData: profileData);
 
-      await _secureStorage.saveUser(updatedUserFromApi);
-      emit(ProfileUpdated(updatedUserFromApi));
-      emit(ProfileLoaded(updatedUserFromApi));
+      final updatedAppUser =
+      await _updateProfileUseCase.call(profileData: profileData);
+      await _secureStorage.saveUser(updatedAppUser);
+
+      // Re-fetch full profile after update to stay in sync
+      add(LoadProfileEvent());
     } catch (error) {
-      final errorMessage = ErrorHandler.getErrorMessage(error);
-      emit(ProfileError(errorMessage));
-      // Revert to previous state on error
-      emit(ProfileLoaded(currentUser));
-    }
-  }
-
-  Future<void> _onUpdateProfilePhoto(
-    UpdateProfilePhotoEvent event,
-    Emitter<ProfileState> emit,
-  ) async {
-    if (state is! ProfileLoaded) return;
-
-    final currentState = state as ProfileLoaded;
-    final currentUser = currentState.user;
-
-    emit(ProfileUpdating(currentUser));
-
-    try {
-      // TODO: Implement image picker and upload functionality
-      // final imagePath = await _imagePickerService.pickImage(event.source);
-      // final imageUrl = await _imageUploadService.uploadImage(imagePath);
-
-      // For now, just show a message
-      emit(const ProfileError(
-          'Photo update functionality will be implemented soon'));
-      emit(ProfileLoaded(currentUser));
-    } catch (error) {
-      final errorMessage = ErrorHandler.getErrorMessage(error);
-      emit(ProfileError(errorMessage));
+      emit(ProfileError(ErrorHandler.getErrorMessage(error)));
       emit(ProfileLoaded(currentUser));
     }
   }
 
   Future<void> _onRefreshProfile(
-    RefreshProfileEvent event,
-    Emitter<ProfileState> emit,
-  ) async {
-    try {
-      // Refresh profile from secure storage first
-      final user = await _secureStorage.getUser();
-      if (user != null) {
-        emit(ProfileLoaded(user));
-      }
-
-      // TODO: Implement server refresh if needed
-      // final serverUser = await _profileRepository.getUserProfile();
-      // await _secureStorage.saveUser(serverUser);
-      // emit(ProfileLoaded(serverUser));
-    } catch (error) {
-      final errorMessage = ErrorHandler.getErrorMessage(error);
-      emit(ProfileError(errorMessage));
-    }
+      RefreshProfileEvent event,
+      Emitter<ProfileState> emit,
+      ) async {
+    add(LoadProfileEvent());
   }
 
-  Map<String, String> _validateInputs({
-    String? key,
-    String? value,
-  }) {
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  ProfileUser? _currentUser() {
+    if (state is ProfileLoaded) return (state as ProfileLoaded).user;
+    if (state is ProfileUpdating) return (state as ProfileUpdating).user;
+    if (state is AvatarUpdateSuccess) return (state as AvatarUpdateSuccess).user;
+    return null;
+  }
+
+  /// Maps a cached [AppUser] → [ProfileUser] as fallback when API is unavailable
+  ProfileUser _appUserToProfileUser(AppUser u) {
+    return ProfileUser(
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      phno: u.phno,
+      picture: u.picture,
+      userAvatar: u.userAvatar,
+      role: u.role,
+      isPrime: u.isPrime,
+      finesDue: u.finesDue,
+      isEmailVerified: u.isEmailVerified,
+      onboardingCompleted: u.onboardingCompleted,
+      badges: u.badges,
+      wishlist: u.wishlist ?? [],
+      createdAt: u.createdAt,
+      updatedAt: u.updatedAt,
+    );
+  }
+
+  Map<String, String> _validateInputs({String? key, String? value}) {
     if (key == null || value == null) {
       return {'error': 'Key and value are required'};
     }
@@ -141,17 +160,17 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           return {'error': 'Name can only contain letters and spaces'};
         }
         return {'name': value.trim()};
+
       case 'phno':
         if (!RegExp(r'^\d{10}$').hasMatch(value.trim())) {
           return {'error': 'Phone number must be exactly 10 digits'};
         }
-        return {'phno': value.trim()}; // Always use 'phno' for API
+        return {'phno': value.trim()};
 
       case 'email':
-        // Email updates are not allowed
         return {
           'error':
-              'Email address cannot be changed. It\'s your primary account identifier.'
+          'Email address cannot be changed. It\'s your primary account identifier.'
         };
 
       case 'gender':
@@ -168,7 +187,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         try {
           DateTime.parse(value);
           return {'dob': value};
-        } catch (e) {
+        } catch (_) {
           return {'error': 'Invalid date format'};
         }
 
@@ -176,29 +195,4 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         return {'error': 'Invalid field key'};
     }
   }
-}
-
-// Additional Profile States for better field update handling
-class ProfileFieldUpdated extends ProfileState {
-  final AppUser user;
-  final String updatedField;
-  final String newValue;
-
-  const ProfileFieldUpdated({
-    required this.user,
-    required this.updatedField,
-    required this.newValue,
-  });
-
-  @override
-  List<Object> get props => [user, updatedField, newValue];
-}
-
-class ProfileApiUpdated extends ProfileState {
-  final AppUser user;
-
-  const ProfileApiUpdated(this.user);
-
-  @override
-  List<Object> get props => [user];
 }

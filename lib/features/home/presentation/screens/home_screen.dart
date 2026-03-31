@@ -4,8 +4,6 @@ import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigat
 import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dart';
-
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
@@ -13,6 +11,7 @@ import '../../../books/presentation/bloc/book_bloc.dart';
 import '../../../books/presentation/bloc/book_event.dart';
 import '../../../books/presentation/bloc/book_state.dart';
 import '../../../books/presentation/widgets/book_list_item.dart';
+import '../../../profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Maintab(),
     CategoryTab(),
     DonationTab(),
-    ProfileTab()
+    ProfileScreen()
   ];
 
   @override
