@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:read_buddy_app/core/theme/text_styles.dart';
-import 'package:read_buddy_app/core/utils/image_helper.dart';
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
@@ -106,7 +105,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                 const SizedBox(height: 16),
                 Text('Parent Category', style: _labelStyle),
                 DropdownButtonFormField<Item>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   hint: const Text('Select Parent Category'),
                   items: _categoryOptions.map((item) {
                     return DropdownMenuItem<Item>(
