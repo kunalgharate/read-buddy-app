@@ -9,7 +9,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   ProfileRepositoryImpl(this.remoteDataSource);
   @override
-  Future<AppUser> updateProfile({required Map<String, String> profileData}) async {
+  Future<AppUser> updateProfile(
+      {required Map<String, String> profileData}) async {
     return await remoteDataSource.updateProfile(profileData: profileData);
   }
 }

@@ -1,3 +1,3 @@
-sealed class DonatedBooksEvents{}
+sealed class DonatedBooksEvents {}
 
-class LoadDonatedBooks extends DonatedBooksEvents{}
+class LoadDonatedBooks extends DonatedBooksEvents {}

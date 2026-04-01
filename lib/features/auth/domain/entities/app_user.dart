@@ -18,7 +18,6 @@ class AppUser {
   final String? gender;
   final List<dynamic>? wishlist;
 
-
   AppUser({
     required this.id,
     required this.name,
@@ -39,6 +38,4 @@ class AppUser {
     this.gender,
     this.wishlist,
   });
-
-
 }

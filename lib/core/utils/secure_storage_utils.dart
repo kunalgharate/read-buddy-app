@@ -13,7 +13,6 @@ class SecureStorageUtil {
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-
   Future<void> saveUser(AppUser appUser) async {
     final userJson = jsonEncode({
       '_id': appUser.id,
@@ -39,24 +38,23 @@ class SecureStorageUtil {
     if (jsonString == null) return null;
     final Map<String, dynamic> userJson = jsonDecode(jsonString);
 
-
-   final appUser=  AppUser(
-     id: userJson['_id'] ?? '',
-     name: userJson['name'] ?? '',
-     email: userJson['email'] ?? '',
-     phno: userJson['phno'] ?? '',
-     gender: userJson['gender'] ?? '',
-     password: userJson['password'] ?? '',
-     role: userJson['role'] ?? '',
-     isPrime: userJson['isPrime'] ?? false,
-     finesDue: userJson['finesDue'] ?? 0,
-     isEmailVerified: userJson['isEmailVerified'] ?? false,
-     badges: userJson['badges'] ?? [],
-     createdAt: DateTime.parse(userJson['createdAt']),
-     updatedAt: DateTime.parse(userJson['updatedAt']),
-     version: userJson['__v'] ?? 0,
-     accessToken: userJson['accessToken'] ?? '',
-     refreshToken: userJson['refreshToken'] ?? '',
+    final appUser = AppUser(
+      id: userJson['_id'] ?? '',
+      name: userJson['name'] ?? '',
+      email: userJson['email'] ?? '',
+      phno: userJson['phno'] ?? '',
+      gender: userJson['gender'] ?? '',
+      password: userJson['password'] ?? '',
+      role: userJson['role'] ?? '',
+      isPrime: userJson['isPrime'] ?? false,
+      finesDue: userJson['finesDue'] ?? 0,
+      isEmailVerified: userJson['isEmailVerified'] ?? false,
+      badges: userJson['badges'] ?? [],
+      createdAt: DateTime.parse(userJson['createdAt']),
+      updatedAt: DateTime.parse(userJson['updatedAt']),
+      version: userJson['__v'] ?? 0,
+      accessToken: userJson['accessToken'] ?? '',
+      refreshToken: userJson['refreshToken'] ?? '',
     );
     return appUser;
   }

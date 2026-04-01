@@ -99,8 +99,9 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                   isContentPadding: true,
                   digitsOnly: false,
                   keyboardType: TextInputType.text,
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Title is required' : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Title is required'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 Text('Parent Category', style: _labelStyle),
@@ -162,9 +163,12 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                                             height: 160,
                                             fit: BoxFit.cover,
                                             placeholder: (context, url) =>
-                                                const Center(child: CircularProgressIndicator()),
-                                            errorWidget: (context, url, error) =>
-                                                const Icon(Icons.error),
+                                                const Center(
+                                                    child:
+                                                        CircularProgressIndicator()),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const Icon(Icons.error),
                                           )
                                         : Image.file(
                                             File(selectedImages[index]!.path),
@@ -191,7 +195,8 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                                             shape: BoxShape.circle,
                                           ),
                                           padding: const EdgeInsets.all(4),
-                                          child: const Icon(Icons.close, color: Colors.red, size: 18),
+                                          child: const Icon(Icons.close,
+                                              color: Colors.red, size: 18),
                                         ),
                                       ),
                                     ),
@@ -240,9 +245,8 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
         return;
       }
 
-      final File? imageFile = selectedImages.isNotEmpty
-          ? File(selectedImages.first!.path)
-          : null;
+      final File? imageFile =
+          selectedImages.isNotEmpty ? File(selectedImages.first!.path) : null;
 
       widget.onSubmit(titleController.text.trim(), selectedCategory, imageFile);
       Navigator.pop(context);

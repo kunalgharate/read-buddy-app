@@ -4,7 +4,6 @@ import 'package:read_buddy_app/features/onboarding/widgets/onboarding_widget.dar
 import '../../../core/di/injection.dart';
 import '../../../core/utils/secure_storage_utils.dart';
 
-
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -20,22 +19,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       'image': 'assets/onboarding_2.svg',
       'title': 'A World of Books, All Formats',
-      'description': 'Access a wide variety of books - textbooks, storybooks, reference books, and more in physical and digital formats.',
+      'description':
+          'Access a wide variety of books - textbooks, storybooks, reference books, and more in physical and digital formats.',
     },
     {
       'image': 'assets/onboarding_donate.svg',
       'title': 'Donate a Book Easily',
-      'description': 'Give your unused books a second life. Just a few taps to donate and make someone\'s day.',
+      'description':
+          'Give your unused books a second life. Just a few taps to donate and make someone\'s day.',
     },
     {
       'image': 'assets/onboarding_request.svg',
       'title': 'Request Books Affordably',
-      'description': 'Subscribe once, and request any available books at a low cost—no need to buy new every time.',
+      'description':
+          'Subscribe once, and request any available books at a low cost—no need to buy new every time.',
     },
     {
       'image': 'assets/onboarding_delivery.png', // <-- use .png here
       'title': 'Delivery to Your Door',
-      'description': 'We’ll send books right to your home or selected location using trusted delivery services.',
+      'description':
+          'We’ll send books right to your home or selected location using trusted delivery services.',
     },
   ];
 
@@ -68,7 +71,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 return OnboardingWidget(
                   image: onboardingData[index]["image"]!,
                   title: onboardingData[index]["title"]!,
-                  description: onboardingData[index]["description"]!, // <-- updated here
+                  description: onboardingData[index]
+                      ["description"]!, // <-- updated here
                 );
               },
             ),
@@ -90,7 +94,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2CE07F), // ReadBuddy color
+                            backgroundColor:
+                                const Color(0xFF2CE07F), // ReadBuddy color
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -126,7 +131,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ElevatedButton(
                         onPressed: _nextPage,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2CE07F), // ReadBuddy color
+                          backgroundColor:
+                              const Color(0xFF2CE07F), // ReadBuddy color
                         ),
                         child: const Text("Next"),
                       ),

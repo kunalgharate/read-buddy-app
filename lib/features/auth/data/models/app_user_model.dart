@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 
-
 class AppUserModel extends AppUser {
   AppUserModel({
     required super.id,
@@ -25,14 +24,14 @@ class AppUserModel extends AppUser {
   });
 
   factory AppUserModel.fromJson(Map<String, dynamic> json) {
-
     final user = json['user'];
-    
+
     if (kDebugMode) {
       print('👤 AppUserModel: User data: $user');
       print('👤 AppUserModel: Access token: ${json['accessToken']}');
       print('👤 AppUserModel: Refresh token: ${json['refreshToken']}');
-      print('👤 AppUserModel: isEmailVerified from JSON: ${user['isEmailVerified']}');
+      print(
+          '👤 AppUserModel: isEmailVerified from JSON: ${user['isEmailVerified']}');
     }
 
     final model = AppUserModel(
@@ -55,7 +54,7 @@ class AppUserModel extends AppUser {
       gender: user['gender'],
       wishlist: user['wishlist'] ?? [],
     );
-    
+
     return model;
   }
 

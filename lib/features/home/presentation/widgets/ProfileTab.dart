@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,7 +36,7 @@ class _ProfileTabState extends State<ProfileTab> {
   void _openSettings() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) =>  SettingsScreen()),
+      MaterialPageRoute(builder: (context) => SettingsScreen()),
     );
   }
 
@@ -50,7 +49,9 @@ class _ProfileTabState extends State<ProfileTab> {
     );
 
     if (result != null && result != currentName && mounted) {
-      context.read<ProfileBloc>().add(UpdateProfileFieldEvent(field: 'name', value: result));
+      context
+          .read<ProfileBloc>()
+          .add(UpdateProfileFieldEvent(field: 'name', value: result));
     }
   }
 
@@ -63,7 +64,9 @@ class _ProfileTabState extends State<ProfileTab> {
     );
 
     if (result != null && result != currentMobile && mounted) {
-      context.read<ProfileBloc>().add(UpdateProfileFieldEvent(field: 'mobile', value: result));
+      context
+          .read<ProfileBloc>()
+          .add(UpdateProfileFieldEvent(field: 'mobile', value: result));
     }
   }
 
@@ -127,7 +130,9 @@ class _ProfileTabState extends State<ProfileTab> {
     );
 
     if (result != null && result != currentEmail && mounted) {
-      context.read<ProfileBloc>().add(UpdateProfileFieldEvent(field: 'email', value: result));
+      context
+          .read<ProfileBloc>()
+          .add(UpdateProfileFieldEvent(field: 'email', value: result));
     }
   }
 
@@ -177,7 +182,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   onTap: () {
                     Navigator.pop(context);
                     if (mounted) {
-                      context.read<ProfileBloc>().add(UpdateProfilePhotoEvent(source: PhotoSource.camera));
+                      context.read<ProfileBloc>().add(
+                          UpdateProfilePhotoEvent(source: PhotoSource.camera));
                     }
                   },
                 ),
@@ -190,7 +196,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   onTap: () {
                     Navigator.pop(context);
                     if (mounted) {
-                      context.read<ProfileBloc>().add(UpdateProfilePhotoEvent(source: PhotoSource.gallery));
+                      context.read<ProfileBloc>().add(
+                          UpdateProfilePhotoEvent(source: PhotoSource.gallery));
                     }
                   },
                 ),
@@ -365,10 +372,10 @@ class _ProfileTabState extends State<ProfileTab> {
           }
 
           // Handle loaded/updated states
-          final user = (state is ProfileLoaded) 
-              ? state.user 
-              : (state is ProfileUpdated) 
-                  ? state.user 
+          final user = (state is ProfileLoaded)
+              ? state.user
+              : (state is ProfileUpdated)
+                  ? state.user
                   : null;
 
           if (user == null) {
@@ -391,7 +398,7 @@ class _ProfileTabState extends State<ProfileTab> {
       print('👤 UI User Picture: "${user.picture}"');
       print('✅ UI User Email Verified: ${user.isEmailVerified}');
     }
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
       child: Column(
@@ -432,7 +439,8 @@ class _ProfileTabState extends State<ProfileTab> {
               icon: Icons.email_outlined,
               label: 'Email Id',
               value: user.email.isNotEmpty ? user.email : 'Not set',
-              onTap: () {}, // Empty callback since we handle tap with GestureDetector
+              onTap:
+                  () {}, // Empty callback since we handle tap with GestureDetector
               isEditable: false, // Lock the email field
             ),
           ),

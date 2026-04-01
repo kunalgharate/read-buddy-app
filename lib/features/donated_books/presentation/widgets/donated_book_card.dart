@@ -56,9 +56,11 @@ class DonatedBookCard extends StatelessWidget {
                   // Badges row
                   Row(
                     children: [
-                      _badge(book.format, const Color(0xFF2CE07F), const Color(0xFF052E44)),
+                      _badge(book.format, const Color(0xFF2CE07F),
+                          const Color(0xFF052E44)),
                       const SizedBox(width: 8),
-                      _badgeWithIcon(book.language, const Color(0xFF2CE07F), const Color(0xFF052E44)),
+                      _badgeWithIcon(book.language, const Color(0xFF2CE07F),
+                          const Color(0xFF052E44)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -150,5 +152,4 @@ class DonatedBookCard extends StatelessWidget {
       ),
     );
   }
-
 }

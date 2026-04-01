@@ -15,7 +15,9 @@ class QuestionModel extends QuestionEntity {
       id: json['id'] as int,
       question: json['question'] as String,
       options: (json['options'] as List<dynamic>).cast<String>(),
-      type: json['type'] == 'single' ? QuestionType.single : QuestionType.multiple,
+      type: json['type'] == 'single'
+          ? QuestionType.single
+          : QuestionType.multiple,
     );
   }
 

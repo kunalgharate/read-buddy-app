@@ -39,7 +39,8 @@ class CategoryCardWidget extends StatelessWidget {
                 placeholder: (context, url) => const SizedBox(
                   width: 81,
                   height: 96.36,
-                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  child:
+                      Center(child: CircularProgressIndicator(strokeWidth: 2)),
                 ),
                 // Fallback icon when image fails to load
                 errorWidget: (context, url, error) => const SizedBox(
@@ -141,7 +142,7 @@ class _MoreMenu extends StatelessWidget {
               builder: (_) => UpdateCategoryPage(category: category),
             ),
           );
-        // Show delete confirmation dialog when delete is selected
+          // Show delete confirmation dialog when delete is selected
         } else if (value == 'delete') {
           DeleteCategory().confirmDelete(context, category.id);
         }

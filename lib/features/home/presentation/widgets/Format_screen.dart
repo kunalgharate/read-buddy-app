@@ -38,7 +38,7 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
               ),
             ),
             const SizedBox(height: 30),
-            
+
             // Format Selection Cards
             Row(
               children: [
@@ -52,13 +52,13 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: selectedFormat == 'physical' 
-                            ? const Color(0xFF4A90E2) 
+                        color: selectedFormat == 'physical'
+                            ? const Color(0xFF4A90E2)
                             : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: selectedFormat == 'physical' 
-                              ? const Color(0xFF4A90E2) 
+                          color: selectedFormat == 'physical'
+                              ? const Color(0xFF4A90E2)
                               : Colors.grey.shade300,
                           width: 2,
                         ),
@@ -75,8 +75,8 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                           Icon(
                             Icons.menu_book,
                             size: 40,
-                            color: selectedFormat == 'physical' 
-                                ? Colors.white 
+                            color: selectedFormat == 'physical'
+                                ? Colors.white
                                 : const Color(0xFF4A90E2),
                           ),
                           const SizedBox(height: 10),
@@ -85,8 +85,8 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: selectedFormat == 'physical' 
-                                  ? Colors.white 
+                              color: selectedFormat == 'physical'
+                                  ? Colors.white
                                   : Colors.black87,
                             ),
                           ),
@@ -95,8 +95,8 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                             'Printed book you own',
                             style: TextStyle(
                               fontSize: 12,
-                              color: selectedFormat == 'physical' 
-                                  ? Colors.white70 
+                              color: selectedFormat == 'physical'
+                                  ? Colors.white70
                                   : Colors.grey.shade600,
                             ),
                             textAlign: TextAlign.center,
@@ -117,13 +117,13 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: selectedFormat == 'digital' 
-                            ? const Color(0xFF4A90E2) 
+                        color: selectedFormat == 'digital'
+                            ? const Color(0xFF4A90E2)
                             : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: selectedFormat == 'digital' 
-                              ? const Color(0xFF4A90E2) 
+                          color: selectedFormat == 'digital'
+                              ? const Color(0xFF4A90E2)
                               : Colors.grey.shade300,
                           width: 2,
                         ),
@@ -140,8 +140,8 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                           Icon(
                             Icons.tablet_android,
                             size: 40,
-                            color: selectedFormat == 'digital' 
-                                ? Colors.white 
+                            color: selectedFormat == 'digital'
+                                ? Colors.white
                                 : const Color(0xFF4A90E2),
                           ),
                           const SizedBox(height: 10),
@@ -150,8 +150,8 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: selectedFormat == 'digital' 
-                                  ? Colors.white 
+                              color: selectedFormat == 'digital'
+                                  ? Colors.white
                                   : Colors.black87,
                             ),
                           ),
@@ -160,8 +160,8 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                             'Ebook, online and offline',
                             style: TextStyle(
                               fontSize: 12,
-                              color: selectedFormat == 'digital' 
-                                  ? Colors.white70 
+                              color: selectedFormat == 'digital'
+                                  ? Colors.white70
                                   : Colors.grey.shade600,
                             ),
                             textAlign: TextAlign.center,
@@ -173,9 +173,9 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 40),
-            
+
             // Action Buttons
             Row(
               children: [
@@ -266,4 +266,3 @@ class _BookFormatScreenState extends State<BookFormatScreen> {
     );
   }
 }
-

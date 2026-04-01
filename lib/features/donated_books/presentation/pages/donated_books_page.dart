@@ -68,7 +68,8 @@ class DonatedBooksPage extends StatelessWidget {
                     return const Center(child: Text('No donated books found.'));
                   }
                   return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                     itemCount: state.donatedBooks.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) =>

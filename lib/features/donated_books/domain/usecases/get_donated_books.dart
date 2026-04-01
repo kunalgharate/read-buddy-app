@@ -4,11 +4,11 @@ import 'package:read_buddy_app/features/donated_books/domain/entities/donated_bo
 import '../repositories/donated_books_repository.dart';
 
 @injectable
-class GetDonatedBooks{
-
+class GetDonatedBooks {
   final DonatedBooksRepository donatedBooksRepository;
 
   GetDonatedBooks(this.donatedBooksRepository);
 
-  Future<List<DonatedBooksEntity>> call() => donatedBooksRepository.getDonatedBooks();
+  Future<List<DonatedBooksEntity>> call() =>
+      donatedBooksRepository.getDonatedBooks();
 }

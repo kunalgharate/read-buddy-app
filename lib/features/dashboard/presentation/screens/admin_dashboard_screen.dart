@@ -16,8 +16,11 @@ class AdminDashboardScreen extends StatelessWidget {
     final categoryState = context.watch<CategoryBloc>().state;
     final donatedBooksState = context.watch<DonatedBooksBloc>().state;
 
-    final categoryCount = categoryState is CategoryLoaded ? categoryState.categories.length : 0;
-    final donatedBooksCount = donatedBooksState is DonatedBooksLoaded ? donatedBooksState.donatedBooks.length : 0;
+    final categoryCount =
+        categoryState is CategoryLoaded ? categoryState.categories.length : 0;
+    final donatedBooksCount = donatedBooksState is DonatedBooksLoaded
+        ? donatedBooksState.donatedBooks.length
+        : 0;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Panel'),

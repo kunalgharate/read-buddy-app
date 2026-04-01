@@ -24,7 +24,8 @@ class _QuestionaryScreenContent extends StatefulWidget {
   const _QuestionaryScreenContent();
 
   @override
-  State<_QuestionaryScreenContent> createState() => _QuestionaryScreenContentState();
+  State<_QuestionaryScreenContent> createState() =>
+      _QuestionaryScreenContentState();
 }
 
 class _QuestionaryScreenContentState extends State<_QuestionaryScreenContent> {
@@ -90,7 +91,8 @@ class _QuestionaryScreenContentState extends State<_QuestionaryScreenContent> {
                     controller: _controller,
                     itemCount: state.questions.length,
                     physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (index) => setState(() => currentIndex = index),
+                    onPageChanged: (index) =>
+                        setState(() => currentIndex = index),
                     itemBuilder: (_, index) {
                       final question = state.questions[index];
                       final selectedAnswers = state.answers[question.id] ?? [];
@@ -98,7 +100,9 @@ class _QuestionaryScreenContentState extends State<_QuestionaryScreenContent> {
                         question: question,
                         selectedAnswers: selectedAnswers,
                         onAnswerSelected: (option) {
-                          context.read<QuestionBloc>().add(SelectAnswer(question.id, option));
+                          context
+                              .read<QuestionBloc>()
+                              .add(SelectAnswer(question.id, option));
                         },
                       );
                     },
@@ -131,7 +135,8 @@ class _QuestionaryScreenContentState extends State<_QuestionaryScreenContent> {
       height: 8,
       width: currentIndex == index ? 24 : 8,
       decoration: BoxDecoration(
-        color: currentIndex == index ? const Color(0xFF2CE07F) : Colors.grey[300],
+        color:
+            currentIndex == index ? const Color(0xFF2CE07F) : Colors.grey[300],
         borderRadius: BorderRadius.circular(12),
       ),
     );
@@ -147,12 +152,17 @@ class _QuestionaryScreenContentState extends State<_QuestionaryScreenContent> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2CE07F),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
-                onPressed: () => context.read<QuestionBloc>().add(SubmitAnswers()),
+                onPressed: () =>
+                    context.read<QuestionBloc>().add(SubmitAnswers()),
                 child: const Text(
                   'Continue',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black87),
                 ),
               ),
             )
@@ -169,9 +179,11 @@ class _QuestionaryScreenContentState extends State<_QuestionaryScreenContent> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2CE07F),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
                   ),
-                  child: const Text('Next', style: TextStyle(color: Colors.black87)),
+                  child: const Text('Next',
+                      style: TextStyle(color: Colors.black87)),
                 ),
               ],
             ),
@@ -216,9 +228,13 @@ class _QuestionPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF2CE07F).withValues(alpha: 0.1) : Colors.white,
+                    color: isSelected
+                        ? const Color(0xFF2CE07F).withValues(alpha: 0.1)
+                        : Colors.white,
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF2CE07F) : Colors.grey[300]!,
+                      color: isSelected
+                          ? const Color(0xFF2CE07F)
+                          : Colors.grey[300]!,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(8),
@@ -227,9 +243,14 @@ class _QuestionPage extends StatelessWidget {
                     children: [
                       Icon(
                         question.type == QuestionType.single
-                            ? (isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked)
-                            : (isSelected ? Icons.check_box : Icons.check_box_outline_blank),
-                        color: isSelected ? const Color(0xFF2CE07F) : Colors.grey,
+                            ? (isSelected
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked)
+                            : (isSelected
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank),
+                        color:
+                            isSelected ? const Color(0xFF2CE07F) : Colors.grey,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -238,7 +259,9 @@ class _QuestionPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             color: isSelected ? Colors.black87 : Colors.black54,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
                           ),
                         ),
                       ),
@@ -253,4 +276,3 @@ class _QuestionPage extends StatelessWidget {
     );
   }
 }
-

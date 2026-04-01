@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-class DonatedBooksEntity extends Equatable{
-
+class DonatedBooksEntity extends Equatable {
   final String? id; //used
   final String bookTitle; //used
-  final String category;  //currently not in API
+  final String category; //currently not in API
   final String format; //used
   final String donorName; //used
   final String coverImageUrl; //optional
@@ -22,8 +21,7 @@ class DonatedBooksEntity extends Equatable{
     required this.createdAt,
     required this.language,
     required this.status,
-
-});
+  });
 
   String get timeAgo {
     try {
@@ -38,6 +36,14 @@ class DonatedBooksEntity extends Equatable{
   }
 
   @override
-  List<Object?> get props => [id, bookTitle, category, format, donorName, coverImageUrl, createdAt, language];
-
+  List<Object?> get props => [
+        id,
+        bookTitle,
+        category,
+        format,
+        donorName,
+        coverImageUrl,
+        createdAt,
+        language
+      ];
 }

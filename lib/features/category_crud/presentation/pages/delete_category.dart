@@ -30,12 +30,14 @@ class DeleteCategory {
             onPressed: () => Navigator.of(context).pop(),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFF052E44)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
             ),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Color(0xFF052E44), fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: Color(0xFF052E44), fontWeight: FontWeight.w600),
             ),
           ),
           ElevatedButton(
@@ -45,12 +47,14 @@ class DeleteCategory {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
             ),
             child: const Text(
               'Delete',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),
           ),
         ],

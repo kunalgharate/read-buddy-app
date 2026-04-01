@@ -85,7 +85,8 @@ class _CategoryListPageState extends State<CategoryListPage> {
                     final categories = _searchText.isEmpty
                         ? state.categories
                         : state.categories
-                            .where((c) => c.title.toLowerCase().contains(_searchText))
+                            .where((c) =>
+                                c.title.toLowerCase().contains(_searchText))
                             .toList();
 
                     if (categories.isEmpty) {
@@ -113,7 +114,8 @@ class _CategoryListPageState extends State<CategoryListPage> {
         ),
         label: const Text(
           'Add Category',
-          style: TextStyle(color: Color(0xFF052E44), fontWeight: FontWeight.bold),
+          style:
+              TextStyle(color: Color(0xFF052E44), fontWeight: FontWeight.bold),
         ),
         icon: const Icon(Icons.add, color: Color(0xFF052E44)),
       ),

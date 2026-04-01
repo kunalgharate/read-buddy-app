@@ -18,7 +18,8 @@ class FilterDonatedBooks {
           book.bookTitle.toLowerCase().contains(query.toLowerCase()) ||
           book.donorName.toLowerCase().contains(query.toLowerCase());
 
-      final matchesFormat = format.isEmpty || book.format.toLowerCase() == format.toLowerCase();
+      final matchesFormat =
+          format.isEmpty || book.format.toLowerCase() == format.toLowerCase();
 
       final matchesTime = _matchesTimeRange(book.createdAt, timeRange);
 

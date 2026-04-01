@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   // Constants
   static const Duration _splashDuration = Duration(seconds: 2);
   static const Duration _minimumSplashTime = Duration(milliseconds: 1500);
-  
+
   // State
   bool _isLoading = true;
   String _statusMessage = 'Loading...';
@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     final startTime = DateTime.now();
-    
+
     try {
       await _checkUserSession();
     } catch (e) {
@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       final secureStorage = getIt<SecureStorageUtil>();
-      
+
       // Check onboarding status first
       final isOnboardingCompleted = await secureStorage.getOnboardingStatus();
       if (!isOnboardingCompleted) {
@@ -59,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       // Get user session data
       final sessionData = await _getSessionData(secureStorage);
-      
+
       if (!sessionData.hasValidSession) {
         _navigateToSignIn();
         return;
@@ -78,7 +78,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
       // Navigate based on user role
       _navigateBasedOnRole(sessionData.user!.role);
-      
     } catch (e) {
       debugPrint('Session check error: $e');
       _navigateToSignIn();
@@ -111,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> {
       // - JWT token expiry check
       // - Token format validation
       // - Server-side validation call
-      
+
       return true;
     } catch (e) {
       debugPrint('Token validation error: $e');
@@ -146,7 +145,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigateBasedOnRole(String role) {
     if (!mounted) return;
-    
+
     final route = role == 'admin' ? '/admin' : '/home';
     Navigator.pushReplacementNamed(context, route);
   }
@@ -256,8 +255,8 @@ class SessionData {
   });
 
   bool get hasValidSession =>
-      user != null && 
-      accessToken != null && 
+      user != null &&
+      accessToken != null &&
       refreshToken != null &&
       accessToken!.isNotEmpty &&
       refreshToken!.isNotEmpty;

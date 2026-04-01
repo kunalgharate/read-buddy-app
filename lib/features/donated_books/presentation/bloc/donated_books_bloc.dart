@@ -5,17 +5,16 @@ import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 @injectable
-class DonatedBooksBloc extends Bloc<DonatedBooksEvents, DonatedBooksState>{
+class DonatedBooksBloc extends Bloc<DonatedBooksEvents, DonatedBooksState> {
   final GetDonatedBooks getDonatedBooks;
 
-  DonatedBooksBloc(this.getDonatedBooks):super(DonatedBooksInitial()){
-    on<LoadDonatedBooks>((event, emit) async{
+  DonatedBooksBloc(this.getDonatedBooks) : super(DonatedBooksInitial()) {
+    on<LoadDonatedBooks>((event, emit) async {
       emit(DonatedBooksLoading());
-      try{
+      try {
         final books = await getDonatedBooks();
         emit(DonatedBooksLoaded(books));
-      }
-      catch(e){
+      } catch (e) {
         emit(DonatedBooksLoadingError(e.toString()));
       }
     });

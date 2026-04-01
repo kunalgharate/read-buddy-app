@@ -25,7 +25,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   // Constants
   static const _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-  
+
   // Colors
   static const _primaryColor = Color(0xFF3182CE);
   static const _textColor = Color(0xFF1E2939);
@@ -63,11 +63,11 @@ class _SignInScreenState extends State<SignInScreen> {
   void _handleSignIn() {
     if (_formKey.currentState!.validate()) {
       context.read<SignInBloc>().add(
-        SignInRequest(
-          email: _emailController.text.trim().toLowerCase(),
-          password: _passwordController.text,
-        ),
-      );
+            SignInRequest(
+              email: _emailController.text.trim().toLowerCase(),
+              password: _passwordController.text,
+            ),
+          );
     }
   }
 
@@ -76,8 +76,10 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   // Navigation methods
-  void _navigateToSignUp() => Navigator.pushReplacementNamed(context, '/signup');
-  void _navigateToForgotPassword() => Navigator.pushNamed(context, '/forgot-password');
+  void _navigateToSignUp() =>
+      Navigator.pushReplacementNamed(context, '/signup');
+  void _navigateToForgotPassword() =>
+      Navigator.pushNamed(context, '/forgot-password');
 
   // User handling methods
   Future<void> _handleUserSuccess(user) async {
@@ -114,7 +116,8 @@ class _SignInScreenState extends State<SignInScreen> {
             if (state is GoogleSignInSuccess) {
               UiUtils.showSuccessSnackBar(
                 context,
-                message: 'Google Sign-In successful! Welcome ${state.user.name}',
+                message:
+                    'Google Sign-In successful! Welcome ${state.user.name}',
               );
               await _handleUserSuccess(state.user);
             } else if (state is GoogleSignInFailure) {
@@ -244,7 +247,8 @@ class _SignInScreenState extends State<SignInScreen> {
       hintStyle: const TextStyle(color: _hintColor, fontSize: 18.0),
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       prefixIcon: Icon(prefixIcon, color: _labelColor),
       suffixIcon: suffixIcon,
       border: _buildOutlineInputBorder(_borderColor),
@@ -254,7 +258,8 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  OutlineInputBorder _buildOutlineInputBorder(Color color, {double width = 1.0}) {
+  OutlineInputBorder _buildOutlineInputBorder(Color color,
+      {double width = 1.0}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(8.0),
       borderSide: BorderSide(color: color, width: width),
@@ -290,7 +295,8 @@ class _SignInScreenState extends State<SignInScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: _primaryColor,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0)),
               elevation: 0,
             ),
             child: isLoading
@@ -304,7 +310,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   )
                 : const Text(
                     'Sign In',
-                    style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
+                    style:
+                        TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
                   ),
           ),
         );
@@ -327,7 +334,8 @@ class _SignInScreenState extends State<SignInScreen> {
           backgroundColor: Colors.grey.shade200,
           textColor: _textColor,
           icon: _buildGoogleIcon(),
-          onPressed: () => context.read<GoogleSignInBloc>().add(GoogleSignInRequested()),
+          onPressed: () =>
+              context.read<GoogleSignInBloc>().add(GoogleSignInRequested()),
         );
       },
     );
@@ -337,7 +345,8 @@ class _SignInScreenState extends State<SignInScreen> {
     return Container(
       width: 28,
       height: 28,
-      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.black),
+      decoration:
+          const BoxDecoration(shape: BoxShape.circle, color: Colors.black),
       alignment: Alignment.center,
       child: const Text(
         'G',

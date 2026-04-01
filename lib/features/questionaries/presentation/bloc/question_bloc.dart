@@ -28,7 +28,8 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
   void _onSelectAnswer(SelectAnswer event, Emitter<QuestionState> emit) {
     if (state is QuestionLoaded) {
       final currentState = state as QuestionLoaded;
-      final question = currentState.questions.firstWhere((q) => q.id == event.questionId);
+      final question =
+          currentState.questions.firstWhere((q) => q.id == event.questionId);
       final updatedAnswers = Map<int, List<String>>.from(currentState.answers);
 
       if (question.type == QuestionType.single) {
@@ -36,7 +37,8 @@ class QuestionBloc extends Bloc<QuestionEvent, QuestionState> {
       } else {
         final current = updatedAnswers[event.questionId] ?? [];
         if (current.contains(event.option)) {
-          updatedAnswers[event.questionId] = current.where((o) => o != event.option).toList();
+          updatedAnswers[event.questionId] =
+              current.where((o) => o != event.option).toList();
         } else {
           updatedAnswers[event.questionId] = [...current, event.option];
         }

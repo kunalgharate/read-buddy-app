@@ -17,6 +17,10 @@ class UpdateCategoryUsecase {
     File? image,
   }) {
     return repository.updateCategory(
-        id: id, title: title, description: description, parentCategoryId: parentCategoryId, image: image);
+        id: id,
+        title: title,
+        description: description,
+        parentCategoryId: parentCategoryId,
+        image: image);
   }
 }

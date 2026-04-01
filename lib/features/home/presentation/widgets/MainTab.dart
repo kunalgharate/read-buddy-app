@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class Maintab extends StatelessWidget {
@@ -7,7 +6,9 @@ class Maintab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(child: Text("Main tab"),
-    ),);
+      body: Center(
+        child: Text("Main tab"),
+      ),
+    );
   }
 }

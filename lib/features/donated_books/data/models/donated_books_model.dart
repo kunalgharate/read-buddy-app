@@ -1,19 +1,18 @@
 import '../../domain/entities/donated_books_entity.dart';
 
 class DonatedBooksModel extends DonatedBooksEntity {
-  DonatedBooksModel({
-    super.id,
-    required super.bookTitle,
-    required super.category,
-    required super.format,
-    required super.donorName,
-    required super.coverImageUrl,
-    required super.createdAt,
-    required super.language,
-    required super.status
-  });
+  DonatedBooksModel(
+      {super.id,
+      required super.bookTitle,
+      required super.category,
+      required super.format,
+      required super.donorName,
+      required super.coverImageUrl,
+      required super.createdAt,
+      required super.language,
+      required super.status});
 
-  factory DonatedBooksModel.fromJson(Map<String, dynamic> json){
+  factory DonatedBooksModel.fromJson(Map<String, dynamic> json) {
     return DonatedBooksModel(
       id: json['donation']['_id'],
       bookTitle: json['donation']['title'] ?? '',
@@ -26,5 +25,4 @@ class DonatedBooksModel extends DonatedBooksEntity {
       status: json['donation']['status'] ?? '',
     );
   }
-
 }

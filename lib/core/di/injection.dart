@@ -79,7 +79,6 @@ import '../../features/donated_books/domain/repositories/donated_books_repositor
 import '../../features/donated_books/domain/usecases/get_donated_books.dart';
 import '../../features/donated_books/presentation/bloc/donated_books_bloc.dart';
 
-
 // Banner
 import '../../features/banner/datasources/data/createbanner_remote_datasource.dart';
 import '../../features/banner/datasources/repositories/banner_repo_impl.dart';
@@ -170,9 +169,8 @@ void _registerDataSources() {
 
   //Admin Donated Books List
   getIt.registerLazySingleton<DonatedBooksRemoteDataSource>(
-        () => DonatedBooksRemoteDataSourceImpl(dio: getIt<Dio>()),
+    () => DonatedBooksRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
-
 }
 
 // ========================================
@@ -226,9 +224,8 @@ void _registerRepositories() {
 
   //Donated Books Repositories
   getIt.registerLazySingleton<DonatedBooksRepository>(
-        () => DonatedBooksRepositoryImpl(getIt<DonatedBooksRemoteDataSource>()),
+    () => DonatedBooksRepositoryImpl(getIt<DonatedBooksRemoteDataSource>()),
   );
-
 }
 
 // ========================================
@@ -298,8 +295,8 @@ void _registerUseCases() {
   getIt.registerLazySingleton(() => SubmitAnswersUseCase());
 
   // Donated Books List Use Case
-  getIt.registerLazySingleton(() => GetDonatedBooks(getIt<DonatedBooksRepository>()));
-
+  getIt.registerLazySingleton(
+      () => GetDonatedBooks(getIt<DonatedBooksRepository>()));
 }
 
 // ========================================
@@ -357,7 +354,6 @@ void _registerBlocs() {
 
   // Donated Books List Bloc
   getIt.registerLazySingleton(() => DonatedBooksBloc(getIt<GetDonatedBooks>()));
-
 }
 
 // ========================================

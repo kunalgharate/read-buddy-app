@@ -8,7 +8,6 @@ class ApiConstants {
   static const String refreshToken = '$baseUrl/auth/refresh';
   static const String loginWithGoogle = '$baseUrl/googleauth/google-auth';
 
-
   // User endpoints
   static const String users = '$baseUrl/users';
 

@@ -57,9 +57,8 @@ class _EditNameScreenState extends State<EditNameScreen> {
     try {
       // Simulate API call delay
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       Navigator.pop(context, newName);
-      
     } catch (error) {
       UiUtils.showErrorSnackBar(
         context,

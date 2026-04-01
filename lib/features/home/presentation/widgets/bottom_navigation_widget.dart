@@ -8,11 +8,10 @@ import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dar
 
 import '../../../books/presentation/pages/book_page.dart';
 
-
 class BottomNavWidget extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
-  
+
   const BottomNavWidget({
     super.key,
     required this.currentIndex,
@@ -30,13 +29,15 @@ class BottomNavWidget extends StatelessWidget {
       animationDuration: const Duration(milliseconds: 300),
       onTap: onTap,
       items: [
-        SvgPicture.asset('assets/icons/home.svg', width: 28, height: 28, color: Colors.white),
-        SvgPicture.asset('assets/icons/categories.svg', width: 28, height: 28, color: Colors.white),
-        SvgPicture.asset('assets/icons/donation.svg', width: 28, height: 28, color: Colors.white),
-        SvgPicture.asset('assets/icons/person.svg', width: 28, height: 28, color: Colors.white),
+        SvgPicture.asset('assets/icons/home.svg',
+            width: 28, height: 28, color: Colors.white),
+        SvgPicture.asset('assets/icons/categories.svg',
+            width: 28, height: 28, color: Colors.white),
+        SvgPicture.asset('assets/icons/donation.svg',
+            width: 28, height: 28, color: Colors.white),
+        SvgPicture.asset('assets/icons/person.svg',
+            width: 28, height: 28, color: Colors.white),
       ],
     );
   }
 }
-
-
