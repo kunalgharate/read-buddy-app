@@ -13,7 +13,6 @@ class AddCategoryUsecase {
     String? parentCategoryId,
     required File image,
   }) {
-    print("usecase ADDDDDDDDDDD calling");
     return repository.addCategory(
       title: title,
       description: description,

@@ -71,6 +71,15 @@ import '../../features/category_crud/domain/usecases/get_caategories.dart';
 import '../../features/category_crud/domain/usecases/update_category.dart';
 import '../../features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 
+// Donated Books List
+// Donated Books
+import '../../features/donated_books/data/datasources/donation_remote_data_source.dart';
+import '../../features/donated_books/data/repositories/donated_books_repository_impl.dart';
+import '../../features/donated_books/domain/repositories/donated_books_repository.dart';
+import '../../features/donated_books/domain/usecases/get_donated_books.dart';
+import '../../features/donated_books/presentation/bloc/donated_books_bloc.dart';
+
+
 // Banner
 import '../../features/banner/datasources/data/createbanner_remote_datasource.dart';
 import '../../features/banner/datasources/repositories/banner_repo_impl.dart';
@@ -158,6 +167,12 @@ void _registerDataSources() {
   getIt.registerLazySingleton<QuestionLocalDataSource>(
     () => QuestionLocalDataSourceImpl(),
   );
+
+  //Admin Donated Books List
+  getIt.registerLazySingleton<DonatedBooksRemoteDataSource>(
+        () => DonatedBooksRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
 }
 
 // ========================================
@@ -208,6 +223,12 @@ void _registerRepositories() {
   getIt.registerLazySingleton<QuestionRepository>(
     () => QuestionRepositoryImpl(getIt<QuestionLocalDataSource>()),
   );
+
+  //Donated Books Repositories
+  getIt.registerLazySingleton<DonatedBooksRepository>(
+        () => DonatedBooksRepositoryImpl(getIt<DonatedBooksRemoteDataSource>()),
+  );
+
 }
 
 // ========================================
@@ -275,6 +296,10 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => GetQuestionsUseCase(getIt<QuestionRepository>()));
   getIt.registerLazySingleton(() => SubmitAnswersUseCase());
+
+  // Donated Books List Use Case
+  getIt.registerLazySingleton(() => GetDonatedBooks(getIt<DonatedBooksRepository>()));
+
 }
 
 // ========================================
@@ -329,6 +354,10 @@ void _registerBlocs() {
         getQuestions: getIt<GetQuestionsUseCase>(),
         submitAnswers: getIt<SubmitAnswersUseCase>(),
       ));
+
+  // Donated Books List Bloc
+  getIt.registerLazySingleton(() => DonatedBooksBloc(getIt<GetDonatedBooks>()));
+
 }
 
 // ========================================

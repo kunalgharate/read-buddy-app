@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:read_buddy_app/features/books/presentation/pages/book_page.dart';
-import 'package:read_buddy_app/features/donate/presentation/donation_page.dart';
 import 'package:read_buddy_app/features/home/presentation/pages/home_page.dart';
 import 'package:read_buddy_app/features/mybook/presentation/mybook.dart';
 
@@ -19,7 +18,7 @@ class _BottomNavLayoutState extends State<BottomNavLayout> {
     HomePage(),
     BookPage(),
     Mybook(),
-    DonationPage(),
+    // DonationPage(),
   ];
 
   final List<String> labels = ["Home", "Category", "MyBook", "Donate"];

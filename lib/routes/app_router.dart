@@ -5,13 +5,13 @@ import 'package:read_buddy_app/features/banner/presentation/pages/Add_banner.dar
 import 'package:read_buddy_app/features/banner/presentation/pages/banner_list.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
-import 'package:read_buddy_app/features/donate/presentation/donation_page.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
 
 import '../features/auth/presentation/widgets/email_verification_widget.dart';
 import '../features/books/presentation/pages/book_page.dart';
 import '../features/dashboard/presentation/screens/admin_dashboard_screen.dart';
 import '../features/onboarding/screens/onboarding_screens.dart';
+import '../features/donated_books/presentation/pages/donated_books_page.dart';
 import '../features/splash/splash_screen.dart';
 
 class AppRouter {
@@ -33,14 +33,14 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const CategoryListPage());
       case '/books':
         return MaterialPageRoute(builder: (_) => const BooksListPage());
-      case '/donation':
-        return MaterialPageRoute(builder: (_) => const DonationPage());
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case '/verification':
         return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
       case '/banner':
         return MaterialPageRoute(builder: (_) => const BannersList());
+      case '/donated-books':
+        return MaterialPageRoute(builder: (_) => const DonatedBooksPage());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

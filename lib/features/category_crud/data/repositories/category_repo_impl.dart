@@ -1,5 +1,5 @@
 // features/category_crud/data/repositories/category_repository_impl.dart
-import 'dart:io';
+import   'dart:io';
 
 import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/features/category_crud/data/datasources/category_remote_dataresources.dart';
@@ -44,12 +44,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
     required String id,
     required String title,
     required String description,
+    String? parentCategoryId,
     required File? image,
   }) async {
     await remoteDataSource.updateCategory(
       id: id,
       title: title,
       description: description,
+      parentCategoryId: parentCategoryId,
       image: image,
     );
   }

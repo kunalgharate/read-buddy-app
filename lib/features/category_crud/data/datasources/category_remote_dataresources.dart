@@ -25,6 +25,7 @@ abstract class CategoryRemoteDataSource {
     required String id,
     required String title,
     required String description,
+    String? parentCategoryId,
     File? image,
   });
 
@@ -137,6 +138,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
     required String id,
     required String title,
     required String description,
+    String? parentCategoryId,
     File? image,
   }) async {
     try {
@@ -144,6 +146,8 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       final Map<String, dynamic> formMap = {
         'name': title,
         'description': description,
+        if (parentCategoryId != null && parentCategoryId.isNotEmpty)
+          'parentCategoryId': parentCategoryId,
       };
 
       if (image != null) {

@@ -63,6 +63,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         id: event.id,
         title: event.title,
         description: event.description,
+        parentCategoryId: event.parentCategoryId,
         image: event.image,
       );
       add(LoadCategories());
