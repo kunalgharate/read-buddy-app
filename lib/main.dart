@@ -15,6 +15,7 @@ import 'features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 import 'features/books/presentation/bloc/book_bloc.dart';
 import 'features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'features/donated_books/presentation/bloc/donated_books_bloc.dart';
+import 'features/donated_books/presentation/bloc/donated_books_events.dart';
 import 'routes/app_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -45,7 +46,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
         BlocProvider(create: (_) => getIt<LocationCubit>()),
-        BlocProvider(create: (_) => getIt<DonatedBooksBloc>()),
+        BlocProvider(
+          create: (_) => getIt<DonatedBooksBloc>()..add(LoadDonatedBooks()),
+        ),
       ],
       child: MaterialApp(
         title: "Read Buddy",

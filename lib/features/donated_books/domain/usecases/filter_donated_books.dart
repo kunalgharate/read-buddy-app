@@ -32,16 +32,21 @@ class FilterDonatedBooks {
     try {
       final date = DateTime.parse(createdAt);
       final now = DateTime.now();
-      final diff = now.difference(date);
       switch (timeRange) {
         case 'Today':
-          return diff.inDays < 1;
+          return date.year == now.year &&
+              date.month == now.month &&
+              date.day == now.day;
         case 'This Week':
-          return diff.inDays < 7;
+          final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+          final weekStart =
+              DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+          return date.isAfter(weekStart) || date.isAtSameMomentAs(weekStart);
         case 'This Month':
-          return diff.inDays < 30;
+          return date.year == now.year && date.month == now.month;
         case 'Older':
-          return diff.inDays >= 30;
+          return date.year < now.year ||
+              (date.year == now.year && date.month < now.month);
         default:
           return true;
       }

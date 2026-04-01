@@ -5,13 +5,22 @@ import '../bloc/donated_books_events.dart';
 import '../bloc/donated_books_states.dart';
 import '../widgets/donated_book_card.dart';
 
-class DonatedBooksPage extends StatelessWidget {
+class DonatedBooksPage extends StatefulWidget {
   const DonatedBooksPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    context.read<DonatedBooksBloc>().add(LoadDonatedBooks());
+  State<DonatedBooksPage> createState() => _DonatedBooksPageState();
+}
 
+class _DonatedBooksPageState extends State<DonatedBooksPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<DonatedBooksBloc>().add(LoadDonatedBooks());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

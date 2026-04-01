@@ -26,6 +26,7 @@ class DonatedBooksEntity extends Equatable {
   String get timeAgo {
     try {
       final diff = DateTime.now().difference(DateTime.parse(createdAt));
+      if (diff.isNegative) return 'just now';
       if (diff.inDays >= 30) return '${(diff.inDays / 30).floor()}mo';
       if (diff.inDays >= 1) return '${diff.inDays}d';
       if (diff.inHours >= 1) return '${diff.inHours}H';
@@ -44,6 +45,7 @@ class DonatedBooksEntity extends Equatable {
         donorName,
         coverImageUrl,
         createdAt,
-        language
+        language,
+        status,
       ];
 }

@@ -73,7 +73,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
             if (widget.initialCategory != null) {
               try {
                 selectedCategory = _categoryOptions.firstWhere(
-                  (item) => item.name == widget.initialCategory!.name,
+                  (item) => item.id == widget.initialCategory!.id,
                 );
               } catch (_) {
                 selectedCategory = null;
@@ -105,7 +105,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                 const SizedBox(height: 16),
                 Text('Parent Category', style: _labelStyle),
                 DropdownButtonFormField<Item>(
-                  initialValue: selectedCategory,
+                  value: selectedCategory,
                   hint: const Text('Select Parent Category'),
                   items: _categoryOptions.map((item) {
                     return DropdownMenuItem<Item>(
@@ -292,7 +292,11 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
     try {
       final image = await ImagePicker().pickImage(source: source);
       if (image != null) {
-        setState(() => selectedImages = [image]);
+        setState(() {
+          networkImages
+              .clear(); // clear old network image when new one selected
+          selectedImages = [image];
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

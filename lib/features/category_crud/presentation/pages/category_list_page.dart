@@ -42,7 +42,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-              Expanded(
+            Expanded(
               child: BlocBuilder<CategoryBloc, CategoryState>(
                 builder: (context, state) {
                   if (state is CategoryLoading) {

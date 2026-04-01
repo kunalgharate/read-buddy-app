@@ -11,16 +11,21 @@ class CategoryModel extends CategoryEntity {
     required this.title,
     required this.category,
     required this.imageUrl,
+    String parentCategoryId = '',
   }) : super(
-            id: id, title: title, parentCategory: category, imageUrl: imageUrl);
+            id: id,
+            title: title,
+            parentCategory: category,
+            parentCategoryId: parentCategoryId,
+            imageUrl: imageUrl);
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
+    final parent = json['parentCategoryId'];
     return CategoryModel(
       id: json['_id'] ?? '',
       title: json['name'] ?? '',
-      category: json['parentCategoryId'] != null
-          ? json['parentCategoryId']['name'] ?? ''
-          : '',
+      category: parent is Map ? (parent['name'] ?? '') : '',
+      parentCategoryId: parent is Map ? (parent['_id'] ?? '') : '',
       imageUrl: json['imageUrl'] ?? '',
     );
   }

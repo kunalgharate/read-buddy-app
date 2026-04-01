@@ -8,7 +8,8 @@ class DonatedBooksLoading extends DonatedBooksState {}
 
 class DonatedBooksLoaded extends DonatedBooksState {
   final List<DonatedBooksEntity> donatedBooks;
-  DonatedBooksLoaded(this.donatedBooks);
+  DonatedBooksLoaded(List<DonatedBooksEntity> books)
+      : donatedBooks = List.unmodifiable(books);
 }
 
 class DonatedBooksLoadingError extends DonatedBooksState {

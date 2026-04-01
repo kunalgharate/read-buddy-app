@@ -29,8 +29,8 @@ class UpdateCategoryPage extends StatelessWidget {
       body: CategoryFormWidget(
         initialTitle: category.title,
         initialImageUrl: category.imageUrl,
-        initialCategory: category.parentCategory.isNotEmpty
-            ? Item(id: category.id, name: category.parentCategory)
+        initialCategory: category.parentCategoryId.isNotEmpty
+            ? Item(id: category.parentCategoryId, name: category.parentCategory)
             : null,
         onSubmit: (String title, Item? selectedCategory, File? image) {
           context.read<CategoryBloc>().add(UpdateCategoryEvent(
