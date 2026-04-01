@@ -1,7 +1,7 @@
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 
 class parentCategoryModel extends Item {
-  parentCategoryModel({
+  const parentCategoryModel({
     required super.id,
     required super.name,
   });

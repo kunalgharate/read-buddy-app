@@ -1,6 +1,5 @@
 import '../../../auth/domain/entities/app_user.dart';
 import 'package:injectable/injectable.dart';
-import '../../../auth/domain/entities/app_user.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasource/profile_remote_data_source.dart';
@@ -22,7 +21,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<AppUser> updateProfile({required Map<String, String> profileData}) async {
+  Future<AppUser> updateProfile(
+      {required Map<String, String> profileData}) async {
     return await remoteDataSource.updateProfile(profileData: profileData);
   }
 }

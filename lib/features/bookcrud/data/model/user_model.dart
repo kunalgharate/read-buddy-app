@@ -2,36 +2,21 @@ import '../../domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
   const UserModel({
-    required String userRole,
-    required bool isEmailVerified,
-    required String id,
-    required String name,
-    required String email,
-    required String authType,
-    required String socialId,
-    required String phone,
-    required String pincode,
-    required String city,
-    required bool isPrime,
-    required DateTime? membershipExpires,
-    required int finesDue,
-    required List<String> badges,
-  }) : super(
-          userRole: userRole,
-          isEmailVerified: isEmailVerified,
-          id: id,
-          name: name,
-          email: email,
-          authType: authType,
-          socialId: socialId,
-          phone: phone,
-          pincode: pincode,
-          city: city,
-          isPrime: isPrime,
-          membershipExpires: membershipExpires,
-          finesDue: finesDue,
-          badges: badges,
-        );
+    required super.userRole,
+    required super.isEmailVerified,
+    required super.id,
+    required super.name,
+    required super.email,
+    required super.authType,
+    required super.socialId,
+    required super.phone,
+    required super.pincode,
+    required super.city,
+    required super.isPrime,
+    required super.membershipExpires,
+    required super.finesDue,
+    required super.badges,
+  });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(

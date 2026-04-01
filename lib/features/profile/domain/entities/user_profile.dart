@@ -4,7 +4,7 @@ class ProfileUser {
   final String email;
   final String? phno;
   final String? picture;
-  final String? userAvatar;     // NEW
+  final String? userAvatar; // NEW
   final String role;
   final bool isPrime;
   final int finesDue;
@@ -21,7 +21,7 @@ class ProfileUser {
     required this.email,
     this.phno,
     this.picture,
-    this.userAvatar,            // NEW
+    this.userAvatar, // NEW
     required this.role,
     required this.isPrime,
     required this.finesDue,

@@ -1,4 +1,3 @@
-
 import '../../domain/entities/user_profile.dart';
 
 class ProfileUserModel extends ProfileUser {

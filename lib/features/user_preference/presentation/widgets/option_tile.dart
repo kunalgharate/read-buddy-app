@@ -51,6 +51,8 @@ class OptionTile extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -106,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 void main() {
   runApp(
-    MaterialApp(
+    const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyHomePage(),
     ),

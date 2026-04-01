@@ -39,7 +39,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     }
   }
 
-
   @override
   Future<ProfileUserModel> getProfile() async {
     if (kDebugMode) {
@@ -56,7 +55,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 ProfileRemoteDataSource: getProfile status: ${response.statusCode}');
+        print(
+            '🌐 ProfileRemoteDataSource: getProfile status: ${response.statusCode}');
         print('🌐 ProfileRemoteDataSource: getProfile data: ${response.data}');
       }
 
@@ -70,7 +70,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         message: 'Failed to fetch profile',
       );
     } catch (e) {
-      if (kDebugMode) print('🌐 ProfileRemoteDataSource: getProfile exception: $e');
+      if (kDebugMode) {
+        print('🌐 ProfileRemoteDataSource: getProfile exception: $e');
+      }
       rethrow;
     }
   }
@@ -92,7 +94,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 ProfileRemoteDataSource: updateAvatar status: ${response.statusCode}');
+        print(
+            '🌐 ProfileRemoteDataSource: updateAvatar status: ${response.statusCode}');
       }
 
       if (response.statusCode == ApiConstants.success) {
@@ -105,14 +108,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         message: 'Failed to update avatar',
       );
     } catch (e) {
-      if (kDebugMode) print('🌐 ProfileRemoteDataSource: updateAvatar exception: $e');
+      if (kDebugMode) {
+        print('🌐 ProfileRemoteDataSource: updateAvatar exception: $e');
+      }
       rethrow;
     }
   }
 
-
   @override
-  Future<AppUser> updateProfile({required Map<String, String> profileData}) async {
+  Future<AppUser> updateProfile(
+      {required Map<String, String> profileData}) async {
     if (kDebugMode) {
       print('🌐 ProfileRemoteDataSource: Updating profile → $profileData');
       print('🌐 URL: ${ApiConstants.updateUserInfo}');
@@ -128,7 +133,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 ProfileRemoteDataSource: updateProfile status: ${response.statusCode}');
+        print(
+            '🌐 ProfileRemoteDataSource: updateProfile status: ${response.statusCode}');
       }
 
       if (response.statusCode == ApiConstants.success) {
@@ -141,7 +147,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         message: 'Failed to update profile',
       );
     } catch (e) {
-      if (kDebugMode) print('🌐 ProfileRemoteDataSource: updateProfile exception: $e');
+      if (kDebugMode) {
+        print('🌐 ProfileRemoteDataSource: updateProfile exception: $e');
+      }
       rethrow;
     }
   }

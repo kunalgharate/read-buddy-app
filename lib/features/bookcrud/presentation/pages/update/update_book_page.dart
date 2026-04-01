@@ -176,7 +176,7 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                             borderSide: BorderSide(color: Colors.grey)),
                         hintText: 'Seacrch Genre')),
                 items: (f, cs) => BookValueItems().bookGenres,
-                popupProps: PopupProps.menu(fit: FlexFit.loose),
+                popupProps: const PopupProps.menu(fit: FlexFit.loose),
               ),
               const SizedBox(height: 16),
               const Text(

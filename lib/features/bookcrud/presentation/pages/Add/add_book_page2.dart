@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:read_buddy_app/core/utils/auto_complete.dart';
@@ -15,7 +13,6 @@ import 'package:read_buddy_app/core/theme/text_styles.dart';
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
-import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/user_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_event.dart';
@@ -370,7 +367,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
               setState(() => selectedCoverImageFile = null);
             },
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [

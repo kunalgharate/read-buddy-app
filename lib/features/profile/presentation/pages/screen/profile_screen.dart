@@ -12,7 +12,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<ProfileBloc>()..add(LoadProfileEvent()),  // ← fixed
+      create: (_) => getIt<ProfileBloc>()..add(LoadProfileEvent()), // ← fixed
       child: const _ProfileView(),
     );
   }
@@ -21,9 +21,9 @@ class ProfileScreen extends StatelessWidget {
 class _ProfileView extends StatelessWidget {
   const _ProfileView();
 
-  static const _navy  = Color(0xFF1E3A5F);
+  static const _navy = Color(0xFF1E3A5F);
   static const _green = Color(0xFF00C853);
-  static const _grey  = Color(0xFF666666);
+  static const _grey = Color(0xFF666666);
 
   void _showAvatarSheet(BuildContext context, ProfileUser user) {
     showModalBottomSheet(
@@ -36,7 +36,9 @@ class _ProfileView extends StatelessWidget {
       builder: (sheetContext) => _AvatarBottomSheet(
         user: user,
         onSelected: (avatarName) {
-          context.read<ProfileBloc>().add(UpdateAvatarEvent(avatarName)); // ← fixed
+          context
+              .read<ProfileBloc>()
+              .add(UpdateAvatarEvent(avatarName)); // ← fixed
         },
       ),
     );
@@ -376,7 +378,7 @@ class _ProfileView extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _navy),
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => HomeScreen()),
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
           ),
         ),
         title: const Text(
@@ -397,7 +399,8 @@ class _ProfileView extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: IconButton(
-              icon: const Icon(Icons.settings_outlined, color: Color(0xFF1565C0)),
+              icon:
+                  const Icon(Icons.settings_outlined, color: Color(0xFF1565C0)),
               onPressed: () => Navigator.pushNamed(context, '/settings'),
             ),
           ),
@@ -416,10 +419,11 @@ class _ProfileView extends StatelessWidget {
                 backgroundColor: _green,
               ),
             );
-          } else if (state is ProfileError) {              // ← fixed: was ProfileFailure
+          } else if (state is ProfileError) {
+            // ← fixed: was ProfileFailure
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),             // ← fixed: was state.errorMessage
+                content: Text(state.message), // ← fixed: was state.errorMessage
                 backgroundColor: Colors.red,
               ),
             );
@@ -431,8 +435,10 @@ class _ProfileView extends StatelessWidget {
               child: CircularProgressIndicator(color: _green),
             );
           }
-          if (state is ProfileError) {                     // ← fixed: was ProfileFailure
-            return _buildErrorState(context, state.message); // ← fixed: was state.errorMessage
+          if (state is ProfileError) {
+            // ← fixed: was ProfileFailure
+            return _buildErrorState(
+                context, state.message); // ← fixed: was state.errorMessage
           }
 
           ProfileUser? user;
@@ -462,9 +468,9 @@ class _AvatarBottomSheet extends StatelessWidget {
     required this.onSelected,
   });
 
-  static const _navy  = Color(0xFF1E3A5F);
+  static const _navy = Color(0xFF1E3A5F);
   static const _green = Color(0xFF00C853);
-  static const _grey  = Color(0xFF666666);
+  static const _grey = Color(0xFF666666);
 
   bool _isSelected(AvatarOption avatar) =>
       user.userAvatar?.toLowerCase() == avatar.name.toLowerCase();
@@ -489,12 +495,12 @@ class _AvatarBottomSheet extends StatelessWidget {
               ),
               boxShadow: selected
                   ? [
-                BoxShadow(
-                  color: _green.withOpacity(0.25),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                )
-              ]
+                      BoxShadow(
+                        color: _green.withOpacity(0.25),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      )
+                    ]
                   : null,
             ),
             child: ClipOval(

@@ -20,11 +20,11 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
   final ChangePasswordUseCase _changePassword;
 
   SignInBloc(
-      this._signIn,
-      this._sendOtp,
-      this._verifyResetOtp,
-      this._changePassword,
-      ) : super(SignInInitial()) {
+    this._signIn,
+    this._sendOtp,
+    this._verifyResetOtp,
+    this._changePassword,
+  ) : super(SignInInitial()) {
     on<SignInRequest>(_onSignInRequest);
     on<SendOtpRequested>(_onSendOtp);
     on<VerifyOtpRequested>(_onVerifyOtp);
@@ -32,9 +32,9 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
   }
 
   Future<void> _onSignInRequest(
-      SignInRequest event,
-      Emitter<SignInState> emit,
-      ) async {
+    SignInRequest event,
+    Emitter<SignInState> emit,
+  ) async {
     emit(SignInLoading());
     try {
       final params = SignInParams(
@@ -49,9 +49,9 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
   }
 
   Future<void> _onSendOtp(
-      SendOtpRequested event,
-      Emitter<SignInState> emit,
-      ) async {
+    SendOtpRequested event,
+    Emitter<SignInState> emit,
+  ) async {
     if (kDebugMode) print('🔐 SignInBloc: Sending OTP to ${event.email}');
     emit(SignInLoading());
     try {
@@ -63,9 +63,9 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
   }
 
   Future<void> _onVerifyOtp(
-      VerifyOtpRequested event,
-      Emitter<SignInState> emit,
-      ) async {
+    VerifyOtpRequested event,
+    Emitter<SignInState> emit,
+  ) async {
     if (kDebugMode) print('🔐 SignInBloc: Verifying OTP for ${event.email}');
     emit(SignInLoading());
     try {
@@ -77,10 +77,12 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
   }
 
   Future<void> _onChangePassword(
-      ChangePasswordRequested event,
-      Emitter<SignInState> emit,
-      ) async {
-    if (kDebugMode) print('🔐 SignInBloc: Changing password for ${event.email}');
+    ChangePasswordRequested event,
+    Emitter<SignInState> emit,
+  ) async {
+    if (kDebugMode) {
+      print('🔐 SignInBloc: Changing password for ${event.email}');
+    }
     emit(SignInLoading());
     try {
       await _changePassword(event.email, event.code, event.newPassword);

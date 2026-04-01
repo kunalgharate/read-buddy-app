@@ -22,11 +22,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final UpdateProfileUseCase _updateProfileUseCase;
 
   ProfileBloc(
-      this._secureStorage,
-      this._getProfileUseCase,
-      this._updateAvatarUseCase,
-      this._updateProfileUseCase,
-      ) : super(ProfileInitial()) {
+    this._secureStorage,
+    this._getProfileUseCase,
+    this._updateAvatarUseCase,
+    this._updateProfileUseCase,
+  ) : super(ProfileInitial()) {
     on<LoadProfileEvent>(_onLoadProfile);
     on<UpdateAvatarEvent>(_onUpdateAvatar);
     on<UpdateProfileFieldEvent>(_onUpdateProfileField);
@@ -36,9 +36,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   // ─── GET /users/profile ───────────────────────────────────────────────────
 
   Future<void> _onLoadProfile(
-      LoadProfileEvent event,
-      Emitter<ProfileState> emit,
-      ) async {
+    LoadProfileEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(ProfileLoading());
     try {
       final profileUser = await _getProfileUseCase.call();
@@ -61,9 +61,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   // ─── PATCH /users/update-avatar ───────────────────────────────────────────
 
   Future<void> _onUpdateAvatar(
-      UpdateAvatarEvent event,
-      Emitter<ProfileState> emit,
-      ) async {
+    UpdateAvatarEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     final currentUser = _currentUser();
     if (currentUser == null) return;
 
@@ -81,9 +81,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   // ─── PUT /users/update-user-info ──────────────────────────────────────────
 
   Future<void> _onUpdateProfileField(
-      UpdateProfileFieldEvent event,
-      Emitter<ProfileState> emit,
-      ) async {
+    UpdateProfileFieldEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     final currentUser = _currentUser();
     if (currentUser == null) return;
 
@@ -98,7 +98,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       profileData.remove('error');
 
       final updatedAppUser =
-      await _updateProfileUseCase.call(profileData: profileData);
+          await _updateProfileUseCase.call(profileData: profileData);
       await _secureStorage.saveUser(updatedAppUser);
 
       // Re-fetch full profile after update to stay in sync
@@ -110,9 +110,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   }
 
   Future<void> _onRefreshProfile(
-      RefreshProfileEvent event,
-      Emitter<ProfileState> emit,
-      ) async {
+    RefreshProfileEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     add(LoadProfileEvent());
   }
 
@@ -121,7 +121,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileUser? _currentUser() {
     if (state is ProfileLoaded) return (state as ProfileLoaded).user;
     if (state is ProfileUpdating) return (state as ProfileUpdating).user;
-    if (state is AvatarUpdateSuccess) return (state as AvatarUpdateSuccess).user;
+    if (state is AvatarUpdateSuccess) {
+      return (state as AvatarUpdateSuccess).user;
+    }
     return null;
   }
 
@@ -170,7 +172,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       case 'email':
         return {
           'error':
-          'Email address cannot be changed. It\'s your primary account identifier.'
+              'Email address cannot be changed. It\'s your primary account identifier.'
         };
 
       case 'gender':

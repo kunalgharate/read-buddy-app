@@ -3,11 +3,7 @@ import 'package:read_buddy_app/features/banner/domain/entity/banner_entity.dart'
 import 'package:read_buddy_app/features/banner/presentation/pages/delete_banner.dart';
 import 'package:read_buddy_app/features/banner/presentation/pages/update_banner.dart';
 
-import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
-import 'package:read_buddy_app/features/bookcrud/presentation/pages/deletecrud_book.dart';
-import 'package:read_buddy_app/features/bookcrud/presentation/widgets/updatebook_stepper.dart';
 
 class BannerCollection extends StatelessWidget {
   final BannerEntity banner;
@@ -19,7 +15,7 @@ class BannerCollection extends StatelessWidget {
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: BorderSide(
+        side: const BorderSide(
           color: Colors.black, // ✅ Border color
           width: 1 / 2, // ✅ Border width
         ),
@@ -29,7 +25,7 @@ class BannerCollection extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 8,
             ),
             ClipRRect(
@@ -64,9 +60,9 @@ class BannerCollection extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 text: TextSpan(
                                   children: [
-                                    TextSpan(
+                                    const TextSpan(
                                       text: "Title:",
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
@@ -88,9 +84,9 @@ class BannerCollection extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               text: TextSpan(
                                 children: [
-                                  TextSpan(
+                                  const TextSpan(
                                     text: "Description: ",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -121,7 +117,7 @@ class BannerCollection extends StatelessWidget {
                           ))
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 4,
                   ),
                   Column(
@@ -130,9 +126,9 @@ class BannerCollection extends StatelessWidget {
                       RichText(
                           text: TextSpan(
                         children: [
-                          TextSpan(
+                          const TextSpan(
                             text: "BannerType:",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -166,7 +162,7 @@ void updatedialog(BuildContext context, BannerEntity banner) async {
   print("update Dialog messaging");
   await showModalBottomSheet(
     context: context,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
     builder: (context) {

@@ -6,7 +6,8 @@ import '../../../../core/utils/network_utils.dart';
 import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AppUserModel> signIn({required String email, required String password});
+  Future<AppUserModel> signIn(
+      {required String email, required String password});
   Future<AppUserModel> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
   Future<AppUserModel> signInWithGoogle({required String token});
@@ -174,7 +175,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {'email': email.trim().toLowerCase()},
       );
 
-      if (kDebugMode) print('🌐 AuthRemoteDataSource: OTP sent ${response.statusCode}');
+      if (kDebugMode) {
+        print('🌐 AuthRemoteDataSource: OTP sent ${response.statusCode}');
+      }
 
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {
@@ -211,7 +214,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         },
       );
 
-      if (kDebugMode) print('🌐 AuthRemoteDataSource: OTP verified ${response.statusCode}');
+      if (kDebugMode) {
+        print('🌐 AuthRemoteDataSource: OTP verified ${response.statusCode}');
+      }
 
       if (response.statusCode != ApiConstants.success) {
         throw DioException(
@@ -228,7 +233,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> changePassword(
       String email, String code, String newPassword) async {
-    if (kDebugMode) print('🌐 AuthRemoteDataSource: Changing password for $email');
+    if (kDebugMode) {
+      print('🌐 AuthRemoteDataSource: Changing password for $email');
+    }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
@@ -249,7 +256,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         },
       );
 
-      if (kDebugMode) print('🌐 AuthRemoteDataSource: Password changed ${response.statusCode}');
+      if (kDebugMode) {
+        print(
+            '🌐 AuthRemoteDataSource: Password changed ${response.statusCode}');
+      }
 
       if (response.statusCode != ApiConstants.success) {
         throw DioException(
