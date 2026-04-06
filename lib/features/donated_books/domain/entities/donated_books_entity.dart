@@ -24,15 +24,17 @@ class DonatedBooksEntity extends Equatable {
   });
 
   String get timeAgo {
-    try {
-      final diff = DateTime.now().difference(DateTime.parse(createdAt));
-      if (diff.inDays >= 30) return '${(diff.inDays / 30).floor()}mo';
-      if (diff.inDays >= 1) return '${diff.inDays}d';
-      if (diff.inHours >= 1) return '${diff.inHours}H';
-      return '${diff.inMinutes}m';
-    } catch (_) {
-      return '';
-    }
+    final created = DateTime.tryParse(createdAt);
+    if (created == null) return '';
+
+    final now = DateTime.now();
+    if (created.isAfter(now)) return '0m';
+
+    final diff = now.difference(created);
+    if (diff.inDays >= 30) return '${(diff.inDays / 30).floor()}mo';
+    if (diff.inDays >= 1) return '${diff.inDays}d';
+    if (diff.inHours >= 1) return '${diff.inHours}h';
+    return '${diff.inMinutes}m';
   }
 
   @override
