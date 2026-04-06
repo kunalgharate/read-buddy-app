@@ -44,6 +44,7 @@ class DonatedBooksEntity extends Equatable {
         donorName,
         coverImageUrl,
         createdAt,
-        language
+        language,
+        status,
       ];
 }

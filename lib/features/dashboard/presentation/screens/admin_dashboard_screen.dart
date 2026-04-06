@@ -101,7 +101,7 @@ class AdminDashboardScreen extends StatelessWidget {
                     count: 318,
                     icon: Icons.card_giftcard,
                     onPressed: () {
-                      Navigator.of(context).pushNamed('/donated-books');
+                      Navigator.of(context).pushNamed('/donation');
                     },
                   ),
                   DashboardBoxWidget(

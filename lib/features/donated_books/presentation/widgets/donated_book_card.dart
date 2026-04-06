@@ -9,7 +9,6 @@ class DonatedBookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 130,
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -24,12 +23,14 @@ class DonatedBookCard extends StatelessWidget {
             // Book cover placeholder
             Container(
               width: 113,
-              height: 136,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: Colors.grey.shade300,
               ),
-              child: const Icon(Icons.menu_book, color: Colors.grey, size: 40),
+              child: const AspectRatio(
+                aspectRatio: 113 / 136,
+                child: Icon(Icons.menu_book, color: Colors.grey, size: 40),
+              ),
             ),
             const SizedBox(width: 12),
 
@@ -57,10 +58,10 @@ class DonatedBookCard extends StatelessWidget {
                   Row(
                     children: [
                       _badge(book.format, const Color(0xFF2CE07F),
-                          const Color(0xFF052E44)),
+                          const Color(0xFF052E44),),
                       const SizedBox(width: 8),
                       _badgeWithIcon(book.language, const Color(0xFF2CE07F),
-                          const Color(0xFF052E44)),
+                          const Color(0xFF052E44),),
                     ],
                   ),
                   const SizedBox(height: 8),

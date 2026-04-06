@@ -10,19 +10,22 @@ class DonatedBooksModel extends DonatedBooksEntity {
       required super.coverImageUrl,
       required super.createdAt,
       required super.language,
-      required super.status});
+      required super.status,
+      });
 
   factory DonatedBooksModel.fromJson(Map<String, dynamic> json) {
+    final donation = json['donation'] as Map<String, dynamic>;
+    final donorId = donation['donorId'] as Map<String, dynamic>?;
     return DonatedBooksModel(
-      id: json['donation']['_id'],
-      bookTitle: json['donation']['title'] ?? '',
-      category: json['donation']['category'] ?? '',
-      format: json['donation']['format'] ?? '',
-      donorName: json['donation']['donorId']['name'] ?? '',
-      coverImageUrl: json['donation']['coverImageUrl'] ?? '',
-      createdAt: json['donation']['createdAt'] ?? '',
-      language: json['donation']['language'] ?? '',
-      status: json['donation']['status'] ?? '',
+      id: donation['_id'],
+      bookTitle: donation['title'] ?? '',
+      category: donation['category'] ?? '',
+      format: donation['format'] ?? '',
+      donorName: donorId?['name'] ?? '',
+      coverImageUrl: donation['coverImageUrl'] ?? '',
+      createdAt: donation['createdAt'] ?? '',
+      language: donation['language'] ?? '',
+      status: donation['status'] ?? '',
     );
   }
 }
