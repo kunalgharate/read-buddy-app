@@ -8,6 +8,7 @@ import 'package:read_buddy_app/features/banner/presentation/pages/banner_list.da
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 import 'package:read_buddy_app/features/donate/presentation/donation_page.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_books_page.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
 import 'package:read_buddy_app/features/questionaries/presentations/pages/onboarding_questionaire.dart';
 import 'package:read_buddy_app/features/question_crud/presentation/pages/question_list_page.dart';
@@ -47,6 +48,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const BooksListPage());
       case '/questions':
         return MaterialPageRoute(builder: (_) => const QuestionListPage());
+      case '/donated-books':
+        return MaterialPageRoute(builder: (_) => const DonatedBooksPage());
       case '/donation':
         return MaterialPageRoute(builder: (_) => const DonationPage());
       case '/home':
