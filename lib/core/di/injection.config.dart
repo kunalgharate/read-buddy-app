@@ -1,5 +1,5 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
 
 // **************************************************************************
 // InjectableConfigGenerator
@@ -18,11 +18,16 @@ import '../../features/auth/data/remotesource/auth_remote_data_source.dart'
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
+import '../../features/auth/domain/usecases/change_password_usecase.dart'
+    as _i788;
 import '../../features/auth/domain/usecases/register_user_usecase.dart'
     as _i241;
+import '../../features/auth/domain/usecases/send_otp_usecase.dart' as _i663;
 import '../../features/auth/domain/usecases/sign_in.dart' as _i920;
 import '../../features/auth/domain/usecases/sign_in_with_google.dart' as _i692;
 import '../../features/auth/domain/usecases/verify_email_usecase.dart' as _i30;
+import '../../features/auth/domain/usecases/verify_reset_otp_usecase.dart'
+    as _i752;
 import '../../features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart'
     as _i170;
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart'
@@ -130,6 +135,12 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i692.SignInWithGoogle(gh<_i787.AuthRepository>()));
     gh.factory<_i30.VerifyEmailUseCase>(
         () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(
+          gh<_i920.SignIn>(),
+          gh<_i663.SendOtpUseCase>(),
+          gh<_i752.VerifyResetOtpUseCase>(),
+          gh<_i788.ChangePasswordUseCase>(),
+        ));
     gh.lazySingleton<_i894.ProfileRepository>(
         () => _i334.ProfileRepositoryImpl(gh<_i192.ProfileRemoteDataSource>()));
     gh.factory<_i170.GoogleSignInBloc>(
@@ -144,7 +155,6 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.factory<_i478.UpdateProfileUseCase>(
         () => _i478.UpdateProfileUseCase(gh<_i894.ProfileRepository>()));
-    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(gh<_i920.SignIn>()));
     gh.factory<_i133.ProfileBloc>(() => _i133.ProfileBloc(
           gh<_i206.SecureStorageUtil>(),
           gh<_i478.UpdateProfileUseCase>(),

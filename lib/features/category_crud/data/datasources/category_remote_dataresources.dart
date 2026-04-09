@@ -25,6 +25,7 @@ abstract class CategoryRemoteDataSource {
     required String id,
     required String title,
     required String description,
+    String? parentCategoryId,
     File? image,
   });
 
@@ -137,28 +138,32 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
     required String id,
     required String title,
     required String description,
+    String? parentCategoryId,
     File? image,
   }) async {
     try {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
-      final Map<String, dynamic> formMap = {
-        'name': title,
-        'description': description,
-      };
-
-      if (image != null) {
-        formMap['image'] = await MultipartFile.fromFile(image.path);
-      }
-
-      final formData = FormData.fromMap(formMap);
 
       final response = await dio.put(
         '${ApiConstants.categories}/$id',
-        data: formData,
+        data: image != null
+            ? FormData.fromMap({
+                'name': title,
+                'description': description,
+                if (parentCategoryId != null && parentCategoryId.isNotEmpty)
+                  'parentCategoryId': parentCategoryId,
+                'image': await MultipartFile.fromFile(image.path),
+              })
+            : {
+                'name': title,
+                'description': description,
+                'parentCategoryId': parentCategoryId,
+              },
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
-            'Content-Type': 'multipart/form-data',
+            'Content-Type':
+                image != null ? 'multipart/form-data' : 'application/json',
           },
         ),
       );
@@ -169,7 +174,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       if (e is DioException) {
         print("Dio error: ${e.message}");
         print("Status code: ${e.response?.statusCode}");
-        print("Response data: ${e.response?.data}"); // 👈 this is what we need
+        print("Response data: ${e.response?.data}");
       } else {
         print("Unexpected error: $e");
       }

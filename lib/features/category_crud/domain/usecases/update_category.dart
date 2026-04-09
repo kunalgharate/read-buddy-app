@@ -13,9 +13,14 @@ class UpdateCategoryUsecase {
     required String id,
     required String title,
     required String description,
+    String? parentCategoryId,
     File? image,
   }) {
     return repository.updateCategory(
-        id: id, title: title, description: description, image: image);
+        id: id,
+        title: title,
+        description: description,
+        parentCategoryId: parentCategoryId,
+        image: image);
   }
 }

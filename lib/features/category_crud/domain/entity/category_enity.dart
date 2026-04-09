@@ -1,16 +1,18 @@
 class CategoryEntity {
   final String id;
   final String title;
-  final String parentCategory;
+  final String? parentCategoryName;
   final String imageUrl;
+  final String? description;
 
   const CategoryEntity({
     required this.id,
     required this.title,
-    required this.parentCategory,
+    this.parentCategoryName,
     required this.imageUrl,
+    this.description,
   });
 
   @override
-  List<Object?> get props => [id, title, parentCategory, imageUrl];
+  List<Object?> get props => [id, title, parentCategoryName, imageUrl, description];
 }

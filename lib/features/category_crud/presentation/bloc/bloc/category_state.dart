@@ -21,6 +21,8 @@ class CategoryLoaded extends CategoryState {
   List<Object?> get props => [categories];
 }
 
+class CategorySuccess extends CategoryState {}
+
 class CategoryError extends CategoryState {
   final String message;
 

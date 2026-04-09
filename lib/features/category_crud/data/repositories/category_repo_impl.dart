@@ -44,12 +44,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
     required String id,
     required String title,
     required String description,
+    String? parentCategoryId,
     required File? image,
   }) async {
     await remoteDataSource.updateCategory(
       id: id,
       title: title,
       description: description,
+      parentCategoryId: parentCategoryId,
       image: image,
     );
   }
