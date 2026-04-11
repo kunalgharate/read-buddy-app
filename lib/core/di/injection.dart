@@ -107,6 +107,13 @@ import 'package:read_buddy_app/features/donated_books/domain/repositories/donate
 import 'package:read_buddy_app/features/donated_books/domain/usecases/get_donated_books.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
 
+// Book Request
+import '../../features/book_request/data/datasources/book_request_remote_datasource.dart';
+import '../../features/book_request/data/repositories/book_request_repository_impl.dart';
+import '../../features/book_request/domain/repositories/book_request_repository.dart';
+import '../../features/book_request/domain/usecases/get_book_detail.dart';
+import '../../features/book_request/presentation/bloc/book_request_bloc.dart';
+
 // Question CRUD (Admin)
 import 'package:read_buddy_app/features/question_crud/data/datasources/question_remote_datasource.dart'
     as QuestionCrudDataSource;
@@ -225,6 +232,11 @@ void _registerDataSources() {
     () => DonatedBooksRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
+  // Book Request
+  getIt.registerLazySingleton<BookRequestRemoteDataSource>(
+    () => BookRequestRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
   // Question CRUD (Admin)
   getIt.registerLazySingleton<QuestionCrudDataSource.QuestionRemoteDataSource>(
     () => QuestionCrudDataSource.QuestionRemoteDataSource(
@@ -296,6 +308,11 @@ void _registerRepositories() {
   // Donated Books
   getIt.registerLazySingleton<DonatedBooksRepository>(
     () => DonatedBooksRepositoryImpl(getIt<DonatedBooksRemoteDataSource>()),
+  );
+
+  // Book Request
+  getIt.registerLazySingleton<BookRequestRepository>(
+    () => BookRequestRepositoryImpl(getIt<BookRequestRemoteDataSource>()),
   );
 
   // Question CRUD (Admin)
@@ -406,6 +423,10 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => GetDonatedBooks(getIt<DonatedBooksRepository>()));
 
+  // Book Request
+  getIt.registerLazySingleton(
+      () => GetBookDetailUsecase(getIt<BookRequestRepository>()));
+
   // Question CRUD (Admin)
   getIt.registerLazySingleton(() => QuestionCrudUseCases.GetQuestions(
       getIt<QuestionCrudDomain.QuestionRepository>()));
@@ -508,6 +529,11 @@ void _registerBlocs() {
         getNearestAgents: getIt<GetNearestAgents>(),
         createBookDonation: getIt<CreateBookDonation>(),
         uploadReceipt: getIt<UploadReceipt>(),
+      ));
+
+  // Book Request
+  getIt.registerFactory(() => BookRequestBloc(
+        getBookDetail: getIt<GetBookDetailUsecase>(),
       ));
 }
 
