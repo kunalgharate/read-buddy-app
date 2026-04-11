@@ -11,6 +11,7 @@ import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_bloc.dart';
 import 'core/di/injection.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<BookBloc>()),
+        BlocProvider(create: (_) => getIt<DonatedBooksBloc>()),
         BlocProvider(create: (_) => getIt<SignInBloc>()),
         BlocProvider(create: (_) => getIt<GoogleSignInBloc>()),
         BlocProvider(create: (_) => getIt<SignUpBloc>()),
