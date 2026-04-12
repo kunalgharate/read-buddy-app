@@ -76,7 +76,7 @@ import '../../features/donated_books/domain/usecases/get_donated_books.dart'
     as _i505;
 import '../../features/donated_books/presentation/bloc/donated_books_bloc.dart'
     as _i253;
-import '../../features/profile/data/remotesource/profile_remote_data_source.dart'
+import '../../features/profile/data/datasource/profile_remote_data_source.dart'
     as _i192;
 import '../../features/profile/data/repositories/profile_repository_impl.dart'
     as _i334;
@@ -84,6 +84,9 @@ import '../../features/profile/domain/repositories/profile_repository.dart'
     as _i894;
 import '../../features/profile/domain/usecases/update_profile_usecase.dart'
     as _i478;
+import '../../features/profile/domain/usecases/get_profile.dart' as _i901;
+import '../../features/profile/domain/usecases/update_user_avatar.dart'
+    as _i902;
 import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
 import '../utils/secure_storage_utils.dart' as _i206;
 
@@ -114,7 +117,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i674.BookRepository>(
         () => _i661.BookRepositoryImpl(gh<_i906.BookRemoteDataSource>()));
     gh.lazySingleton<_i192.ProfileRemoteDataSource>(
-        () => _i192.ProfileRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
+        () => _i192.ProfileRemoteDataSourceImpl(
+              dio: gh<_i361.Dio>(),
+              secureStorage: gh<_i206.SecureStorageUtil>(),
+            ));
     gh.factory<_i225.DonatedBooksRepository>(() =>
         _i141.DonatedBooksRepositoryImpl(
             gh<_i66.DonatedBooksRemoteDataSource>()));
@@ -168,8 +174,14 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.factory<_i478.UpdateProfileUseCase>(
         () => _i478.UpdateProfileUseCase(gh<_i894.ProfileRepository>()));
+    gh.factory<_i901.GetProfileUseCase>(
+        () => _i901.GetProfileUseCase(gh<_i894.ProfileRepository>()));
+    gh.factory<_i902.UpdateAvatarUseCase>(
+        () => _i902.UpdateAvatarUseCase(gh<_i894.ProfileRepository>()));
     gh.factory<_i133.ProfileBloc>(() => _i133.ProfileBloc(
           gh<_i206.SecureStorageUtil>(),
+          gh<_i901.GetProfileUseCase>(),
+          gh<_i902.UpdateAvatarUseCase>(),
           gh<_i478.UpdateProfileUseCase>(),
         ));
     gh.factory<_i788.ChangePasswordUseCase>(

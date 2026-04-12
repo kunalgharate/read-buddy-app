@@ -12,9 +12,9 @@ class PlaybackStateService {
     required Duration position,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('${_prefix}${bookId}_track', trackIndex);
+    await prefs.setInt('$_prefix${bookId}_track', trackIndex);
     await prefs.setInt(
-      '${_prefix}${bookId}_position',
+      '$_prefix${bookId}_position',
       position.inMilliseconds,
     );
   }
@@ -22,8 +22,8 @@ class PlaybackStateService {
   /// Load saved playback state. Returns null if no saved state.
   static Future<PlaybackState?> load(String bookId) async {
     final prefs = await SharedPreferences.getInstance();
-    final track = prefs.getInt('${_prefix}${bookId}_track');
-    final posMs = prefs.getInt('${_prefix}${bookId}_position');
+    final track = prefs.getInt('$_prefix${bookId}_track');
+    final posMs = prefs.getInt('$_prefix${bookId}_position');
 
     if (track == null || posMs == null) return null;
 
@@ -36,8 +36,8 @@ class PlaybackStateService {
   /// Clear saved state for a book
   static Future<void> clear(String bookId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('${_prefix}${bookId}_track');
-    await prefs.remove('${_prefix}${bookId}_position');
+    await prefs.remove('$_prefix${bookId}_track');
+    await prefs.remove('$_prefix${bookId}_position');
   }
 }
 
