@@ -31,3 +31,22 @@ final class SignInFailure extends SignInState {
   @override
   List<Object> get props => [errorMessage];
 }
+
+final class OtpSentSuccess extends SignInState {
+  final String email;
+
+  const OtpSentSuccess(this.email);
+
+  @override
+  List<Object> get props => [email];
+}
+
+final class OtpVerifiedSuccess extends SignInState {
+  @override
+  List<Object> get props => [];
+}
+
+final class PasswordChangedSuccess extends SignInState {
+  @override
+  List<Object> get props => [];
+}

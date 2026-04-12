@@ -1,5 +1,3 @@
-// lib/core/di/injection.dart
-
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
@@ -13,7 +11,6 @@ import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_location
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
 
 // Core
-import '../../features/questionaries/data/repositories/question_repository_impl.dart';
 import '../network/dio_client.dart';
 import '../utils/secure_storage_utils.dart';
 
@@ -25,16 +22,12 @@ import '../../features/auth/domain/usecases/register_user_usecase.dart';
 import '../../features/auth/domain/usecases/sign_in.dart';
 import '../../features/auth/domain/usecases/sign_in_with_google.dart';
 import '../../features/auth/domain/usecases/verify_email_usecase.dart';
+import '../../features/auth/domain/usecases/send_otp_usecase.dart';
+import '../../features/auth/domain/usecases/verify_reset_otp_usecase.dart';
+import '../../features/auth/domain/usecases/change_password_usecase.dart';
 import '../../features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
-
-// Profile
-import '../../features/profile/data/remotesource/profile_remote_data_source.dart';
-import '../../features/profile/data/repositories/profile_repository_impl.dart';
-import '../../features/profile/domain/repositories/profile_repository.dart';
-import '../../features/profile/domain/usecases/update_profile_usecase.dart';
-import '../../features/profile/presentation/blocs/profile_bloc.dart';
 
 // Books
 import '../../features/books/data/datasources/book_remote_data_source.dart';
@@ -79,6 +72,7 @@ import '../../features/banner/presentation/bloc/banner_bloc.dart';
 
 // Questionaries
 import '../../features/questionaries/data/datasources/onboarding_remote_datasource.dart';
+import '../../features/questionaries/data/repositories/question_repository_impl.dart';
 import '../../features/questionaries/domain/repositories/onboarding_repository.dart';
 import '../../features/questionaries/domain/usecases/get_questions.dart';
 import '../../features/questionaries/domain/usecases/set_preferences.dart';
@@ -87,11 +81,18 @@ import '../../features/questionaries/domain/usecases/delete_user_preferences.dar
 import '../../features/questionaries/domain/usecases/set_onboarding_status.dart';
 import '../../features/questionaries/presentations/bloc/on_boarding_bloc.dart';
 
+// Donated Books
+import '../../features/donated_books/data/datasources/donation_remote_data_source.dart';
+import '../../features/donated_books/data/repositories/donated_books_repository_impl.dart';
+import '../../features/donated_books/domain/repositories/donated_books_repository.dart';
+import '../../features/donated_books/domain/usecases/get_donated_books.dart';
+import '../../features/donated_books/presentation/bloc/donated_books_bloc.dart';
+
 // Question CRUD (Admin)
 import '../../features/question_crud/data/datasources/question_remote_datasource.dart'
-    as QuestionCrudData;
+    as QuestionCrudDataSource;
 import '../../features/question_crud/data/repositories/question_repository_impl.dart'
-    as QuestionCrudData;
+    as QuestionCrudRepo;
 import '../../features/question_crud/domain/repositories/question_repository.dart'
     as QuestionCrudDomain;
 import '../../features/question_crud/domain/usecases/get_questions.dart'
@@ -136,11 +137,6 @@ void _registerDataSources() {
     () => AuthRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
-  // Profile
-  getIt.registerLazySingleton<ProfileRemoteDataSource>(
-    () => ProfileRemoteDataSourceImpl(dio: getIt<Dio>()),
-  );
-
   // Books
   getIt.registerLazySingleton<BookRemoteDataSource>(
     () => BookRemoteDataSourceImpl(dio: getIt<Dio>()),
@@ -180,11 +176,16 @@ void _registerDataSources() {
   );
 
   // Question CRUD (Admin)
-  getIt.registerLazySingleton<QuestionCrudData.QuestionRemoteDataSource>(
-    () => QuestionCrudData.QuestionRemoteDataSource(
+  getIt.registerLazySingleton<QuestionCrudDataSource.QuestionRemoteDataSource>(
+    () => QuestionCrudDataSource.QuestionRemoteDataSource(
       getIt<Dio>(),
       getIt<SecureStorageUtil>(),
     ),
+  );
+
+  // Donated Books
+  getIt.registerLazySingleton<DonatedBooksRemoteDataSource>(
+    () => DonatedBooksRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 }
 
@@ -195,11 +196,6 @@ void _registerRepositories() {
   // Auth
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt<AuthRemoteDataSource>()),
-  );
-
-  // Profile
-  getIt.registerLazySingleton<ProfileRepository>(
-    () => ProfileRepositoryImpl(getIt<ProfileRemoteDataSource>()),
   );
 
   // Books
@@ -239,8 +235,14 @@ void _registerRepositories() {
 
   // Question CRUD (Admin)
   getIt.registerLazySingleton<QuestionCrudDomain.QuestionRepository>(
-    () => QuestionCrudData.QuestionRepositoryImpl(
-        getIt<QuestionCrudData.QuestionRemoteDataSource>()),
+    () => QuestionCrudRepo.QuestionRepositoryImpl(
+      getIt<QuestionCrudDataSource.QuestionRemoteDataSource>(),
+    ),
+  );
+
+  // Donated Books
+  getIt.registerLazySingleton<DonatedBooksRepository>(
+    () => DonatedBooksRepositoryImpl(getIt<DonatedBooksRemoteDataSource>()),
   );
 }
 
@@ -255,10 +257,11 @@ void _registerUseCases() {
       () => RegisterUserUseCase(getIt<AuthRepository>()));
   getIt
       .registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
-
-  // Profile
+  getIt.registerLazySingleton(() => SendOtpUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(
-      () => UpdateProfileUseCase(getIt<ProfileRepository>()));
+      () => VerifyResetOtpUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(
+      () => ChangePasswordUseCase(getIt<AuthRepository>()));
 
   // Books
   getIt.registerLazySingleton(() => GetBooks(getIt<BookRepository>()));
@@ -283,7 +286,8 @@ void _registerUseCases() {
 
   // Search Location
   getIt.registerLazySingleton(
-      () => SearchLocationUsecase(getIt<SearchLocationRepository>()));
+    () => SearchLocationUsecase(getIt<SearchLocationRepository>()),
+  );
 
   // Category CRUD
   getIt.registerLazySingleton(
@@ -326,6 +330,10 @@ void _registerUseCases() {
       getIt<QuestionCrudDomain.QuestionRepository>()));
   getIt.registerLazySingleton(() => QuestionCrudUseCases.DeleteQuestion(
       getIt<QuestionCrudDomain.QuestionRepository>()));
+
+  // Donated Books
+  getIt.registerLazySingleton(
+      () => GetDonatedBooks(getIt<DonatedBooksRepository>()));
 }
 
 // ========================================
@@ -333,7 +341,12 @@ void _registerUseCases() {
 // ========================================
 void _registerBlocs() {
   // Auth
-  getIt.registerLazySingleton(() => SignInBloc(getIt<SignIn>()));
+  getIt.registerLazySingleton(() => SignInBloc(
+        getIt<SignIn>(),
+        getIt<SendOtpUseCase>(),
+        getIt<VerifyResetOtpUseCase>(),
+        getIt<ChangePasswordUseCase>(),
+      ));
   getIt
       .registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
   getIt.registerLazySingleton(() => SignUpBloc(
@@ -341,14 +354,11 @@ void _registerBlocs() {
         getIt<VerifyEmailUseCase>(),
       ));
 
-  // Profile
-  getIt.registerLazySingleton(() => ProfileBloc(
-        getIt<SecureStorageUtil>(),
-        getIt<UpdateProfileUseCase>(),
-      ));
-
   // Books
   getIt.registerLazySingleton(() => BookBloc(getIt<GetBooks>()));
+
+  // Donated Books
+  getIt.registerLazySingleton(() => DonatedBooksBloc(getIt<GetDonatedBooks>()));
 
   // Book CRUD
   getIt.registerLazySingleton(() => BookCrudBloc(
@@ -376,7 +386,7 @@ void _registerBlocs() {
         deleteBannerUsecase: getIt<DeleteBannerUsecase>(),
       ));
 
-  // Questionaries — registerFactory for fresh instance per screen
+  // Questionaries
   getIt.registerFactory(() => OnboardingBloc(
         getQuestionsUseCase: getIt<GetQuestionsUseCase>(),
         setPreferencesUseCase: getIt<SetPreferencesUseCase>(),

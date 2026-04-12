@@ -5,5 +5,7 @@ abstract class AuthRepository {
   Future<AppUser> signInUsingGoogle({required String token});
   Future<AppUser> registerUser(Map<String, dynamic> data);
   Future<AppUser> verifyEmail(String email, String code);
-  Future<dynamic> forgetPassword();
+  Future<void> sendOtp(String email);
+  Future<void> verifyResetOtp(String email, String otp);
+  Future<void> changePassword(String email, String code, String newPassword);
 }
