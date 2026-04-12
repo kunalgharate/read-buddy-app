@@ -61,7 +61,7 @@ class _QuestionListPageState extends State<QuestionListPage> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddEditQuestionPage(),
+        builder: (context) => const AddEditQuestionPage(),
       ),
     );
 
@@ -73,7 +73,7 @@ class _QuestionListPageState extends State<QuestionListPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Question added')),
+        const SnackBar(content: Text('Question added')),
       );
     }
   }
@@ -94,7 +94,7 @@ class _QuestionListPageState extends State<QuestionListPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Question updated')),
+        const SnackBar(content: Text('Question updated')),
       );
     }
   }
@@ -110,7 +110,7 @@ class _QuestionListPageState extends State<QuestionListPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Question deleted')),
+        const SnackBar(content: Text('Question deleted')),
       );
     } catch (e) {
       if (!mounted) return;
@@ -125,19 +125,19 @@ class _QuestionListPageState extends State<QuestionListPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Question?'),
-        content: Text('Are you sure?'),
+        title: const Text('Delete Question?'),
+        content: const Text('Are you sure?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               deleteQuestion(question.id);
             },
-            child: Text('Delete'),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -149,26 +149,26 @@ class _QuestionListPageState extends State<QuestionListPage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text('Questions Management',
+        title: const Text('Questions Management',
             style: TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: Colors.green))
+          ? const Center(child: CircularProgressIndicator(color: Colors.green))
           : Column(
               children: [
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   color: Colors.white,
                   child: Row(
                     children: [
-                      Icon(Icons.quiz, color: Colors.green, size: 24),
-                      SizedBox(width: 12),
+                      const Icon(Icons.quiz, color: Colors.green, size: 24),
+                      const SizedBox(width: 12),
                       Text(
                         'Total Questions: ${_questions.length}',
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                     ],
@@ -176,19 +176,19 @@ class _QuestionListPageState extends State<QuestionListPage> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     itemCount: _questions.length,
                     itemBuilder: (context, index) {
                       QuestionEntity question = _questions[index];
                       return Container(
-                        margin: EdgeInsets.only(bottom: 12),
+                        margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Padding(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -197,31 +197,31 @@ class _QuestionListPageState extends State<QuestionListPage> {
                                   Expanded(
                                     child: Text(
                                       question.question,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600),
                                     ),
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Colors.green.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    padding: EdgeInsets.symmetric(
+                                    padding: const EdgeInsets.symmetric(
                                         horizontal: 8, vertical: 4),
                                     child: Text(
                                       question.type == QuestionType.single
                                           ? 'Single'
                                           : 'Multiple',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Colors.green,
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   PopupMenuButton<String>(
                                     icon: Icon(Icons.more_vert,
                                         color: Colors.grey[600]),
@@ -233,7 +233,7 @@ class _QuestionListPageState extends State<QuestionListPage> {
                                       }
                                     },
                                     itemBuilder: (context) => [
-                                      PopupMenuItem(
+                                      const PopupMenuItem(
                                         value: 'edit',
                                         child: Row(
                                           children: [
@@ -251,8 +251,8 @@ class _QuestionListPageState extends State<QuestionListPage> {
                                             Icon(Icons.delete,
                                                 size: 18,
                                                 color: Colors.red[600]),
-                                            SizedBox(width: 8),
-                                            Text('Delete'),
+                                            const SizedBox(width: 8),
+                                            const Text('Delete'),
                                           ],
                                         ),
                                       ),
@@ -260,15 +260,15 @@ class _QuestionListPageState extends State<QuestionListPage> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 12),
+                              const SizedBox(height: 12),
                               Text('Options:',
                                   style: TextStyle(
                                       fontWeight: FontWeight.w500,
                                       color: Colors.grey[700])),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               for (int i = 0; i < question.options.length; i++)
                                 Padding(
-                                  padding: EdgeInsets.only(bottom: 6),
+                                  padding: const EdgeInsets.only(bottom: 6),
                                   child: Row(
                                     children: [
                                       Container(
@@ -282,7 +282,7 @@ class _QuestionListPageState extends State<QuestionListPage> {
                                         child: Center(
                                           child: Text(
                                             '${i + 1}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w500,
                                               color: Colors.green,
@@ -290,11 +290,11 @@ class _QuestionListPageState extends State<QuestionListPage> {
                                           ),
                                         ),
                                       ),
-                                      SizedBox(width: 12),
+                                      const SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
                                           question.options[i],
-                                          style: TextStyle(fontSize: 14),
+                                          style: const TextStyle(fontSize: 14),
                                         ),
                                       ),
                                     ],
@@ -312,8 +312,9 @@ class _QuestionListPageState extends State<QuestionListPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: addQuestion,
         backgroundColor: Colors.green,
-        icon: Icon(Icons.add, color: Colors.white),
-        label: Text('Add Question', style: TextStyle(color: Colors.white)),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label:
+            const Text('Add Question', style: TextStyle(color: Colors.white)),
       ),
     );
   }

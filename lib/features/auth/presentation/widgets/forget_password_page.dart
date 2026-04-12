@@ -105,16 +105,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     style: const TextStyle(
-                        fontSize: 16, color: Color(0xFF1E3A5F)),
+                      fontSize: 16,
+                      color: Color(0xFF1E3A5F),
+                    ),
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined,
-                          color: Color(0xFF666666), size: 22),
+                      prefixIcon: Icon(
+                        Icons.email_outlined,
+                        color: Color(0xFF666666),
+                        size: 22,
+                      ),
                       hintText: 'Enter your email',
-                      hintStyle:
-                      TextStyle(color: Color(0xFF999999), fontSize: 16),
+                      hintStyle: TextStyle(
+                        color: Color(0xFF999999),
+                        fontSize: 16,
+                      ),
                       border: InputBorder.none,
-                      contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -123,20 +132,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   builder: (context, state) {
                     if (state is SignInLoading) {
                       return const Center(
-                          child: CircularProgressIndicator(
-                              color: Color(0xFF00C853)));
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF00C853),
+                        ),
+                      );
                     }
                     return CustomButton(
                       text: 'Continue',
                       onPressed: () {
                         final email = _emailController.text.trim();
-                        final emailRegex =
-                        RegExp(r'^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$');
+                        final emailRegex = RegExp(
+                          r'^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$',
+                        );
                         if (email.isEmpty || !emailRegex.hasMatch(email)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content:
-                              Text('Please enter a valid email address'),
+                              content: Text(
+                                'Please enter a valid email address',
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );

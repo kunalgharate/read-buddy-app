@@ -11,6 +11,10 @@ import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_location
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
 
 // Core
+
+import '../../features/profile/data/datasource/profile_remote_data_source.dart';
+import '../../features/profile/domain/usecases/get_profile.dart';
+import '../../features/profile/domain/usecases/update_user_avatar.dart';
 import '../network/dio_client.dart';
 import '../utils/secure_storage_utils.dart';
 
@@ -28,6 +32,13 @@ import '../../features/auth/domain/usecases/change_password_usecase.dart';
 import '../../features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
+
+// Profile
+import '../../features/profile/data/repositories/profile_repository_impl.dart';
+import '../../features/profile/domain/repositories/profile_repository.dart';
+
+import '../../features/profile/domain/usecases/update_profile_usecase.dart';
+import '../../features/profile/presentation/blocs/profile_bloc.dart';
 
 // Books
 import '../../features/books/data/datasources/book_remote_data_source.dart';
@@ -137,6 +148,14 @@ void _registerDataSources() {
     () => AuthRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
+  // Profile — fixed: pass real secureStorage instead of null
+  getIt.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(
+      dio: getIt<Dio>(),
+      secureStorage: getIt<SecureStorageUtil>(), // ← FIXED
+    ),
+  );
+
   // Books
   getIt.registerLazySingleton<BookRemoteDataSource>(
     () => BookRemoteDataSourceImpl(dio: getIt<Dio>()),
@@ -196,6 +215,11 @@ void _registerRepositories() {
   // Auth
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt<AuthRemoteDataSource>()),
+  );
+
+  // Profile
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(getIt<ProfileRemoteDataSource>()),
   );
 
   // Books
@@ -263,6 +287,14 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => ChangePasswordUseCase(getIt<AuthRepository>()));
 
+  // Profile — added GetProfileUseCase and UpdateAvatarUseCase
+  getIt.registerLazySingleton(
+      () => GetProfileUseCase(getIt<ProfileRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateAvatarUseCase(getIt<ProfileRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateProfileUseCase(getIt<ProfileRepository>()));
+
   // Books
   getIt.registerLazySingleton(() => GetBooks(getIt<BookRepository>()));
 
@@ -286,8 +318,7 @@ void _registerUseCases() {
 
   // Search Location
   getIt.registerLazySingleton(
-    () => SearchLocationUsecase(getIt<SearchLocationRepository>()),
-  );
+      () => SearchLocationUsecase(getIt<SearchLocationRepository>()));
 
   // Category CRUD
   getIt.registerLazySingleton(
@@ -352,6 +383,14 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => SignUpBloc(
         getIt<RegisterUserUseCase>(),
         getIt<VerifyEmailUseCase>(),
+      ),);
+
+  // Profile — fixed: added all 4 required constructor args
+  getIt.registerFactory(() => ProfileBloc(
+        getIt<SecureStorageUtil>(),
+        getIt<GetProfileUseCase>(), // ← NEW
+        getIt<UpdateAvatarUseCase>(), // ← NEW
+        getIt<UpdateProfileUseCase>(),
       ));
 
   // Books

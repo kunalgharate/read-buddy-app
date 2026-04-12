@@ -32,7 +32,7 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
 
       final account = await googleSignIn.signIn();
       if (account == null) {
-        emit(GoogleSignInFailure("User cancelled sign-in"));
+        emit(const GoogleSignInFailure("User cancelled sign-in"));
         return;
       }
 
@@ -40,7 +40,7 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
       final idToken = auth.idToken;
 
       if (idToken == null) {
-        emit(GoogleSignInFailure("ID token is null"));
+        emit(const GoogleSignInFailure("ID token is null"));
         return;
       }
 

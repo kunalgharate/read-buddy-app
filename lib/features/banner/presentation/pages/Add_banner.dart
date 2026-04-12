@@ -9,7 +9,6 @@ import 'package:read_buddy_app/core/utils/image_helper.dart';
 import 'package:read_buddy_app/core/theme/text_styles.dart';
 import 'package:read_buddy_app/core/widgets/my_buttons.dart';
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
-import 'package:read_buddy_app/features/auth/presentation/pages/sing_up_page.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 
 class AddBanner extends StatefulWidget {
@@ -111,7 +110,7 @@ class _AddBannerState extends State<AddBanner> {
                                       });
                                     },
                                     child: Container(
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                         boxShadow: [
@@ -154,7 +153,7 @@ class _AddBannerState extends State<AddBanner> {
                   items: (f, cs) => ["Ads", "Banner", "Donation", "Info"],
                   popupProps: const PopupProps.menu(fit: FlexFit.loose),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 const Text('Banner Title', style: TextStyles.labelStyle),
                 MyTextField(
                   controller: BannerTitleController,
@@ -163,7 +162,7 @@ class _AddBannerState extends State<AddBanner> {
                   obscureText: false,
                   keyboardType: TextInputType.text,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 const Text('Banner Description', style: TextStyles.labelStyle),
                 MyTextField(
                   controller: BannerDescriptionController,
@@ -173,7 +172,7 @@ class _AddBannerState extends State<AddBanner> {
                   keyboardType: TextInputType.text,
                   maxlines: 5,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 const Text('Banner Link', style: TextStyles.labelStyle),
                 MyTextField(
                   controller: BannerlinkController,
@@ -241,7 +240,7 @@ class _AddBannerState extends State<AddBanner> {
   void dialogpermission() async {
     await showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {

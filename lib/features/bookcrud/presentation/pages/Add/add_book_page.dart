@@ -6,7 +6,6 @@ import 'package:read_buddy_app/core/utils/book_validators.dart';
 import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
-import 'package:read_buddy_app/features/bookcrud/presentation/pages/Add/add_book_page2.dart';
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 
@@ -123,7 +122,7 @@ class _AddBookPageState extends State<AddBookPage> {
                             borderSide: BorderSide(color: Colors.grey)),
                         hintText: 'Seacrch Genre')),
                 items: (f, cs) => BookValueItems().bookGenres,
-                popupProps: PopupProps.menu(fit: FlexFit.loose),
+                popupProps: const PopupProps.menu(fit: FlexFit.loose),
               ),
               const SizedBox(height: 16),
               const Text(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_event.dart';
-import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DeletecrudBook {
@@ -23,13 +22,13 @@ class DeletecrudBook {
                 style: TextButton.styleFrom(
                     shape: ContinuousRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
-                        side: BorderSide(color: Colors.black))),
+                        side: const BorderSide(color: Colors.black))),
                 child: const Text(
                   "Cancel",
                   style: TextStyle(color: Colors.black),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 15,
               ),
               TextButton(
@@ -40,7 +39,7 @@ class DeletecrudBook {
                 style: TextButton.styleFrom(
                     shape: ContinuousRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
-                        side: BorderSide(color: Colors.black))),
+                        side: const BorderSide(color: Colors.black))),
                 child:
                     const Text("Delete", style: TextStyle(color: Colors.black)),
               ),

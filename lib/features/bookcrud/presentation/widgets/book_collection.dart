@@ -16,7 +16,7 @@ class BooksCollection extends StatelessWidget {
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: BorderSide(
+        side: const BorderSide(
           color: Colors.black,
           width: 1 / 2,
         ),
@@ -26,7 +26,7 @@ class BooksCollection extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 8,
             ),
             ClipRRect(
@@ -99,10 +99,10 @@ class BooksCollection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(5))),
                           child: Text(
                             bookcollection.category,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 color: Color.fromARGB(255, 6, 86, 150)),
                           )),
-                      SizedBox(
+                      const SizedBox(
                         width: 5,
                       ),
                       TextButton(
@@ -113,7 +113,7 @@ class BooksCollection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(5))),
                           child: Text(
                             bookcollection.format,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 color: Color.fromARGB(255, 6, 86, 150)),
                           ))
                     ],
@@ -135,7 +135,7 @@ void updatedialog(BuildContext context, BookCrudEntity book) async {
   print("update Dialog messaging");
   await showModalBottomSheet(
     context: context,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
     builder: (context) {

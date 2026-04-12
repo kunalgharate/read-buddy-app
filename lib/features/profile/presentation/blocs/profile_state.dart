@@ -12,8 +12,7 @@ class ProfileInitial extends ProfileState {}
 class ProfileLoading extends ProfileState {}
 
 class ProfileLoaded extends ProfileState {
-  final AppUser user;
-
+  final ProfileUser user;
   const ProfileLoaded(this.user);
 
   @override
@@ -21,8 +20,7 @@ class ProfileLoaded extends ProfileState {
 }
 
 class ProfileUpdating extends ProfileState {
-  final AppUser user;
-
+  final ProfileUser user;
   const ProfileUpdating(this.user);
 
   @override
@@ -31,8 +29,16 @@ class ProfileUpdating extends ProfileState {
 
 class ProfileUpdated extends ProfileState {
   final AppUser user;
-
   const ProfileUpdated(this.user);
+
+  @override
+  List<Object?> get props => [user];
+}
+
+/// Emitted after PATCH /users/update-avatar succeeds
+class AvatarUpdateSuccess extends ProfileState {
+  final ProfileUser user;
+  const AvatarUpdateSuccess(this.user);
 
   @override
   List<Object?> get props => [user];
@@ -40,7 +46,6 @@ class ProfileUpdated extends ProfileState {
 
 class ProfileError extends ProfileState {
   final String message;
-
   const ProfileError(this.message);
 
   @override

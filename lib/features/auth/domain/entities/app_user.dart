@@ -46,7 +46,7 @@ class AppUser {
   factory AppUser.fromJson(Map<String, dynamic> json) {
     // Support both flat response and nested { user: {...}, accessToken, refreshToken }
     final Map<String, dynamic> u =
-    json['user'] != null ? json['user'] as Map<String, dynamic> : json;
+        json['user'] != null ? json['user'] as Map<String, dynamic> : json;
 
     return AppUser(
       id: u['_id']?.toString() ?? u['id']?.toString() ?? '',
@@ -67,10 +67,11 @@ class AppUser {
           : DateTime.now(),
       version: (u['__v'] as num?)?.toInt() ?? 0,
       // tokens can live at the root level or inside user object
-      accessToken: json['accessToken']?.toString() ??
-          u['accessToken']?.toString() ?? '',
+      accessToken:
+          json['accessToken']?.toString() ?? u['accessToken']?.toString() ?? '',
       refreshToken: json['refreshToken']?.toString() ??
-          u['refreshToken']?.toString() ?? '',
+          u['refreshToken']?.toString() ??
+          '',
       picture: u['picture']?.toString(),
       phno: u['phno']?.toString(),
       gender: u['gender']?.toString(),
@@ -80,21 +81,21 @@ class AppUser {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'email': email,
-    'role': role,
-    'isPrime': isPrime,
-    'finesDue': finesDue,
-    'isEmailVerified': isEmailVerified,
-    'onboardingCompleted': onboardingCompleted,
-    'badges': badges,
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
-    'picture': picture,
-    'phno': phno,
-    'gender': gender,
-    'wishlist': wishlist,
-    'userAvatar': userAvatar,
-  };
+        'id': id,
+        'name': name,
+        'email': email,
+        'role': role,
+        'isPrime': isPrime,
+        'finesDue': finesDue,
+        'isEmailVerified': isEmailVerified,
+        'onboardingCompleted': onboardingCompleted,
+        'badges': badges,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
+        'picture': picture,
+        'phno': phno,
+        'gender': gender,
+        'wishlist': wishlist,
+        'userAvatar': userAvatar,
+      };
 }

@@ -1,4 +1,5 @@
 /// Audiobook domain entities — pure Dart, no framework dependencies.
+library;
 
 class AudioBookTrack {
   final String id;

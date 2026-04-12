@@ -7,8 +7,19 @@ abstract class ProfileEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Triggers GET /users/profile
 class LoadProfileEvent extends ProfileEvent {}
 
+/// Triggers PATCH /users/update-avatar
+class UpdateAvatarEvent extends ProfileEvent {
+  final String avatarName;
+  const UpdateAvatarEvent(this.avatarName);
+
+  @override
+  List<Object?> get props => [avatarName];
+}
+
+/// Triggers PUT /users/update-user-info
 class UpdateProfileFieldEvent extends ProfileEvent {
   final String field;
   final String value;
@@ -20,34 +31,6 @@ class UpdateProfileFieldEvent extends ProfileEvent {
 
   @override
   List<Object?> get props => [field, value];
-}
-
-class UpdateProfileApiEvent extends ProfileEvent {
-  final String? name;
-  final String? phno;
-  final String? gender;
-  final String? dob;
-  final String? picture;
-
-  const UpdateProfileApiEvent({
-    this.name,
-    this.phno,
-    this.gender,
-    this.dob,
-    this.picture,
-  });
-
-  @override
-  List<Object?> get props => [name, phno, gender, dob, picture];
-}
-
-class UpdateProfilePhotoEvent extends ProfileEvent {
-  final PhotoSource source;
-
-  const UpdateProfilePhotoEvent({required this.source});
-
-  @override
-  List<Object?> get props => [source];
 }
 
 class RefreshProfileEvent extends ProfileEvent {}

@@ -59,6 +59,7 @@ class AppUserModel extends AppUser {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'user': {
