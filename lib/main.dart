@@ -14,13 +14,16 @@ import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_bloc.dart';
 import 'core/di/injection.dart';
+import 'core/services/connectivity_service.dart';
 import 'core/utils/app_bloc_observer.dart';
+import 'core/widgets/connectivity_wrapper.dart';
 import 'routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   configureDependencies();
+  await ConnectivityService.instance.init();
   Bloc.observer = AppBlocObserver();
 
   print('🚀 [main] App starting...');
@@ -57,7 +60,9 @@ class MyApp extends StatelessWidget {
           textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           useMaterial3: true,
         ),
-        home: const SplashScreen(),
+        home: const ConnectivityWrapper(
+          child: SplashScreen(),
+        ),
         onGenerateRoute: AppRouter.generateRoute,
       ),
     );
