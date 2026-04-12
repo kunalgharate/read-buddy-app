@@ -31,6 +31,9 @@ doc/api/
 # OS files
 .DS_Store
 
+# Kiro settings (contains API keys — do NOT commit)
+.kiro/settings/
+
 # Android build artifacts & generated files
 android/app/.cxx/
 android/.gradle/

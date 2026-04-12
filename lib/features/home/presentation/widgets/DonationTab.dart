@@ -1,380 +1,276 @@
 import 'package:flutter/material.dart';
-import 'Format_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DonationTab extends StatelessWidget {
   const DonationTab({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Donation Tab'),
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  // ignore: library_private_types_in_public_api
-  _MainScreenState createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
-    );
-    _fadeController.forward();
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
+  static const _primaryGreen = Color(0xFF2CE07F);
+  static const _textDark = Color(0xFF052E44);
+  static const _background = Color(0xFFFDFDFD);
+  static const _cardShadow = Color(0x0D000000); // ~5% black
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: const BookDonationScreen(),
+      backgroundColor: _background,
+      appBar: AppBar(
+        backgroundColor: _background,
+        elevation: 0,
+        centerTitle: false,
+        title: Text(
+          'Donate',
+          style: GoogleFonts.poppins(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: _textDark,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- Your Impact ---
+            Text(
+              'Your Impact',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: _textDark,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Row(
+              children: [
+                Expanded(
+                  child: _ImpactCard(
+                    icon: Icons.book,
+                    iconColor: Color(0xFF2CE07F),
+                    iconBgColor: Color(0x1A2CE07F),
+                    count: '04',
+                    label: 'Books Donated',
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: _ImpactCard(
+                    icon: Icons.people,
+                    iconColor: Color(0xFF2196F3),
+                    iconBgColor: Color(0x1A2196F3),
+                    count: '20+',
+                    label: 'Students Helped',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
+
+            // --- Your Book Status ---
+            Text(
+              'Your Book Status',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: _textDark,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+                boxShadow: [
+                  BoxShadow(
+                    color: _cardShadow,
+                    blurRadius: 10,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Column(
+                children: [
+                  _BookStatusRow(
+                    title: 'The Jungle Book',
+                    format: 'E-Book',
+                    status: 'Completed',
+                    statusColor: Color(0xFF4CAF50),
+                  ),
+                  SizedBox(height: 16),
+                  _BookStatusRow(
+                    title: 'The Jungle Book',
+                    format: 'E-Book',
+                    status: 'Pending',
+                    statusColor: Color(0xFFFFC107),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // --- Donate Book Button ---
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/book-format');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryGreen,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.add, size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Donate a Book',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class BookDonationScreen extends StatelessWidget {
-  const BookDonationScreen({super.key});
+// ─── Private Widgets ─────────────────────────────────────────
+
+class _ImpactCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBgColor;
+  final String count;
+  final String label;
+
+  const _ImpactCard({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBgColor,
+    required this.count,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: DonationTab._cardShadow,
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: iconBgColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            count,
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: DonationTab._textDark,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: const Color(0xFF666666),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookStatusRow extends StatelessWidget {
+  final String title;
+  final String format;
+  final String status;
+  final Color statusColor;
+
+  const _BookStatusRow({
+    required this.title,
+    required this.format,
+    required this.status,
+    required this.statusColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Your Status Section
-              const Text(
-                'Your Status',
-                style: TextStyle(
-                  fontSize: 18,
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2E2E2E),
+                  color: DonationTab._textDark,
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Your Impact Row
-              const Text(
-                'Your Impact',
-                style: TextStyle(
+              Text(
+                format,
+                style: GoogleFonts.poppins(
                   fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  // Books Donated Card
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF4CAF50).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.book,
-                              color: Color(0xFF4CAF50),
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            '04',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2E2E2E),
-                            ),
-                          ),
-                          const Text(
-                            'Books Donated',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF666666),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 16),
-
-                  // Students Helped Card
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2196F3).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.people,
-                              color: Color(0xFF2196F3),
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            '20+',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2E2E2E),
-                            ),
-                          ),
-                          const Text(
-                            'Student Helped',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF666666),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // Your Book Status Section
-              const Text(
-                'Your Book Status',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2E2E2E),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Book Status Items
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // First Book Item
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'The Jungle Book',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF2E2E2E),
-                                ),
-                              ),
-                              Text(
-                                'E-Book',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF666666),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF4CAF50),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Text(
-                            'Completed',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Second Book Item
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'The Jungle Book',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF2E2E2E),
-                                ),
-                              ),
-                              Text(
-                                'E-Book',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF666666),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFC107),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Text(
-                            'Pending',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Donate Book Section
-              const Text(
-                'Donate Book',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2E2E2E),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Donate Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const BookFormatScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add,
-                        size: 24,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Donate a Book',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
+                  color: const Color(0xFF666666),
                 ),
               ),
             ],
           ),
         ),
-      ),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: statusColor,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            status,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
