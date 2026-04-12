@@ -22,6 +22,9 @@ class ApiConstants {
   // Category endpoints
   static const String categories = '$baseUrl/categories';
 
+  // Donation endpoints
+  static const String getAllDonations = '$baseUrl/donations';
+
   static const String olaMap = '$baseUrl/ola/address?input';
 
   // HTTP Status Codes

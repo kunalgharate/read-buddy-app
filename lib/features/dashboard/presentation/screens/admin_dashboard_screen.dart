@@ -54,7 +54,9 @@ class AdminDashboardScreen extends StatelessWidget {
                     title: 'Books Donated',
                     count: 5,
                     color: Colors.grey,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/donated-books');
+                    },
                   ),
                   DashboardBoxWidget(
                     title: 'Books Request',
