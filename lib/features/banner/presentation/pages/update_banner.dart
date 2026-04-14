@@ -170,7 +170,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                                     });
                                   },
                                   child: Container(
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
                                       boxShadow: [

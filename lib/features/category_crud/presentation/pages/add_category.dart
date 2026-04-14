@@ -8,12 +8,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:read_buddy_app/core/theme/text_styles.dart';
 import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/core/utils/auto_complete.dart';
-import 'package:read_buddy_app/core/utils/image_helper.dart';
 
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
-import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 
 class AddCategory extends StatefulWidget {
   const AddCategory({super.key});
@@ -144,7 +142,7 @@ class _AddCategoryState extends State<AddCategory> {
                                     });
                                   },
                                   child: Container(
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
                                       boxShadow: [
@@ -201,7 +199,7 @@ class _AddCategoryState extends State<AddCategory> {
     );
   }
 
-  TextStyle labelStyle = TextStyle(
+  TextStyle labelStyle = const TextStyle(
     fontWeight: FontWeight.w700,
     fontSize: 18,
     color: Color.fromARGB(255, 4, 33, 83),
@@ -233,7 +231,7 @@ class _AddCategoryState extends State<AddCategory> {
   void dialogpermission() async {
     await showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {

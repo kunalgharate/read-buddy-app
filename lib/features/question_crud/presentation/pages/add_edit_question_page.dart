@@ -59,7 +59,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Minimum 2 options required')),
+        const SnackBar(content: Text('Minimum 2 options required')),
       );
     }
   }
@@ -67,7 +67,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
   Future<void> saveQuestion() async {
     if (questionController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter question')),
+        const SnackBar(content: Text('Please enter question')),
       );
       return;
     }
@@ -81,7 +81,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
 
     if (options.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter at least 2 options')),
+        const SnackBar(content: Text('Please enter at least 2 options')),
       );
       return;
     }
@@ -143,19 +143,19 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
       appBar: AppBar(
         title: Text(
           widget.question == null ? 'Add Question' : 'Edit Question',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -171,7 +171,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                         fontWeight: FontWeight.w600,
                         color: Colors.grey[800]),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   TextField(
                     controller: questionController,
                     maxLines: 3,
@@ -183,17 +183,18 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.green, width: 2),
+                        borderSide:
+                            const BorderSide(color: Colors.green, width: 2),
                       ),
-                      contentPadding: EdgeInsets.all(12),
+                      contentPadding: const EdgeInsets.all(12),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -209,7 +210,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                         fontWeight: FontWeight.w600,
                         color: Colors.grey[800]),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Column(
                     children: [
                       GestureDetector(
@@ -220,8 +221,8 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                         },
                         child: Container(
                           width: double.infinity,
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: selectedType == 'single'
                                 ? Colors.green.withOpacity(0.1)
@@ -245,12 +246,12 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                                   });
                                 },
                               ),
-                              Text('Single Choice'),
+                              const Text('Single Choice'),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -259,8 +260,8 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                         },
                         child: Container(
                           width: double.infinity,
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: selectedType == 'multiple'
                                 ? Colors.green.withOpacity(0.1)
@@ -284,7 +285,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                                   });
                                 },
                               ),
-                              Text('Multiple Choice'),
+                              const Text('Multiple Choice'),
                             ],
                           ),
                         ),
@@ -294,9 +295,9 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -317,22 +318,22 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                       ),
                       ElevatedButton.icon(
                         onPressed: addOption,
-                        icon: Icon(Icons.add, size: 18),
-                        label: Text('Add'),
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Add'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          textStyle: TextStyle(fontSize: 14),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          textStyle: const TextStyle(fontSize: 14),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   for (int i = 0; i < optionControllers.length; i++)
                     Padding(
-                      padding: EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: 12),
                       child: Row(
                         children: [
                           Container(
@@ -345,14 +346,14 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                             child: Center(
                               child: Text(
                                 '${i + 1}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: Colors.green,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: TextField(
                               controller: optionControllers[i],
@@ -365,22 +366,22 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide:
-                                      BorderSide(color: Colors.green, width: 2),
+                                  borderSide: const BorderSide(
+                                      color: Colors.green, width: 2),
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 8),
                               ),
                             ),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           if (optionControllers.length > 2)
                             IconButton(
                               onPressed: () => removeOption(i),
                               icon: Icon(Icons.delete, color: Colors.red[600]),
                               style: IconButton.styleFrom(
                                 backgroundColor: Colors.red[50],
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                               ),
                             ),
                         ],
@@ -389,7 +390,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -401,11 +402,11 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  textStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  textStyle: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 child: _isLoading
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(

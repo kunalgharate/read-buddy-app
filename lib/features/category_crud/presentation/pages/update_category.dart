@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:read_buddy_app/core/theme/text_styles.dart';
-import 'package:read_buddy_app/core/utils/image_helper.dart';
 import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -149,7 +148,7 @@ class _UpdateCategoryPageState extends State<UpdateCategoryPage> {
                                         });
                                       },
                                       child: Container(
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                           color: Colors.white,
                                           shape: BoxShape.circle,
                                           boxShadow: [
@@ -266,7 +265,7 @@ class _UpdateCategoryPageState extends State<UpdateCategoryPage> {
   void dialogpermission() async {
     await showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {

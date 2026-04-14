@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/utils/image_helper.dart';
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/add_category.dart';
@@ -63,7 +62,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                 },
                 decoration: InputDecoration(
                     hintText: 'Search Categories',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: const BorderSide(color: Colors.grey),
@@ -112,7 +111,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                 },
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 50,
             )
           ],
@@ -120,7 +119,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
       ),
       floatingActionButton: FloatingActionButton.large(
         backgroundColor: const Color.fromARGB(255, 96, 177, 228),
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         tooltip: 'Add Book',
         onPressed: () {
           // Your action
@@ -147,13 +146,13 @@ class _CategoryListPageState extends State<CategoryListPage> {
           return Container(
             height: 100,
             width: MediaQuery.of(context).size.width,
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: Column(
               children: [
                 Expanded(
                   child: ListTile(
-                    leading: Icon(Icons.update),
-                    title: Text("Update Category"),
+                    leading: const Icon(Icons.update),
+                    title: const Text("Update Category"),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushReplacement(
@@ -166,13 +165,13 @@ class _CategoryListPageState extends State<CategoryListPage> {
                   ),
                 ),
                 const Divider(),
-                SizedBox(
+                const SizedBox(
                   width: 10,
                 ),
                 Expanded(
                   child: ListTile(
                     leading: const Icon(Icons.delete),
-                    title: Text("Delete Category"),
+                    title: const Text("Delete Category"),
                     onTap: () {
                       Navigator.pop(context);
                       DeleteCategory().confirmDelete(context, category.id);
@@ -192,7 +191,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
         color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: BorderSide(
+          side: const BorderSide(
             color: Colors.black,
             width: 0.5,
           ),
@@ -219,7 +218,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Text(

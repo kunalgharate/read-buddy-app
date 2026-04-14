@@ -72,7 +72,7 @@ class _BooksListPageState extends State<BooksListPage> {
                 onChanged: (value) => _onSearchChanged(),
                 decoration: InputDecoration(
                     hintText: 'Search Book',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: const BorderSide(color: Colors.grey),
@@ -113,7 +113,7 @@ class _BooksListPageState extends State<BooksListPage> {
                 }
               },
             )),
-            SizedBox(
+            const SizedBox(
               height: 50,
             )
           ],
@@ -121,7 +121,7 @@ class _BooksListPageState extends State<BooksListPage> {
       ),
       floatingActionButton: FloatingActionButton.large(
         backgroundColor: const Color.fromARGB(255, 96, 177, 228),
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         tooltip: 'Add Book',
         onPressed: () {
           // Your action

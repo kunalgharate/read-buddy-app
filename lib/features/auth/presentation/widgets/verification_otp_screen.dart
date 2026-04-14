@@ -19,9 +19,9 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
   static const int _otpLength = 6;
 
   final List<TextEditingController> _controllers =
-  List.generate(_otpLength, (_) => TextEditingController());
+      List.generate(_otpLength, (_) => TextEditingController());
   final List<FocusNode> _focusNodes =
-  List.generate(_otpLength, (_) => FocusNode());
+      List.generate(_otpLength, (_) => FocusNode());
 
   @override
   void initState() {
@@ -37,8 +37,12 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    for (final c in _controllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 
@@ -49,8 +53,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
       for (int i = 0; i < _otpLength; i++) {
         _controllers[i].text = digits[i];
       }
+      if (!mounted) return;
       _focusNodes[_otpLength - 1].requestFocus();
-      setState(() {});
     }
   }
 
@@ -75,12 +79,14 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
       return;
     }
     context.read<SignInBloc>().add(
-      VerifyOtpRequested(email: widget.email, otp: _otp),
-    );
+          VerifyOtpRequested(email: widget.email, otp: _otp),
+        );
   }
 
   void _clearOtp() {
-    for (final c in _controllers) c.clear();
+    for (final c in _controllers) {
+      c.clear();
+    }
     _focusNodes[0].requestFocus();
   }
 
@@ -93,6 +99,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
             email: widget.email,
             code: _otp,
           );
+          if (!context.mounted) return;
           Navigator.pushNamed(context, '/reset-password');
         } else if (state is OtpSentSuccess) {
           _clearOtp();
@@ -179,11 +186,14 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: const BorderSide(
-                                color: Color(0xFF00C853), width: 2),
+                                color: Color(0xFF00C853), width: 2,
+                            ),
                           ),
                         ),
                         onTap: () {
-                          if (index == 0) _tryAutoFill();
+                          if (index == 0) {
+                            _tryAutoFill();
+                          }
                         },
                         onChanged: (value) => _onDigitChanged(index, value),
                       ),
@@ -212,8 +222,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
                   builder: (context, state) {
                     if (state is SignInLoading) {
                       return const Center(
-                        child: CircularProgressIndicator(
-                            color: Color(0xFF00C853)),
+                        child:
+                            CircularProgressIndicator(color: Color(0xFF00C853)),
                       );
                     }
                     return CustomButton(

@@ -1,12 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
-import 'package:read_buddy_app/features/bookcrud/data/model/item_model.dart';
-import 'package:read_buddy_app/features/bookcrud/data/model/user_model.dart';
-import 'package:read_buddy_app/features/bookcrud/domain/entities/user_entity.dart';
 import '../../../../core/network/api_constants.dart';
 
 abstract class BookCrudRemoteDataSource {

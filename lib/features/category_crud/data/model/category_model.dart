@@ -1,9 +1,12 @@
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 
 class CategoryModel extends CategoryEntity {
+  @override
   final String id;
+  @override
   final String title;
   final String category;
+  @override
   final String imageUrl;
 
   CategoryModel({

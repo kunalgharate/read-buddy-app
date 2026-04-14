@@ -132,5 +132,4 @@ class SecureStorageUtil {
   Future<void> clearAll() async {
     await _storage.deleteAll();
   }
-
 }

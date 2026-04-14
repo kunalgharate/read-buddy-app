@@ -14,7 +14,8 @@ class SearchableDD extends StatelessWidget {
   final bool? showClearButton;
   final TextEditingController? controller;
 
-  SearchableDD({
+  const SearchableDD({
+    super.key,
     this.hintText,
     this.hintStyle,
     this.controller,

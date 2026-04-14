@@ -10,7 +10,6 @@ import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/core/utils/image_helper.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
-import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/user_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_event.dart';
@@ -364,7 +363,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                       });
                                     },
                                     child: Container(
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                         boxShadow: [
@@ -414,7 +413,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                       });
                                     },
                                     child: Container(
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                         boxShadow: [
@@ -485,7 +484,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                       tagController.text.isNotEmpty &&
                       !tagController.text.endsWith(' ')) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                           content: Text('Please press space to add your tag')),
                     );
                     return;
@@ -572,7 +571,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
   void dialogpermission() async {
     await showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
@@ -647,7 +646,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
   void singleImagePermission() async {
     await showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
@@ -701,7 +700,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
 
 Widget _buildCloseButton() {
   return Container(
-    decoration: BoxDecoration(
+    decoration: const BoxDecoration(
       color: Colors.white,
       shape: BoxShape.circle,
       boxShadow: [
