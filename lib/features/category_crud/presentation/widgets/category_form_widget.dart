@@ -101,7 +101,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                   digitsOnly: false,
                   keyboardType: TextInputType.text,
                   validator: (v) =>
-                      v == null || v.isEmpty ? 'Title is required' : null,
+                      v == null || v.trim().isEmpty ? 'Title is required' : null,
                 ),
                 const SizedBox(height: 16),
                 _label('Parent Category (Optional)'),
@@ -289,6 +289,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
   }
 
   void _submit() {
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSubmitting = true);
     if (_isEdit) {
