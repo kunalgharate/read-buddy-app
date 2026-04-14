@@ -66,7 +66,17 @@ import '../../features/category_crud/domain/usecases/get_caategories.dart'
     as _i359;
 import '../../features/category_crud/domain/usecases/update_category.dart'
     as _i527;
-import '../../features/profile/data/remotesource/profile_remote_data_source.dart'
+import '../../features/donated_books/data/datasources/donation_remote_data_source.dart'
+    as _i66;
+import '../../features/donated_books/data/repositories/donated_books_repository_impl.dart'
+    as _i141;
+import '../../features/donated_books/domain/repositories/donated_books_repository.dart'
+    as _i225;
+import '../../features/donated_books/domain/usecases/get_donated_books.dart'
+    as _i505;
+import '../../features/donated_books/presentation/bloc/donated_books_bloc.dart'
+    as _i253;
+import '../../features/profile/data/datasource/profile_remote_data_source.dart'
     as _i192;
 import '../../features/profile/data/repositories/profile_repository_impl.dart'
     as _i334;
@@ -74,6 +84,9 @@ import '../../features/profile/domain/repositories/profile_repository.dart'
     as _i894;
 import '../../features/profile/domain/usecases/update_profile_usecase.dart'
     as _i478;
+import '../../features/profile/domain/usecases/get_profile.dart' as _i901;
+import '../../features/profile/domain/usecases/update_user_avatar.dart'
+    as _i902;
 import '../../features/profile/presentation/blocs/profile_bloc.dart' as _i133;
 import '../utils/secure_storage_utils.dart' as _i206;
 
@@ -93,6 +106,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i673.BookCrudRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
     gh.factory<_i170.AuthRemoteDataSource>(
         () => _i170.AuthRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
+    gh.factory<_i66.DonatedBooksRemoteDataSource>(
+        () => _i66.DonatedBooksRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
     gh.factory<_i344.BookCrudRepository>(() =>
         _i473.BookCrudRepositoryImpl(gh<_i673.BookCrudRemoteDataSource>()));
     gh.factory<_i212.CategoryRemoteDataSource>(
@@ -102,7 +117,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i674.BookRepository>(
         () => _i661.BookRepositoryImpl(gh<_i906.BookRemoteDataSource>()));
     gh.lazySingleton<_i192.ProfileRemoteDataSource>(
-        () => _i192.ProfileRemoteDataSourceImpl(dio: gh<_i361.Dio>()));
+        () => _i192.ProfileRemoteDataSourceImpl(
+              dio: gh<_i361.Dio>(),
+              secureStorage: gh<_i206.SecureStorageUtil>(),
+            ));
+    gh.factory<_i225.DonatedBooksRepository>(() =>
+        _i141.DonatedBooksRepositoryImpl(
+            gh<_i66.DonatedBooksRemoteDataSource>()));
     gh.factory<_i187.CategoryRepository>(() =>
         _i574.CategoryRepositoryImpl(gh<_i212.CategoryRemoteDataSource>()));
     gh.factory<_i787.AuthRepository>(
@@ -119,6 +140,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i194.SearchBookUsecase(gh<_i344.BookCrudRepository>()));
     gh.factory<_i161.UpdateBookUsecase>(
         () => _i161.UpdateBookUsecase(gh<_i344.BookCrudRepository>()));
+    gh.factory<_i505.GetDonatedBooks>(
+        () => _i505.GetDonatedBooks(gh<_i225.DonatedBooksRepository>()));
     gh.factory<_i581.GetBooks>(
         () => _i581.GetBooks(gh<_i674.BookRepository>()));
     gh.factory<_i903.BookBloc>(() => _i903.BookBloc(gh<_i581.GetBooks>()));
@@ -157,11 +180,25 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i478.UpdateProfileUseCase(gh<_i894.ProfileRepository>()));
     gh.factory<_i133.ProfileBloc>(() => _i133.ProfileBloc(
           gh<_i206.SecureStorageUtil>(),
+          gh<_i901.GetProfileUseCase>(),
+          gh<_i902.UpdateAvatarUseCase>(),
           gh<_i478.UpdateProfileUseCase>(),
         ));
+    gh.factory<_i788.ChangePasswordUseCase>(
+        () => _i788.ChangePasswordUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i663.SendOtpUseCase>(
+        () => _i663.SendOtpUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i752.VerifyResetOtpUseCase>(
+        () => _i752.VerifyResetOtpUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),
           gh<_i30.VerifyEmailUseCase>(),
+        ));
+    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(
+          gh<_i920.SignIn>(),
+          gh<_i663.SendOtpUseCase>(),
+          gh<_i752.VerifyResetOtpUseCase>(),
+          gh<_i788.ChangePasswordUseCase>(),
         ));
     return this;
   }

@@ -5,7 +5,6 @@ import 'package:read_buddy_app/features/bookcrud/domain/entities/search_location
 import '../../../../core/network/api_constants.dart';
 import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
-import 'package:read_buddy_app/features/bookcrud/data/model/user_model.dart';
 
 abstract class SearchLocationRemoteResources {
   Future<List<SearchLocationEntity>> getSuggestionsList(String query);

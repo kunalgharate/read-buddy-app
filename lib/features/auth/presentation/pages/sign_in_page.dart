@@ -371,8 +371,9 @@ class _SignInScreenState extends State<SignInScreen> {
           backgroundColor: Colors.grey.shade200,
           textColor: _textColor,
           icon: _buildGoogleIcon(),
-          onPressed: () =>
-              context.read<GoogleSignInBloc>().add(GoogleSignInRequested()),
+          onPressed: () => context
+              .read<GoogleSignInBloc>()
+              .add(const GoogleSignInRequested()),
         );
       },
     );

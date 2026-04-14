@@ -60,7 +60,7 @@ class _BannersListState extends State<BannersList> {
                 }
               },
             )),
-            SizedBox(
+            const SizedBox(
               height: 50,
             )
           ],
@@ -68,7 +68,7 @@ class _BannersListState extends State<BannersList> {
       ),
       floatingActionButton: FloatingActionButton.large(
         backgroundColor: const Color.fromARGB(255, 96, 177, 228),
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         tooltip: 'Add Banner',
         onPressed: () {
           // Your action

@@ -8,7 +8,7 @@ class ApiConstants {
   static const String refreshToken = '$baseUrl/auth/refresh';
   static const String loginWithGoogle = '$baseUrl/googleauth/google-auth';
   static const String resendResetOtp = '$baseUrl/users/resend-reset-otp';
-  static const String changePassword  = '$baseUrl/users/reset-password';
+  static const String changePassword = '$baseUrl/users/reset-password';
   static const String verifyOtp = '$baseUrl/users/verify-reset-otp';
   // User endpoints
   static const String users = '$baseUrl/users';
@@ -21,6 +21,9 @@ class ApiConstants {
 
   // Category endpoints
   static const String categories = '$baseUrl/categories';
+
+  // Donation endpoints
+  static const String getAllDonations = '$baseUrl/donations';
 
   static const String olaMap = '$baseUrl/ola/address?input';
 

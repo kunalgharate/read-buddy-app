@@ -15,8 +15,8 @@ class ResetPasswordScreen extends StatefulWidget {
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
+  final _obscurePassword = ValueNotifier<bool>(true);
+  final _obscureConfirm = ValueNotifier<bool>(true);
 
   String? _email;
   String? _otp;
@@ -29,16 +29,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   Future<void> _loadSession() async {
     final session = await getIt<SecureStorageUtil>().getForgotPasswordSession();
-    setState(() {
-      _email = session['email'];
-      _otp = session['code'];
-    });
+    _email = session['email'];
+    _otp = session['code'];
   }
 
   @override
   void dispose() {
     _passwordController.dispose();
     _confirmController.dispose();
+    _obscurePassword.dispose();
+    _obscureConfirm.dispose();
     super.dispose();
   }
 
@@ -60,10 +60,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     }
 
     context.read<SignInBloc>().add(ChangePasswordRequested(
-      email: _email!,
-      code: _otp!,
-      newPassword: password,
-    ));
+          email: _email!,
+          code: _otp!,
+          newPassword: password,
+        ));
   }
 
   void _showError(String msg) {
@@ -78,6 +78,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       listener: (context, state) async {
         if (state is PasswordChangedSuccess) {
           await getIt<SecureStorageUtil>().clearForgotPasswordSession();
+          if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Password changed successfully!'),
@@ -134,12 +135,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _passwordField(
+                _PasswordField(
                   controller: _passwordController,
                   hint: 'Enter new password',
-                  obscure: _obscurePassword,
-                  onToggle: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
+                  obscureNotifier: _obscurePassword,
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -151,12 +150,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _passwordField(
+                _PasswordField(
                   controller: _confirmController,
                   hint: 'Confirm new password',
-                  obscure: _obscureConfirm,
-                  onToggle: () =>
-                      setState(() => _obscureConfirm = !_obscureConfirm),
+                  obscureNotifier: _obscureConfirm,
                 ),
                 const SizedBox(height: 40),
                 BlocBuilder<SignInBloc, SignInState>(
@@ -164,7 +161,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     if (state is SignInLoading) {
                       return const Center(
                         child: CircularProgressIndicator(
-                            color: Color(0xFF00C853)),
+                          color: Color(0xFF00C853),
+                        ),
                       );
                     }
                     return CustomButton(
@@ -181,43 +179,63 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       ),
     );
   }
+}
 
-  Widget _passwordField({
-    required TextEditingController controller,
-    required String hint,
-    required bool obscure,
-    required VoidCallback onToggle,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscure,
-        style: const TextStyle(fontSize: 15, color: Color(0xFF1E3A5F)),
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.lock_outline,
-              color: Color(0xFF666666), size: 20),
-          suffixIcon: IconButton(
-            icon: Icon(
-              obscure
-                  ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined,
-              color: const Color(0xFF666666),
-              size: 20,
-            ),
-            onPressed: onToggle,
+class _PasswordField extends StatelessWidget {
+  const _PasswordField({
+    required this.controller,
+    required this.hint,
+    required this.obscureNotifier,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final ValueNotifier<bool> obscureNotifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: obscureNotifier,
+      builder: (context, obscure, _) {
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
           ),
-          hintText: hint,
-          hintStyle:
-          const TextStyle(color: Color(0xFF999999), fontSize: 15),
-          border: InputBorder.none,
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        ),
-      ),
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscure,
+            style: const TextStyle(fontSize: 15, color: Color(0xFF1E3A5F)),
+            decoration: InputDecoration(
+              prefixIcon: const Icon(
+                Icons.lock_outline,
+                color: Color(0xFF666666),
+                size: 20,
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscure
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: const Color(0xFF666666),
+                  size: 20,
+                ),
+                onPressed: () => obscureNotifier.value = !obscure,
+              ),
+              hintText: hint,
+              hintStyle: const TextStyle(
+                color: Color(0xFF999999),
+                fontSize: 15,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

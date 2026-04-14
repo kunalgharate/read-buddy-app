@@ -5,12 +5,10 @@ import '../../../auth/presentation/pages/sign_in_page.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/widgets/addbook_stepper.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/add_category.dart';
-import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/book_state.dart';
 import '../widgets/book_list_item.dart';
-import '../../../bookcrud/presentation/pages/Add/add_book_page.dart';
 
 class BookPage extends StatefulWidget {
   const BookPage({super.key});
@@ -174,7 +172,8 @@ class _BookPageState extends State<BookPage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => BookStepper()
+                                        builder: (context) =>
+                                            const BookStepper()
                                         // AddBookPage(
                                         //   onContinue: () {},
                                         // )

@@ -1,7 +1,7 @@
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 
 class ItemModel extends Item {
-  ItemModel({
+  const ItemModel({
     required super.id,
     required super.name,
   });

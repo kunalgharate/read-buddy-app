@@ -4,8 +4,6 @@ import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigat
 import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dart';
-
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
@@ -13,6 +11,7 @@ import '../../../books/presentation/bloc/book_bloc.dart';
 import '../../../books/presentation/bloc/book_event.dart';
 import '../../../books/presentation/bloc/book_state.dart';
 import '../../../books/presentation/widgets/book_list_item.dart';
+import '../../../profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,21 +27,70 @@ class _HomeScreenState extends State<HomeScreen> {
     Maintab(),
     CategoryTab(),
     DonationTab(),
-    ProfileTab()
+    ProfileScreen()
   ];
 
   @override
   Widget build(BuildContext context) {
     final actions = [
+      IconButton(
+        onPressed: () => Navigator.pushNamed(context, '/ebooks'),
+        icon: const Icon(
+          Icons.chrome_reader_mode,
+          color: Color(0xFF052E44),
+        ),
+        tooltip: 'eBooks',
+      ),
+      IconButton(
+        onPressed: () => Navigator.pushNamed(context, '/audiobooks'),
+        icon: const Icon(
+          Icons.headphones_rounded,
+          color: Color(0xFF052E44),
+        ),
+        tooltip: 'Audiobooks',
+      ),
+      IconButton(
+        onPressed: () => Navigator.pushNamed(context, '/search'),
+        icon: const Icon(
+          Icons.search,
+          color: Color(0xFF052E44),
+        ),
+        tooltip: 'Search',
+      ),
+      IconButton(
+        onPressed: () => Navigator.pushNamed(context, '/notification'),
+        icon: const Icon(
+          Icons.notifications_outlined,
+          color: Color(0xFF052E44),
+        ),
+        tooltip: 'Notifications',
+      ),
+      IconButton(
+        onPressed: () => Navigator.pushNamed(context, '/mybooks'),
+        icon: const Icon(
+          Icons.menu_book_outlined,
+          color: Color(0xFF052E44),
+        ),
+        tooltip: 'My Books',
+      ),
+      IconButton(
+        onPressed: () => Navigator.pushNamed(context, '/rewards'),
+        icon: const Icon(
+          Icons.emoji_events,
+          color: Color(0xFF2CE07F),
+        ),
+        tooltip: 'Rewards',
+      ),
       ElevatedButton(
-          onPressed: () async {
-            final secureStorage = getIt<SecureStorageUtil>();
-            await secureStorage.clearAll();
-            await AppPreferences.clear();
-            if (!context.mounted) return;
-            Navigator.pushReplacementNamed(context, '/signin');
-          },
-          child: const Icon(Icons.logout)),
+        onPressed: () async {
+          final secureStorage = getIt<SecureStorageUtil>();
+          await secureStorage.clearAll();
+          await AppPreferences.clear();
+          if (!context.mounted) return;
+          Navigator.pushReplacementNamed(context, '/signin');
+        },
+        child: const Icon(Icons.logout),
+      ),
     ];
 
     if (currentIndex == 0) {

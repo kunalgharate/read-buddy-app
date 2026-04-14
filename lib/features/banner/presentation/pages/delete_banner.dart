@@ -22,13 +22,13 @@ class DeleteBanner {
                 style: TextButton.styleFrom(
                     shape: ContinuousRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
-                        side: BorderSide(color: Colors.black))),
+                        side: const BorderSide(color: Colors.black))),
                 child: const Text(
                   "Cancel",
                   style: TextStyle(color: Colors.black),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 15,
               ),
               TextButton(
@@ -39,7 +39,7 @@ class DeleteBanner {
                 style: TextButton.styleFrom(
                     shape: ContinuousRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
-                        side: BorderSide(color: Colors.black))),
+                        side: const BorderSide(color: Colors.black))),
                 child:
                     const Text("Delete", style: TextStyle(color: Colors.black)),
               ),
