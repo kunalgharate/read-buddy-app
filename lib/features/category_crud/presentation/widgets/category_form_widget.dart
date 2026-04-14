@@ -26,6 +26,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
   XFile? _pickedImage;
 
   bool get _isEdit => widget.existing != null;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -70,15 +71,19 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
       body: BlocListener<CategoryBloc, CategoryState>(
         listener: (context, state) {
           if (state is CategorySuccess) {
+            setState(() => _isSubmitting = false);
             if (context.mounted) Navigator.pop(context);
           }
           if (state is CategoryError) {
+            setState(() => _isSubmitting = false);
             if (context.mounted) {
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(content: Text(state.message)));
             }
           }
         },
+        listenWhen: (previous, current) =>
+            current is CategorySuccess || current is CategoryError,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Form(
@@ -142,18 +147,12 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                   maxlines: 3,
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _label('Image'),
-                    IconButton(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.cloud_upload,
-                          color: Color(0xFF052E44)),
-                    ),
-                  ],
+                _label('Image'),
+                const SizedBox(height: 6),
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: _imagePreview(),
                 ),
-                _imagePreview(),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -166,13 +165,27 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
-                    child: Text(
-                      _isEdit ? 'Update' : 'Done',
-                      style: const TextStyle(
-                        color: Color(0xFF052E44),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
+                    child: BlocBuilder<CategoryBloc, CategoryState>(
+                      builder: (context, state) {
+                        if (_isSubmitting) {
+                          return const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF052E44),
+                              strokeWidth: 2,
+                            ),
+                          );
+                        }
+                        return Text(
+                          _isEdit ? 'Update' : 'Create',
+                          style: const TextStyle(
+                            color: Color(0xFF052E44),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -259,12 +272,13 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
               : Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Icon(Icons.cloud_upload_outlined,
-                          size: 40, color: Colors.grey.shade400),
+                          size: 48, color: Colors.grey.shade400),
                       const SizedBox(height: 8),
                       Text(
-                        'Tap upload icon to add image',
+                        'Tap to upload image',
                         style: TextStyle(
                             color: Colors.grey.shade500, fontSize: 13),
                       ),
@@ -276,7 +290,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-
+    setState(() => _isSubmitting = true);
     if (_isEdit) {
       context.read<CategoryBloc>().add(UpdateCategoryEvent(
             id: widget.existing!.id,
@@ -287,6 +301,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
           ));
     } else {
       if (_pickedImage == null) {
+        setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please upload an image')),
         );
