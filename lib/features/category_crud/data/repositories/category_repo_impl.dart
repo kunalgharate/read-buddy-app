@@ -30,7 +30,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
     String? parentCategoryId,
     required File image,
   }) async {
-    print("AAAAAAAAAAdddddd catat implll $parentCategoryId");
     await remoteDataSource.addCategory(
       title: title,
       description: description,

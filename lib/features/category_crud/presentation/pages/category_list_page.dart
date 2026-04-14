@@ -46,7 +46,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                       return const Center(child: Text("No categories found."));
                     }
                     return ListView.separated(
-                      padding: EdgeInsets.zero,
+                      padding: const EdgeInsets.only(bottom: 60),
                       itemCount: state.categories.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
@@ -79,7 +79,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
     );
   }
 
-  void updatedialog(CategoryEntity category) async {
+  void updateDialog(CategoryEntity category) async {
     await showModalBottomSheet(
         context: context,
         shape: const RoundedRectangleBorder(
@@ -231,7 +231,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
             ),
           ),
           IconButton(
-            onPressed: () => updatedialog(category),
+            onPressed: () => updateDialog(category),
             icon: const Icon(Icons.more_vert, size: 20, color: Color(0xFF141414)),
           ),
         ],

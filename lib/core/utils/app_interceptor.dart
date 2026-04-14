@@ -44,7 +44,9 @@ class AppInterceptor extends Interceptor {
       if (accessToken != null && accessToken.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $accessToken';
       }
-      options.headers['Content-Type'] = 'application/json';
+      if (!options.headers.containsKey('Content-Type') && options.data is! FormData) {
+        options.headers['Content-Type'] = 'application/json';
+      }
       options.headers['Accept'] = 'application/json';
     } catch (e) {
       // Continue without token if storage fails
