@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/ProfileTab.dart';
-
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
-import '../../../books/presentation/bloc/book_bloc.dart';
-import '../../../books/presentation/bloc/book_event.dart';
-import '../../../books/presentation/bloc/book_state.dart';
-import '../../../books/presentation/widgets/book_list_item.dart';
+import '../../../books/presentation/pages/book_page.dart';
+import '../../../profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,87 +17,67 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentIndex = 0;
+  int _currentIndex = 0;
 
-  final List<Widget> pages = const [
-    Maintab(),
-    CategoryTab(),
+  final List<Widget> _pages = const [
+    MainTab(),
+    BookPage(),
     DonationTab(),
-    ProfileTab()
+    ProfileScreen(),
   ];
+
+  Future<void> _logout() async {
+    await getIt<SecureStorageUtil>().clearAll();
+    await AppPreferences.clear();
+    if (!mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil('/signin', (_) => false);
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _logout();
+            },
+            child: const Text('Logout', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final actions = [
-      ElevatedButton(
-          onPressed: () async {
-            final secureStorage = getIt<SecureStorageUtil>();
-            await secureStorage.clearAll();
-            await AppPreferences.clear();
-            if (!context.mounted) return;
-            Navigator.pushReplacementNamed(context, '/signin');
-          },
-          child: const Icon(Icons.logout)),
-    ];
-
-    if (currentIndex == 0) {
-      context.read<BookBloc>().add(LoadBooks());
-    }
-
     return Scaffold(
-      appBar: currentIndex == 0
-          ? AppBar(title: const Text('Ready Buddy'), actions: actions)
-          : null,
-      body: currentIndex == 0
-          ? BlocBuilder<BookBloc, BookState>(
-              builder: (context, state) {
-                switch (state) {
-                  case BookInitial():
-                    return Column(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () {
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //         builder: (context) => const AddBookPage()));
-                            },
-                            child: const Text("Add Book")),
-                        const Center(child: Text('No books loaded.')),
-                      ],
-                    );
-
-                  case BookLoading():
-                    return const Center(child: CircularProgressIndicator());
-
-                  case BookLoaded(:final books):
-                    return ListView.builder(
-                      itemCount: books.length,
-                      itemBuilder: (context, index) =>
-                          BookListItem(book: books[index]),
-                    );
-
-                  case BookError(:final message):
-                    return Center(child: Text(message));
-                }
-              },
-            )
-          : pages[currentIndex],
-      floatingActionButton: currentIndex == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                context.read<BookBloc>().add(LoadBooks());
-              },
-              child: const Icon(Icons.refresh),
+      appBar: _currentIndex == 0
+          ? AppBar(
+              title: const Text('Read Buddy'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: _showLogoutDialog,
+                ),
+              ],
             )
           : null,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavWidget(
-        currentIndex: currentIndex,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
       ),
     );
   }
