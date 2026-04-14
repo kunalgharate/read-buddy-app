@@ -13,6 +13,5 @@ class CategoryEntity {
     this.description,
   });
 
-  @override
   List<Object?> get props => [id, title, parentCategoryName, imageUrl, description];
 }

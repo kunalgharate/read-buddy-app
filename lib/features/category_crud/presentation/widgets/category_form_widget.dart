@@ -69,10 +69,14 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
       ),
       body: BlocListener<CategoryBloc, CategoryState>(
         listener: (context, state) {
-          if (state is CategorySuccess) Navigator.pop(context);
+          if (state is CategorySuccess) {
+            if (context.mounted) Navigator.pop(context);
+          }
           if (state is CategoryError) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.message)));
+            if (context.mounted) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(state.message)));
+            }
           }
         },
         child: SingleChildScrollView(
