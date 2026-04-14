@@ -15,6 +15,7 @@ abstract class CategoryRepository {
     required String id,
     required String title,
     required String description,
+    String? parentCategoryId,
     required File? image,
   });
   Future<void> deleteCategory(String id);

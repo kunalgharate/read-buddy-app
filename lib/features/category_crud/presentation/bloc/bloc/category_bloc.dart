@@ -43,13 +43,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onAddCategory(
       AddCategoryEvent event, Emitter<CategoryState> emit) async {
     try {
-      print("calling addcategory   ${event.parentCategoryId}");
       await addCategory.call(
         title: event.title,
         description: event.description,
         parentCategoryId: event.parentCategoryId,
         image: event.image,
       );
+      emit(CategorySuccess());
       add(LoadCategories());
     } catch (e) {
       emit(CategoryError('Failed to add category: ${e.toString()}'));
@@ -63,8 +63,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         id: event.id,
         title: event.title,
         description: event.description,
+        parentCategoryId: event.parentCategoryId,
         image: event.image,
       );
+      emit(CategorySuccess());
       add(LoadCategories());
     } catch (e) {
       emit(CategoryError('Failed to update category: ${e.toString()}'));

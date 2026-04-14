@@ -158,8 +158,12 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i692.SignInWithGoogle(gh<_i787.AuthRepository>()));
     gh.factory<_i30.VerifyEmailUseCase>(
         () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
-    gh.factory<_i253.DonatedBooksBloc>(
-        () => _i253.DonatedBooksBloc(gh<_i505.GetDonatedBooks>()));
+    gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(
+          gh<_i920.SignIn>(),
+          gh<_i663.SendOtpUseCase>(),
+          gh<_i752.VerifyResetOtpUseCase>(),
+          gh<_i788.ChangePasswordUseCase>(),
+        ));
     gh.lazySingleton<_i894.ProfileRepository>(
         () => _i334.ProfileRepositoryImpl(gh<_i192.ProfileRemoteDataSource>()));
     gh.factory<_i170.GoogleSignInBloc>(
@@ -174,10 +178,6 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.factory<_i478.UpdateProfileUseCase>(
         () => _i478.UpdateProfileUseCase(gh<_i894.ProfileRepository>()));
-    gh.factory<_i901.GetProfileUseCase>(
-        () => _i901.GetProfileUseCase(gh<_i894.ProfileRepository>()));
-    gh.factory<_i902.UpdateAvatarUseCase>(
-        () => _i902.UpdateAvatarUseCase(gh<_i894.ProfileRepository>()));
     gh.factory<_i133.ProfileBloc>(() => _i133.ProfileBloc(
           gh<_i206.SecureStorageUtil>(),
           gh<_i901.GetProfileUseCase>(),
