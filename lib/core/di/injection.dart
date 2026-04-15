@@ -31,11 +31,9 @@ import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 
 // Profile
-import '../../features/profile/data/datasource/profile_remote_data_source.dart';
+import '../../features/profile/data/remotesource/profile_remote_data_source.dart';
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
-import '../../features/profile/domain/usecases/get_profile.dart';
-import '../../features/profile/domain/usecases/update_user_avatar.dart';
 import '../../features/profile/domain/usecases/update_profile_usecase.dart';
 import '../../features/profile/presentation/blocs/profile_bloc.dart';
 
@@ -292,10 +290,6 @@ void _registerUseCases() {
 
   // Profile
   getIt.registerLazySingleton(
-      () => GetProfileUseCase(getIt<ProfileRepository>()));
-  getIt.registerLazySingleton(
-      () => UpdateAvatarUseCase(getIt<ProfileRepository>()));
-  getIt.registerLazySingleton(
       () => UpdateProfileUseCase(getIt<ProfileRepository>()));
 
   // Home Books
@@ -396,8 +390,6 @@ void _registerBlocs() {
   // Profile
   getIt.registerFactory(() => ProfileBloc(
         getIt<SecureStorageUtil>(),
-        getIt<GetProfileUseCase>(),
-        getIt<UpdateAvatarUseCase>(),
         getIt<UpdateProfileUseCase>(),
       ));
 

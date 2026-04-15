@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
-import '../../../books/presentation/pages/book_page.dart';
-import '../widgets/ProfileTab.dart';
+import '../../../profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,9 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = const [
     MainTab(),
-    BookPage(),
+    CategoryTab(),
     DonationTab(),
-    ProfileTab(),
+    ProfileScreen(),
   ];
 
   Future<void> _logout() async {
