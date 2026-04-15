@@ -20,7 +20,7 @@ class BookEntity {
   final String? description;
   final String ownerId;
   final BookAddressEntity? address;
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   const BookEntity({
     required this.id,

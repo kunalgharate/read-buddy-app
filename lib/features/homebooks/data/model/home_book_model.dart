@@ -45,24 +45,43 @@ class BookModel extends BookEntity {
       genre: json['genre'],
       tags: _parseTags(json['tags']),
       coverImageUrl: json['coverImageUrl'],
-      additionalImages: List<String>.from(json['additional_images'] ?? []),
+      additionalImages: (json['additional_images'] as List? ?? [])
+          .map((e) => e.toString())
+          .toList(),
       description: json['description'],
       ownerId: json['ownerId'] ?? '',
       address: json['address'] != null
           ? BookAddressModel.fromJson(json['address'])
           : null,
-      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ??
+          (throw FormatException(
+              'Missing or invalid createdAt: ${json['createdAt']}')),
     );
   }
 
-  // tags field inconsistent hai API mein — ["romance,fiction,love"] style bhi hai
+  // tags field inconsistent — can be List, comma-separated String, or null
   static List<String> _parseTags(dynamic tags) {
     if (tags == null) return [];
-    return (tags as List)
-        .expand((tag) => tag.toString().split(','))
-        .map((t) => t.trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
+
+    // Already a list: ["romance", "fiction"] or ["romance,fiction,love"]
+    if (tags is List) {
+      return tags
+          .expand((tag) => tag.toString().split(','))
+          .map((t) => t.trim())
+          .where((t) => t.isNotEmpty)
+          .toList();
+    }
+
+    // Plain string: "romance,fiction,love"
+    if (tags is String) {
+      return tags
+          .split(',')
+          .map((t) => t.trim())
+          .where((t) => t.isNotEmpty)
+          .toList();
+    }
+
+    return [];
   }
 }
 

@@ -9,8 +9,7 @@ import '../model/home_monthly_status_model.dart';
 abstract class HomeRemoteDataSource {
   Future<List<BookModel>> getLatestBooks();
   Future<List<BookModel>> getTrendingBooks();
-  Future<List<BookModel>> getRecommendedBook();
-
+  Future<List<BookModel>> getRecommendedBooks();
   Future<MonthlyStatsModel> getMonthlyStats();
 }
 
@@ -26,7 +25,6 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   Future<Options> _authOptions() async {
     final token = await _secureStorage.getAccessToken();
-    if (kDebugMode) print('🔑 HomeRemoteDataSource: Token: $token');
     return Options(headers: {'Authorization': 'Bearer $token'});
   }
 
@@ -131,7 +129,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   }
 
   @override
-  Future<List<BookModel>> getRecommendedBook() async {
+  Future<List<BookModel>> getRecommendedBooks() async {
     await _checkInternet(ApiConstants.recommendedBooks);
     try {
       final response = await _dio.get(
@@ -158,7 +156,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       );
     } catch (e) {
       if (kDebugMode)
-        print('🌐 HomeRemoteDataSource: getRecommendedBook exception: $e');
+        print('🌐 HomeRemoteDataSource: getRecommendedBooks exception: $e');
       rethrow;
     }
   }

@@ -37,14 +37,15 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<List<BookEntity>> getRecommendedBook() async {
+  Future<List<BookEntity>> getRecommendedBooks() async {
     try {
-      final result = await _remoteDataSource.getRecommendedBook();
+      final result = await _remoteDataSource.getRecommendedBooks();
       if (kDebugMode)
-        print('✅ HomeRepository: getRecommendedBook → ${result.length} books');
+        print('✅ HomeRepository: getRecommendedBooks → ${result.length} books');
       return result;
     } catch (e) {
-      if (kDebugMode) print('❌ HomeRepository: getRecommendedBook failed → $e');
+      if (kDebugMode)
+        print('❌ HomeRepository: getRecommendedBooks failed → $e');
       rethrow;
     }
   }

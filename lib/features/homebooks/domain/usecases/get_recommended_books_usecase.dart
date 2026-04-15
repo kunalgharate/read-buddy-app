@@ -7,6 +7,6 @@ class GetRecommendedBookUseCase {
   GetRecommendedBookUseCase(this.repository);
 
   Future<List<BookEntity>> call() async {
-    return await repository.getRecommendedBook();
+    return await repository.getRecommendedBooks();
   }
 }

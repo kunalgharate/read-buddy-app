@@ -8,13 +8,19 @@ class ApiConstants {
   static const String refreshToken = '$baseUrl/auth/refresh';
   static const String loginWithGoogle = '$baseUrl/googleauth/google-auth';
   static const String resendResetOtp = '$baseUrl/users/resend-reset-otp';
-  static const String changePassword  = '$baseUrl/users/reset-password';
+  static const String changePassword = '$baseUrl/users/reset-password';
   static const String verifyOtp = '$baseUrl/users/verify-reset-otp';
   // User endpoints
   static const String users = '$baseUrl/users';
 // Profile endpoints
   static const String getProfile = '$baseUrl/users/profile';
   static const String updateAvatar = '$baseUrl/users/update-avatar';
+  //homebooks
+  static const String trendingBooks = '$baseUrl/home/trending-books';
+  static const String recommendedBooks = '$baseUrl/home/recommended-books';
+  static const String latestBooks = '$baseUrl/home/latest-books';
+  //monthly data
+  static const String monthlyData = '$baseUrl/home/monthly-stats';
   // Book endpoints
   static const String books = '$baseUrl/books';
   static const String searchBooks = '$baseUrl/searchbook/search';

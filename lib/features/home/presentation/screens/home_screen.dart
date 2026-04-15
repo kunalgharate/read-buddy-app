@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../books/presentation/pages/book_page.dart';
-import '../../../profile/presentation/pages/screen/profile_screen.dart';
+import '../widgets/ProfileTab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,14 +22,30 @@ class _HomeScreenState extends State<HomeScreen> {
     MainTab(),
     BookPage(),
     DonationTab(),
-    ProfileScreen(),
+    ProfileTab(),
   ];
 
   Future<void> _logout() async {
-    await getIt<SecureStorageUtil>().clearAll();
-    await AppPreferences.clear();
-    if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil('/signin', (_) => false);
+    bool hasError = false;
+
+    try {
+      await getIt<SecureStorageUtil>().clearAll();
+      await AppPreferences.clear();
+    } catch (e) {
+      hasError = true;
+    } finally {
+      if (mounted) {
+        if (hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Logout completed with some issues.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        Navigator.of(context).pushNamedAndRemoveUntil('/signin', (_) => false);
+      }
+    }
   }
 
   void _showLogoutDialog() {
