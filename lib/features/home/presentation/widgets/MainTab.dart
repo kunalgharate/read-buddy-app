@@ -11,10 +11,6 @@ import '../../../homebooks/presentation/bloc/home_book_state.dart';
 
 const _primary = Color(0xFF03405B);
 
-// ─────────────────────────────────────────────
-// MainTab — always provide both blocs
-// ─────────────────────────────────────────────
-
 class MainTab extends StatelessWidget {
   const MainTab({super.key});
 
@@ -25,7 +21,7 @@ class MainTab extends StatelessWidget {
         BlocProvider(create: (_) => getIt<HomeBloc>()..add(LoadHomeData())),
         BlocProvider(
             create: (_) =>
-                getIt<BannerBloc>()), // no event yet — fired conditionally
+                getIt<BannerBloc>()),
       ],
       child: const _MainTabView(),
     );
@@ -380,10 +376,6 @@ class _BookCard extends StatelessWidget {
         child: const Icon(Icons.book, size: 44, color: Color(0xFFB0BEC5)),
       );
 }
-
-// ─────────────────────────────────────────────
-// Format Badge
-// ─────────────────────────────────────────────
 
 class _FormatBadge extends StatelessWidget {
   final String? format;
