@@ -12,13 +12,19 @@ class ApiConstants {
   static const String verifyOtp = '$baseUrl/users/verify-reset-otp';
   // User endpoints
   static const String users = '$baseUrl/users';
+
 // Profile endpoints
   static const String getProfile = '$baseUrl/users/profile';
   static const String updateAvatar = '$baseUrl/users/update-avatar';
   // Book endpoints
   static const String books = '$baseUrl/books';
   static const String searchBooks = '$baseUrl/searchbook/search';
-
+  //homebooks
+  static const String trendingBooks = '$baseUrl/home/trending-books';
+  static const String recommendedBooks = '$baseUrl/home/recommended-books';
+  static const String latestBooks = '$baseUrl/home/latest-books';
+  //monthly data
+  static const String monthlyData = '$baseUrl/home/monthly-stats';
   // Category endpoints
   static const String categories = '$baseUrl/categories';
 
