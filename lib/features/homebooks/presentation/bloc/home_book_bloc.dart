@@ -38,17 +38,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final user = await secureStorage.getUser(); // ← read user
       final isPrime = user?.isPrime ?? false; // ← extract isPrime
 
-      if (kDebugMode)
+      if (kDebugMode) {
         print('✅ HomeBloc: All sections loaded | isPrime: $isPrime');
+      }
 
       emit(HomeLoaded(
-        latestBooks: results[0] as List<BookEntity>,
-        trendingBooks: results[1] as List<BookEntity>,
+        latestBooks: results[0],
+        trendingBooks: results[1],
         isPrime: isPrime,
         recommendedBooks: recommended,
       ));
     } catch (e) {
-      if (kDebugMode) print('❌ HomeBloc: Error → $e');
+      if (kDebugMode) {
+        print('❌ HomeBloc: Error → $e');
+      }
       emit(HomeError(e.toString()));
     }
   }

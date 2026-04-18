@@ -105,7 +105,8 @@ class _ChallengeCard extends StatelessWidget {
           // Points
           Row(
             children: [
-              const Icon(Icons.star_outline, color: Color(0xFFFFB800), size: 24),
+              const Icon(Icons.star_outline,
+                  color: Color(0xFFFFB800), size: 24),
               const SizedBox(width: 6),
               Text(
                 '$points',

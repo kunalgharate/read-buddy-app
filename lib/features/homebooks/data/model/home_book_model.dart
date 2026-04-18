@@ -49,21 +49,19 @@ class BookModel extends BookEntity {
           .map((e) => e.toString())
           .toList(),
       description: json['description'],
-      ownerId: json['ownerId'] ?? '',
+      ownerId: json['ownerId'] is Map
+          ? json['ownerId']['_id'] ?? ''
+          : json['ownerId'] ?? '',
       address: json['address'] != null
           ? BookAddressModel.fromJson(json['address'])
           : null,
-      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ??
-          (throw FormatException(
-              'Missing or invalid createdAt: ${json['createdAt']}')),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? ''),
     );
   }
 
-  // tags field inconsistent — can be List, comma-separated String, or null
   static List<String> _parseTags(dynamic tags) {
     if (tags == null) return [];
 
-    // Already a list: ["romance", "fiction"] or ["romance,fiction,love"]
     if (tags is List) {
       return tags
           .expand((tag) => tag.toString().split(','))
@@ -72,11 +70,9 @@ class BookModel extends BookEntity {
           .toList();
     }
 
-    // Plain string: "romance,fiction,love"
-    if (tags is String) {
+    if (tags is List) {
       return tags
-          .split(',')
-          .map((t) => t.trim())
+          .map((t) => t.toString().trim())
           .where((t) => t.isNotEmpty)
           .toList();
     }

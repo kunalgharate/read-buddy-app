@@ -186,7 +186,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: const BorderSide(
-                                color: Color(0xFF00C853), width: 2,
+                              color: Color(0xFF00C853),
+                              width: 2,
                             ),
                           ),
                         ),

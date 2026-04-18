@@ -25,6 +25,13 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   Future<Options> _authOptions() async {
     final token = await _secureStorage.getAccessToken();
+    if (token == null || token.isEmpty) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.unknown,
+        message: 'No access token available. Please log in again.',
+      );
+    }
     return Options(headers: {'Authorization': 'Bearer $token'});
   }
 
@@ -82,8 +89,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch latest books',
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🌐 HomeRemoteDataSource: getLatestBooks exception: $e');
+      }
       rethrow;
     }
   }
@@ -109,11 +117,11 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       }
 
       if (_isSuccess(response.statusCode)) {
+        final books = _parseBookList(response.data, ApiConstants.trendingBooks);
         if (kDebugMode) {
-          print('📚 trendingBooks count: ${(response.data as List).length}');
-          print('📚 trendingBooks raw: ${response.data}');
+          print('📚 trendingBooks count: ${books.length}');
         }
-        return _parseBookList(response.data, ApiConstants.trendingBooks);
+        return books;
       }
 
       throw DioException(
@@ -122,8 +130,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch trending books',
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🌐 HomeRemoteDataSource: getTrendingBooks exception: $e');
+      }
       rethrow;
     }
   }
@@ -131,11 +140,13 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<List<BookModel>> getRecommendedBooks() async {
     await _checkInternet(ApiConstants.recommendedBooks);
+
     try {
       final response = await _dio.get(
         ApiConstants.recommendedBooks,
         options: await _authOptions(),
       );
+
       if (_isSuccess(response.statusCode)) {
         final data = response.data;
         if (data is! Map<String, dynamic>) {
@@ -143,20 +154,22 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         }
         final mostRequested = data['mostRequested'];
         if (mostRequested is! List || mostRequested.isEmpty) {
-          return []; // ← return empty list instead of throwing
+          return [];
         }
         return mostRequested
             .map((e) => BookModel.fromJson(e as Map<String, dynamic>))
-            .toList(); // ← parse all, not just first
+            .toList();
       }
+
       throw DioException(
         requestOptions: response.requestOptions,
         response: response,
         message: 'Failed to fetch recommended books',
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🌐 HomeRemoteDataSource: getRecommendedBooks exception: $e');
+      }
       rethrow;
     }
   }
@@ -183,8 +196,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch monthly stats',
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🌐 HomeRemoteDataSource: getMonthlyStats exception: $e');
+      }
       rethrow;
     }
   }

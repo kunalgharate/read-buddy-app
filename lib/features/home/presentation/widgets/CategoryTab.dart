@@ -331,8 +331,8 @@ class _SubCategoryTile extends StatelessWidget {
                         const SizedBox(width: 3),
                         Text(
                           _capitalize(category.parentCategoryName!),
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.grey),
+                          style:
+                              const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -343,16 +343,15 @@ class _SubCategoryTile extends StatelessWidget {
                       category.description!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 12, color: Colors.grey.shade500),
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey.shade500),
                     ),
                   ],
                 ],
               ),
             ),
 
-            const Icon(Icons.arrow_forward_ios,
-                size: 14, color: Colors.grey),
+            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
           ],
         ),
       ),

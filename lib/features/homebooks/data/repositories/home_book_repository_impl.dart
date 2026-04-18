@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/book_entity.dart';
 import '../../domain/repositories/home_book_repository.dart';
-
 import '../datasource/home_remote_datasource.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
@@ -14,11 +13,14 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<List<BookEntity>> getLatestBooks() async {
     try {
       final result = await _remoteDataSource.getLatestBooks();
-      if (kDebugMode)
+      if (kDebugMode) {
         print('✅ HomeRepository: getLatestBooks → ${result.length} books');
+      }
       return result;
     } catch (e) {
-      if (kDebugMode) print('❌ HomeRepository: getLatestBooks failed → $e');
+      if (kDebugMode) {
+        print('❌ HomeRepository: getLatestBooks failed → $e');
+      }
       rethrow;
     }
   }
@@ -27,11 +29,14 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<List<BookEntity>> getTrendingBooks() async {
     try {
       final result = await _remoteDataSource.getTrendingBooks();
-      if (kDebugMode)
+      if (kDebugMode) {
         print('✅ HomeRepository: getTrendingBooks → ${result.length} books');
+      }
       return result;
     } catch (e) {
-      if (kDebugMode) print('❌ HomeRepository: getTrendingBooks failed → $e');
+      if (kDebugMode) {
+        print('❌ HomeRepository: getTrendingBooks failed → $e');
+      }
       rethrow;
     }
   }
@@ -40,12 +45,14 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<List<BookEntity>> getRecommendedBooks() async {
     try {
       final result = await _remoteDataSource.getRecommendedBooks();
-      if (kDebugMode)
+      if (kDebugMode) {
         print('✅ HomeRepository: getRecommendedBooks → ${result.length} books');
+      }
       return result;
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('❌ HomeRepository: getRecommendedBooks failed → $e');
+      }
       rethrow;
     }
   }

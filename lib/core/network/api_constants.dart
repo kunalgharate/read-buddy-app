@@ -31,6 +31,8 @@ class ApiConstants {
   // Donation endpoints
   static const String getAllDonations = '$baseUrl/donations';
 
+  // Donation endpoints
+
   static const String olaMap = '$baseUrl/ola/address?input';
 
   // HTTP Status Codes

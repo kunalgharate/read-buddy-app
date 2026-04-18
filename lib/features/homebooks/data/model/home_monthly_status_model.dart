@@ -13,10 +13,10 @@ class MonthlyStatsModel {
 
   factory MonthlyStatsModel.fromJson(Map<String, dynamic> json) {
     return MonthlyStatsModel(
-      donatedBooks: json['donatedBooks'] ?? 0,
-      requestedBooks: json['requestedBooks'] ?? 0,
-      newUsers: json['newUsers'] ?? 0,
-      deliveredBooks: json['deliveredBooks'] ?? 0,
+      donatedBooks: (json['donatedBooks'] as num?)?.toInt() ?? 0,
+      requestedBooks: (json['requestedBooks'] as num?)?.toInt() ?? 0,
+      newUsers: (json['newUsers'] as num?)?.toInt() ?? 0,
+      deliveredBooks: (json['deliveredBooks'] as num?)?.toInt() ?? 0,
     );
   }
 }

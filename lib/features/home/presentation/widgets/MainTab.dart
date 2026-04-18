@@ -32,10 +32,6 @@ class MainTab extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Main scrollable body
-// ─────────────────────────────────────────────
-
 class _MainTabView extends StatelessWidget {
   const _MainTabView();
 
@@ -43,7 +39,14 @@ class _MainTabView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F4F7),
-      body: BlocBuilder<HomeBloc, HomeState>(
+      body: BlocConsumer<HomeBloc, HomeState>(
+        // Fire banner event only once when HomeLoaded first arrives
+        listenWhen: (prev, curr) => curr is HomeLoaded && prev is! HomeLoaded,
+        listener: (context, state) {
+          if (state is HomeLoaded && state.isPrime) {
+            context.read<BannerBloc>().add(GetBannerListEvent());
+          }
+        },
         builder: (context, state) {
           if (state is HomeLoading || state is HomeInitial) {
             return const Center(child: CircularProgressIndicator());
@@ -63,11 +66,6 @@ class _MainTabView extends StatelessWidget {
           }
 
           if (state is HomeLoaded) {
-            // Fire banner API only for prime users, only once
-            if (state.isPrime) {
-              context.read<BannerBloc>().add(GetBannerListEvent());
-            }
-
             return SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(0, 20, 0, 80),
@@ -76,7 +74,7 @@ class _MainTabView extends StatelessWidget {
                   children: [
                     _BannerSection(
                       trendingCover:
-                      state.trendingBooks.firstOrNull?.coverImageUrl,
+                          state.trendingBooks.firstOrNull?.coverImageUrl,
                       isPrime: state.isPrime,
                     ),
                     const SizedBox(height: 32),
@@ -84,7 +82,7 @@ class _MainTabView extends StatelessWidget {
                     const SizedBox(height: 32),
                     _BookSection(
                         title: 'Recommended for you',
-                        books: state.trendingBooks),
+                        books: state.recommendedBooks),
                     const SizedBox(height: 32),
                     _MonthlyStatsCard(
                         dataSource: getIt<HomeRemoteDataSource>()),
@@ -217,9 +215,9 @@ class _BannerSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: trendingCover?.isNotEmpty == true
                     ? Image.network(trendingCover!,
-                    width: 115,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _coverPlaceholder())
+                        width: 115,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _coverPlaceholder())
                     : _coverPlaceholder(),
               ),
             ),
@@ -230,10 +228,10 @@ class _BannerSection extends StatelessWidget {
   }
 
   Widget _coverPlaceholder() => Container(
-    width: 115,
-    color: Colors.white12,
-    child: const Icon(Icons.menu_book, color: Colors.white38, size: 40),
-  );
+        width: 115,
+        color: Colors.white12,
+        child: const Icon(Icons.menu_book, color: Colors.white38, size: 40),
+      );
 }
 
 // ─────────────────────────────────────────────
@@ -283,11 +281,11 @@ class _BookSection extends StatelessWidget {
           child: books.isEmpty
               ? const Center(child: Text('No books available'))
               : ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: books.length,
-            itemBuilder: (_, i) => _BookCard(book: books[i]),
-          ),
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: books.length,
+                  itemBuilder: (_, i) => _BookCard(book: books[i]),
+                ),
         ),
       ],
     );
@@ -326,13 +324,13 @@ class _BookCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(14)),
+                      const BorderRadius.vertical(top: Radius.circular(14)),
                   child: book.coverImageUrl?.isNotEmpty == true
                       ? Image.network(book.coverImageUrl!,
-                      height: 170,
-                      width: 140,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _imgPlaceholder())
+                          height: 170,
+                          width: 140,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _imgPlaceholder())
                       : _imgPlaceholder(),
                 ),
                 Positioned(
@@ -371,14 +369,14 @@ class _BookCard extends StatelessWidget {
   }
 
   Widget _imgPlaceholder() => Container(
-    height: 170,
-    width: 140,
-    decoration: const BoxDecoration(
-      color: Color(0xFFE8EDF2),
-      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-    ),
-    child: const Icon(Icons.book, size: 44, color: Color(0xFFB0BEC5)),
-  );
+        height: 170,
+        width: 140,
+        decoration: const BoxDecoration(
+          color: Color(0xFFE8EDF2),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+        ),
+        child: const Icon(Icons.book, size: 44, color: Color(0xFFB0BEC5)),
+      );
 }
 
 // ─────────────────────────────────────────────
@@ -461,7 +459,7 @@ class _MonthlyStatsCardState extends State<_MonthlyStatsCard> {
               return const SizedBox(
                   height: 100,
                   child:
-                  Center(child: CircularProgressIndicator(strokeWidth: 2)));
+                      Center(child: CircularProgressIndicator(strokeWidth: 2)));
             }
             if (snap.hasError) {
               return const SizedBox(

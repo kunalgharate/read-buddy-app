@@ -50,7 +50,8 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
 
       return (response.data as List).map((json) {
         BookValueItems.bookCategories.add(ItemModel.fromJson(json));
-        CategoryItems.parentCategoryItems.add(parentCategoryModel.fromJson(json));
+        CategoryItems.parentCategoryItems
+            .add(parentCategoryModel.fromJson(json));
         return CategoryModel.fromJson(json);
       }).toList();
     } catch (e) {
@@ -131,7 +132,8 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
                   'parentCategoryId': parentCategoryId,
               }),
         options: Options(
-          contentType: image != null ? 'multipart/form-data' : 'application/json',
+          contentType:
+              image != null ? 'multipart/form-data' : 'application/json',
         ),
       );
       if (response.statusCode != 200) {

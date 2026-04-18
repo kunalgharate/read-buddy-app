@@ -44,7 +44,7 @@ class BookEntity {
     this.description,
     required this.ownerId,
     this.address,
-    required this.createdAt,
+    this.createdAt,
   });
 }
 

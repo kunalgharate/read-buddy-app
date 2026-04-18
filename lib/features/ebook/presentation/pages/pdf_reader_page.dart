@@ -185,9 +185,8 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
     if (_syncPdfDoc != null) {
       try {
         final extractor = syncpdf.PdfTextExtractor(_syncPdfDoc!);
-        pageText = extractor
-            .extractText(startPageIndex: _currentPage - 1)
-            .trim();
+        pageText =
+            extractor.extractText(startPageIndex: _currentPage - 1).trim();
       } catch (_) {
         pageText = '';
       }
@@ -210,8 +209,7 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
     final speeds = [0.25, 0.35, 0.5, 0.65, 0.8, 1.0];
     final labels = ['0.5x', '0.75x', '1x', '1.25x', '1.5x', '2x'];
     final currentIndex = speeds.indexOf(_ttsSpeed);
-    final nextIndex =
-        currentIndex < 0 ? 2 : (currentIndex + 1) % speeds.length;
+    final nextIndex = currentIndex < 0 ? 2 : (currentIndex + 1) % speeds.length;
     setState(() {
       _ttsSpeed = speeds[nextIndex];
       _ttsService.setSpeed(_ttsSpeed);

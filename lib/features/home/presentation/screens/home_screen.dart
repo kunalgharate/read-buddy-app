@@ -93,44 +93,46 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: _currentIndex == 0
           ? AppBar(
-        // title: const Text('Read Buddy'),
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/ebooks'),
-            icon: const Icon(Icons.chrome_reader_mode),
-            tooltip: 'eBooks',
-          ),
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/audiobooks'),
-            icon: const Icon(Icons.headphones_rounded),
-            tooltip: 'Audiobooks',
-          ),
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/search'),
-            icon: const Icon(Icons.search),
-            tooltip: 'Search',
-          ),
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/notification'),
-            icon: const Icon(Icons.notifications_outlined),
-            tooltip: 'Notifications',
-          ),
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/mybooks'),
-            icon: const Icon(Icons.menu_book_outlined),
-            tooltip: 'My Books',
-          ),
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/rewards'),
-            icon: const Icon(Icons.emoji_events, color: Color(0xFF2CE07F)),
-            tooltip: 'Rewards',
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _showLogoutDialog,
-          ),
-        ],
-      )
+              // title: const Text('Read Buddy'),
+              actions: [
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/ebooks'),
+                  icon: const Icon(Icons.chrome_reader_mode),
+                  tooltip: 'eBooks',
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/audiobooks'),
+                  icon: const Icon(Icons.headphones_rounded),
+                  tooltip: 'Audiobooks',
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/search'),
+                  icon: const Icon(Icons.search),
+                  tooltip: 'Search',
+                ),
+                IconButton(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/notification'),
+                  icon: const Icon(Icons.notifications_outlined),
+                  tooltip: 'Notifications',
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/mybooks'),
+                  icon: const Icon(Icons.menu_book_outlined),
+                  tooltip: 'My Books',
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/rewards'),
+                  icon:
+                      const Icon(Icons.emoji_events, color: Color(0xFF2CE07F)),
+                  tooltip: 'Rewards',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: _showLogoutDialog,
+                ),
+              ],
+            )
           : null,
       body: IndexedStack(
         index: _currentIndex,
