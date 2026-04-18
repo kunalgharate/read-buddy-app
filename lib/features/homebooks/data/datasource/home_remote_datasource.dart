@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/network/api_constants.dart';
 import '../../../../core/utils/network_utils.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
 import '../model/home_book_model.dart';
 import '../model/home_monthly_status_model.dart';
 
@@ -15,25 +14,8 @@ abstract class HomeRemoteDataSource {
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   final Dio _dio;
-  final SecureStorageUtil _secureStorage;
 
-  HomeRemoteDataSourceImpl({
-    required Dio dio,
-    required SecureStorageUtil secureStorage,
-  })  : _dio = dio,
-        _secureStorage = secureStorage;
-
-  Future<Options> _authOptions() async {
-    final token = await _secureStorage.getAccessToken();
-    if (token == null || token.isEmpty) {
-      throw DioException(
-        requestOptions: RequestOptions(path: ''),
-        type: DioExceptionType.unknown,
-        message: 'No access token available. Please log in again.',
-      );
-    }
-    return Options(headers: {'Authorization': 'Bearer $token'});
-  }
+  HomeRemoteDataSourceImpl({required Dio dio}) : _dio = dio;
 
   Future<void> _checkInternet(String path) async {
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -51,9 +33,16 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       throw Exception(
           'Unexpected response format from $endpoint: expected a list');
     }
-    return data
-        .map((e) => BookModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final results = <BookModel>[];
+    for (final e in data) {
+      try {
+        results.add(BookModel.fromJson(e as Map<String, dynamic>));
+      } catch (err) {
+        if (kDebugMode)
+          print('⚠️ Skipping malformed record in $endpoint: $err');
+      }
+    }
+    return results;
   }
 
   bool _isSuccess(int? statusCode) =>
@@ -69,10 +58,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     await _checkInternet(ApiConstants.latestBooks);
 
     try {
-      final response = await _dio.get(
-        ApiConstants.latestBooks,
-        options: await _authOptions(),
-      );
+      final response = await _dio.get(ApiConstants.latestBooks);
 
       if (kDebugMode) {
         print(
@@ -89,9 +75,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch latest books',
       );
     } catch (e) {
-      if (kDebugMode) {
+      if (kDebugMode)
         print('🌐 HomeRemoteDataSource: getLatestBooks exception: $e');
-      }
       rethrow;
     }
   }
@@ -106,10 +91,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     await _checkInternet(ApiConstants.trendingBooks);
 
     try {
-      final response = await _dio.get(
-        ApiConstants.trendingBooks,
-        options: await _authOptions(),
-      );
+      final response = await _dio.get(ApiConstants.trendingBooks);
 
       if (kDebugMode) {
         print(
@@ -118,9 +100,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
       if (_isSuccess(response.statusCode)) {
         final books = _parseBookList(response.data, ApiConstants.trendingBooks);
-        if (kDebugMode) {
-          print('📚 trendingBooks count: ${books.length}');
-        }
+        if (kDebugMode) print('📚 trendingBooks count: ${books.length}');
         return books;
       }
 
@@ -130,9 +110,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch trending books',
       );
     } catch (e) {
-      if (kDebugMode) {
+      if (kDebugMode)
         print('🌐 HomeRemoteDataSource: getTrendingBooks exception: $e');
-      }
       rethrow;
     }
   }
@@ -142,10 +121,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     await _checkInternet(ApiConstants.recommendedBooks);
 
     try {
-      final response = await _dio.get(
-        ApiConstants.recommendedBooks,
-        options: await _authOptions(),
-      );
+      final response = await _dio.get(ApiConstants.recommendedBooks);
 
       if (_isSuccess(response.statusCode)) {
         final data = response.data;
@@ -153,9 +129,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
           throw Exception('Unexpected response format from recommendedBooks');
         }
         final mostRequested = data['mostRequested'];
-        if (mostRequested is! List || mostRequested.isEmpty) {
-          return [];
-        }
+        if (mostRequested is! List || mostRequested.isEmpty) return [];
         return mostRequested
             .map((e) => BookModel.fromJson(e as Map<String, dynamic>))
             .toList();
@@ -167,9 +141,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch recommended books',
       );
     } catch (e) {
-      if (kDebugMode) {
+      if (kDebugMode)
         print('🌐 HomeRemoteDataSource: getRecommendedBooks exception: $e');
-      }
       rethrow;
     }
   }
@@ -179,10 +152,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     await _checkInternet(ApiConstants.monthlyData);
 
     try {
-      final response = await _dio.get(
-        ApiConstants.monthlyData,
-        options: await _authOptions(),
-      );
+      final response = await _dio.get(ApiConstants.monthlyData);
 
       if (_isSuccess(response.statusCode)) {
         return MonthlyStatsModel.fromJson(
@@ -196,9 +166,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch monthly stats',
       );
     } catch (e) {
-      if (kDebugMode) {
+      if (kDebugMode)
         print('🌐 HomeRemoteDataSource: getMonthlyStats exception: $e');
-      }
       rethrow;
     }
   }
