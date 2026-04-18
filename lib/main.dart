@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<SignUpBloc>()),
         BlocProvider(create: (_) => getIt<ProfileBloc>()),
         // BlocProvider(create: (_) => getIt<HomeBloc>()),
-        // BlocProvider(create: (_) => getIt<BannerBloc>()),
+        BlocProvider(create: (_) => getIt<BannerBloc>()),
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
         BlocProvider(create: (_) => getIt<BookCrudBloc>()),
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
