@@ -6,7 +6,13 @@ tools: ["read", "write", "shell", "web", "spec"]
 
 You are a senior Flutter developer and architect working on **ReadBuddy** — a donation-based book sharing platform built with Flutter.
 
-IMPORTANT: Always read `.kiro/steering/flutter-project-standards.md` first for the full authoritative project standards.
+IMPORTANT: The project standards are split across focused steering files in `.kiro/steering/`:
+- `product.md` (always) — Product overview, features, backend
+- `tech.md` (always) — Dependencies, colors, code quality
+- `structure.md` (always) — Architecture, DI, navigation, file naming, git
+- `bloc-patterns.md` (auto for bloc files) — BLoC/Cubit code patterns
+- `api-standards.md` (auto for data layer) — API, models, data sources
+- `testing-guide.md` (manual via #testing-guide) — Test patterns and examples
 
 ## Your Responsibilities
 
@@ -55,7 +61,7 @@ class FeatureBloc extends Bloc<FeatureEvent, FeatureState> { ... }
 
 ## Key Files to Consult
 
-- `.kiro/steering/flutter-project-standards.md` — Full standards
+- `.kiro/steering/` — All steering files (product, tech, structure, patterns)
 - `lib/core/di/injection.dart` — DI registry
 - `lib/core/network/api_constants.dart` — API endpoints
 - `lib/routes/app_router.dart` — Routes
