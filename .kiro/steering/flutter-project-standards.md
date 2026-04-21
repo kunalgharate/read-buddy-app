@@ -2,357 +2,271 @@
 inclusion: auto
 ---
 
-# Flutter Expert — ReadBuddy Project Standards
+# ReadBuddy — Flutter Project Standards
 
-## Code Quality Tools
+## Project Overview
 
-### Dart Formatter
-- ALWAYS run `dart format .` before considering any code complete.
-- Line length: 80 characters (Dart default).
-- Use trailing commas on all multi-argument function calls, widget constructors, and collection literals — this ensures `dart format` produces clean, readable diffs.
+ReadBuddy is a donation-based book sharing platform. Users donate physical books, eBooks, audiobooks, and video books to the system. These books get circulated to other users who join the app. Features include prime membership (access to multiple books), multi-format reading (physical, eBook, audiobook, video), multi-language support (English, Hindi, Marathi), and an admin dashboard for content management.
 
-### Linter
-- The project uses `package:flutter_lints/flutter.yaml` as the base rule set.
-- Enforced rules (see `analysis_options.yaml`):
-  - `prefer_const_constructors` — use `const` wherever possible.
-  - `prefer_const_declarations` — declare compile-time constants with `const`.
-  - `avoid_unnecessary_containers` — don't wrap widgets in unnecessary `Container`.
-- Run `flutter analyze` to check for lint violations. Fix all warnings before committing.
-- `avoid_print` is set to `ignore` in this project — debug prints are acceptable.
-
-### Dart Code Metrics (DCM)
-- Configured in `analysis_options.yaml` under `dart_code_metrics`.
-- Thresholds:
-  - Cyclomatic complexity: max 20
-  - Maximum nesting level: max 5
-  - Number of parameters: max 4
-- Rules enforced:
-  - `no-boolean-literal-compare` — use `if (flag)` not `if (flag == true)`.
-  - `no-empty-block` — no empty `{}` blocks; use a comment if intentionally empty.
-  - `prefer-trailing-comma` — trailing commas on multi-line constructs.
-- If a function exceeds complexity limits, break it into smaller private methods.
+**Backend**: Node.js on Render.com — `https://readbuddy-server.onrender.com/api`
+**Package**: `read_buddy_app` | **SDK**: `>=3.5.0 <4.0.0` | **Font**: Poppins (google_fonts)
 
 ---
 
 ## Architecture — Feature-Based Clean Architecture
 
-### Full Features (with API/data)
-
-Features that interact with APIs or persistent data MUST follow the three-layer structure under `lib/features/<feature_name>/`:
-
+### Full Features (with API)
 ```
 lib/features/<feature_name>/
 ├── data/
-│   ├── datasources/        # Remote/local data source abstractions + implementations
-│   │   └── (also seen as: remotesource/, dataresources/)
-│   ├── models/              # Data models (fromJson/toJson), extend domain entities
-│   └── repositories/        # Repository implementations (implements domain interface)
+│   ├── datasources/     # Remote data source (Dio HTTP calls)
+│   ├── models/          # Data models — EXTEND domain entities, manual fromJson/toJson
+│   └── repositories/    # Repository implementations
 ├── domain/
-│   ├── entities/            # Pure Dart classes, no framework dependencies
-│   │   └── (also seen as: entity/)
-│   ├── repositories/        # Abstract repository interfaces (contracts)
-│   │   └── (also seen as: repository/)
-│   └── usecases/            # Single-responsibility use cases with call() method
-│       └── (also seen as: usecase/)
+│   ├── entities/        # Pure Dart classes, no framework deps
+│   ├── repositories/    # Abstract interfaces (contracts)
+│   └── usecases/        # Single call() method per use case
 └── presentation/
-    ├── blocs/               # BLoC classes (event, state, bloc)
-    │   └── (also seen as: bloc/)
-    ├── pages/               # Full-screen page widgets
-    │   └── (also seen as: screens/)
-    └── widgets/             # Reusable UI components scoped to this feature
+    ├── blocs/           # BLoC (event/state/bloc) or Cubit
+    ├── pages/           # Full-screen widgets
+    └── widgets/         # Reusable UI components
 ```
-
-IMPORTANT: The project has naming inconsistencies in subfolder names (e.g., `remotesource` vs `datasources`, `entity` vs `entities`, `usecase` vs `usecases`). For NEW features, prefer the plural form: `datasources/`, `entities/`, `repositories/`, `usecases/`.
 
 ### Presentation-Only Features
+Simple UI features: `home`, `donate`, `mybook`, `rewards`, `settings`, `splash`, `onboarding`, `search`, `notification`.
 
-Simple UI-only features that don't need API calls can have just a `presentation/` folder. Existing examples: `home`, `donate`, `mybook`, `rewards`, `settings`, `splash`, `onboarding`.
+### Current Features (22 total)
+| Feature | Type | Layers | Description |
+|---------|------|--------|-------------|
+| auth | Full | D/Do/P | Sign in, sign up, Google sign-in, forgot password (OTP), email verification |
+| profile | Full | D/Do/P | User profile, avatar selection, field updates, cache-first fetch |
+| books | Full | D/Do/P | Browse books list from API |
+| bookcrud | Full | D/Do/P | Admin: Add/edit/delete books with images, location search |
+| category_crud | Full | D/Do/P | Admin: CRUD categories with images |
+| question_crud | Full | D/Do/P | Admin: CRUD onboarding questions |
+| banner | Full | D/Do/P | Admin: CRUD promotional banners |
+| donated_books | Full | D/Do/P | Admin: View all donated books |
+| questionaries | Full | D/Do/P | Onboarding questionnaire with preference submission |
+| ebook | Partial | Do/P | PDF + EPUB reader with dark mode, TTS, highlights, caching |
+| audiobook | Partial | Do/P | Audio player with just_audio, speed control, playlist, state persistence |
+| home | Presentation | P | Home screen with bottom nav (4 tabs), AppBar actions |
+| donate | Presentation | P | Donation tab, book format selection, donate book form, donate money |
+| search | Presentation | P | Search with topic chips and book format cards |
+| notification | Presentation | P | Notification cards list |
+| rewards | Presentation | P | Rewards, reading streak, badges, challenges |
+| mybook | Presentation | P | My Books with Reading/Completed/Wishlist tabs |
+| dashboard | Presentation | P | Admin dashboard |
+| settings | Presentation | P | Settings screen |
+| splash | Presentation | P | Splash screen with auth routing |
+| onboarding | Presentation | P | Onboarding intro screens |
+| user_preference | Presentation | P | User preference display |
 
-```
-lib/features/<feature_name>/
-└── presentation/
-    ├── pages/
-    └── widgets/
-```
+---
 
-### Layer Rules
+## Dependencies Reference
 
-**Domain Layer** (innermost — no dependencies on data or presentation):
-- Entities are plain Dart classes. No `json_annotation`, no Flutter imports.
-- Repository interfaces are abstract classes defining the contract.
-- Use cases have a single `call()` method. Accept a Params class if multiple inputs are needed.
-- Example pattern (from this project):
-```dart
-class SignIn {
-  final AuthRepository repository;
-  SignIn(this.repository);
-  Future<AppUser> call(SignInParams params) async {
-    return await repository.signIn(
-      email: params.email,
-      password: params.password,
-    );
-  }
-}
-```
+### State Management
+- `flutter_bloc: ^8.1.3` — BLoC/Cubit pattern
+- `equatable: ^2.0.5` — Value equality for events/states
 
-**Data Layer** (implements domain contracts):
-- Models EXTEND domain entities (e.g., `AppUserModel extends AppUser`, `BookModel extends Book`).
-- Use MANUAL `fromJson()` factory constructors and `toJson()` methods — this project does NOT use `json_serializable` code generation.
-- Remote data sources use `Dio` for HTTP calls. Inject `Dio` via constructor.
-- Repository implementations take data sources as constructor dependencies.
-- Always check network connectivity before API calls using `NetworkUtils.hasInternetConnection()`.
-- Handle `DioException` and rethrow with meaningful messages.
+### Networking
+- `dio: ^5.4.0` — HTTP client with interceptors
+- `connectivity_plus: ^6.1.4` — Real-time network monitoring
 
-**Presentation Layer** (UI + state management):
-- Use `flutter_bloc` for state management.
-- BLoC classes accept use cases via constructor injection — never repositories directly.
-- Pages are `StatefulWidget` or `StatelessWidget` that use `BlocBuilder` / `BlocListener` / `MultiBlocListener`.
-- Keep widget trees shallow — extract sub-widgets into the `widgets/` folder.
+### Auth & Security
+- `google_sign_in: ^6.2.2` — Google OAuth
+- `flutter_secure_storage: ^9.2.4` — Encrypted local storage for tokens/user
+- `shared_preferences: ^2.5.4` — Simple key-value storage
+
+### DI
+- `get_it: ^7.6.0` — Service locator
+- `injectable: ^2.3.0` — DI annotations (manual registration used)
+
+### Readers
+- `syncfusion_flutter_pdfviewer: ^27.2.5` — PDF viewer (zoom, search, text selection)
+- `syncfusion_flutter_pdf: ^27.2.5` — PDF text extraction for TTS
+- `flutter_epub_viewer: ^1.1.1` — EPUB viewer (chapters, highlights, themes)
+
+### Audio
+- `just_audio: ^0.9.43` — Audio playback with streaming, speed control, playlists
+- `flutter_tts: ^4.2.0` — Text-to-speech (EN, HI, MR)
+
+### UI
+- `google_fonts: ^6.2.1` — Poppins font
+- `flutter_svg: ^2.0.10` — SVG rendering
+- `curved_navigation_bar: ^1.0.6` — Bottom navigation
+- `cached_network_image: ^3.4.1` — Image caching
+- `dropdown_search: ^6.0.2` — Searchable dropdowns
+
+### Media & Storage
+- `image_picker: ^1.1.2` — Camera/gallery image picking
+- `permission_handler: ^12.0.0+1` — Runtime permissions
+- `path_provider: ^2.1.5` — App directory paths
+- `crypto: ^3.0.6` — MD5 hashing for file cache
 
 ---
 
 ## Dependency Injection
 
-- Use `get_it` as the service locator. The singleton is `getIt` in `lib/core/di/injection.dart`.
-- Registration is MANUAL (not using `@InjectableInit` code generation despite the annotation being present).
-- Registration order matters — follow this sequence:
-  1. `_registerUtils()` — Dio, SecureStorage, core utilities
-  2. `_registerDataSources()` — remote/local data sources
-  3. `_registerRepositories()` — repository implementations
-  4. `_registerUseCases()` — use cases
-  5. `_registerBlocs()` — BLoCs
-  6. `_registerCubits()` — Cubits (separate from BLoCs)
-- Use `registerLazySingleton` for most registrations.
-- Use `registerFactory` when a fresh instance is needed per screen (e.g., `OnboardingBloc`).
-- When adding a new feature, register ALL layers in `injection.dart` following the existing grouped pattern with section comments.
-- BLoCs that take multiple use cases use named parameters:
-```dart
-getIt.registerLazySingleton(() => BookCrudBloc(
-  searchBooks: getIt<SearchBookUsecase>(),
-  addBookCrud: getIt<AddBookUsecase>(),
-  getBooksCrud: getIt<GetBooksUsecase>(),
-));
-```
+Manual registration in `lib/core/di/injection.dart`. Order:
+1. `_registerUtils()` — Dio, SecureStorageUtil
+2. `_registerDataSources()` — Remote data sources (inject Dio + SecureStorage)
+3. `_registerRepositories()` — Repository implementations
+4. `_registerUseCases()` — Use cases
+5. `_registerBlocs()` — BLoCs
+6. `_registerCubits()` — Cubits
+
+Use `registerLazySingleton` for most. Use `registerFactory` for per-screen BLoCs (ProfileBloc, OnboardingBloc).
 
 ---
 
-## BLoC vs Cubit
+## BLoC Pattern
 
-### When to use BLoC
-- Features with complex event-driven flows (auth, CRUD operations, multi-step processes).
-- When you need distinct event types (e.g., `LoadBooks`, `RefreshBooks`, `DeleteBook`).
-
-### When to use Cubit
-- Simpler state management with single-action methods (e.g., `LocationCubit`, `UserCubit`).
-- When the state transitions are straightforward (load → loaded/error).
-
-### BLoC Event/State Patterns
-
-IMPORTANT: The codebase has TWO patterns in use. For NEW code, prefer **Pattern A** (the more structured approach):
-
-**Pattern A — `part` files with `sealed class` + `Equatable`** (preferred for new code):
+**Preferred pattern** (part files + sealed + Equatable):
 ```dart
 // feature_bloc.dart
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 part 'feature_event.dart';
 part 'feature_state.dart';
-
-class FeatureBloc extends Bloc<FeatureEvent, FeatureState> { ... }
-
-// feature_event.dart
-part of 'feature_bloc.dart';
-sealed class FeatureEvent extends Equatable {
-  const FeatureEvent();
-  @override
-  List<Object> get props => [];
+class FeatureBloc extends Bloc<FeatureEvent, FeatureState> {
+  final MyUseCase _useCase;
+  FeatureBloc(this._useCase) : super(FeatureInitial()) {
+    on<LoadFeature>(_onLoad);
+  }
 }
-final class LoadFeature extends FeatureEvent {}
-
-// feature_state.dart
-part of 'feature_bloc.dart';
-sealed class FeatureState extends Equatable {
-  const FeatureState();
-}
-final class FeatureInitial extends FeatureState {
-  @override
-  List<Object> get props => [];
-}
-final class FeatureLoaded extends FeatureState {
-  final Data data;
-  const FeatureLoaded(this.data);
-  @override
-  List<Object> get props => [data];
-}
+// feature_event.dart — part of, sealed class extends Equatable
+// feature_state.dart — part of, sealed class extends Equatable
 ```
 
-**Pattern B — Standalone files with `sealed class`, no Equatable** (exists in books feature):
-```dart
-// book_event.dart (no part of)
-sealed class BookEvent {}
-class LoadBooks extends BookEvent {}
+**Cubit** for simple state: `LocationCubit`, `UserCubit`.
 
-// book_state.dart (no part of)
-sealed class BookState {}
-class BookLoaded extends BookState {
-  final List<Book> books;
-  BookLoaded(this.books);
-}
-```
-
-### Error Handling in BLoCs
-- Use `ErrorHandler.getErrorMessage(error)` from `lib/core/utils/error_handler.dart` to convert exceptions to user-friendly strings.
-- The project does NOT use `Either<Failure, Success>` from dartz — it uses try/catch throughout.
-- `ExceptionHandler.handle(DioException)` in `lib/core/error/exception_handler.dart` converts DioExceptions to typed `Failure` objects, but most BLoCs catch errors directly with `ErrorHandler`.
-
----
-
-## Error Handling
-
-- `Failure` class hierarchy in `lib/core/error/failure.dart`: `ServerFailure`, `NetworkFailure`, `CancelledFailure`, `UnknownFailure`.
-- `ExceptionHandler` in `lib/core/error/exception_handler.dart` maps `DioException` types to `Failure` subclasses.
-- `ErrorHandler` in `lib/core/utils/error_handler.dart` converts any error to a user-friendly `String` — this is what BLoCs use directly.
-- Pattern: try/catch in BLoC → `ErrorHandler.getErrorMessage(error)` → emit error state with message string.
+**Error handling**: try/catch → `ErrorHandler.getErrorMessage(error)` → emit error state.
 
 ---
 
 ## Networking
 
-- All HTTP calls go through `Dio` (configured in `lib/core/network/dio_client.dart`).
-- API base URL: `https://readbuddy-server.onrender.com/api` (Render.com free tier — cold starts expected).
-- API endpoints are centralized in `lib/core/network/api_constants.dart` with grouped constants per feature.
-- HTTP status codes are also defined as constants in `ApiConstants` (e.g., `ApiConstants.success`, `ApiConstants.unauthorized`).
-- Timeouts: connect 120s, receive 180s, send 120s (generous due to free-tier cold starts).
-- Default headers: `Content-Type: application/json`, `Accept: application/json`, `User-Agent: ReadBuddyApp/1.0.0`.
-- Automatic retry on timeout errors (built into DioClient interceptor).
-- Network connectivity check: `NetworkUtils.hasInternetConnection()` — uses `InternetAddress.lookup('google.com')`.
-- Server reachability check: `NetworkUtils.canReachServer(host)`.
+- `DioClient.createDio()` — configures Dio with `AppInterceptor` (auto-attaches Bearer token, handles 401 token refresh)
+- Base URL: `https://readbuddy-server.onrender.com/api`
+- Endpoints in `lib/core/network/api_constants.dart`
+- Timeouts: connect 120s, receive 180s, send 120s (Render free tier cold starts)
+- `NetworkUtils.hasInternetConnection()` — DNS lookup check
+- `ConnectivityService` — real-time monitoring with auto no-internet dialog
 
 ---
 
-## Navigation
+## Auth Flow
 
-- Named routes via `AppRouter.generateRoute()` in `lib/routes/app_router.dart`.
-- Register new routes in the `switch` statement.
-- Navigate with `Navigator.pushNamed(context, '/route-name')`.
-- IMPORTANT: `go_router` is in pubspec.yaml but the project uses the manual `AppRouter` pattern — do NOT use `go_router`. Stay consistent with `AppRouter`.
-
----
-
-## Core Utilities Reference
-
-| Utility | Location | Purpose |
-|---------|----------|---------|
-| `ErrorHandler` | `lib/core/utils/error_handler.dart` | Convert any error to user-friendly string |
-| `ExceptionHandler` | `lib/core/error/exception_handler.dart` | Map DioException to Failure types |
-| `NetworkUtils` | `lib/core/utils/network_utils.dart` | Internet connectivity & server reachability checks |
-| `UiUtils` | `lib/core/utils/ui_utils.dart` | Snackbars (success/error), loading dialogs, confirmation dialogs |
-| `SecureStorageUtil` | `lib/core/utils/secure_storage_utils.dart` | Encrypted storage for user data & tokens |
-| `AppPreferences` | `lib/core/services/app_preferences.dart` | SharedPreferences wrapper for app settings |
-| `ImageHelper` | `lib/core/utils/image_helper.dart` | Image picking utilities |
-| `BookValidators` | `lib/core/utils/book_validators.dart` | Book form field validation |
-| `SelectionStore` | `lib/core/utils/selection_store.dart` | Selection state management |
-| `AppBlocObserver` | `lib/core/utils/app_bloc_observer.dart` | Debug logging for BLoC transitions |
-| `CustomElevatedButton` | `lib/core/widgets/my_buttons.dart` | Reusable button (green primary, dark text) |
-| `MyTextField` | `lib/core/widgets/my_textfields.dart` | Reusable form input with validation |
+1. Sign up → email verification (OTP) → onboarding questionnaire → home
+2. Sign in (email/password or Google) → check onboarding status → home or questionnaire
+3. Forgot password → send OTP → verify OTP → reset password
+4. Token refresh via `AppInterceptor` on 401 responses
+5. Tokens stored in `FlutterSecureStorage`
 
 ---
 
-## Project Conventions
+## Color Palette
 
-- Font: Poppins (via `google_fonts` package).
-- Color palette (from Figma design tokens):
-  - Primary: `#2CE07F` (green)
-  - Text Highlight: `#052E44` (dark blue)
-  - Text Primary: `#141414`
-  - Text Secondary: `#262626`
-  - Background: `#FDFDFD`
-  - Error: `#D64545`
-  - Success (snackbar): `#38A169`
-  - Default/Border 1: `#E0E0E0`
-  - Default/Border 2: `#EAEAEA`
-  - Default/Border 3: `#C9C9D1`
-  - Accent/Selective: `#D0E1FD`
-  - Accent/Background: `#FFE5DE`
-  - Accent/Cards: `#BAC7CD`
-  - Accent 2 (nav bar): `#2295F0`
-- Theme text styles in `lib/core/theme/text_styles.dart`.
-- Assets: SVGs via `flutter_svg` (`SvgPicture.asset()`), PNGs via `Image.asset()`.
-- Asset paths: `assets/` for general, `assets/icons/` for icons, `assets/mock/` for mock JSON data.
-- Mock data: JSON files in `assets/mock/` (e.g., `onboarding_question.json`).
+| Token | Hex | Usage |
+|-------|-----|-------|
+| Primary | `#2CE07F` | Buttons, active states, progress |
+| Text Highlight | `#052E44` | Headings, primary text |
+| Text Primary | `#141414` | Body text |
+| Background | `#FDFDFD` | Page backgrounds |
+| Error | `#D64545` | Error states, alerts |
+| Success | `#38A169` | Success snackbars |
+| Border | `#E0E0E0` | Card borders, dividers |
+| Accent Blue | `#2295F0` | Nav bar, links |
+| Accent Selective | `#D0E1FD` | Selected states |
+
+---
+
+## Code Quality
+
+### Linter (`analysis_options.yaml`)
+- Base: `package:flutter_lints/flutter.yaml`
+- `prefer_const_constructors`, `prefer_const_declarations`, `avoid_unnecessary_containers`
+- `avoid_print: ignore`
+
+### DCM Metrics
+- Cyclomatic complexity: max 20
+- Maximum nesting: max 5
+- Parameters: max 4
+- Rules: `no-boolean-literal-compare`, `no-empty-block`, `prefer-trailing-comma`
+
+### Formatting
+- `dart format .` before every commit
+- `flutter analyze` must pass with zero errors
+
+---
+
+## Core Utilities
+
+| Utility | Path | Purpose |
+|---------|------|---------|
+| ErrorHandler | `core/utils/error_handler.dart` | DioException → user-friendly string |
+| UiUtils | `core/utils/ui_utils.dart` | Snackbars, loading/confirmation dialogs |
+| NetworkUtils | `core/utils/network_utils.dart` | Connectivity checks |
+| ConnectivityService | `core/services/connectivity_service.dart` | Real-time network monitoring |
+| FileCacheService | `core/services/file_cache_service.dart` | Download + cache remote files |
+| SecureStorageUtil | `core/utils/secure_storage_utils.dart` | Encrypted user/token storage |
+| AppPreferences | `core/services/app_preferences.dart` | SharedPreferences wrapper |
+| AppInterceptor | `core/utils/app_interceptor.dart` | Auto Bearer token + 401 refresh |
+| ConnectivityWrapper | `core/widgets/connectivity_wrapper.dart` | Global no-internet dialog |
+| ConnectivityMixin | `core/mixins/connectivity_mixin.dart` | Per-page connectivity check |
+| CustomElevatedButton | `core/widgets/my_buttons.dart` | Reusable green button |
+| MyTextField | `core/widgets/my_textfields.dart` | Reusable form input |
 
 ---
 
 ## Model Serialization
 
-- IMPORTANT: This project uses MANUAL `fromJson`/`toJson` — NOT `json_serializable` code generation.
-- `build_runner` and `json_serializable` are in dev_dependencies but are NOT actively used for model generation.
-- Models extend domain entities and use `super` parameters:
-```dart
-class AppUserModel extends AppUser {
-  AppUserModel({
-    required super.id,
-    required super.name,
-    // ...
-  });
-
-  factory AppUserModel.fromJson(Map<String, dynamic> json) {
-    final user = json['user'];
-    return AppUserModel(
-      id: user['_id'] ?? '',
-      name: user['name'] ?? '',
-      // ...
-    );
-  }
-
-  Map<String, dynamic> toJson() => { ... };
-}
-```
-- API responses often nest data under a key (e.g., `json['user']`, `json['data']`) — always check the response structure.
-
----
-
-## Testing
-
-- The project currently has NO tests. When adding tests:
-  - Place unit tests in `test/features/<feature>/` mirroring the lib structure.
-  - Use `flutter_test` (already in dev_dependencies).
-  - Test use cases and BLoCs as priority.
+- MANUAL `fromJson`/`toJson` — NOT json_serializable code generation
+- Models EXTEND domain entities using `super` parameters
+- API responses often nest data: `json['user']`, `json['data']`
+- `AppUser` has `fromJson` factory that handles both flat and nested responses
 
 ---
 
 ## File Naming
 
-- Dart files: `snake_case.dart`
-- BLoC files: `<feature>_bloc.dart`, `<feature>_event.dart`, `<feature>_state.dart`
-- Cubit files: `<feature>_cubit.dart`, `<feature>_state.dart`
+- Files: `snake_case.dart`
+- BLoC: `<feature>_bloc.dart`, `<feature>_event.dart`, `<feature>_state.dart`
 - Pages: `<name>_page.dart` or `<name>_screen.dart`
-- Widgets: `<descriptive_name>_widget.dart` or `<descriptive_name>.dart`
 - Models: `<entity_name>_model.dart`
-- Use cases: `<action>_<entity>.dart` (e.g., `get_books.dart`, `sign_in.dart`)
-- Data sources: `<feature>_remote_data_source.dart`
+- Use cases: `<action>_<entity>.dart`
+- New subfolders: prefer plural (`entities/`, `usecases/`, `datasources/`)
+
+---
+
+## Navigation
+
+- `AppRouter.generateRoute()` in `lib/routes/app_router.dart`
+- Named routes via `Navigator.pushNamed(context, '/route')`
+- Do NOT use `go_router` (in pubspec but unused)
+
+---
+
+## Testing
+
+- No tests exist yet. When adding:
+  - `test/features/<feature>/` mirroring lib structure
+  - Priority: use cases → BLoCs → widgets
+  - Use `flutter_test`, `bloc_test`, `mocktail`
 
 ---
 
 ## Checklist for New Features
 
 ### Full Feature (with API)
-1. Create `data/`, `domain/`, `presentation/` folders under `lib/features/<feature>/`.
-2. Define entity in `domain/entities/`.
-3. Define repository interface in `domain/repositories/`.
-4. Create use case(s) in `domain/usecases/`.
-5. Implement model in `data/models/` with manual `fromJson`/`toJson` (extending entity).
-6. Implement remote data source in `data/datasources/`.
-7. Implement repository in `data/repositories/`.
-8. Create BLoC with events and states in `presentation/blocs/` (use Pattern A with part files).
-9. Create pages in `presentation/pages/` and widgets in `presentation/widgets/`.
-10. Register ALL layers in `lib/core/di/injection.dart` (data source → repo → use case → bloc).
-11. Add API endpoints to `lib/core/network/api_constants.dart`.
-12. Add route in `lib/routes/app_router.dart`.
-13. Run `dart format .` and `flutter analyze`.
+1. Domain: entity → repository interface → use cases
+2. Data: model (extends entity, manual fromJson) → data source → repository impl
+3. Presentation: BLoC (part files, sealed, Equatable) → pages → widgets
+4. Register ALL layers in `lib/core/di/injection.dart`
+5. Add endpoints to `api_constants.dart`
+6. Add route to `app_router.dart`
+7. `dart format .` and `flutter analyze`
 
 ### Presentation-Only Feature
-1. Create `presentation/` folder under `lib/features/<feature>/`.
-2. Create pages and widgets.
-3. Add route in `lib/routes/app_router.dart`.
-4. Run `dart format .` and `flutter analyze`.
+1. Create `presentation/` with pages and widgets
+2. Add route to `app_router.dart`
+3. `dart format .` and `flutter analyze`

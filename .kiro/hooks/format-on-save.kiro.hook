@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Dart Format on Save",
+  "description": "Automatically runs dart format on Dart files when they are saved, ensuring consistent code formatting across the project.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.dart"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "dart format --fix $KIRO_FILE_PATH"
+  }
+}
