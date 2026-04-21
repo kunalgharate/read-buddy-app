@@ -255,6 +255,38 @@ class FeatureBloc extends Bloc<FeatureEvent, FeatureState> {
 
 ---
 
+## Git Conventions
+
+- Branch naming: `feature/<name>`, `fix/<name>`, `chore/<name>`
+- Commit messages: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`
+- Always branch from latest `main`
+- Run `dart format .` and `flutter analyze` before committing
+- Do NOT commit `.kiro/settings/` (contains API keys)
+- Do NOT commit `.idea/`, generated platform files, or `build/`
+
+---
+
+## API Response Patterns
+
+Most API responses follow these structures:
+```json
+// Auth responses — nested user + tokens at root
+{ "user": { "_id": "...", "name": "...", ... }, "accessToken": "...", "refreshToken": "..." }
+
+// List responses — array at root
+[ { "_id": "...", "title": "...", ... }, ... ]
+
+// Single item — object at root
+{ "_id": "...", "title": "...", ... }
+
+// Error responses
+{ "message": "Error description" }
+```
+
+Always handle both flat and nested response formats in fromJson factories.
+
+---
+
 ## Checklist for New Features
 
 ### Full Feature (with API)

@@ -1,16 +1,14 @@
 {
-  "enabled": true,
+  "enabled": false,
   "name": "Check Project Standards",
-  "description": "Before any write operation, reminds the agent to follow ReadBuddy project standards — clean architecture, BLoC pattern, proper DI registration, and code quality rules.",
-  "version": "1",
+  "description": "Before creating new Dart files, reminds the agent to follow ReadBuddy clean architecture and coding standards. Disabled by default — enable when needed for strict enforcement.",
+  "version": "1.0.0",
   "when": {
     "type": "preToolUse",
-    "toolTypes": [
-      "write"
-    ]
+    "toolTypes": ["write"]
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Before writing this file, verify: 1) It follows clean architecture layers (data/domain/presentation). 2) BLoC uses part files + sealed class + Equatable. 3) Models use manual fromJson/toJson extending entities. 4) DI registration order is correct. 5) Uses existing utilities (ErrorHandler, UiUtils, ConnectivityMixin). 6) File naming is snake_case."
+    "prompt": "If this is a new Dart file under lib/features/, verify: 1) Correct layer placement (data/domain/presentation). 2) snake_case file naming. 3) Uses project color constants. 4) Poppins font. If NOT a Dart feature file, proceed without checks."
   }
 }

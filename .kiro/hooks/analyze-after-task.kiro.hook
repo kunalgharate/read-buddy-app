@@ -1,13 +1,13 @@
 {
   "enabled": true,
   "name": "Analyze After Task",
-  "description": "Runs flutter analyze after a spec task is completed to catch any lint or type errors introduced during implementation.",
-  "version": "1",
+  "description": "Runs flutter analyze after a spec task is completed to catch lint or type errors.",
+  "version": "1.0.0",
   "when": {
     "type": "postTaskExecution"
   },
   "then": {
     "type": "runCommand",
-    "command": "flutter analyze --no-pub 2>&1 | head -20"
+    "command": "flutter analyze --no-pub 2>&1 | head -30"
   }
 }
