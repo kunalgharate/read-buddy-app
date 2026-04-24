@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'https://readbuddy-server.onrender.com/api';
+  static const String baseUrl = 'https://readbuddy-server-b54k.onrender.com/api';
 
   // Auth endpoints
   static const String login = '$baseUrl/users/login';
