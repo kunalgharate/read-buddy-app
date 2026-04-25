@@ -68,9 +68,8 @@ class _AudioBookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final trackLabel = book.isSinglePart
-        ? 'Single Part'
-        : '${book.tracks.length} Parts';
+    final trackLabel =
+        book.isSinglePart ? 'Single Part' : '${book.tracks.length} Parts';
 
     return InkWell(
       onTap: onTap,

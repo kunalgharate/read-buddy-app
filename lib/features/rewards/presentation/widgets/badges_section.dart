@@ -57,17 +57,14 @@ class _BadgeItem extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: isUnlocked
-                ? const Color(0xFF2CE07F)
-                : const Color(0xFFEAEAEA),
+            color:
+                isUnlocked ? const Color(0xFF2CE07F) : const Color(0xFFEAEAEA),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Icon(
             Icons.menu_book_outlined,
             size: 22,
-            color: isUnlocked
-                ? Colors.white
-                : Colors.grey.shade400,
+            color: isUnlocked ? Colors.white : Colors.grey.shade400,
           ),
         ),
         const SizedBox(height: 6),

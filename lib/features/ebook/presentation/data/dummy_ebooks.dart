@@ -1,10 +1,8 @@
 import '../../domain/entities/ebook.dart';
 
-const _samplePdfUrl =
-    'https://files.catbox.moe/6sku0l.pdf';
+const _samplePdfUrl = 'https://files.catbox.moe/6sku0l.pdf';
 
-const _sampleEpubUrl =
-    'https://files.catbox.moe/d8ejcq.epub';
+const _sampleEpubUrl = 'https://files.catbox.moe/d8ejcq.epub';
 
 const _langEn = EBookLanguage(code: 'en', name: 'English');
 const _langHi = EBookLanguage(code: 'hi', name: 'Hindi');

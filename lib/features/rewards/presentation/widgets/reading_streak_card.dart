@@ -84,9 +84,7 @@ class _DayCircle extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: isActive
-                ? const Color(0xFF2CE07F)
-                : const Color(0xFFEAEAEA),
+            color: isActive ? const Color(0xFF2CE07F) : const Color(0xFFEAEAEA),
             shape: BoxShape.circle,
           ),
           child: Center(

@@ -35,7 +35,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-
             Expanded(
               child: BlocBuilder<CategoryBloc, CategoryState>(
                 builder: (context, state) {
@@ -50,7 +49,8 @@ class _CategoryListPageState extends State<CategoryListPage> {
                       itemCount: state.categories.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
-                        return _buildCategoryCard(state.categories[index], context);
+                        return _buildCategoryCard(
+                            state.categories[index], context);
                       },
                     );
                   } else if (state is CategoryError) {
@@ -61,7 +61,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
                 },
               ),
             ),
-
           ],
         ),
       ),
@@ -127,7 +126,8 @@ class _CategoryListPageState extends State<CategoryListPage> {
         backgroundColor: Colors.white,
         title: const Text(
           'Delete Category',
-          style: TextStyle(color: Color(0xFF052E44), fontWeight: FontWeight.bold),
+          style:
+              TextStyle(color: Color(0xFF052E44), fontWeight: FontWeight.bold),
         ),
         content: const Text(
           'Are you sure you want to delete this category? This action cannot be undone.',
@@ -149,8 +149,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6)),
             ),
-            child: const Text('Delete',
-                style: TextStyle(color: Colors.white)),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -169,74 +168,75 @@ class _CategoryListPageState extends State<CategoryListPage> {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: CachedNetworkImage(
-              imageUrl: category.imageUrl,
-              width: 70,
-              height: 80,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: CachedNetworkImage(
+                imageUrl: category.imageUrl,
                 width: 70,
                 height: 80,
-                color: Colors.grey.shade300,
-                child: const Icon(Icons.image, color: Colors.grey),
-              ),
-              errorWidget: (context, url, error) => Container(
-                width: 70,
-                height: 80,
-                color: Colors.grey.shade300,
-                child: const Icon(Icons.broken_image, color: Colors.grey),
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  width: 70,
+                  height: 80,
+                  color: Colors.grey.shade300,
+                  child: const Icon(Icons.image, color: Colors.grey),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 70,
+                  height: 80,
+                  color: Colors.grey.shade300,
+                  child: const Icon(Icons.broken_image, color: Colors.grey),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  category.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF000000),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    category.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF000000),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: [
-                    if (category.parentCategoryName != null)
-                      _badge(category.parentCategoryName!)
-                    else
-                      _badge('No Parent'),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Description: ${category.description?.isNotEmpty == true ? category.description! : 'None'}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF052E44),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      if (category.parentCategoryName != null)
+                        _badge(category.parentCategoryName!)
+                      else
+                        _badge('No Parent'),
+                    ],
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    'Description: ${category.description?.isNotEmpty == true ? category.description! : 'None'}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF052E44),
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            onPressed: () => updateDialog(category),
-            icon: const Icon(Icons.more_vert, size: 20, color: Color(0xFF141414)),
-          ),
-        ],
+            IconButton(
+              onPressed: () => updateDialog(category),
+              icon: const Icon(Icons.more_vert,
+                  size: 20, color: Color(0xFF141414)),
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -257,6 +257,4 @@ class _CategoryListPageState extends State<CategoryListPage> {
       ),
     );
   }
-
-
 }

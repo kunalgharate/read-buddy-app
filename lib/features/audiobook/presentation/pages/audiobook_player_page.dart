@@ -130,7 +130,9 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
     if (_currentTrackIndex < _book.tracks.length - 1) {
       _loadTrack(_currentTrackIndex + 1);
     }
-  }  Future<void> _playPause() async {
+  }
+
+  Future<void> _playPause() async {
     if (_player.playing) {
       await _player.pause();
       await _saveState();
@@ -232,12 +234,15 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
           children: [
             const Icon(Icons.error_outline, color: Color(0xFFD64545), size: 48),
             const SizedBox(height: 12),
-            Text(_error!, style: GoogleFonts.poppins(fontSize: 14, color: _textDark), textAlign: TextAlign.center),
+            Text(_error!,
+                style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
+                textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => _loadTrack(_currentTrackIndex),
               style: ElevatedButton.styleFrom(backgroundColor: _green),
-              child: Text('Retry', style: GoogleFonts.poppins(color: Colors.white)),
+              child: Text('Retry',
+                  style: GoogleFonts.poppins(color: Colors.white)),
             ),
           ],
         ),
@@ -250,20 +255,32 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
       children: [
         const Spacer(),
         Container(
-          width: 200, height: 200,
-          decoration: BoxDecoration(color: _green.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(24)),
+          width: 200,
+          height: 200,
+          decoration: BoxDecoration(
+              color: _green.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(24)),
           child: const Icon(Icons.headphones_rounded, size: 80, color: _green),
         ),
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Text(_currentTrack.title, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: _textDark), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+          child: Text(_currentTrack.title,
+              style: GoogleFonts.poppins(
+                  fontSize: 18, fontWeight: FontWeight.w600, color: _textDark),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis),
         ),
         const SizedBox(height: 4),
-        Text(_book.author, style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF666666))),
+        Text(_book.author,
+            style: GoogleFonts.poppins(
+                fontSize: 14, color: const Color(0xFF666666))),
         if (_book.tracks.length > 1) ...[
           const SizedBox(height: 4),
-          Text('Part ${_currentTrackIndex + 1} of ${_book.tracks.length}', style: GoogleFonts.poppins(fontSize: 12, color: _green, fontWeight: FontWeight.w500)),
+          Text('Part ${_currentTrackIndex + 1} of ${_book.tracks.length}',
+              style: GoogleFonts.poppins(
+                  fontSize: 12, color: _green, fontWeight: FontWeight.w500)),
         ],
         const SizedBox(height: 8),
         // Buffering indicator
@@ -286,17 +303,25 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
       stream: _player.processingStateStream,
       builder: (context, snapshot) {
         final state = snapshot.data ?? ProcessingState.idle;
-        if (state == ProcessingState.loading || state == ProcessingState.buffering) {
+        if (state == ProcessingState.loading ||
+            state == ProcessingState.buffering) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: _green)),
+                const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: _green)),
                 const SizedBox(width: 8),
                 Text(
-                  state == ProcessingState.loading ? 'Loading...' : 'Buffering...',
-                  style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF666666)),
+                  state == ProcessingState.loading
+                      ? 'Loading...'
+                      : 'Buffering...',
+                  style: GoogleFonts.poppins(
+                      fontSize: 12, color: const Color(0xFF666666)),
                 ),
               ],
             ),
@@ -313,7 +338,9 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
       builder: (context, snapshot) {
         final position = snapshot.data ?? Duration.zero;
         final duration = _player.duration ?? Duration.zero;
-        final progress = duration.inMilliseconds > 0 ? position.inMilliseconds / duration.inMilliseconds : 0.0;
+        final progress = duration.inMilliseconds > 0
+            ? position.inMilliseconds / duration.inMilliseconds
+            : 0.0;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
@@ -321,8 +348,10 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
               SliderTheme(
                 data: SliderThemeData(
                   trackHeight: 4,
-                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                  thumbShape:
+                      const RoundSliderThumbShape(enabledThumbRadius: 7),
+                  overlayShape:
+                      const RoundSliderOverlayShape(overlayRadius: 14),
                   activeTrackColor: _green,
                   inactiveTrackColor: const Color(0xFFE0E0E0),
                   thumbColor: _green,
@@ -331,7 +360,8 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
                 child: Slider(
                   value: progress.clamp(0.0, 1.0),
                   onChanged: (v) {
-                    _player.seek(Duration(milliseconds: (v * duration.inMilliseconds).round()));
+                    _player.seek(Duration(
+                        milliseconds: (v * duration.inMilliseconds).round()));
                   },
                 ),
               ),
@@ -340,8 +370,12 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_fmt(position), style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF666666))),
-                    Text(_fmt(duration), style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF666666))),
+                    Text(_fmt(position),
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, color: const Color(0xFF666666))),
+                    Text(_fmt(duration),
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, color: const Color(0xFF666666))),
                   ],
                 ),
               ),
@@ -359,26 +393,63 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
         final state = snapshot.data;
         final isPlaying = state?.playing ?? false;
         final processing = state?.processingState ?? ProcessingState.idle;
-        final isBuffering = processing == ProcessingState.loading || processing == ProcessingState.buffering;
+        final isBuffering = processing == ProcessingState.loading ||
+            processing == ProcessingState.buffering;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(icon: const Icon(Icons.skip_previous_rounded), iconSize: 36, color: _currentTrackIndex > 0 ? _textDark : const Color(0xFFCCCCCC), onPressed: _currentTrackIndex > 0 ? _skipPrevious : null),
+            IconButton(
+                icon: const Icon(Icons.skip_previous_rounded),
+                iconSize: 36,
+                color: _currentTrackIndex > 0
+                    ? _textDark
+                    : const Color(0xFFCCCCCC),
+                onPressed: _currentTrackIndex > 0 ? _skipPrevious : null),
             const SizedBox(width: 8),
-            IconButton(icon: const Icon(Icons.replay_10_rounded), iconSize: 32, color: _textDark, onPressed: _seekBackward),
+            IconButton(
+                icon: const Icon(Icons.replay_10_rounded),
+                iconSize: 32,
+                color: _textDark,
+                onPressed: _seekBackward),
             const SizedBox(width: 8),
             Container(
-              width: 64, height: 64,
-              decoration: const BoxDecoration(color: _green, shape: BoxShape.circle),
+              width: 64,
+              height: 64,
+              decoration:
+                  const BoxDecoration(color: _green, shape: BoxShape.circle),
               child: isBuffering
-                  ? const Center(child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3)))
-                  : IconButton(icon: Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, color: Colors.white), iconSize: 36, onPressed: _playPause),
+                  ? const Center(
+                      child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 3)))
+                  : IconButton(
+                      icon: Icon(
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          color: Colors.white),
+                      iconSize: 36,
+                      onPressed: _playPause),
             ),
             const SizedBox(width: 8),
-            IconButton(icon: const Icon(Icons.forward_10_rounded), iconSize: 32, color: _textDark, onPressed: _seekForward),
+            IconButton(
+                icon: const Icon(Icons.forward_10_rounded),
+                iconSize: 32,
+                color: _textDark,
+                onPressed: _seekForward),
             const SizedBox(width: 8),
-            IconButton(icon: const Icon(Icons.skip_next_rounded), iconSize: 36, color: _currentTrackIndex < _book.tracks.length - 1 ? _textDark : const Color(0xFFCCCCCC), onPressed: _currentTrackIndex < _book.tracks.length - 1 ? _skipNext : null),
+            IconButton(
+                icon: const Icon(Icons.skip_next_rounded),
+                iconSize: 36,
+                color: _currentTrackIndex < _book.tracks.length - 1
+                    ? _textDark
+                    : const Color(0xFFCCCCCC),
+                onPressed: _currentTrackIndex < _book.tracks.length - 1
+                    ? _skipNext
+                    : null),
           ],
         );
       },
@@ -390,8 +461,12 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
       onTap: _cycleSpeed,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(color: _green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-        child: Text('Speed: ${_speed}x', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: _green)),
+        decoration: BoxDecoration(
+            color: _green.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20)),
+        child: Text('Speed: ${_speed}x',
+            style: GoogleFonts.poppins(
+                fontSize: 14, fontWeight: FontWeight.w600, color: _green)),
       ),
     );
   }
@@ -399,15 +474,26 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
   Widget _buildPlaylistPreview() {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0xFFEAEAEA)))),
+      decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Color(0xFFEAEAEA)))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Playlist', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: _textDark)),
-              TextButton(onPressed: _showPlaylist, child: Text('View All', style: GoogleFonts.poppins(fontSize: 13, color: _green, fontWeight: FontWeight.w500))),
+              Text('Playlist',
+                  style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: _textDark)),
+              TextButton(
+                  onPressed: _showPlaylist,
+                  child: Text('View All',
+                      style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: _green,
+                          fontWeight: FontWeight.w500))),
             ],
           ),
           SizedBox(
@@ -419,11 +505,21 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
               itemBuilder: (_, i) {
                 final isActive = i == _currentTrackIndex;
                 return GestureDetector(
-                  onTap: () { _loadTrack(i); },
+                  onTap: () {
+                    _loadTrack(i);
+                  },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(color: isActive ? _green : const Color(0xFFF0F0F0), borderRadius: BorderRadius.circular(24)),
-                    child: Center(child: Text('Part ${i + 1}', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: isActive ? Colors.white : _textDark))),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                        color: isActive ? _green : const Color(0xFFF0F0F0),
+                        borderRadius: BorderRadius.circular(24)),
+                    child: Center(
+                        child: Text('Part ${i + 1}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: isActive ? Colors.white : _textDark))),
                   ),
                 );
               },
@@ -436,15 +532,21 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
 
   void _showPlaylist() {
     showModalBottomSheet(
-      context: context, backgroundColor: _bg,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      context: context,
+      backgroundColor: _bg,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Playlist', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: _textDark)),
+            Text('Playlist',
+                style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: _textDark)),
             const SizedBox(height: 12),
             Flexible(
               child: ListView.builder(
@@ -454,11 +556,34 @@ class _AudioBookPlayerPageState extends State<AudioBookPlayerPage> {
                   final track = _book.tracks[i];
                   final isActive = i == _currentTrackIndex;
                   return ListTile(
-                    leading: CircleAvatar(radius: 16, backgroundColor: isActive ? _green : const Color(0xFFE0E0E0), child: Text('${track.trackNumber}', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: isActive ? Colors.white : const Color(0xFF666666)))),
-                    title: Text(track.title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: isActive ? FontWeight.w600 : FontWeight.w400, color: isActive ? _green : _textDark)),
-                    subtitle: Text(_fmt(track.duration), style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF666666))),
-                    trailing: isActive ? const Icon(Icons.equalizer, color: _green) : const Icon(Icons.play_circle_outline, color: Color(0xFFCCCCCC)),
-                    onTap: () { Navigator.pop(ctx); _loadTrack(i); },
+                    leading: CircleAvatar(
+                        radius: 16,
+                        backgroundColor:
+                            isActive ? _green : const Color(0xFFE0E0E0),
+                        child: Text('${track.trackNumber}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isActive
+                                    ? Colors.white
+                                    : const Color(0xFF666666)))),
+                    title: Text(track.title,
+                        style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight:
+                                isActive ? FontWeight.w600 : FontWeight.w400,
+                            color: isActive ? _green : _textDark)),
+                    subtitle: Text(_fmt(track.duration),
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, color: const Color(0xFF666666))),
+                    trailing: isActive
+                        ? const Icon(Icons.equalizer, color: _green)
+                        : const Icon(Icons.play_circle_outline,
+                            color: Color(0xFFCCCCCC)),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _loadTrack(i);
+                    },
                   );
                 },
               ),

@@ -9,11 +9,10 @@ import 'package:read_buddy_app/features/bookcrud/domain/respository/search_locat
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_book.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_location.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
+import 'package:read_buddy_app/features/profile/domain/usecases/get_profile.dart';
 
 // Core
-
 import '../../features/profile/data/datasource/profile_remote_data_source.dart';
-import '../../features/profile/domain/usecases/get_profile.dart';
 import '../../features/profile/domain/usecases/update_user_avatar.dart';
 import '../network/dio_client.dart';
 import '../utils/secure_storage_utils.dart';
@@ -36,9 +35,17 @@ import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 // Profile
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
-
 import '../../features/profile/domain/usecases/update_profile_usecase.dart';
 import '../../features/profile/presentation/blocs/profile_bloc.dart';
+
+// Home Books
+import '../../features/homebooks/data/datasource/home_remote_datasource.dart';
+import '../../features/homebooks/data/repositories/home_book_repository_impl.dart';
+import '../../features/homebooks/domain/repositories/home_book_repository.dart';
+import '../../features/homebooks/domain/usecases/get_latest_books_usecase.dart';
+import '../../features/homebooks/domain/usecases/get_trending_books_usecase.dart';
+import '../../features/homebooks/domain/usecases/get_recommended_books_usecase.dart';
+import '../../features/homebooks/presentation/bloc/home_book_bloc.dart';
 
 // Books
 import '../../features/books/data/datasources/book_remote_data_source.dart';
@@ -148,12 +155,17 @@ void _registerDataSources() {
     () => AuthRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
-  // Profile — fixed: pass real secureStorage instead of null
+  // Profile
   getIt.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(
       dio: getIt<Dio>(),
-      secureStorage: getIt<SecureStorageUtil>(), // ← FIXED
+      secureStorage: getIt<SecureStorageUtil>(),
     ),
+  );
+
+  // Home Books
+  getIt.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
   // Books
@@ -194,17 +206,17 @@ void _registerDataSources() {
     ),
   );
 
+  // Donated Books
+  getIt.registerLazySingleton<DonatedBooksRemoteDataSource>(
+    () => DonatedBooksRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
   // Question CRUD (Admin)
   getIt.registerLazySingleton<QuestionCrudDataSource.QuestionRemoteDataSource>(
     () => QuestionCrudDataSource.QuestionRemoteDataSource(
       getIt<Dio>(),
       getIt<SecureStorageUtil>(),
     ),
-  );
-
-  // Donated Books
-  getIt.registerLazySingleton<DonatedBooksRemoteDataSource>(
-    () => DonatedBooksRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 }
 
@@ -220,6 +232,11 @@ void _registerRepositories() {
   // Profile
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(getIt<ProfileRemoteDataSource>()),
+  );
+
+  // Home Books
+  getIt.registerLazySingleton<HomeRepository>(
+    () => HomeRepositoryImpl(remoteDataSource: getIt<HomeRemoteDataSource>()),
   );
 
   // Books
@@ -257,16 +274,16 @@ void _registerRepositories() {
     () => OnboardingRepositoryImpl(getIt<OnboardingRemoteDataSource>()),
   );
 
+  // Donated Books
+  getIt.registerLazySingleton<DonatedBooksRepository>(
+    () => DonatedBooksRepositoryImpl(getIt<DonatedBooksRemoteDataSource>()),
+  );
+
   // Question CRUD (Admin)
   getIt.registerLazySingleton<QuestionCrudDomain.QuestionRepository>(
     () => QuestionCrudRepo.QuestionRepositoryImpl(
       getIt<QuestionCrudDataSource.QuestionRemoteDataSource>(),
     ),
-  );
-
-  // Donated Books
-  getIt.registerLazySingleton<DonatedBooksRepository>(
-    () => DonatedBooksRepositoryImpl(getIt<DonatedBooksRemoteDataSource>()),
   );
 }
 
@@ -287,13 +304,20 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => ChangePasswordUseCase(getIt<AuthRepository>()));
 
-  // Profile — added GetProfileUseCase and UpdateAvatarUseCase
+// Profile
   getIt.registerLazySingleton(
       () => GetProfileUseCase(getIt<ProfileRepository>()));
   getIt.registerLazySingleton(
-      () => UpdateAvatarUseCase(getIt<ProfileRepository>()));
-  getIt.registerLazySingleton(
       () => UpdateProfileUseCase(getIt<ProfileRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateAvatarUseCase(getIt<ProfileRepository>()));
+  // Home Books
+  getIt.registerLazySingleton(
+      () => GetLatestBooksUseCase(getIt<HomeRepository>()));
+  getIt.registerLazySingleton(
+      () => GetTrendingBooksUseCase(getIt<HomeRepository>()));
+  getIt.registerLazySingleton(
+      () => GetRecommendedBookUseCase(getIt<HomeRepository>()));
 
   // Books
   getIt.registerLazySingleton(() => GetBooks(getIt<BookRepository>()));
@@ -352,6 +376,10 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => SetOnboardingStatusUseCase(getIt<OnboardingRepository>()));
 
+  // Donated Books
+  getIt.registerLazySingleton(
+      () => GetDonatedBooks(getIt<DonatedBooksRepository>()));
+
   // Question CRUD (Admin)
   getIt.registerLazySingleton(() => QuestionCrudUseCases.GetQuestions(
       getIt<QuestionCrudDomain.QuestionRepository>()));
@@ -361,10 +389,6 @@ void _registerUseCases() {
       getIt<QuestionCrudDomain.QuestionRepository>()));
   getIt.registerLazySingleton(() => QuestionCrudUseCases.DeleteQuestion(
       getIt<QuestionCrudDomain.QuestionRepository>()));
-
-  // Donated Books
-  getIt.registerLazySingleton(
-      () => GetDonatedBooks(getIt<DonatedBooksRepository>()));
 }
 
 // ========================================
@@ -383,21 +407,29 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => SignUpBloc(
         getIt<RegisterUserUseCase>(),
         getIt<VerifyEmailUseCase>(),
-      ),);
+      ));
 
-  // Profile — fixed: added all 4 required constructor args
+  // Profile
   getIt.registerFactory(() => ProfileBloc(
         getIt<SecureStorageUtil>(),
-        getIt<GetProfileUseCase>(), // ← NEW
-        getIt<UpdateAvatarUseCase>(), // ← NEW
+        getIt<GetProfileUseCase>(),
+        getIt<UpdateAvatarUseCase>(),
         getIt<UpdateProfileUseCase>(),
       ));
 
-  // Books
-  getIt.registerLazySingleton(() => BookBloc(getIt<GetBooks>()));
+  // Home Books
+  getIt.registerFactory(() => HomeBloc(
+        getLatestBooks: getIt<GetLatestBooksUseCase>(),
+        getTrendingBooks: getIt<GetTrendingBooksUseCase>(),
+        getRecommendedBooks: getIt<GetRecommendedBookUseCase>(),
+        secureStorage: getIt<SecureStorageUtil>(),
+      ));
 
   // Donated Books
   getIt.registerLazySingleton(() => DonatedBooksBloc(getIt<GetDonatedBooks>()));
+
+  // Books
+  getIt.registerLazySingleton(() => BookBloc(getIt<GetBooks>()));
 
   // Book CRUD
   getIt.registerLazySingleton(() => BookCrudBloc(

@@ -155,9 +155,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           );
                           return;
                         }
-                        context
-                            .read<SignInBloc>()
-                            .add(SendOtpRequested(email));
+                        context.read<SignInBloc>().add(SendOtpRequested(email));
                       },
                     );
                   },

@@ -31,8 +31,10 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.existing?.title ?? '');
-    _descriptionController = TextEditingController(text: widget.existing?.description ?? '');
+    _titleController =
+        TextEditingController(text: widget.existing?.title ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.existing?.description ?? '');
     if (widget.existing?.parentCategoryName != null) {
       final match = CategoryItems.parentCategoryItems
           .where((e) => e.name == widget.existing!.parentCategoryName);
@@ -100,8 +102,9 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                   isContentPadding: true,
                   digitsOnly: false,
                   keyboardType: TextInputType.text,
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Title is required' : null,
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? 'Title is required'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 _label('Parent Category (Optional)'),
@@ -247,8 +250,8 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                       CachedNetworkImage(
                         imageUrl: widget.existing!.imageUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => const Center(
-                            child: CircularProgressIndicator()),
+                        placeholder: (_, __) =>
+                            const Center(child: CircularProgressIndicator()),
                         errorWidget: (_, __, ___) =>
                             const Icon(Icons.broken_image),
                       ),
