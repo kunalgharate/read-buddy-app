@@ -74,15 +74,17 @@ class AppInterceptor extends Interceptor {
   }
 
   bool _shouldAttemptTokenRefresh(DioException err) {
-    final statusCode = err.response?.statusCode;
-    final isTokenExpired = err.response?.data is Map && 
-        (err.response?.data['error']?.toString().contains('token') == true ||
-         err.response?.data['message']?.toString().contains('token') == true);
-
-    return (statusCode == ApiConstants.unauthorized || (statusCode == ApiConstants.forbidden && isTokenExpired)) &&
-        !err.requestOptions.uri.path.contains('/auth/refresh') &&
-        !err.requestOptions.uri.path.contains('/login') &&
-        !err.requestOptions.uri.path.contains('/register');
+    final status = err.response?.statusCode;
+    final path = err.requestOptions.uri.path;
+    final isAuthRoute = path.contains('/auth/refresh') ||
+        path.contains('/login') ||
+        path.contains('/register');
+    if (isAuthRoute) return false;
+    // Refresh on 401, or 404 on bookrequests action routes (server quirk)
+    if (status == ApiConstants.unauthorized) return true;
+    if (status == ApiConstants.notFound &&
+        (path.contains('/accept') || path.contains('/decline'))) return true;
+    return false;
   }
 
   Future<String?> _refreshAccessToken() async {
