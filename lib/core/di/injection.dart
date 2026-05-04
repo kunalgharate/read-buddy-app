@@ -112,7 +112,21 @@ import '../../features/book_request/data/datasources/book_request_remote_datasou
 import '../../features/book_request/data/repositories/book_request_repository_impl.dart';
 import '../../features/book_request/domain/repositories/book_request_repository.dart';
 import '../../features/book_request/domain/usecases/get_book_detail.dart';
+import '../../features/book_request/domain/usecases/create_book_request.dart';
+import '../../features/book_request/domain/usecases/get_my_book_requests.dart';
+import '../../features/book_request/domain/usecases/cancel_book_request.dart';
+import '../../features/book_request/domain/usecases/get_all_book_requests.dart';
+import '../../features/book_request/domain/usecases/accept_book_request.dart';
+import '../../features/book_request/domain/usecases/decline_book_request.dart';
+import '../../features/book_request/domain/usecases/get_library_details.dart';
+import '../../features/book_request/domain/usecases/schedule_pickup.dart';
+import '../../features/book_request/domain/usecases/set_fulfillment.dart';
+import '../../features/book_request/domain/usecases/confirm_payment.dart';
+import '../../features/book_request/domain/usecases/get_upcoming_pickups.dart';
 import '../../features/book_request/presentation/bloc/book_request_bloc.dart';
+import '../../features/book_request/presentation/bloc/my_requests_bloc.dart';
+import '../../features/book_request/presentation/bloc/admin_requests_bloc.dart';
+import '../../features/book_request/presentation/bloc/admin_upcoming_pickups_bloc.dart';
 
 // Question CRUD (Admin)
 import 'package:read_buddy_app/features/question_crud/data/datasources/question_remote_datasource.dart'
@@ -163,7 +177,7 @@ Future<void> configureDependencies() async {
 // UTILS & CORE
 // ========================================
 void _registerUtils() {
-  getIt.registerLazySingleton<SecureStorageUtil>(() => SecureStorageUtil());
+  getIt.registerSingleton<SecureStorageUtil>(SecureStorageUtil());
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
 }
 
@@ -234,7 +248,10 @@ void _registerDataSources() {
 
   // Book Request
   getIt.registerLazySingleton<BookRequestRemoteDataSource>(
-    () => BookRequestRemoteDataSourceImpl(dio: getIt<Dio>()),
+    () => BookRequestRemoteDataSourceImpl(
+      dio: getIt<Dio>(),
+      secureStorage: getIt<SecureStorageUtil>(),
+    ),
   );
 
   // Question CRUD (Admin)
@@ -426,6 +443,28 @@ void _registerUseCases() {
   // Book Request
   getIt.registerLazySingleton(
       () => GetBookDetailUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => CreateBookRequestUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => GetMyBookRequestsUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => CancelBookRequestUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => GetAllBookRequestsUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => AcceptBookRequestUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => DeclineBookRequestUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => GetLibraryDetailsUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => SchedulePickupUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => SetFulfillmentUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => ConfirmPaymentUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => GetUpcomingPickupsUsecase(getIt<BookRequestRepository>()));
 
   // Question CRUD (Admin)
   getIt.registerLazySingleton(() => QuestionCrudUseCases.GetQuestions(
@@ -534,6 +573,23 @@ void _registerBlocs() {
   // Book Request
   getIt.registerFactory(() => BookRequestBloc(
         getBookDetail: getIt<GetBookDetailUsecase>(),
+        createBookRequest: getIt<CreateBookRequestUsecase>(),
+        getLibraryDetails: getIt<GetLibraryDetailsUsecase>(),
+        schedulePickup: getIt<SchedulePickupUsecase>(),
+        setFulfillment: getIt<SetFulfillmentUsecase>(),
+        confirmPayment: getIt<ConfirmPaymentUsecase>(),
+      ));
+  getIt.registerFactory(() => MyRequestsBloc(
+        getMyBookRequests: getIt<GetMyBookRequestsUsecase>(),
+        cancelBookRequest: getIt<CancelBookRequestUsecase>(),
+      ));
+  getIt.registerFactory(() => AdminRequestsBloc(
+        getAllBookRequests: getIt<GetAllBookRequestsUsecase>(),
+        acceptBookRequest: getIt<AcceptBookRequestUsecase>(),
+        declineBookRequest: getIt<DeclineBookRequestUsecase>(),
+      ));
+  getIt.registerFactory(() => AdminUpcomingPickupsBloc(
+        getUpcomingPickups: getIt<GetUpcomingPickupsUsecase>(),
       ));
 }
 

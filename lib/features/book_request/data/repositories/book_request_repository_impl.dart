@@ -1,0 +1,77 @@
+import '../../domain/entities/book_detail_entity.dart';
+import '../../domain/entities/book_request_entity.dart';
+import '../../domain/entities/library_entity.dart';
+import '../../domain/entities/pickup_details_entity.dart';
+import '../../domain/repositories/book_request_repository.dart';
+import '../datasources/book_request_remote_datasource.dart';
+
+class BookRequestRepositoryImpl implements BookRequestRepository {
+  final BookRequestRemoteDataSource remoteDataSource;
+
+  BookRequestRepositoryImpl(this.remoteDataSource);
+
+  @override
+  Future<BookDetailEntity> getBookById(String id) async {
+    return await remoteDataSource.getBookById(id);
+  }
+
+  @override
+  Future<void> createBookRequest(String bookId) async {
+    return await remoteDataSource.createBookRequest(bookId);
+  }
+
+  @override
+  Future<List<BookRequestEntity>> getMyBookRequests() async {
+    return await remoteDataSource.getMyBookRequests();
+  }
+
+  @override
+  Future<List<BookRequestEntity>> getAllBookRequests() async {
+    return await remoteDataSource.getAllBookRequests();
+  }
+
+  @override
+  Future<List<BookRequestEntity>> getUpcomingPickups() async {
+    return await remoteDataSource.getUpcomingPickups();
+  }
+
+  @override
+  Future<void> cancelBookRequest(String id) async {
+    return await remoteDataSource.cancelBookRequest(id);
+  }
+
+  @override
+  Future<void> acceptBookRequest(String id, {String? notes}) async {
+    return await remoteDataSource.acceptBookRequest(id, notes: notes);
+  }
+
+  @override
+  Future<void> declineBookRequest(String id, {String reason = 'Request declined'}) async {
+    return await remoteDataSource.declineBookRequest(id, reason: reason);
+  }
+
+  @override
+  Future<LibraryEntity> getLibraryDetails() async {
+    return await remoteDataSource.getLibraryDetails();
+  }
+
+  @override
+  Future<BookRequestEntity> schedulePickup(PickupDetailsEntity details) async {
+    return await remoteDataSource.schedulePickup(details);
+  }
+
+  @override
+  Future<BookRequestEntity> getRequestDetails(String id) async {
+    return await remoteDataSource.getRequestDetails(id);
+  }
+
+  @override
+  Future<void> setFulfillment(String id, String method, String name, String phone, String? address) async {
+    return await remoteDataSource.setFulfillment(id, method, name, phone, address);
+  }
+
+  @override
+  Future<void> confirmPayment(String id, int amount) async {
+    return await remoteDataSource.confirmPayment(id, amount);
+  }
+}
