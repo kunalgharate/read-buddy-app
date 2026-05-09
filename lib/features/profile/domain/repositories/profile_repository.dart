@@ -1,5 +1,5 @@
-import '../../../auth/domain/entities/app_user.dart';
-import '../entities/user_profile.dart';
+import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
+import 'package:read_buddy_app/features/profile/domain/entities/user_profile.dart';
 
 abstract class ProfileRepository {
   /// GET /users/profile

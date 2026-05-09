@@ -1,7 +1,7 @@
 // lib/features/books/presentation/widgets/book_list_item.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import '../../domain/entities/book.dart';
+import 'package:read_buddy_app/features/books/domain/entities/book.dart';
 
 class BookListItem extends StatelessWidget {
   final Book book;

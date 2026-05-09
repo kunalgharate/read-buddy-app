@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
-import '../../../../core/di/injection.dart';
-import '../../../../core/services/app_preferences.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
-import '../home/presentation/screens/home_screen.dart';
-import '../dashboard/presentation/screens/admin_dashboard_screen.dart';
-import '../onboarding/onboarding_screens.dart';
-import '../questionaries/presentations/pages/onboarding_questionaire.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/services/app_preferences.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
+import 'package:read_buddy_app/features/dashboard/presentation/screens/admin_dashboard_screen.dart';
+import 'package:read_buddy_app/features/onboarding/onboarding_screens.dart';
+import 'package:read_buddy_app/features/questionaries/presentations/pages/onboarding_questionaire.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

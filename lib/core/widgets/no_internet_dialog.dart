@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../services/connectivity_service.dart';
+import 'package:read_buddy_app/core/services/connectivity_service.dart';
 
 /// Shows a dialog when internet is unavailable.
 /// Has Retry and Cancel buttons. Auto-closes when connectivity is restored.

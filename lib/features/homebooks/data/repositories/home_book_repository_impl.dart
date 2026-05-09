@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import '../../domain/entities/book_entity.dart';
-import '../../domain/repositories/home_book_repository.dart';
-import '../datasource/home_remote_datasource.dart';
+import 'package:read_buddy_app/features/homebooks/domain/entities/book_entity.dart';
+import 'package:read_buddy_app/features/homebooks/domain/repositories/home_book_repository.dart';
+import 'package:read_buddy_app/features/homebooks/data/datasource/home_remote_datasource.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource _remoteDataSource;

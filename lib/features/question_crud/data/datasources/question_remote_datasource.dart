@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import '../../domain/entities/question_entity.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
-import '../../../../core/network/api_constants.dart';
+import 'package:read_buddy_app/features/question_crud/domain/entities/question_entity.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/core/network/api_constants.dart';
 
 class QuestionRemoteDataSource {
   final Dio _dio;

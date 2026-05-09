@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/my_rewards_card.dart';
-import '../widgets/reading_streak_card.dart';
-import '../widgets/badges_section.dart';
-import '../widgets/challenges_section.dart';
+import 'package:read_buddy_app/features/rewards/presentation/widgets/my_rewards_card.dart';
+import 'package:read_buddy_app/features/rewards/presentation/widgets/reading_streak_card.dart';
+import 'package:read_buddy_app/features/rewards/presentation/widgets/badges_section.dart';
+import 'package:read_buddy_app/features/rewards/presentation/widgets/challenges_section.dart';
 
 class RewardsPage extends StatelessWidget {
   const RewardsPage({super.key});

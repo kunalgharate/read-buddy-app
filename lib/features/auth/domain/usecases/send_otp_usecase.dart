@@ -1,4 +1,4 @@
-import '../repositories/auth_repository.dart';
+import 'package:read_buddy_app/features/auth/domain/repositories/auth_repository.dart';
 
 class SendOtpUseCase {
   final AuthRepository _repository;

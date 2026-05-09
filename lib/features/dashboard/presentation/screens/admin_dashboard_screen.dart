@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/di/injection.dart';
-import '../../../../core/services/app_preferences.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
-import '../widgets/dashboard_box_widget.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/services/app_preferences.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/features/dashboard/presentation/widgets/dashboard_box_widget.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});

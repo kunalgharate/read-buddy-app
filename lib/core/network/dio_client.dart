@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../utils/app_interceptor.dart';
+import 'package:read_buddy_app/core/utils/app_interceptor.dart';
 
 class DioClient {
   static Dio createDio() {

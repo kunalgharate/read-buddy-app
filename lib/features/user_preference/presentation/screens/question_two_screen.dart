@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/user_preference/presentation/screens/question_three_screen.dart';
-import '../widgets/option_tile.dart';
+import 'package:read_buddy_app/features/user_preference/presentation/widgets/option_tile.dart';
 
 class QuestionTwoScreen extends StatefulWidget {
   const QuestionTwoScreen({super.key});

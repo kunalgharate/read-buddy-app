@@ -1,14 +1,14 @@
 // lib/features/books/presentation/pages/book_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../auth/presentation/pages/sign_in_page.dart';
+import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/widgets/addbook_stepper.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/add_category.dart';
-import '../bloc/book_bloc.dart';
-import '../bloc/book_event.dart';
-import '../bloc/book_state.dart';
-import '../widgets/book_list_item.dart';
+import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
+import 'package:read_buddy_app/features/books/presentation/bloc/book_event.dart';
+import 'package:read_buddy_app/features/books/presentation/bloc/book_state.dart';
+import 'package:read_buddy_app/features/books/presentation/widgets/book_list_item.dart';
 
 class BookPage extends StatefulWidget {
   const BookPage({super.key});

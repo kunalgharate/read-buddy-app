@@ -2,12 +2,12 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../../core/utils/error_handler.dart';
-import '../../../domain/entities/app_user.dart';
-import '../../../domain/usecases/sign_in.dart';
-import '../../../domain/usecases/send_otp_usecase.dart';
-import '../../../domain/usecases/verify_reset_otp_usecase.dart';
-import '../../../domain/usecases/change_password_usecase.dart';
+import 'package:read_buddy_app/core/utils/error_handler.dart';
+import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/send_otp_usecase.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/verify_reset_otp_usecase.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/change_password_usecase.dart';
 
 part 'sign_in_event.dart';
 part 'sign_in_state.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../remotesource/auth_remote_data_source.dart';
+import 'package:read_buddy_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:read_buddy_app/features/auth/data/remotesource/auth_remote_data_source.dart';
 import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 
 @Injectable(as: AuthRepository)

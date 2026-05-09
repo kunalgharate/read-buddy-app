@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../services/connectivity_service.dart';
-import '../widgets/no_internet_dialog.dart';
+import 'package:read_buddy_app/core/services/connectivity_service.dart';
+import 'package:read_buddy_app/core/widgets/no_internet_dialog.dart';
 
 /// Mixin for StatefulWidgets that need to check connectivity
 /// before performing network-dependent actions.

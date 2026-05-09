@@ -1,4 +1,4 @@
-import '../entities/app_user.dart';
+import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 
 abstract class AuthRepository {
   Future<AppUser> signIn({required String email, required String password});

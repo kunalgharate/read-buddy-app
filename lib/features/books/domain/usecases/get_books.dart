@@ -1,8 +1,8 @@
 // features/books/domain/usecases/get_books.dart
 import 'package:injectable/injectable.dart';
 
-import '../entities/book.dart';
-import '../repositories/book_repository.dart';
+import 'package:read_buddy_app/features/books/domain/entities/book.dart';
+import 'package:read_buddy_app/features/books/domain/repositories/book_repository.dart';
 
 @injectable
 class GetBooks {

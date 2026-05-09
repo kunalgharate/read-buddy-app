@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import '../../../../core/network/api_constants.dart';
-import '../../../../core/utils/network_utils.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
-import '../../../auth/domain/entities/app_user.dart';
-import '../model/user_profile_model.dart';
+import 'package:read_buddy_app/core/network/api_constants.dart';
+import 'package:read_buddy_app/core/utils/network_utils.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
+import 'package:read_buddy_app/features/profile/data/model/user_profile_model.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<ProfileUserModel> getProfile();

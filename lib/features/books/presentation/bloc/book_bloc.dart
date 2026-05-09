@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'book_event.dart';
 import 'book_state.dart';
-import '../../domain/usecases/get_books.dart';
+import 'package:read_buddy_app/features/books/domain/usecases/get_books.dart';
 
 @injectable
 class BookBloc extends Bloc<BookEvent, BookState> {

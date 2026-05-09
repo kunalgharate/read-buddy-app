@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/option_tile.dart';
+import 'package:read_buddy_app/features/user_preference/presentation/widgets/option_tile.dart';
 
 class QuestionFiveScreen extends StatefulWidget {
   const QuestionFiveScreen({super.key});

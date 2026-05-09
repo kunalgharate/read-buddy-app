@@ -1,4 +1,4 @@
-import '../../domain/entities/question_entity.dart';
+import 'package:read_buddy_app/features/question_crud/domain/entities/question_entity.dart';
 
 class QuestionModel extends QuestionEntity {
   const QuestionModel({

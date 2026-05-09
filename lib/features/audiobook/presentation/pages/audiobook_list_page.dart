@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../domain/entities/audiobook.dart';
-import '../data/dummy_audiobooks.dart';
+import 'package:read_buddy_app/features/audiobook/domain/entities/audiobook.dart';
+import 'package:read_buddy_app/features/audiobook/presentation/data/dummy_audiobooks.dart';
 
 class AudioBookListPage extends StatelessWidget {
   const AudioBookListPage({super.key});

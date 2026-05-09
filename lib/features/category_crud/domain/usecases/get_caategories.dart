@@ -2,7 +2,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 
-import '../repository/category_repository.dart';
+import 'package:read_buddy_app/features/category_crud/domain/repository/category_repository.dart';
 
 @injectable
 class GetCategoriesUsecase {

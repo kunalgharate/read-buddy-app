@@ -1,0 +1,88 @@
+{
+  "user_impact": {
+    "books_donated": 4,
+    "students_helped": 23,
+    "total_money_donated": 1250.00,
+    "donations_this_month": 2
+  },
+  "monthly_stats": {
+    "month": "April",
+    "year": 2026,
+    "donated_books": 142,
+    "new_users": 87,
+    "delivered_books": 119
+  },
+  "leaderboard": [
+    {
+      "user_id": "usr_001",
+      "name": "Aarav Sharma",
+      "avatar_url": "https://i.pravatar.cc/150?img=1",
+      "books_donated": 18,
+      "rank": 1
+    },
+    {
+      "user_id": "usr_002",
+      "name": "Priya Patel",
+      "avatar_url": "https://i.pravatar.cc/150?img=5",
+      "books_donated": 15,
+      "rank": 2
+    },
+    {
+      "user_id": "usr_003",
+      "name": "Rohan Mehta",
+      "avatar_url": "https://i.pravatar.cc/150?img=3",
+      "books_donated": 12,
+      "rank": 3
+    },
+    {
+      "user_id": "usr_004",
+      "name": "Sneha Kulkarni",
+      "avatar_url": "https://i.pravatar.cc/150?img=9",
+      "books_donated": 10,
+      "rank": 4
+    },
+    {
+      "user_id": "usr_005",
+      "name": "Vikram Singh",
+      "avatar_url": "https://i.pravatar.cc/150?img=7",
+      "books_donated": 8,
+      "rank": 5
+    }
+  ],
+  "recent_donations": [
+    {
+      "donation_id": "don_101",
+      "type": "book",
+      "title": "Wings of Fire",
+      "author": "A.P.J. Abdul Kalam",
+      "format": "physical",
+      "donated_at": "2026-04-25T10:30:00Z",
+      "status": "delivered"
+    },
+    {
+      "donation_id": "don_102",
+      "type": "book",
+      "title": "The White Tiger",
+      "author": "Aravind Adiga",
+      "format": "ebook",
+      "donated_at": "2026-04-20T14:15:00Z",
+      "status": "completed"
+    },
+    {
+      "donation_id": "don_103",
+      "type": "money",
+      "amount": 500.00,
+      "donated_at": "2026-04-18T09:00:00Z",
+      "status": "completed"
+    },
+    {
+      "donation_id": "don_104",
+      "type": "book",
+      "title": "Sapiens",
+      "author": "Yuval Noah Harari",
+      "format": "physical",
+      "donated_at": "2026-04-10T16:45:00Z",
+      "status": "in_transit"
+    }
+  ]
+}

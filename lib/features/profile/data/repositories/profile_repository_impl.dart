@@ -1,8 +1,8 @@
-import '../../../auth/domain/entities/app_user.dart';
+import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/entities/user_profile.dart';
-import '../../domain/repositories/profile_repository.dart';
-import '../datasource/profile_remote_data_source.dart';
+import 'package:read_buddy_app/features/profile/domain/entities/user_profile.dart';
+import 'package:read_buddy_app/features/profile/domain/repositories/profile_repository.dart';
+import 'package:read_buddy_app/features/profile/data/datasource/profile_remote_data_source.dart';
 
 @LazySingleton(as: ProfileRepository)
 class ProfileRepositoryImpl implements ProfileRepository {

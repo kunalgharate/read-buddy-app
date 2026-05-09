@@ -1,5 +1,5 @@
 // features/books/presentation/bloc/book_state.dart
-import '../../domain/entities/book.dart';
+import 'package:read_buddy_app/features/books/domain/entities/book.dart';
 
 sealed class BookState {}
 

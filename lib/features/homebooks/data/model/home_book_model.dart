@@ -1,4 +1,4 @@
-import '../../domain/entities/book_entity.dart';
+import 'package:read_buddy_app/features/homebooks/domain/entities/book_entity.dart';
 
 class BookModel extends BookEntity {
   const BookModel({

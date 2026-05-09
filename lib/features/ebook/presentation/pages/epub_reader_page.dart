@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_epub_viewer/flutter_epub_viewer.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../services/tts_service.dart';
+import 'package:read_buddy_app/features/ebook/presentation/services/tts_service.dart';
 
 class EpubReaderPage extends StatefulWidget {
   final String url;

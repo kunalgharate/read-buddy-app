@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import '../../domain/entities/question_entity.dart';
-import '../../domain/usecases/get_questions.dart' as QuestionCrudUseCases;
-import '../../domain/usecases/delete_question.dart' as QuestionCrudUseCases;
+import 'package:read_buddy_app/features/question_crud/domain/entities/question_entity.dart';
+import 'package:read_buddy_app/features/question_crud/domain/usecases/get_questions.dart' as QuestionCrudUseCases;
+import 'package:read_buddy_app/features/question_crud/domain/usecases/delete_question.dart' as QuestionCrudUseCases;
 import 'add_edit_question_page.dart';
 
 class QuestionListPage extends StatefulWidget {

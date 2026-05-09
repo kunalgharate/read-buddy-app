@@ -1,5 +1,5 @@
 // // features/books/data/models/book_model.dart
-import '../../domain/entities/book.dart';
+import 'package:read_buddy_app/features/books/domain/entities/book.dart';
 
 // class BookModel extends Book {
 //   BookModel(

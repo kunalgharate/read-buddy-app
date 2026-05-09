@@ -1,6 +1,6 @@
 // onboarding/data/model/onboarding_question_model.dart
 
-import '../../domain/entity/onboarding_question_entity.dart'; // ← correct import
+import 'package:read_buddy_app/features/questionaries/domain/entity/onboarding_question_entity.dart'; // ← correct import
 
 class QuestionModel extends QuestionEntity {
   const QuestionModel({

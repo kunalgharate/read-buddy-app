@@ -1,16 +1,16 @@
 // presentation/screens/onboarding_questionnaire.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/di/injection.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
-import '../../../../core/services/app_preferences.dart';
-import '../../../auth/data/models/app_user_model.dart';
-import '../../../home/presentation/screens/home_screen.dart';
-import '../../domain/entity/onboarding_question_entity.dart';
-import '../bloc/on_boarding_bloc.dart';
-import '../bloc/on_boarding_event.dart';
-import '../bloc/on_boarding_state.dart';
-import '../widgets/question_card.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/core/services/app_preferences.dart';
+import 'package:read_buddy_app/features/auth/data/models/app_user_model.dart';
+import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
+import 'package:read_buddy_app/features/questionaries/domain/entity/onboarding_question_entity.dart';
+import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_bloc.dart';
+import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_event.dart';
+import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_state.dart';
+import 'package:read_buddy_app/features/questionaries/presentations/widgets/question_card.dart';
 
 class OnboardingQuestionnaire extends StatelessWidget {
   const OnboardingQuestionnaire({super.key});

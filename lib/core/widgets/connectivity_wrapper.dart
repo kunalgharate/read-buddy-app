@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../services/connectivity_service.dart';
+import 'package:read_buddy_app/core/services/connectivity_service.dart';
 import 'no_internet_dialog.dart';
 
 /// Wrap this around your MaterialApp's home to automatically

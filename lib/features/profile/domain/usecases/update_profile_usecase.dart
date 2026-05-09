@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import '../../../auth/domain/entities/app_user.dart';
-import '../repositories/profile_repository.dart';
+import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
+import 'package:read_buddy_app/features/profile/domain/repositories/profile_repository.dart';
 
 @injectable
 class UpdateProfileUseCase {

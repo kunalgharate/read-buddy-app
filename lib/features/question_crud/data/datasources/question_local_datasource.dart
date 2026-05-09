@@ -1,5 +1,5 @@
-// import '../models/question_model.dart';
-// import '../../domain/entities/question_entity.dart';
+// import 'package:read_buddy_app/features/question_crud/data/models/question_model.dart';
+// import 'package:read_buddy_app/features/question_crud/domain/entities/question_entity.dart';
 //
 // class QuestionLocalDataSource {
 //   List<QuestionEntity> _questions = [

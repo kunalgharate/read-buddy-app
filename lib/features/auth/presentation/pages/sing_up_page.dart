@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/utils/ui_utils.dart';
-import '../blocs/sign_up/sign_up_bloc.dart';
-import '../widgets/custom_button_widget.dart';
+import 'package:read_buddy_app/core/utils/ui_utils.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
+import 'package:read_buddy_app/features/auth/presentation/widgets/custom_button_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});

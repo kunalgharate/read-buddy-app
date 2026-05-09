@@ -1,0 +1,97 @@
+{
+  "user_id": "usr_current",
+  "donated_books": [
+    {
+      "book_id": "bk_201",
+      "title": "The Jungle Book",
+      "author": "Rudyard Kipling",
+      "format": "ebook",
+      "cover_image_url": "https://covers.openlibrary.org/b/id/8309883-L.jpg",
+      "status": "completed",
+      "donated_at": "2026-03-15T08:30:00Z",
+      "delivered_at": "2026-03-18T14:00:00Z",
+      "recipient": {
+        "name": "Ankit Verma",
+        "city": "Pune"
+      }
+    },
+    {
+      "book_id": "bk_202",
+      "title": "The Jungle Book",
+      "author": "Rudyard Kipling",
+      "format": "ebook",
+      "cover_image_url": "https://covers.openlibrary.org/b/id/8309883-L.jpg",
+      "status": "pending",
+      "donated_at": "2026-04-22T11:00:00Z",
+      "delivered_at": null,
+      "recipient": null
+    },
+    {
+      "book_id": "bk_203",
+      "title": "Atomic Habits",
+      "author": "James Clear",
+      "format": "physical",
+      "cover_image_url": "https://covers.openlibrary.org/b/id/12547191-L.jpg",
+      "status": "in_transit",
+      "donated_at": "2026-04-18T09:45:00Z",
+      "delivered_at": null,
+      "recipient": {
+        "name": "Meera Joshi",
+        "city": "Mumbai"
+      },
+      "tracking_id": "TRK-928374"
+    },
+    {
+      "book_id": "bk_204",
+      "title": "Ikigai",
+      "author": "Héctor García",
+      "format": "audiobook",
+      "cover_image_url": "https://covers.openlibrary.org/b/id/10389354-L.jpg",
+      "status": "completed",
+      "donated_at": "2026-02-10T15:20:00Z",
+      "delivered_at": "2026-02-10T15:20:00Z",
+      "recipient": {
+        "name": "Ravi Kumar",
+        "city": "Delhi"
+      }
+    }
+  ],
+  "requested_books": [
+    {
+      "request_id": "req_301",
+      "title": "Deep Work",
+      "author": "Cal Newport",
+      "format": "ebook",
+      "status": "fulfilled",
+      "requested_at": "2026-03-05T12:00:00Z",
+      "fulfilled_at": "2026-03-08T10:00:00Z"
+    },
+    {
+      "request_id": "req_302",
+      "title": "The Alchemist",
+      "author": "Paulo Coelho",
+      "format": "physical",
+      "status": "pending",
+      "requested_at": "2026-04-20T16:30:00Z",
+      "fulfilled_at": null
+    }
+  ],
+  "reading_progress": [
+    {
+      "book_id": "bk_501",
+      "title": "Deep Work",
+      "author": "Cal Newport",
+      "format": "ebook",
+      "progress_percent": 72,
+      "last_read_at": "2026-04-28T21:00:00Z"
+    },
+    {
+      "book_id": "bk_502",
+      "title": "Thinking, Fast and Slow",
+      "author": "Daniel Kahneman",
+      "format": "ebook",
+      "progress_percent": 35,
+      "last_read_at": "2026-04-26T18:30:00Z"
+    }
+  ]
+}

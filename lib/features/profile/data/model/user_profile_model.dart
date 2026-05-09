@@ -1,4 +1,4 @@
-import '../../domain/entities/user_profile.dart';
+import 'package:read_buddy_app/features/profile/domain/entities/user_profile.dart';
 
 class ProfileUserModel extends ProfileUser {
   const ProfileUserModel({

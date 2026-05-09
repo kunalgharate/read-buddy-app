@@ -1,4 +1,4 @@
-import '../../domain/entities/audiobook.dart';
+import 'package:read_buddy_app/features/audiobook/domain/entities/audiobook.dart';
 
 final List<AudioBook> dummyAudioBooks = [
   // Wings of Fire — English (8 parts)

@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "name": "Dart Format on Save",
-  "description": "Runs dart format on Dart source files when saved. Excludes generated files.",
+  "description": "Runs dart format on Dart source files when saved.",
   "version": "1.0.0",
   "when": {
     "type": "fileEdited",
@@ -9,6 +9,6 @@
   },
   "then": {
     "type": "runCommand",
-    "command": "dart format --fix lib/"
+    "command": "dart format lib/"
   }
 }
