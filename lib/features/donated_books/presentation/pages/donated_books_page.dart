@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/donated_books_bloc.dart';
-import '../bloc/donated_books_events.dart';
-import '../bloc/donated_books_states.dart';
-import '../widgets/donated_book_card.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_events.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_states.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/widgets/donated_book_card.dart';
 
 class DonatedBooksPage extends StatefulWidget {
   const DonatedBooksPage({super.key});
@@ -78,7 +78,7 @@ class _DonatedBooksPageState extends State<DonatedBooksPage> {
                   }
                   return ListView.separated(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     itemCount: state.donatedBooks.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) =>

@@ -1,5 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = 'https://readbuddy-server-b54k.onrender.com/api';
+  static const String baseUrl =
+      'https://readbuddy-server-b54k.onrender.com/api';
 
   // Auth endpoints
   static const String login = '$baseUrl/users/login';
@@ -30,8 +31,9 @@ class ApiConstants {
 
   // Donation endpoints
   static const String getAllDonations = '$baseUrl/donations';
-
-  // Donation endpoints
+  static const String myImpact = '$baseUrl/v1/donations/my-impact';
+  static const String createBookDonation = '$baseUrl/v1/donations/createBookDonation';
+  static String uploadDonationReceipt(String donationId) => '$baseUrl/v1/donations/$donationId/uploadReceipt';
 
   static const String olaMap = '$baseUrl/ola/address?input';
 
@@ -68,4 +70,6 @@ class ApiConstants {
   static const String resetUserPreference = '$baseUrl/onboarding/preference';
 
   static const String setOnboardingStatus = '$baseUrl/users/onboarding-status';
+
+  static const String nearestAgent = '$baseUrl/v1/libraries/details';
 }
