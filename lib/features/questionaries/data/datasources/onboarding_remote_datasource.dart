@@ -2,8 +2,8 @@
 import 'package:dio/dio.dart';
 
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
-import 'package:read_buddy_app/features/questionaries/data/models/question_model.dart';
+import '../../../../core/network/api_constants.dart';
+import '../models/question_model.dart';
 
 abstract class OnboardingRemoteDataSource {
   Future<List<QuestionModel>> getQuestions();

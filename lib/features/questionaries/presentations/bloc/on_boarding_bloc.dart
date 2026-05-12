@@ -1,11 +1,11 @@
 // presentation/bloc/onboarding_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/features/questionaries/domain/entity/onboarding_question_entity.dart';
-import 'package:read_buddy_app/features/questionaries/domain/usecases/delete_user_preferences.dart';
-import 'package:read_buddy_app/features/questionaries/domain/usecases/get_questions.dart';
-import 'package:read_buddy_app/features/questionaries/domain/usecases/set_onboarding_status.dart';
-import 'package:read_buddy_app/features/questionaries/domain/usecases/set_preferences.dart';
-import 'package:read_buddy_app/features/questionaries/domain/usecases/update_user_preferences.dart';
+import '../../domain/entity/onboarding_question_entity.dart';
+import '../../domain/usecases/delete_user_preferences.dart';
+import '../../domain/usecases/get_questions.dart';
+import '../../domain/usecases/set_onboarding_status.dart';
+import '../../domain/usecases/set_preferences.dart';
+import '../../domain/usecases/update_user_preferences.dart';
 import 'on_boarding_event.dart';
 import 'on_boarding_state.dart';
 

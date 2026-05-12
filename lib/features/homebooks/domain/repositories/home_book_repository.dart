@@ -1,4 +1,4 @@
-import 'package:read_buddy_app/features/homebooks/domain/entities/book_entity.dart';
+import '../entities/book_entity.dart';
 
 abstract class HomeRepository {
   Future<List<BookEntity>> getLatestBooks();

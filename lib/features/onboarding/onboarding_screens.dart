@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
-import 'package:read_buddy_app/core/services/app_preferences.dart';
+import '../../core/services/app_preferences.dart';
 import 'onboarding_widget.dart';
 
 class OnboardingScreen extends StatefulWidget {

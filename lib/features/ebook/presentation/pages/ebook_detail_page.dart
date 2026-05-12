@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:read_buddy_app/core/mixins/connectivity_mixin.dart';
-import 'package:read_buddy_app/features/ebook/domain/entities/ebook.dart';
+import '../../../../core/mixins/connectivity_mixin.dart';
+import '../../domain/entities/ebook.dart';
 
 class EBookDetailPage extends StatefulWidget {
   final EBook ebook;

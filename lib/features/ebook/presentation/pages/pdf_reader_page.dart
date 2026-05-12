@@ -6,8 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncpdf;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-import 'package:read_buddy_app/core/services/file_cache_service.dart';
-import 'package:read_buddy_app/features/ebook/presentation/services/tts_service.dart';
+import '../../../../core/services/file_cache_service.dart';
+import '../services/tts_service.dart';
 
 class PdfReaderPage extends StatefulWidget {
   final String url;

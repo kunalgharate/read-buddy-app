@@ -1,13 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/core/utils/error_handler.dart';
-import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
-import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
-import 'package:read_buddy_app/features/profile/domain/entities/user_profile.dart';
-import 'package:read_buddy_app/features/profile/domain/usecases/get_profile.dart';
-import 'package:read_buddy_app/features/profile/domain/usecases/update_profile_usecase.dart';
-import 'package:read_buddy_app/features/profile/domain/usecases/update_user_avatar.dart';
+import '../../../../core/utils/error_handler.dart';
+import '../../../../core/utils/secure_storage_utils.dart';
+import '../../../auth/domain/entities/app_user.dart';
+import '../../domain/entities/user_profile.dart';
+import '../../domain/usecases/get_profile.dart';
+import '../../domain/usecases/update_profile_usecase.dart';
+import '../../domain/usecases/update_user_avatar.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';

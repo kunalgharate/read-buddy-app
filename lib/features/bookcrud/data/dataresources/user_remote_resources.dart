@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
+import '../../../../core/network/api_constants.dart';
 import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/user_model.dart';

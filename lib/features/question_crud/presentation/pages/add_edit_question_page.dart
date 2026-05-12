@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:read_buddy_app/features/question_crud/domain/entities/question_entity.dart';
-import 'package:read_buddy_app/features/question_crud/domain/usecases/add_question.dart' as QuestionCrudUseCases;
-import 'package:read_buddy_app/features/question_crud/domain/usecases/update_question.dart' as QuestionCrudUseCases;
+import '../../domain/entities/question_entity.dart';
+import '../../domain/usecases/add_question.dart' as QuestionCrudUseCases;
+import '../../domain/usecases/update_question.dart' as QuestionCrudUseCases;
 
 class AddEditQuestionPage extends StatefulWidget {
   final QuestionEntity? question;

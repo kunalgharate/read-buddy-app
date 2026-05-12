@@ -1,4 +1,4 @@
-import 'package:read_buddy_app/features/ebook/domain/entities/ebook.dart';
+import '../../domain/entities/ebook.dart';
 
 const _samplePdfUrl = 'https://files.catbox.moe/6sku0l.pdf';
 

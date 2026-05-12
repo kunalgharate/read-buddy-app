@@ -1,7 +1,7 @@
 // features/category_crud/domain/usecases/update_category.dart
 import 'dart:io';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/features/category_crud/domain/repository/category_repository.dart';
+import '../repository/category_repository.dart';
 
 @injectable
 class UpdateCategoryUsecase {

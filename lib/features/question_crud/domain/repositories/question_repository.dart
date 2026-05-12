@@ -1,4 +1,4 @@
-import 'package:read_buddy_app/features/question_crud/domain/entities/question_entity.dart';
+import '../entities/question_entity.dart';
 
 abstract class QuestionRepository {
   Future<List<QuestionEntity>> getQuestions();

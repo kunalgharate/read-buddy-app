@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:read_buddy_app/features/auth/presentation/widgets/custom_button_widget.dart';
+import '../widgets/custom_button_widget.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   final String email;

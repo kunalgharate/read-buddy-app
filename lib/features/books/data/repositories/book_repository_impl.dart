@@ -1,9 +1,9 @@
 // features/books/data/repositories/book_repository_impl.dart
 import 'package:injectable/injectable.dart';
 
-import 'package:read_buddy_app/features/books/domain/entities/book.dart';
-import 'package:read_buddy_app/features/books/domain/repositories/book_repository.dart';
-import 'package:read_buddy_app/features/books/data/datasources/book_remote_data_source.dart';
+import '../../domain/entities/book.dart';
+import '../../domain/repositories/book_repository.dart';
+import '../datasources/book_remote_data_source.dart';
 
 @Injectable(as: BookRepository)
 class BookRepositoryImpl implements BookRepository {

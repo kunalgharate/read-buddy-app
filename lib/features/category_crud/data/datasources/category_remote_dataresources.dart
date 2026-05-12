@@ -7,7 +7,7 @@ import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/core/utils/app_value_items.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/item_model.dart';
 import 'package:read_buddy_app/features/category_crud/data/model/parent_category_model.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
+import '../../../../../core/network/api_constants.dart';
 import 'package:read_buddy_app/features/category_crud/data/model/category_model.dart';
 
 abstract class CategoryRemoteDataSource {
@@ -48,21 +48,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
         throw Exception('Failed to load categories');
       }
 
-      // Handle both response formats: raw list or wrapped object
-      final List<dynamic> categoriesList;
-      if (response.data is List) {
-        categoriesList = response.data as List<dynamic>;
-      } else if (response.data is Map<String, dynamic>) {
-        final map = response.data as Map<String, dynamic>;
-        // Try common wrapper keys
-        categoriesList =
-            (map['data'] ?? map['categories'] ?? []) as List<dynamic>;
-      } else {
-        throw Exception(
-            'Unexpected response format: ${response.data.runtimeType}');
-      }
-
-      return categoriesList.map((json) {
+      return (response.data as List).map((json) {
         BookValueItems.bookCategories.add(ItemModel.fromJson(json));
         CategoryItems.parentCategoryItems
             .add(parentCategoryModel.fromJson(json));

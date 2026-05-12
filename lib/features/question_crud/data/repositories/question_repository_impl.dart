@@ -1,6 +1,6 @@
-import 'package:read_buddy_app/features/question_crud/domain/entities/question_entity.dart';
-import 'package:read_buddy_app/features/question_crud/domain/repositories/question_repository.dart';
-import 'package:read_buddy_app/features/question_crud/data/datasources/question_remote_datasource.dart';
+import '../../domain/entities/question_entity.dart';
+import '../../domain/repositories/question_repository.dart';
+import '../datasources/question_remote_datasource.dart';
 
 class QuestionRepositoryImpl implements QuestionRepository {
   final QuestionRemoteDataSource dataSource;

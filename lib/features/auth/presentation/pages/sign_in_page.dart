@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/core/services/app_preferences.dart';
-import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
-import 'package:read_buddy_app/core/utils/ui_utils.dart';
-import 'package:read_buddy_app/features/questionaries/presentations/pages/onboarding_questionaire.dart';
-import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
-import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
-import 'package:read_buddy_app/features/auth/presentation/widgets/custom_button_widget.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/app_preferences.dart';
+import '../../../../core/utils/secure_storage_utils.dart';
+import '../../../../core/utils/ui_utils.dart';
+import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
+import '../blocs/google_sign_in/google_sign_in_bloc.dart';
+import '../blocs/sign_in/sign_in_bloc.dart';
+import '../widgets/custom_button_widget.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

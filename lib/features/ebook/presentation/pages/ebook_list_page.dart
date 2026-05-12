@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:read_buddy_app/features/ebook/domain/entities/ebook.dart';
-import 'package:read_buddy_app/features/ebook/presentation/data/dummy_ebooks.dart';
+import '../../domain/entities/ebook.dart';
+import '../data/dummy_ebooks.dart';
 
 class EBookListPage extends StatelessWidget {
   const EBookListPage({super.key});

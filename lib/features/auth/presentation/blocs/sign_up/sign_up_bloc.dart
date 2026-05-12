@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
-import 'package:read_buddy_app/core/utils/error_handler.dart';
-import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
-import 'package:read_buddy_app/features/auth/domain/usecases/register_user_usecase.dart';
-import 'package:read_buddy_app/features/auth/domain/usecases/verify_email_usecase.dart';
+import '../../../../../core/utils/error_handler.dart';
+import '../../../domain/entities/app_user.dart';
+import '../../../domain/usecases/register_user_usecase.dart';
+import '../../../domain/usecases/verify_email_usecase.dart';
 
 part 'sign_up_event.dart';
 part 'sign_up_state.dart';

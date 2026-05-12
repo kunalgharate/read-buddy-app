@@ -123,13 +123,6 @@ import 'package:read_buddy_app/features/question_crud/domain/usecases/update_que
 import 'package:read_buddy_app/features/question_crud/domain/usecases/delete_question.dart'
     as QuestionCrudUseCases;
 
-// Categories
-import 'package:read_buddy_app/features/categories/data/datasources/categories_local_datasource.dart';
-import 'package:read_buddy_app/features/categories/data/repositories/categories_repository_impl.dart';
-import 'package:read_buddy_app/features/categories/domain/repositories/categories_repository.dart';
-import 'package:read_buddy_app/features/categories/domain/usecases/get_categories.dart';
-import 'package:read_buddy_app/features/categories/presentation/cubit/categories_cubit.dart';
-
 // Donation Stats
 
 // Donate
@@ -141,13 +134,6 @@ import 'package:read_buddy_app/features/donate/domain/usecases/get_donation_stat
 import 'package:read_buddy_app/features/donate/domain/usecases/get_nearest_agents.dart';
 import 'package:read_buddy_app/features/donate/domain/usecases/create_book_donation.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
-
-// Monthly Stats
-import 'package:read_buddy_app/features/monthly_stats/data/datasources/monthly_stats_remote_datasource.dart';
-import 'package:read_buddy_app/features/monthly_stats/data/repositories/monthly_stats_repository_impl.dart';
-import 'package:read_buddy_app/features/monthly_stats/domain/repositories/monthly_stats_repository.dart';
-import 'package:read_buddy_app/features/monthly_stats/domain/usecases/get_monthly_stats.dart';
-import 'package:read_buddy_app/features/monthly_stats/presentation/bloc/monthly_stats_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -163,6 +149,7 @@ Future<void> configureDependencies() async {
   _registerRepositories();
   _registerUseCases();
   _registerBlocs();
+  _registerCubits();
 }
 
 // ========================================
@@ -246,19 +233,9 @@ void _registerDataSources() {
     ),
   );
 
-  // Categories
-  getIt.registerLazySingleton<CategoriesLocalDataSource>(
-    () => CategoriesLocalDataSourceImpl(),
-  );
-
   // Donate
   getIt.registerLazySingleton<DonateRemoteDataSource>(
     () => DonateRemoteDataSourceImpl(dio: getIt<Dio>()),
-  );
-
-  // Monthly Stats
-  getIt.registerLazySingleton<MonthlyStatsRemoteDataSource>(
-    () => MonthlyStatsRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 }
 
@@ -328,24 +305,10 @@ void _registerRepositories() {
     ),
   );
 
-  // Categories
-  getIt.registerLazySingleton<CategoriesRepository>(
-    () => CategoriesRepositoryImpl(
-      localDataSource: getIt<CategoriesLocalDataSource>(),
-    ),
-  );
-
   // Donate
   getIt.registerLazySingleton<DonateRepository>(
     () => DonateRepositoryImpl(
       remoteDataSource: getIt<DonateRemoteDataSource>(),
-    ),
-  );
-
-  // Monthly Stats
-  getIt.registerLazySingleton<MonthlyStatsRepository>(
-    () => MonthlyStatsRepositoryImpl(
-      remoteDataSource: getIt<MonthlyStatsRemoteDataSource>(),
     ),
   );
 }
@@ -453,23 +416,15 @@ void _registerUseCases() {
   getIt.registerLazySingleton(() => QuestionCrudUseCases.DeleteQuestion(
       getIt<QuestionCrudDomain.QuestionRepository>()));
 
-  // Categories
-  getIt.registerLazySingleton(
-      () => GetCategories(repository: getIt<CategoriesRepository>()));
-
   // Donate
   getIt.registerLazySingleton(() =>
       DonateUseCases.GetDonationStats(repository: getIt<DonateRepository>()));
   getIt.registerLazySingleton(
-          () => GetNearestAgents(repository: getIt<DonateRepository>()));
+      () => GetNearestAgents(repository: getIt<DonateRepository>()));
   getIt.registerLazySingleton(
-          () => CreateBookDonation(repository: getIt<DonateRepository>()));
+      () => CreateBookDonation(repository: getIt<DonateRepository>()));
   getIt.registerLazySingleton(
-          () => UploadReceipt(repository: getIt<DonateRepository>()));
-
-  // Monthly Stats
-  getIt.registerLazySingleton(
-      () => GetMonthlyStats(getIt<MonthlyStatsRepository>()));
+      () => UploadReceipt(repository: getIt<DonateRepository>()));
 }
 
 // ========================================
@@ -477,8 +432,7 @@ void _registerUseCases() {
 // ========================================
 void _registerBlocs() {
   // Auth
-  getIt.registerLazySingleton(() =>
-      SignInBloc(
+  getIt.registerLazySingleton(() => SignInBloc(
         getIt<SignIn>(),
         getIt<SendOtpUseCase>(),
         getIt<VerifyResetOtpUseCase>(),
@@ -486,15 +440,13 @@ void _registerBlocs() {
       ));
   getIt
       .registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
-  getIt.registerLazySingleton(() =>
-      SignUpBloc(
+  getIt.registerLazySingleton(() => SignUpBloc(
         getIt<RegisterUserUseCase>(),
         getIt<VerifyEmailUseCase>(),
       ));
 
   // Profile
-  getIt.registerFactory(() =>
-      ProfileBloc(
+  getIt.registerFactory(() => ProfileBloc(
         getIt<SecureStorageUtil>(),
         getIt<GetProfileUseCase>(),
         getIt<UpdateAvatarUseCase>(),
@@ -502,8 +454,7 @@ void _registerBlocs() {
       ));
 
   // Home Books
-  getIt.registerFactory(() =>
-      HomeBloc(
+  getIt.registerFactory(() => HomeBloc(
         getLatestBooks: getIt<GetLatestBooksUseCase>(),
         getTrendingBooks: getIt<GetTrendingBooksUseCase>(),
         getRecommendedBooks: getIt<GetRecommendedBookUseCase>(),
@@ -517,8 +468,7 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => BookBloc(getIt<GetBooks>()));
 
   // Book CRUD
-  getIt.registerLazySingleton(() =>
-      BookCrudBloc(
+  getIt.registerLazySingleton(() => BookCrudBloc(
         searchBooks: getIt<SearchBookUsecase>(),
         addBookCrud: getIt<AddBookUsecase>(),
         getBooksCrud: getIt<GetBooksUsecase>(),
@@ -528,8 +478,7 @@ void _registerBlocs() {
       ));
 
   // Category CRUD
-  getIt.registerLazySingleton(() =>
-      CategoryBloc(
+  getIt.registerLazySingleton(() => CategoryBloc(
         getCategories: getIt<GetCategoriesUsecase>(),
         addCategory: getIt<AddCategoryUsecase>(),
         updateCategory: getIt<UpdateCategoryUsecase>(),
@@ -537,8 +486,7 @@ void _registerBlocs() {
       ));
 
   // Banner
-  getIt.registerLazySingleton(() =>
-      BannerBloc(
+  getIt.registerLazySingleton(() => BannerBloc(
         getBannerUsecase: getIt<GetBannerUsecase>(),
         createBannerUsecase: getIt<CreateBannerUsecase>(),
         updateBannerUsecase: getIt<UpdateBannerUsecase>(),
@@ -546,8 +494,7 @@ void _registerBlocs() {
       ));
 
   // Questionaries
-  getIt.registerFactory(() =>
-      OnboardingBloc(
+  getIt.registerFactory(() => OnboardingBloc(
         getQuestionsUseCase: getIt<GetQuestionsUseCase>(),
         setPreferencesUseCase: getIt<SetPreferencesUseCase>(),
         updatePreferencesUseCase: getIt<UpdatePreferencesUseCase>(),
@@ -556,11 +503,19 @@ void _registerBlocs() {
       ));
 
   // Donate
-  getIt.registerFactory(() =>
-      DonateBookBloc(
+  getIt.registerFactory(() => DonateBookBloc(
         getDonationStats: getIt<DonateUseCases.GetDonationStats>(),
         getNearestAgents: getIt<GetNearestAgents>(),
         createBookDonation: getIt<CreateBookDonation>(),
         uploadReceipt: getIt<UploadReceipt>(),
       ));
+}
+
+// ========================================
+// CUBITS
+// ========================================
+void _registerCubits() {
+  getIt.registerLazySingleton(() => UserCubit(getIt<GetUserListUseCase>()));
+  getIt.registerLazySingleton(
+      () => LocationCubit(getIt<SearchLocationUsecase>()));
 }

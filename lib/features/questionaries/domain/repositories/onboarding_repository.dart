@@ -1,5 +1,5 @@
 // domain/repositories/onboarding_repository.dart
-import 'package:read_buddy_app/features/questionaries/domain/entity/onboarding_question_entity.dart';
+import '../entity/onboarding_question_entity.dart';
 
 abstract class OnboardingRepository {
   Future<List<QuestionEntity>> getQuestions();

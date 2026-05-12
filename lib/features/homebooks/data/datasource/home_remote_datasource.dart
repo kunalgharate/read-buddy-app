@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
-import 'package:read_buddy_app/core/utils/network_utils.dart';
-import 'package:read_buddy_app/features/homebooks/data/model/home_book_model.dart';
-import 'package:read_buddy_app/features/homebooks/data/model/home_monthly_status_model.dart';
+import '../../../../core/network/api_constants.dart';
+import '../../../../core/utils/network_utils.dart';
+import '../model/home_book_model.dart';
+import '../model/home_monthly_status_model.dart';
 
 abstract class HomeRemoteDataSource {
   Future<List<BookModel>> getLatestBooks();

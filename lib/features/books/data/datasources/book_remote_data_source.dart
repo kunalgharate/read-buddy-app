@@ -1,8 +1,8 @@
 // features/books/data/datasources/book_remote_data_source.dart
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
-import 'package:read_buddy_app/features/books/data/models/book_model.dart';
+import '../../../../core/network/api_constants.dart';
+import '../models/book_model.dart';
 
 abstract class BookRemoteDataSource {
   Future<List<BookModel>> getBooks();

@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
-import 'package:read_buddy_app/core/utils/network_utils.dart';
-import 'package:read_buddy_app/features/auth/data/models/app_user_model.dart';
+import '../../../../core/network/api_constants.dart';
+import '../../../../core/utils/network_utils.dart';
+import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AppUserModel> signIn(

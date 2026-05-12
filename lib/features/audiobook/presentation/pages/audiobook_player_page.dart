@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
 
-import 'package:read_buddy_app/core/services/file_cache_service.dart';
-import 'package:read_buddy_app/features/audiobook/domain/entities/audiobook.dart';
-import 'package:read_buddy_app/features/audiobook/presentation/services/playback_state_service.dart';
+import '../../../../core/services/file_cache_service.dart';
+import '../../domain/entities/audiobook.dart';
+import '../services/playback_state_service.dart';
 
 class AudioBookPlayerPage extends StatefulWidget {
   final AudioBook audioBook;

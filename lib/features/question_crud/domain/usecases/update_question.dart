@@ -1,5 +1,5 @@
-import 'package:read_buddy_app/features/question_crud/domain/entities/question_entity.dart';
-import 'package:read_buddy_app/features/question_crud/domain/repositories/question_repository.dart';
+import '../entities/question_entity.dart';
+import '../repositories/question_repository.dart';
 
 class UpdateQuestion {
   final QuestionRepository repository;

@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 
-import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
-import 'package:read_buddy_app/features/auth/domain/repositories/auth_repository.dart';
+import '../entities/app_user.dart';
+import '../repositories/auth_repository.dart';
 
 /// SignIn use case
 @injectable

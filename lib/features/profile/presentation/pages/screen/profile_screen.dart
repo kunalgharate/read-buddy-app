@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
-import 'package:read_buddy_app/features/profile/domain/entities/avatar_user_model.dart';
-import 'package:read_buddy_app/features/profile/domain/entities/user_profile.dart';
-import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
+import '../../../../../core/di/injection.dart';
+import '../../../../home/presentation/screens/home_screen.dart';
+import '../../../domain/entities/avatar_user_model.dart';
+import '../../../domain/entities/user_profile.dart';
+import '../../blocs/profile_bloc.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

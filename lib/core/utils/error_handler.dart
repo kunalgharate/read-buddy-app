@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
+import '../network/api_constants.dart';
 
 class ErrorHandler {
   static String getErrorMessage(dynamic error) {

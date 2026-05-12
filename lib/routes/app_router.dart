@@ -23,7 +23,6 @@ import 'package:read_buddy_app/features/audiobook/presentation/pages/audiobook_l
 import 'package:read_buddy_app/features/audiobook/presentation/pages/audiobook_player_page.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/Format_screen.dart';
-import 'package:read_buddy_app/features/monthly_stats/presentation/pages/monthly_stats_page.dart';
 import 'package:read_buddy_app/features/questionaries/presentations/pages/onboarding_questionaire.dart';
 import 'package:read_buddy_app/features/question_crud/presentation/pages/question_list_page.dart';
 import 'package:read_buddy_app/features/auth/presentation/widgets/email_verification_widget.dart';
@@ -130,10 +129,6 @@ class AppRouter {
         final book = settings.arguments as AudioBook;
         return MaterialPageRoute(
           builder: (_) => AudioBookPlayerPage(audioBook: book),
-        );
-      case '/monthly-stats':
-        return MaterialPageRoute(
-          builder: (_) => const MonthlyStatsPage(),
         );
       case '/donated-book-detail':
         final book = settings.arguments as DonatedBooksEntity;
