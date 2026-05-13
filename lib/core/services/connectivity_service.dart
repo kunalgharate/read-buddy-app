@@ -73,15 +73,54 @@ class ConnectivityService {
     }
   }
 
-  /// Actual DNS lookup to confirm internet works.
+  /// Actual internet verification using multiple strategies.
+  /// On emulators, DNS lookup can be unreliable, so we try multiple approaches.
   Future<bool> _verifyInternet() async {
-    try {
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(const Duration(seconds: 5));
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } catch (_) {
-      return false;
+    // Strategy 1: DNS lookup with multiple hosts
+    final hosts = ['google.com', 'cloudflare.com', '1.1.1.1'];
+    for (final host in hosts) {
+      try {
+        final result = await InternetAddress.lookup(host)
+            .timeout(const Duration(seconds: 3));
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          return true;
+        }
+      } catch (_) {
+        // Try next host
+      }
     }
+
+    // Strategy 2: Try a raw socket connection to a known IP (bypasses DNS)
+    try {
+      final socket = await Socket.connect(
+        '1.1.1.1', // Cloudflare DNS - always available
+        53, // DNS port
+        timeout: const Duration(seconds: 3),
+      );
+      socket.destroy();
+      return true;
+    } catch (_) {
+      // Socket connection failed
+    }
+
+    // Strategy 3: On emulators, connectivity_plus may report correctly
+    // but DNS fails. If we have a network adapter, assume connected
+    // and let actual API calls handle failures gracefully.
+    if (kDebugMode) {
+      try {
+        final results = await _connectivity.checkConnectivity();
+        final hasAdapter = results.any(
+          (r) => r == ConnectivityResult.wifi || r == ConnectivityResult.mobile,
+        );
+        if (hasAdapter) {
+          print(
+              '🌐 ConnectivityService: DNS failed but network adapter present — assuming connected (emulator workaround)');
+          return true;
+        }
+      } catch (_) {}
+    }
+
+    return false;
   }
 
   void _update(bool connected) {
