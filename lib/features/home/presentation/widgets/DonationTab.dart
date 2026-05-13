@@ -1,144 +1,485 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
+import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_book_detail_page.dart';
+import 'Format_screen.dart';
 
-class DonationTab extends StatelessWidget {
+class DonationTab extends StatefulWidget {
   const DonationTab({super.key});
 
   static const _primaryGreen = Color(0xFF2CE07F);
   static const _textDark = Color(0xFF052E44);
   static const _background = Color(0xFFFDFDFD);
-  static const _cardShadow = Color(0x0D000000); // ~5% black
+  static const _cardShadow = Color(0x0D000000);
+
+  @override
+  State<DonationTab> createState() => _DonationTabState();
+}
+
+class _DonationTabState extends State<DonationTab> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<DonateBookBloc>().add(LoadDonationStats());
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    return const _DonationTabContent();
+  }
+}
+
+// ─── Main Content ─────────────────────────────────────────────
+
+class _DonationTabContent extends StatelessWidget {
+  const _DonationTabContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final horizontalPadding = size.width * 0.05;
+
     return Scaffold(
-      backgroundColor: _background,
+      backgroundColor: DonationTab._background,
       appBar: AppBar(
-        backgroundColor: _background,
+        backgroundColor: DonationTab._background,
         elevation: 0,
         centerTitle: false,
         title: Text(
           'Donate',
           style: GoogleFonts.poppins(
-            fontSize: 22,
+            fontSize: size.width * 0.055,
             fontWeight: FontWeight.w600,
-            color: _textDark,
+            color: DonationTab._textDark,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- Your Impact ---
-            Text(
-              'Your Impact',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: _textDark,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          context.read<DonateBookBloc>().add(LoadDonationStats());
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: size.height * 0.02,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- Your Impact ---
+              Text(
+                'Your Impact',
+                style: GoogleFonts.poppins(
+                  fontSize: size.width * 0.045,
+                  fontWeight: FontWeight.w600,
+                  color: DonationTab._textDark,
+                ),
+              ),
+              SizedBox(height: size.height * 0.015),
+              const _ImpactSection(),
+              SizedBox(height: size.height * 0.035),
+
+              // --- Recent Donations (heading changed) ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Recent Donations', // ✅ Changed from 'Your Book Status'
+                    style: GoogleFonts.poppins(
+                      fontSize: size.width * 0.045,
+                      fontWeight: FontWeight.w600,
+                      color: DonationTab._textDark,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/donated-books');
+                    },
+                    child: Text(
+                      'See all',
+                      style: GoogleFonts.poppins(
+                        fontSize: size.width * 0.035,
+                        fontWeight: FontWeight.w500,
+                        color: DonationTab._primaryGreen,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: size.height * 0.015),
+              const _BookStatusSection(),
+              SizedBox(height: size.height * 0.04),
+
+              // --- Donation Section Label ---
+              Text(
+                'Donation',
+                style: GoogleFonts.poppins(
+                  fontSize: size.width * 0.045,
+                  fontWeight: FontWeight.w600,
+                  color: DonationTab._textDark,
+                ),
+              ),
+              SizedBox(height: size.height * 0.015),
+
+              // --- Donate Book Button ---
+              _DonationButton(
+                icon: Icons.add,
+                label: 'Donate a Book',
+                onPressed: () => showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.white,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  builder: (_) => const BookFormatBottomSheet(),
+                ),
+              ),
+              SizedBox(height: size.height * 0.015),
+
+              // --- Donate Money Button ---
+              _DonationButton(
+                icon: Icons.add,
+                label: 'Donate Money',
+                onPressed: () => showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.white,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  builder: (_) => const RazorpayBottomSheet(),
+                ),
+              ),
+
+              SizedBox(height: size.height * 0.03),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Impact Section ───────────────────────────────────────────
+
+class _ImpactSection extends StatelessWidget {
+  const _ImpactSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return BlocBuilder<DonateBookBloc, DonateBookState>(
+      builder: (context, state) {
+        if (state is DonateBookLoading) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: CircularProgressIndicator(
+                color: DonationTab._primaryGreen,
               ),
             ),
-            const SizedBox(height: 12),
-            const Row(
+          );
+        }
+
+        if (state is DonateBookError) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: _ImpactCard(
-                    icon: Icons.book,
-                    iconColor: Color(0xFF2CE07F),
-                    iconBgColor: Color(0x1A2CE07F),
-                    count: '04',
-                    label: 'Books Donated',
+                Text(
+                  'Failed to load stats',
+                  style: GoogleFonts.poppins(
+                    fontSize: size.width * 0.035,
+                    color: const Color(0xFFD64545),
                   ),
                 ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: _ImpactCard(
-                    icon: Icons.people,
-                    iconColor: Color(0xFF2196F3),
-                    iconBgColor: Color(0x1A2196F3),
-                    count: '20+',
-                    label: 'Students Helped',
+                TextButton(
+                  onPressed: () => context.read<DonateBookBloc>().add(LoadDonationStats()),
+                  child: Text(
+                    'Retry',
+                    style: GoogleFonts.poppins(
+                      color: DonationTab._primaryGreen,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 28),
+          );
+        }
 
-            // --- Your Book Status ---
-            Text(
-              'Your Book Status',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: _textDark,
+        final booksDonated =
+        state is DonationStatsLoaded ? state.stats.booksDonated : 0;
+        final studentsHelped =
+        state is DonationStatsLoaded ? state.stats.studentsHelped : 0;
+
+        return Row(
+          children: [
+            Expanded(
+              child: _ImpactCard(
+                icon: Icons.book,
+                iconColor: const Color(0xFF2CE07F),
+                iconBgColor: const Color(0x1A2CE07F),
+                count: booksDonated.toString().padLeft(2, '0'),
+                label: 'Books Donated',
               ),
             ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-                boxShadow: [
-                  BoxShadow(
-                    color: _cardShadow,
-                    blurRadius: 10,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Column(
-                children: [
-                  _BookStatusRow(
-                    title: 'The Jungle Book',
-                    format: 'E-Book',
-                    status: 'Completed',
-                    statusColor: Color(0xFF4CAF50),
-                  ),
-                  SizedBox(height: 16),
-                  _BookStatusRow(
-                    title: 'The Jungle Book',
-                    format: 'E-Book',
-                    status: 'Pending',
-                    statusColor: Color(0xFFFFC107),
-                  ),
-                ],
+            SizedBox(width: size.width * 0.04),
+            Expanded(
+              child: _ImpactCard(
+                icon: Icons.people,
+                iconColor: const Color(0xFF2196F3),
+                iconBgColor: const Color(0x1A2196F3),
+                count:
+                studentsHelped > 20 ? '20+' : studentsHelped.toString(),
+                label: 'Students Helped',
               ),
             ),
-            const SizedBox(height: 32),
+          ],
+        );
+      },
+    );
+  }
+}
 
-            // --- Donate Book Button ---
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/book-format');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _primaryGreen,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+// ─── Book Status Section ──────────────────────────────────────
+
+class _BookStatusSection extends StatelessWidget {
+  const _BookStatusSection();
+
+  // Maps raw API status string → (display label, color)
+  ({String label, Color color}) _resolveStatus(String apiStatus) {
+    switch (apiStatus.toLowerCase()) {
+      case 'donation_created':
+      case 'pickup_requested':
+      case 'pending':
+        return (label: 'Pending', color: const Color(0xFFFFC107));
+      case 'accepted':
+      case 'processing':
+      case 'out_for_pickup':
+        return (label: 'In Progress', color: const Color(0xFF2196F3));
+      case 'completed':
+      case 'delivered':
+      case 'success':
+        return (label: 'Completed', color: const Color(0xFF4CAF50));
+      case 'cancelled':
+      case 'rejected':
+        return (label: 'Cancelled', color: const Color(0xFFF44336));
+      default:
+        return (
+        label: apiStatus.replaceAll('_', ' ').toUpperCase(),
+        color: const Color(0xFF9E9E9E),
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    // Shared card decoration used in all states
+    BoxDecoration cardDecoration() => const BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      boxShadow: [
+        BoxShadow(
+          color: DonationTab._cardShadow,
+          blurRadius: 10,
+          offset: Offset(0, 2),
+        ),
+      ],
+    );
+
+    return BlocBuilder<DonateBookBloc, DonateBookState>(
+      builder: (context, state) {
+        // --- Loading ---
+        if (state is DonateBookLoading) {
+          return Container(
+            padding: EdgeInsets.all(size.width * 0.04),
+            decoration: cardDecoration(),
+            child: const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: CircularProgressIndicator(
+                  color: DonationTab._primaryGreen,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.add, size: 24),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Donate a Book',
+              ),
+            ),
+          );
+        }
+
+        // --- Error ---
+        if (state is DonateBookError) {
+          return Container(
+            padding: EdgeInsets.all(size.width * 0.04),
+            decoration: cardDecoration(),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Failed to load books',
+                    style: GoogleFonts.poppins(
+                      fontSize: size.width * 0.035,
+                      color: const Color(0xFFD64545),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => context.read<DonateBookBloc>().add(LoadDonationStats()),
+                    child: Text(
+                      'Retry',
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
+                        color: DonationTab._primaryGreen,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // --- Loaded ---
+        if (state is DonationStatsLoaded) {
+          final books = state.stats.bookStatusList;
+
+          // --- Empty state ---
+          if (books.isEmpty) {
+            return Container(
+              padding: EdgeInsets.all(size.width * 0.04),
+              decoration: cardDecoration(),
+              child: Center(
+                child: Text(
+                  'No donated books yet',
+                  style: GoogleFonts.poppins(
+                    fontSize: size.width * 0.035,
+                    color: const Color(0xFF666666),
+                  ),
                 ),
+              ),
+            );
+          }
+
+          // Show max 5 books
+          final itemCount = books.length > 5 ? 5 : books.length;
+
+          final listItems = <Widget>[];
+
+          for (var i = 0; i < itemCount; i++) {
+            // Add a thin divider between rows (not before the first)
+            if (i != 0) {
+              listItems.add(const Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFF0F0F0),
+              ));
+            }
+
+            // Resolve status label + color
+            final resolved = _resolveStatus(books[i].status);
+
+            listItems.add(
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/donated-book-detail',
+                    arguments: DonatedBooksEntity(
+                      id: books[i].id,
+                      bookTitle: books[i].title,
+                      format: books[i].format,
+                      status: books[i].status,
+                      category: books[i].categoryName ?? '',
+                      donorName: 'You',
+                      coverImageUrl: books[i].coverImageUrl ?? '',
+                      createdAt:
+                      books[i].createdAt ?? DateTime.now().toIso8601String(),
+                      language: 'English',
+                    ),
+                  );
+                },
+
+                child: Padding(
+                  padding:
+                  EdgeInsets.symmetric(vertical: size.height * 0.015),
+                  child: _BookStatusRow(
+                    title: books[i].title,
+                    format: books[i].format,
+                    status: resolved.label,
+                    statusColor: resolved.color,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: size.width * 0.04),
+            decoration: cardDecoration(),
+            child: Column(
+              children: listItems,
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
+// ─── Donation Button ──────────────────────────────────────────
+
+class _DonationButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  const _DonationButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return SizedBox(
+      width: double.infinity,
+      height: size.height * 0.065,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2CE07F),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: size.width * 0.055),
+            SizedBox(width: size.width * 0.02),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: size.width * 0.04,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -148,7 +489,7 @@ class DonationTab extends StatelessWidget {
   }
 }
 
-// ─── Private Widgets ─────────────────────────────────────────
+// ─── Impact Card ──────────────────────────────────────────────
 
 class _ImpactCard extends StatelessWidget {
   final IconData icon;
@@ -167,8 +508,9 @@ class _ImpactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(size.width * 0.04),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -183,19 +525,19 @@ class _ImpactCard extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: size.width * 0.1,
+            height: size.width * 0.1,
             decoration: BoxDecoration(
               color: iconBgColor,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: Icon(icon, color: iconColor, size: size.width * 0.06),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: size.height * 0.01),
           Text(
             count,
             style: GoogleFonts.poppins(
-              fontSize: 20,
+              fontSize: size.width * 0.05,
               fontWeight: FontWeight.bold,
               color: DonationTab._textDark,
             ),
@@ -203,7 +545,7 @@ class _ImpactCard extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: size.width * 0.03,
               color: const Color(0xFF666666),
             ),
           ),
@@ -212,6 +554,8 @@ class _ImpactCard extends StatelessWidget {
     );
   }
 }
+
+// ─── Book Status Row ──────────────────────────────────────────
 
 class _BookStatusRow extends StatelessWidget {
   final String title;
@@ -228,6 +572,7 @@ class _BookStatusRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Row(
       children: [
         Expanded(
@@ -237,7 +582,7 @@ class _BookStatusRow extends StatelessWidget {
               Text(
                 title,
                 style: GoogleFonts.poppins(
-                  fontSize: 16,
+                  fontSize: size.width * 0.04,
                   fontWeight: FontWeight.w600,
                   color: DonationTab._textDark,
                 ),
@@ -245,7 +590,7 @@ class _BookStatusRow extends StatelessWidget {
               Text(
                 format,
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: size.width * 0.035,
                   color: const Color(0xFF666666),
                 ),
               ),
@@ -253,9 +598,9 @@ class _BookStatusRow extends StatelessWidget {
           ),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
+          padding: EdgeInsets.symmetric(
+            horizontal: size.width * 0.03,
+            vertical: size.height * 0.007,
           ),
           decoration: BoxDecoration(
             color: statusColor,
@@ -265,7 +610,7 @@ class _BookStatusRow extends StatelessWidget {
             status,
             style: GoogleFonts.poppins(
               color: Colors.white,
-              fontSize: 12,
+              fontSize: size.width * 0.03,
               fontWeight: FontWeight.w500,
             ),
           ),

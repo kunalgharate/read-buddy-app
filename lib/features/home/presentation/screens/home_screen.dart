@@ -3,10 +3,10 @@ import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigat
 import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
-import '../../../../core/di/injection.dart';
-import '../../../../core/services/app_preferences.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
-import '../../../profile/presentation/pages/screen/profile_screen.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/services/app_preferences.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/features/profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,13 +17,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-
-  final List<Widget> _pages = const [
-    MainTab(),
-    CategoryTab(),
-    DonationTab(),
-    ProfileScreen(),
-  ];
 
   Future<void> _logout() async {
     try {
@@ -136,7 +129,12 @@ class _HomeScreenState extends State<HomeScreen> {
           : null,
       body: IndexedStack(
         index: _currentIndex,
-        children: _pages,
+        children: [
+          MainTab(onDonatePressed: () => setState(() => _currentIndex = 2)),
+          const CategoryTab(),
+          const DonationTab(),
+          const ProfileScreen(),
+        ],
       ),
       bottomNavigationBar: BottomNavWidget(
         currentIndex: _currentIndex,
