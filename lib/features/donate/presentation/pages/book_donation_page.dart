@@ -4,11 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:read_buddy_app/core/extensions/string_extensions.dart';
+import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
+import 'package:read_buddy_app/features/books/presentation/bloc/book_event.dart';
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/book_donation_request.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/agent.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_events.dart';
 
 class DonationPage extends StatefulWidget {
   const DonationPage({super.key});
@@ -390,6 +394,10 @@ class _DonationPageState extends State<DonationPage> {
       body: BlocListener<DonateBookBloc, DonateBookState>(
         listener: (context, state) {
           if (state is BookDonationCreated) {
+            // Refresh book pages so new donation appears
+            context.read<BookBloc>().add(RefreshBooks());
+            context.read<DonatedBooksBloc>().add(LoadDonatedBooks());
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
