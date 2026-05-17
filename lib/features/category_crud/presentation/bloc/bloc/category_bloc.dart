@@ -31,11 +31,19 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
   Future<void> _onLoadCategories(
       LoadCategories event, Emitter<CategoryState> emit) async {
+    print('📂 [CategoryBloc] LoadCategories event received');
+    print('📂 [CategoryBloc] Current state: $state');
     emit(CategoryLoading());
     try {
       final categories = await getCategories();
+      print('📂 [CategoryBloc] Categories loaded: ${categories.length}');
+      for (final cat in categories) {
+        print('📂 [CategoryBloc]   - ${cat.id}: ${cat.title}');
+      }
       emit(CategoryLoaded(categories));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('📂 [CategoryBloc] ERROR loading categories: $e');
+      print('📂 [CategoryBloc] StackTrace: $stackTrace');
       emit(CategoryError('Failed to load categories: ${e.toString()}'));
     }
   }

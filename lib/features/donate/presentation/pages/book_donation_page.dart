@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:read_buddy_app/core/extensions/string_extensions.dart';
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/book_donation_request.dart';
@@ -119,11 +120,11 @@ class _DonationPageState extends State<DonationPage> {
       receiptImagePath: _receiptImage?.path,
       pickupDetails: _deliveryType == 'pickup'
           ? PickupDetails(
-        name: _nameController.text.trim(),
-        address: _addressController.text.trim(),
-        pincode: _pinController.text.trim(),
-        mobile: _contractController.text.trim(), // ✅ was 'phoneNumber'
-      )
+              name: _nameController.text.trim(),
+              address: _addressController.text.trim(),
+              pincode: _pinController.text.trim(),
+              mobile: _contractController.text.trim(), // ✅ was 'phoneNumber'
+            )
           : null,
       dropoffDetails: _deliveryType == 'dropoff' && _selectedAgent != null
           ? DropoffDetails(libraryId: _selectedAgent!.id)
@@ -148,8 +149,10 @@ class _DonationPageState extends State<DonationPage> {
             return Dialog(
               backgroundColor: Colors.white,
               elevation: 8,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              insetPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: Container(
@@ -164,7 +167,8 @@ class _DonationPageState extends State<DonationPage> {
                         padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+                          border: Border(
+                              bottom: BorderSide(color: Colors.grey.shade100)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,32 +195,43 @@ class _DonationPageState extends State<DonationPage> {
                             const SizedBox(height: 16),
                             TextField(
                               controller: _categorySearchController,
-                              style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
+                              style: GoogleFonts.poppins(
+                                  fontSize: 14, color: _textDark),
                               decoration: InputDecoration(
                                 hintText: 'Search genres...',
-                                hintStyle: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
-                                prefixIcon: const Icon(Icons.search, size: 20, color: Color(0xFF94A3B8)),
+                                hintStyle: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: const Color(0xFF94A3B8)),
+                                prefixIcon: const Icon(Icons.search,
+                                    size: 20, color: Color(0xFF94A3B8)),
                                 filled: true,
                                 fillColor: const Color(0xFFF8FAFC),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFFF1F5F9)),
+                                  borderSide: const BorderSide(
+                                      color: Color(0xFFF1F5F9)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: _primaryGreen, width: 1.5),
+                                  borderSide: const BorderSide(
+                                      color: _primaryGreen, width: 1.5),
                                 ),
                               ),
                               onChanged: (value) {
                                 setDialogState(() {
                                   _filteredCategories = value.isEmpty
                                       ? categories
-                                      : categories.where((cat) => cat.title.toLowerCase().contains(value.toLowerCase())).toList();
+                                      : categories
+                                          .where((cat) => cat.title
+                                              .toLowerCase()
+                                              .contains(value.toLowerCase()))
+                                          .toList();
                                 });
                               },
                             ),
@@ -233,11 +248,15 @@ class _DonationPageState extends State<DonationPage> {
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.search_off_rounded, size: 48, color: Colors.grey.shade200),
+                                      Icon(Icons.search_off_rounded,
+                                          size: 48,
+                                          color: Colors.grey.shade200),
                                       const SizedBox(height: 12),
                                       Text(
                                         'No genres found',
-                                        style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                            color: const Color(0xFF94A3B8)),
                                       ),
                                     ],
                                   ),
@@ -248,24 +267,31 @@ class _DonationPageState extends State<DonationPage> {
                                 shrinkWrap: true,
                                 physics: const BouncingScrollPhysics(),
                                 itemCount: _filteredCategories.length,
-                                separatorBuilder: (_, __) => const SizedBox(height: 4),
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 4),
                                 itemBuilder: (context, index) {
                                   final category = _filteredCategories[index];
-                                  final isSelected = _selectedCategory?.id == category.id;
+                                  final isSelected =
+                                      _selectedCategory?.id == category.id;
 
                                   return Material(
                                     color: Colors.transparent,
                                     child: InkWell(
                                       onTap: () {
-                                        setState(() => _selectedCategory = category);
+                                        setState(
+                                            () => _selectedCategory = category);
                                         Navigator.pop(dialogContext);
                                       },
                                       borderRadius: BorderRadius.circular(12),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 10),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? _primaryGreen.withOpacity(0.08) : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(12),
+                                          color: isSelected
+                                              ? _primaryGreen.withOpacity(0.08)
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: Row(
                                           children: [
@@ -273,16 +299,26 @@ class _DonationPageState extends State<DonationPage> {
                                               width: 36,
                                               height: 36,
                                               decoration: BoxDecoration(
-                                                color: isSelected ? _primaryGreen.withOpacity(0.2) : const Color(0xFFF1F5F9),
-                                                borderRadius: BorderRadius.circular(8),
+                                                color: isSelected
+                                                    ? _primaryGreen
+                                                        .withOpacity(0.2)
+                                                    : const Color(0xFFF1F5F9),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
                                               child: Center(
                                                 child: Text(
-                                                  category.title.isNotEmpty ? category.title[0].toUpperCase() : '?',
+                                                  category.title.isNotEmpty
+                                                      ? category.title
+                                                          .capitalizeFirst[0]
+                                                      : '?',
                                                   style: GoogleFonts.poppins(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w700,
-                                                    color: isSelected ? _primaryGreen : const Color(0xFF64748B),
+                                                    color: isSelected
+                                                        ? _primaryGreen
+                                                        : const Color(
+                                                            0xFF64748B),
                                                   ),
                                                 ),
                                               ),
@@ -290,15 +326,24 @@ class _DonationPageState extends State<DonationPage> {
                                             const SizedBox(width: 12),
                                             Expanded(
                                               child: Text(
-                                                category.title,
+                                                category
+                                                    .title.capitalizeEachWord,
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 14,
-                                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                                  color: isSelected ? _textDark : const Color(0xFF334155),
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.w600
+                                                      : FontWeight.w500,
+                                                  color: isSelected
+                                                      ? _textDark
+                                                      : const Color(0xFF334155),
                                                 ),
                                               ),
                                             ),
-                                            if (isSelected) const Icon(Icons.check_circle_rounded, size: 20, color: _primaryGreen),
+                                            if (isSelected)
+                                              const Icon(
+                                                  Icons.check_circle_rounded,
+                                                  size: 20,
+                                                  color: _primaryGreen),
                                           ],
                                         ),
                                       ),
@@ -349,8 +394,7 @@ class _DonationPageState extends State<DonationPage> {
               SnackBar(
                 content: Text(
                   'Book donated successfully! ',
-                  style:
-                  GoogleFonts.poppins(fontSize: 13, color: Colors.white),
+                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.white),
                 ),
                 backgroundColor: _primaryGreen,
                 behavior: SnackBarBehavior.floating,
@@ -365,8 +409,7 @@ class _DonationPageState extends State<DonationPage> {
               SnackBar(
                 content: Text(
                   'Failed to submit. Please try again.',
-                  style:
-                  GoogleFonts.poppins(fontSize: 13, color: Colors.white),
+                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.white),
                 ),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
@@ -390,7 +433,7 @@ class _DonationPageState extends State<DonationPage> {
             Expanded(
               child: SingleChildScrollView(
                 padding:
-                EdgeInsets.symmetric(horizontal: paddingH, vertical: 16),
+                    EdgeInsets.symmetric(horizontal: paddingH, vertical: 16),
                 child: _currentStep == 0 ? _buildStep1() : _buildStep2(),
               ),
             ),
@@ -423,20 +466,26 @@ class _DonationPageState extends State<DonationPage> {
         // ✅ Improved category selector trigger (no images)
         BlocBuilder<CategoryBloc, CategoryState>(
           builder: (context, state) {
+            print(
+                '📂 [BookDonationPage] CategoryBloc state: ${state.runtimeType}');
             List<CategoryEntity> categories = [];
             if (state is CategoryLoaded) {
               categories = state.categories;
+              print(
+                  '📂 [BookDonationPage] Categories count: ${categories.length}');
               if (_filteredCategories.isEmpty &&
                   _categorySearchController.text.isEmpty) {
                 _filteredCategories = categories;
               }
+            } else if (state is CategoryError) {
+              print('📂 [BookDonationPage] CategoryError: ${state.message}');
             }
 
             return GestureDetector(
               onTap: () => _showCategorySearchDialog(context, categories),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -461,7 +510,7 @@ class _DonationPageState extends State<DonationPage> {
                       child: Center(
                         child: Text(
                           _selectedCategory != null
-                              ? _selectedCategory!.title[0].toUpperCase()
+                              ? _selectedCategory!.title.capitalizeFirst[0]
                               : '#',
                           style: GoogleFonts.poppins(
                             fontSize: 14,
@@ -476,7 +525,8 @@ class _DonationPageState extends State<DonationPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _selectedCategory?.title ?? 'Select Category',
+                        _selectedCategory?.title.capitalizeEachWord ??
+                            'Select Category',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           color: _selectedCategory != null
@@ -488,8 +538,7 @@ class _DonationPageState extends State<DonationPage> {
                     // ✅ Clear button if selected, else dropdown arrow
                     if (_selectedCategory != null)
                       GestureDetector(
-                        onTap: () =>
-                            setState(() => _selectedCategory = null),
+                        onTap: () => setState(() => _selectedCategory = null),
                         child: const Icon(Icons.close,
                             size: 18, color: Color(0xFF7A9BB5)),
                       )
@@ -662,30 +711,30 @@ class _DonationPageState extends State<DonationPage> {
   // ─── Reusable Widgets ─────────────────────────────────────
 
   Widget _sectionSubtitle(String text) => Text(
-    text,
-    style: GoogleFonts.poppins(
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      color: const Color(0xFF7A9BB5),
-    ),
-  );
+        text,
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF7A9BB5),
+        ),
+      );
 
   Widget _label(String text) => Text(
-    text,
-    style: GoogleFonts.poppins(
-      fontSize: 13,
-      fontWeight: FontWeight.w500,
-      color: _textDark,
-    ),
-  );
+        text,
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: _textDark,
+        ),
+      );
 
   Widget _textField(
-      TextEditingController controller,
-      String hint, {
-        int maxLines = 1,
-        IconData? prefixIcon,
-        TextInputType? keyboardType,
-      }) {
+    TextEditingController controller,
+    String hint, {
+    int maxLines = 1,
+    IconData? prefixIcon,
+    TextInputType? keyboardType,
+  }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
@@ -693,15 +742,15 @@ class _DonationPageState extends State<DonationPage> {
       style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.poppins(
-            fontSize: 14, color: const Color(0xFF999999)),
+        hintStyle:
+            GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF999999)),
         prefixIcon: prefixIcon != null
             ? Icon(prefixIcon, size: 18, color: const Color(0xFF7A9BB5))
             : null,
         filled: true,
         fillColor: Colors.white,
         contentPadding:
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -726,10 +775,9 @@ class _DonationPageState extends State<DonationPage> {
             _bookCondition == c.toLowerCase().replaceAll(' ', '_');
         return GestureDetector(
           onTap: () => setState(
-                  () => _bookCondition = c.toLowerCase().replaceAll(' ', '_')),
+              () => _bookCondition = c.toLowerCase().replaceAll(' ', '_')),
           child: Container(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: isSelected ? _primaryGreen : Colors.white,
               borderRadius: BorderRadius.circular(20),
@@ -766,27 +814,26 @@ class _DonationPageState extends State<DonationPage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-              color: imageFile != null
-                  ? _primaryGreen
-                  : const Color(0xFFE0E0E0)),
+              color:
+                  imageFile != null ? _primaryGreen : const Color(0xFFE0E0E0)),
         ),
         child: imageFile != null
             ? ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.file(imageFile, fit: BoxFit.cover),
-        )
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(imageFile, fit: BoxFit.cover),
+              )
             : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 28, color: const Color(0xFF7A9BB5)),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                  fontSize: 13, color: const Color(0xFF7A9BB5)),
-            ),
-          ],
-        ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 28, color: const Color(0xFF7A9BB5)),
+                  const SizedBox(height: 6),
+                  Text(
+                    label,
+                    style: GoogleFonts.poppins(
+                        fontSize: 13, color: const Color(0xFF7A9BB5)),
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -814,8 +861,7 @@ class _DonationPageState extends State<DonationPage> {
           children: [
             Icon(icon,
                 size: 20,
-                color:
-                isSelected ? Colors.white : const Color(0xFF7A9BB5)),
+                color: isSelected ? Colors.white : const Color(0xFF7A9BB5)),
             const SizedBox(width: 8),
             Text(
               label,
@@ -842,21 +888,21 @@ class _DonationPageState extends State<DonationPage> {
           backgroundColor: _primaryGreen,
           foregroundColor: Colors.white,
           elevation: 0,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: isLoading
             ? const SizedBox(
-          height: 20,
-          width: 20,
-          child: CircularProgressIndicator(
-              color: Colors.white, strokeWidth: 2),
-        )
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 2),
+              )
             : Text(
-          label,
-          style: GoogleFonts.poppins(
-              fontSize: 15, fontWeight: FontWeight.w600),
-        ),
+                label,
+                style: GoogleFonts.poppins(
+                    fontSize: 15, fontWeight: FontWeight.w600),
+              ),
       ),
     );
   }
@@ -870,13 +916,12 @@ class _DonationPageState extends State<DonationPage> {
         style: OutlinedButton.styleFrom(
           foregroundColor: _textDark,
           side: const BorderSide(color: Color(0xFFE0E0E0)),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Text(
           label,
-          style: GoogleFonts.poppins(
-              fontSize: 15, fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -956,15 +1001,14 @@ class _StepCircle extends StatelessWidget {
               child: isDone
                   ? const Icon(Icons.check, size: 16, color: Colors.white)
                   : Text(
-                '$number',
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isActive
-                      ? Colors.white
-                      : const Color(0xFF999999),
-                ),
-              ),
+                      '$number',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isActive ? Colors.white : const Color(0xFF999999),
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 4),
@@ -973,8 +1017,7 @@ class _StepCircle extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 11,
               color: isActive ? _textDark : const Color(0xFF999999),
-              fontWeight:
-              isActive ? FontWeight.w500 : FontWeight.normal,
+              fontWeight: isActive ? FontWeight.w500 : FontWeight.normal,
             ),
           ),
         ],
@@ -1024,9 +1067,8 @@ class _LibraryCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: isSelected
-                ? const Color(0xFF2CE07F)
-                : const Color(0xFFE0E0E0),
+            color:
+                isSelected ? const Color(0xFF2CE07F) : const Color(0xFFE0E0E0),
             width: isSelected ? 2 : 1),
       ),
       child: Row(
@@ -1069,8 +1111,8 @@ class _LibraryCard extends StatelessWidget {
                     _infoRow(Icons.access_time, agent.openHours),
                     _infoRow(Icons.location_on_outlined,
                         '${agent.distanceKm.toStringAsFixed(1)} km'),
-                    _infoRow(Icons.star_outline,
-                        agent.rating.toStringAsFixed(1)),
+                    _infoRow(
+                        Icons.star_outline, agent.rating.toStringAsFixed(1)),
                     _infoRow(Icons.local_shipping_outlined,
                         '${agent.totalDeliveries} deliveries'),
                   ],
@@ -1079,18 +1121,14 @@ class _LibraryCard extends StatelessWidget {
                 GestureDetector(
                   onTap: onUploadReceipt,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: hasReceipt
-                          ? Colors.blue
-                          : const Color(0xFF2CE07F),
+                      color: hasReceipt ? Colors.blue : const Color(0xFF2CE07F),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      hasReceipt
-                          ? 'Receipt Selected ✅'
-                          : 'Upload receipt',
+                      hasReceipt ? 'Receipt Selected ✅' : 'Upload receipt',
                       style: GoogleFonts.poppins(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -1114,8 +1152,8 @@ class _LibraryCard extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           text,
-          style: GoogleFonts.poppins(
-              fontSize: 11, color: const Color(0xFF7A9BB5)),
+          style:
+              GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF7A9BB5)),
         ),
       ],
     );
