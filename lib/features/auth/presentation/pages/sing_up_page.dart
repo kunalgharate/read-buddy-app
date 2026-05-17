@@ -114,13 +114,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (state.isUserAlreadyExists) {
           UiUtils.showErrorSnackBar(
             context,
-            message: state.message,
+            message: 'This account already exists. Redirecting to Sign In...',
             action: SnackBarAction(
               label: 'Sign In',
               textColor: Colors.white,
               onPressed: _navigateToSignIn,
             ),
           );
+          // Auto-navigate to sign-in after 3 seconds
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) {
+              _navigateToSignIn();
+            }
+          });
         } else {
           UiUtils.showErrorSnackBar(
             context,

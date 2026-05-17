@@ -40,7 +40,13 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   @override
   Future<List<CategoryModel>> getCategories() async {
     try {
+      print(
+          '📂 [CategoryDataSource] Fetching categories from: ${ApiConstants.categories}');
       final response = await dio.get(ApiConstants.categories);
+      print('📂 [CategoryDataSource] Response status: ${response.statusCode}');
+      print(
+          '📂 [CategoryDataSource] Response data type: ${response.data.runtimeType}');
+      print('📂 [CategoryDataSource] Response data: ${response.data}');
 
       CategoryItems.parentCategoryItems.clear();
       BookValueItems.bookCategories.clear();
@@ -48,7 +54,19 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
         throw Exception('Failed to load categories');
       }
 
-      return (response.data as List).map((json) {
+      // API returns { "categories": [...] } — extract the list
+      final List<dynamic> categoryList;
+      if (response.data is List) {
+        categoryList = response.data as List;
+      } else if (response.data is Map<String, dynamic> &&
+          response.data['categories'] is List) {
+        categoryList = response.data['categories'] as List;
+      } else {
+        throw Exception(
+            'Unexpected response format: ${response.data.runtimeType}');
+      }
+
+      return categoryList.map((json) {
         BookValueItems.bookCategories.add(ItemModel.fromJson(json));
         CategoryItems.parentCategoryItems
             .add(parentCategoryModel.fromJson(json));
@@ -56,11 +74,11 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       }).toList();
     } catch (e) {
       if (e is DioException) {
-        print("Dio error: ${e.message}");
-        print("Status code: ${e.response?.statusCode}");
-        print("Response data: ${e.response?.data}");
+        print("📂 [CategoryDataSource] Dio error: ${e.message}");
+        print("📂 [CategoryDataSource] Status code: ${e.response?.statusCode}");
+        print("📂 [CategoryDataSource] Response data: ${e.response?.data}");
       } else {
-        print("Unexpected error: $e");
+        print("📂 [CategoryDataSource] Unexpected error: $e");
       }
       rethrow;
     }
