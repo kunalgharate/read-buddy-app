@@ -149,14 +149,11 @@ class _BottomActionBar extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: book.isAvailable
-                  ? () => context
-                      .read<BookRequestBloc>()
-                      .add(CreateBookRequest(book.id))
-                  : null,
+              onPressed: () => context
+                  .read<BookRequestBloc>()
+                  .add(CreateBookRequest(book.id)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2CE07F),
-                disabledBackgroundColor: Colors.grey.shade300,
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -180,7 +177,7 @@ class _BottomActionBar extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: book.isAvailable ? Colors.white : Colors.grey,
+                      color: Colors.white,
                     ),
                   );
                 },

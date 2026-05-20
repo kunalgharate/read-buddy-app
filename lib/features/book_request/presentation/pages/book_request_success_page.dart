@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'my_requests_page.dart';
 
 class BookRequestSuccessPage extends StatelessWidget {
   final String bookTitle;
@@ -46,7 +47,20 @@ class BookRequestSuccessPage extends StatelessWidget {
                       )
                     : _placeholder(),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 10),
+              // Book title
+              Text(
+                bookTitle,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1E2939),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 16),
               // Success icon
               Container(
                 width: 64,
@@ -69,19 +83,6 @@ class BookRequestSuccessPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              // Book title
-              Text(
-                bookTitle,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF1E2939),
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 16),
               // Message
               Text(
                 'Your book request has been created successfully. We will review and approve it within a few hours.',
@@ -98,13 +99,8 @@ class BookRequestSuccessPage extends StatelessWidget {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (fromMyRequests) {
-                      Navigator.pop(context);
-                    } else {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    }
-                  },
+                  onPressed: () =>
+                      Navigator.of(context).popUntil((route) => route.isFirst),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2CE07F),
                     elevation: 0,
@@ -112,12 +108,44 @@ class BookRequestSuccessPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text(
-                    fromMyRequests ? 'View My Requests' : 'Go to Home',
+                  child: const Text(
+                    'Go to Home',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1A237E),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // View My Book Requests button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MyRequestsPage(),
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF052E44),
+                    side: const BorderSide(color: Color(0xFF052E44)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'View My Book Requests',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF052E44),
                     ),
                   ),
                 ),

@@ -139,6 +139,7 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
                 emptyMessage: 'No pending requests',
                 emptyIcon: Icons.hourglass_empty_outlined,
                 onTap: (r) => _showDetailSheet(context, r, 'Pending Request'),
+                onDecline: (id) => _showDeclineDialog(context, id),
               ),
               _GenericList(
                 requests: _filter(all, 'pickup_scheduled'),
@@ -175,6 +176,53 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
     );
   }
 
+  void _showDeclineDialog(BuildContext context, String requestId) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Decline Request',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF052E44))),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: 'Enter reason for declining...',
+            hintStyle: const TextStyle(fontSize: 13, color: Color(0xFFAAAAAA)),
+            contentPadding: const EdgeInsets.all(12),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF2CE07F)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final reason = controller.text.trim();
+              if (reason.isEmpty) return;
+              Navigator.pop(dialogContext);
+              context.read<AdminRequestsBloc>().add(DeclineRequest(requestId, reason));
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Decline', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showDetailSheet(
       BuildContext context, BookRequestEntity r, String title) {
     showModalBottomSheet(
@@ -207,6 +255,7 @@ class _GenericList extends StatelessWidget {
   final String emptyMessage;
   final IconData emptyIcon;
   final void Function(BookRequestEntity) onTap;
+  final void Function(String)? onDecline;
 
   const _GenericList({
     required this.requests,
@@ -214,6 +263,7 @@ class _GenericList extends StatelessWidget {
     required this.emptyIcon,
     required this.onTap,
     this.actionId,
+    this.onDecline,
   });
 
   @override
@@ -229,6 +279,7 @@ class _GenericList extends StatelessWidget {
         request: requests[i],
         isActioning: actionId == requests[i].id,
         onTap: () => onTap(requests[i]),
+        onDecline: onDecline,
       ),
     );
   }
@@ -240,11 +291,13 @@ class _RequestCard extends StatelessWidget {
   final BookRequestEntity request;
   final bool isActioning;
   final VoidCallback onTap;
+  final void Function(String)? onDecline;
 
   const _RequestCard({
     required this.request,
     required this.isActioning,
     required this.onTap,
+    this.onDecline,
   });
 
   @override
@@ -320,9 +373,7 @@ class _RequestCard extends StatelessWidget {
                               Expanded(
                                 child: _OutlineBtn(
                                   label: 'Decline',
-                                  onTap: () => context
-                                      .read<AdminRequestsBloc>()
-                                      .add(DeclineRequest(request.id)),
+                                  onTap: () => onDecline?.call(request.id),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -452,6 +503,55 @@ class _DetailSheet extends StatelessWidget {
         _DetailTile(
             label: 'Name',
             value: request.userName ?? request.userId ?? '—'),
+        if (request.userEmail != null)
+          _DetailTile(label: 'Email', value: request.userEmail!),
+
+        // Rejection reason
+        if (request.rejectionReason != null) ...[
+          const SizedBox(height: 8),
+          const Text('Rejection Reason',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.redAccent)),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFEBEB),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              request.rejectionReason!,
+              style: const TextStyle(fontSize: 13, color: Colors.redAccent),
+            ),
+          ),
+        ],
+
+        // Delivery details — only after approved
+        if (request.status.toLowerCase() != 'requested' &&
+            (request.deliveryName != null || request.deliveryAddress != null)) ...[
+          const SizedBox(height: 8),
+          const Text('Delivery Details',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF052E44))),
+          const SizedBox(height: 10),
+          if (request.deliveryName != null)
+            _DetailTile(label: 'Name', value: request.deliveryName!),
+          if (request.deliveryPhone != null)
+            _DetailTile(label: 'Phone', value: request.deliveryPhone!),
+          if (request.deliveryAddress != null)
+            _DetailTile(label: 'Address', value: request.deliveryAddress!),
+          if (request.deliveryPincode != null)
+            _DetailTile(label: 'Pincode', value: request.deliveryPincode!),
+          if (request.deliveryPreferredDate != null)
+            _DetailTile(label: 'Preferred Date', value: _fmtDate(request.deliveryPreferredDate)),
+          if (request.deliveryPreferredTime != null)
+            _DetailTile(label: 'Preferred Time', value: request.deliveryPreferredTime!),
+        ],
 
         // Pickup details — only after approved
         if (request.status.toLowerCase() != 'requested' &&
@@ -469,20 +569,6 @@ class _DetailSheet extends StatelessWidget {
             _DetailTile(label: 'Phone', value: request.pickupPhone!),
           if (request.pickupAddress != null)
             _DetailTile(label: 'Address', value: request.pickupAddress!),
-        ],
-
-        // Delivery details — only after approved
-        if (request.status.toLowerCase() != 'requested' &&
-            request.deliveryAddress != null) ...[
-          const SizedBox(height: 8),
-          const Text('Delivery Details',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF052E44))),
-          const SizedBox(height: 10),
-          _DetailTile(label: 'Address', value: request.deliveryAddress!),
-          _DetailTile(label: 'Payment', value: request.paymentStatus),
         ],
 
         // Dates

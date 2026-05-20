@@ -134,6 +134,18 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
       );
       return;
     }
+    if (phone.length != 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Phone number must be exactly 10 digits')),
+      );
+      return;
+    }
+    if (address.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid address')),
+      );
+      return;
+    }
     if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a pickup date')),
@@ -294,7 +306,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                     controller: _phoneController,
                     hint: 'Enter phone number',
                     keyboardType: TextInputType.phone,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
                   ),
 
                   const SizedBox(height: 16),

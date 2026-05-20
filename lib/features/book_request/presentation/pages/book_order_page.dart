@@ -49,6 +49,9 @@ class _BookOrderViewState extends State<_BookOrderView> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
+  final _pincodeController = TextEditingController();
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
 
   @override
   void initState() {
@@ -61,11 +64,23 @@ class _BookOrderViewState extends State<_BookOrderView> {
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
+    _pincodeController.dispose();
     super.dispose();
   }
 
   String get _appBarTitle =>
       _currentTab == 0 ? 'Book Order' : 'Delivery Details';
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  String _formatTime(TimeOfDay time) {
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '${hour.toString().padLeft(2, '0')}:$minute $period';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +113,7 @@ class _BookOrderViewState extends State<_BookOrderView> {
           if (state is LibraryDetailsLoaded) {
             setState(() => _library = state.library);
           }
-          if (state is DeliveryFulfillmentSet) {
+          if (state is DeliveryScheduled) {
             setState(() => _currentTab = 1);
           }
           if (state is DeliveryPaymentDone) {
@@ -123,10 +138,14 @@ class _BookOrderViewState extends State<_BookOrderView> {
               child: _currentTab == 0
                   ? _BookOrderTab(
                       request: widget.request,
-                      library: _library,
                       nameController: _nameController,
                       phoneController: _phoneController,
                       addressController: _addressController,
+                      pincodeController: _pincodeController,
+                      selectedDate: _selectedDate,
+                      selectedTime: _selectedTime,
+                      onDatePicked: (d) => setState(() => _selectedDate = d),
+                      onTimePicked: (t) => setState(() => _selectedTime = t),
                     )
                   : _DeliveryDetailsTab(
                       library: _library,
@@ -148,35 +167,74 @@ class _BookOrderViewState extends State<_BookOrderView> {
           height: 52,
           child: BlocBuilder<BookRequestBloc, BookRequestState>(
             builder: (context, state) {
-              final isLoading = state is DeliveryFulfillmentLoading ||
+              final isLoading = state is DeliveryScheduling ||
                   state is DeliveryPaymentLoading;
               return ElevatedButton(
                 onPressed: isLoading
                     ? null
                     : () {
                         if (_currentTab == 0) {
-                          final address = _addressController.text.trim();
                           final name = _nameController.text.trim();
                           final phone = _phoneController.text.trim();
-                          if (name.isEmpty || phone.isEmpty || address.isEmpty) {
+                          final address = _addressController.text.trim();
+                          final pincode = _pincodeController.text.trim();
+                          if (name.isEmpty || phone.isEmpty || address.isEmpty || pincode.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Please fill in all fields')),
+                              const SnackBar(content: Text('Please fill in all fields')),
+                            );
+                            return;
+                          }
+                          if (phone.length != 10) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Phone number must be exactly 10 digits')),
+                            );
+                            return;
+                          }
+                          if (address.length < 10) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please enter a valid address')),
+                            );
+                            return;
+                          }
+                          if (pincode.length != 6 || pincode[0] == '0') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please enter a valid 6-digit pincode')),
+                            );
+                            return;
+                          }
+                          if (_selectedDate == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please select a preferred date')),
+                            );
+                            return;
+                          }
+                          if (_selectedTime == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please select a preferred time')),
                             );
                             return;
                           }
                           context.read<BookRequestBloc>().add(
-                                SetDeliveryFulfillment(
+                                ScheduleDelivery(
                                   requestId: widget.request.id,
                                   name: name,
                                   phone: phone,
                                   address: address,
+                                  pincode: pincode,
+                                  preferredDate: _formatDate(_selectedDate!),
+                                  preferredTime: _formatTime(_selectedTime!),
                                 ),
                               );
                         } else {
                           context.read<BookRequestBloc>().add(
                                 ConfirmDeliveryPayment(
                                   requestId: widget.request.id,
+                                  name: _nameController.text.trim(),
+                                  phone: _phoneController.text.trim(),
+                                  address: _addressController.text.trim(),
+                                  pincode: _pincodeController.text.trim(),
+                                  preferredDate: _formatDate(_selectedDate!),
+                                  preferredTime: _formatTime(_selectedTime!),
                                 ),
                               );
                         }
@@ -306,18 +364,78 @@ class _OrderStepper extends StatelessWidget {
 
 class _BookOrderTab extends StatelessWidget {
   final BookRequestEntity request;
-  final LibraryEntity? library;
   final TextEditingController nameController;
   final TextEditingController phoneController;
   final TextEditingController addressController;
+  final TextEditingController pincodeController;
+  final DateTime? selectedDate;
+  final TimeOfDay? selectedTime;
+  final ValueChanged<DateTime> onDatePicked;
+  final ValueChanged<TimeOfDay> onTimePicked;
 
   const _BookOrderTab({
     required this.request,
-    required this.library,
     required this.nameController,
     required this.phoneController,
     required this.addressController,
+    required this.pincodeController,
+    required this.selectedDate,
+    required this.selectedTime,
+    required this.onDatePicked,
+    required this.onTimePicked,
   });
+
+  Future<void> _pickDate(BuildContext context) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFF2CE07F),
+            onPrimary: Color(0xFF1E2939),
+            onSurface: Color(0xFF1E2939),
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) onDatePicked(picked);
+  }
+
+  Future<void> _pickTime(BuildContext context) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime ?? TimeOfDay.now(),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFF2CE07F),
+            onPrimary: Color(0xFF1E2939),
+            onSurface: Color(0xFF1E2939),
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) onTimePicked(picked);
+  }
+
+  String _fmtDate(DateTime? d) {
+    if (d == null) return 'Select Date';
+    return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+  }
+
+  String _fmtTime(TimeOfDay? t) {
+    if (t == null) return 'Select Time';
+    final hour = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final minute = t.minute.toString().padLeft(2, '0');
+    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+    return '${hour.toString().padLeft(2, '0')}:$minute $period';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -327,15 +445,11 @@ class _BookOrderTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _BookCard(request: request),
-          const SizedBox(height: 12),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
-          const SizedBox(height: 20),
-          _DeliveryAgentCard(library: library),
           const SizedBox(height: 20),
           const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
           const SizedBox(height: 20),
           const Text(
-            'User Details',
+            'Delivery Details',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -343,7 +457,7 @@ class _BookOrderTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const _FieldLabel(label: 'User Name'),
+          const _FieldLabel(label: 'Full Name'),
           const SizedBox(height: 8),
           _InputField(
             controller: nameController,
@@ -357,7 +471,10 @@ class _BookOrderTab extends StatelessWidget {
             controller: phoneController,
             hint: 'Enter phone number',
             keyboardType: TextInputType.phone,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(10),
+            ],
           ),
           const SizedBox(height: 16),
           const _FieldLabel(label: 'Address'),
@@ -367,6 +484,54 @@ class _BookOrderTab extends StatelessWidget {
             hint: 'Enter delivery address',
             keyboardType: TextInputType.streetAddress,
             maxLines: 3,
+          ),
+          const SizedBox(height: 16),
+          const _FieldLabel(label: 'Pincode'),
+          const SizedBox(height: 8),
+          _InputField(
+            controller: pincodeController,
+            hint: 'Enter pincode',
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(6),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _FieldLabel(label: 'Preferred Date'),
+                    const SizedBox(height: 8),
+                    _DateTimePickerButton(
+                      icon: Icons.calendar_month_outlined,
+                      label: _fmtDate(selectedDate),
+                      isPlaceholder: selectedDate == null,
+                      onTap: () => _pickDate(context),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _FieldLabel(label: 'Preferred Time'),
+                    const SizedBox(height: 8),
+                    _DateTimePickerButton(
+                      icon: Icons.access_time_outlined,
+                      label: _fmtTime(selectedTime),
+                      isPlaceholder: selectedTime == null,
+                      onTap: () => _pickTime(context),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 32),
         ],
@@ -403,10 +568,6 @@ class _DeliveryDetailsTab extends StatelessWidget {
             deliveryPhone: deliveryPhone,
             deliveryAddress: deliveryAddress,
           ),
-          const SizedBox(height: 28),
-          const _DeliveryBoySection(),
-          const SizedBox(height: 28),
-          const _PayOfDeliverySection(),
           const SizedBox(height: 32),
         ],
       ),
@@ -451,14 +612,14 @@ class _DeliveryTimelineV2 extends StatelessWidget {
         const _TimelineLine(height: 14),
         _TimelineCard(
           icon: Icons.local_shipping_outlined,
-          description: 'Your book will be picked up from $libAddress',
+          description: 'Your book will be picked up from',
           boldLines: ['$libName - $libPhone', libAddress],
         ),
         const _TimelineLine(height: 14),
         const _TimelineCircle(label: 'To'),
         const _TimelineLine(height: 14),
         _TimelineCard(
-          icon: Icons.local_shipping_outlined,
+          icon: Icons.home_outlined,
           description: 'Your book will be delivered to',
           boldLines: [deliveryName, deliveryPhone, deliveryAddress],
         ),
@@ -569,228 +730,6 @@ class _TimelineCard extends StatelessWidget {
   }
 }
 
-// ─── Delivery Boy Details section ─────────────────────────────────────────────
-
-class _DeliveryBoySection extends StatelessWidget {
-  const _DeliveryBoySection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Row(
-          children: [
-            Icon(Icons.local_shipping_outlined,
-                size: 20, color: Color(0xFF1E2939)),
-            SizedBox(width: 8),
-            Text(
-              'Delivery Boy Details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E2939),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const _DetailRow(
-            icon: Icons.person_outline, label: 'Name', value: 'Sunil Soni'),
-        const Divider(height: 1, color: Color(0xFFEEEEEE)),
-        const _DetailRow(
-            icon: Icons.phone_outlined,
-            label: 'Contact No.',
-            value: '0123456789'),
-        const Divider(height: 1, color: Color(0xFFEEEEEE)),
-        _StatusRow(),
-      ],
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: const Color(0xFF555555)),
-          const SizedBox(width: 10),
-          Text(label,
-              style: const TextStyle(fontSize: 14, color: Color(0xFF444444))),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1E2939),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    const statuses = ['Picked Up', 'On Way', 'Delivered'];
-    const activeIndex = 0;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          const Icon(Icons.phone_callback_outlined,
-              size: 20, color: Color(0xFF555555)),
-          const SizedBox(width: 10),
-          const Text('Status',
-              style: TextStyle(fontSize: 14, color: Color(0xFF444444))),
-          const Spacer(),
-          Row(
-            children: List.generate(statuses.length, (i) {
-              final isActive = i == activeIndex;
-              return Padding(
-                padding: EdgeInsets.only(left: i == 0 ? 0 : 6),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color:
-                        isActive ? const Color(0xFF2CE07F) : Colors.white,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isActive
-                          ? const Color(0xFF2CE07F)
-                          : const Color(0xFFCCCCCC),
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    statuses[i],
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: isActive
-                          ? const Color(0xFF1E2939)
-                          : const Color(0xFF888888),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Pay of Delivery section ──────────────────────────────────────────────────
-
-class _PayOfDeliverySection extends StatelessWidget {
-  const _PayOfDeliverySection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Row(
-          children: [
-            Icon(Icons.account_balance_wallet_outlined,
-                size: 20, color: Color(0xFF1E2939)),
-            SizedBox(width: 8),
-            Text(
-              'Pay of Delivery',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E2939),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Column(
-            children: [
-              _ChargeRow(
-                  label: 'Book Delivery Charge',
-                  amount: '+60',
-                  showDivider: true),
-              _ChargeRow(
-                  label: 'Delivery App Partner Fee',
-                  amount: '+20',
-                  showDivider: false),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ChargeRow extends StatelessWidget {
-  final String label;
-  final String amount;
-  final bool showDivider;
-
-  const _ChargeRow({
-    required this.label,
-    required this.amount,
-    required this.showDivider,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(label,
-                  style: const TextStyle(
-                      fontSize: 14, color: Color(0xFF444444))),
-              Text(
-                amount,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF1E2939),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (showDivider)
-          const Divider(height: 1, thickness: 1, color: Color(0xFFE8E8E8)),
-      ],
-    );
-  }
-}
-
 // ─── Book info card ───────────────────────────────────────────────────────────
 
 class _BookCard extends StatelessWidget {
@@ -875,97 +814,6 @@ class _BookCard extends StatelessWidget {
   }
 }
 
-// ─── Delivery agent card ──────────────────────────────────────────────────────
-
-class _DeliveryAgentCard extends StatelessWidget {
-  final LibraryEntity? library;
-
-  const _DeliveryAgentCard({required this.library});
-
-  @override
-  Widget build(BuildContext context) {
-    final name = library?.name ?? '—';
-    final phone = library?.contactNumber ?? '—';
-    final address = library?.address.fullAddress ?? '—';
-    final hours = library?.openHours ?? '—';
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEAEAEA),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFCCCCCC)),
-                ),
-                child: const Icon(Icons.store_outlined,
-                    size: 24, color: Color(0xFF888888)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E2939),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 16, color: Color(0xFF888888)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  address,
-                  style: const TextStyle(
-                      fontSize: 13, color: Color(0xFF555555), height: 1.4),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.phone_outlined, size: 16, color: Color(0xFF888888)),
-              const SizedBox(width: 8),
-              Text(phone,
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF555555))),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.access_time_outlined,
-                  size: 16, color: Color(0xFF888888)),
-              const SizedBox(width: 8),
-              Text(hours,
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF555555))),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ─── Field label ──────────────────────────────────────────────────────────────
 
 class _FieldLabel extends StatelessWidget {
@@ -986,6 +834,57 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
+// ─── Date / Time picker button ────────────────────────────────────────────────
+
+class _DateTimePickerButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isPlaceholder;
+  final VoidCallback onTap;
+
+  const _DateTimePickerButton({
+    required this.icon,
+    required this.label,
+    required this.isPlaceholder,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFDDDDDD), width: 1.2),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF555555)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isPlaceholder
+                      ? const Color(0xFFAAAAAA)
+                      : const Color(0xFF1E2939),
+                  fontWeight:
+                      isPlaceholder ? FontWeight.normal : FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 // ─── Text input field ─────────────────────────────────────────────────────────
 
 class _InputField extends StatelessWidget {

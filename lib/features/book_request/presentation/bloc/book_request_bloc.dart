@@ -3,8 +3,7 @@ import '../../domain/usecases/get_book_detail.dart';
 import '../../domain/usecases/create_book_request.dart';
 import '../../domain/usecases/get_library_details.dart';
 import '../../domain/usecases/schedule_pickup.dart';
-import '../../domain/usecases/set_fulfillment.dart';
-import '../../domain/usecases/confirm_payment.dart';
+import '../../domain/usecases/schedule_delivery.dart';
 import 'book_request_event.dart';
 import 'book_request_state.dart';
 
@@ -13,22 +12,20 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   final CreateBookRequestUsecase createBookRequest;
   final GetLibraryDetailsUsecase getLibraryDetails;
   final SchedulePickupUsecase schedulePickup;
-  final SetFulfillmentUsecase setFulfillment;
-  final ConfirmPaymentUsecase confirmPayment;
+  final ScheduleDeliveryUsecase scheduleDelivery;
 
   BookRequestBloc({
     required this.getBookDetail,
     required this.createBookRequest,
     required this.getLibraryDetails,
     required this.schedulePickup,
-    required this.setFulfillment,
-    required this.confirmPayment,
+    required this.scheduleDelivery,
   }) : super(BookRequestInitial()) {
     on<LoadBookDetail>(_onLoadBookDetail);
     on<CreateBookRequest>(_onCreateBookRequest);
     on<LoadLibraryDetails>(_onLoadLibraryDetails);
     on<SchedulePickup>(_onSchedulePickup);
-    on<SetDeliveryFulfillment>(_onSetDeliveryFulfillment);
+    on<ScheduleDelivery>(_onScheduleDelivery);
     on<ConfirmDeliveryPayment>(_onConfirmDeliveryPayment);
   }
 
@@ -84,33 +81,29 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
     }
   }
 
-  Future<void> _onSetDeliveryFulfillment(
-    SetDeliveryFulfillment event,
+  // Step 1: just move to step 2, no API call
+  Future<void> _onScheduleDelivery(
+    ScheduleDelivery event,
     Emitter<BookRequestState> emit,
   ) async {
-    emit(DeliveryFulfillmentLoading());
-    try {
-      await setFulfillment(
-        requestId: event.requestId,
-        name: event.name,
-        phone: event.phone,
-        address: event.address,
-      );
-      emit(DeliveryFulfillmentSet());
-    } catch (e) {
-      emit(DeliveryError(e.toString().replaceFirst('Exception: ', '')));
-    }
+    emit(DeliveryScheduled());
   }
 
+  // Step 2: directly call schedule delivery
   Future<void> _onConfirmDeliveryPayment(
     ConfirmDeliveryPayment event,
     Emitter<BookRequestState> emit,
   ) async {
     emit(DeliveryPaymentLoading());
     try {
-      await confirmPayment(
+      await scheduleDelivery(
         requestId: event.requestId,
-        amount: event.amount,
+        name: event.name,
+        phone: event.phone,
+        address: event.address,
+        pincode: event.pincode,
+        preferredDate: event.preferredDate,
+        preferredTime: event.preferredTime,
       );
       emit(DeliveryPaymentDone());
     } catch (e) {

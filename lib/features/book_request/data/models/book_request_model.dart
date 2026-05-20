@@ -21,11 +21,18 @@ class BookRequestModel extends BookRequestEntity {
     super.userName,
     super.bookCondition,
     super.deliveryAddress,
+    super.deliveryName,
+    super.deliveryPhone,
+    super.deliveryPincode,
+    super.deliveryPreferredDate,
+    super.deliveryPreferredTime,
+    super.userEmail,
     super.pickupUserName,
     super.pickupPhone,
     super.pickupAddress,
     super.pickupDate,
     super.pickupTime,
+    super.rejectionReason,
   });
 
   factory BookRequestModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +56,11 @@ class BookRequestModel extends BookRequestEntity {
         ? json['pickupDetails'] as Map<String, dynamic>
         : null;
 
+    // deliveryDetails nested object from schedule-delivery response
+    final deliveryDetails = json['deliveryDetails'] is Map<String, dynamic>
+        ? json['deliveryDetails'] as Map<String, dynamic>
+        : null;
+
     return BookRequestModel(
       id: json['_id'] ?? '',
       userId: userObj?['_id'] ?? (json['userId'] is String ? json['userId'] : null),
@@ -70,13 +82,20 @@ class BookRequestModel extends BookRequestEntity {
       bookCondition: book?['condition'],
       donorName: donorObj?['name'],
       userName: userObj?['name'],
+      userEmail: userObj?['email'],
       deliveryAddress: json['address'] is String ? json['address'] as String : null,
+      deliveryName: deliveryDetails?['name'],
+      deliveryPhone: deliveryDetails?['phone'],
+      deliveryPincode: deliveryDetails?['pincode'],
+      deliveryPreferredDate: deliveryDetails?['preferredDate'],
+      deliveryPreferredTime: deliveryDetails?['preferredTime'],
       // pickup fields — from pickupDetails object or root level
       pickupUserName: pickupDetails?['userName'] ?? json['userName'],
       pickupPhone: pickupDetails?['phoneNumber'] ?? json['phoneNumber'],
       pickupAddress: pickupDetails?['address'] ?? json['address'],
       pickupDate: pickupDetails?['pickupDate'] ?? json['pickupDate'],
       pickupTime: pickupDetails?['pickupTime'] ?? json['pickupTime'],
+      rejectionReason: json['rejectionReason'] ?? json['reason'],
     );
   }
 }

@@ -7,6 +7,7 @@ import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/my_requests_bloc.dart';
 import '../pages/approved_book_request_page.dart';
 import '../pages/book_request_success_page.dart';
+import '../pages/delivered_request_detail_page.dart';
 import '../../../../core/di/injection.dart' as di;
 
 class MyRequestsPage extends StatelessWidget {
@@ -21,8 +22,36 @@ class MyRequestsPage extends StatelessWidget {
   }
 }
 
-class _MyRequestsView extends StatelessWidget {
+class _MyRequestsView extends StatefulWidget {
   const _MyRequestsView();
+
+  @override
+  State<_MyRequestsView> createState() => _MyRequestsViewState();
+}
+
+class _MyRequestsViewState extends State<_MyRequestsView>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  List<BookRequestEntity> _pending(List<BookRequestEntity> all) => all
+      .where((r) => r.status.toLowerCase() != 'delivered')
+      .toList();
+
+  List<BookRequestEntity> _completed(List<BookRequestEntity> all) => all
+      .where((r) => r.status.toLowerCase() == 'delivered')
+      .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +73,19 @@ class _MyRequestsView extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: const Color(0xFF052E44),
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: const Color(0xFF2CE07F),
+          indicatorWeight: 3,
+          labelStyle:
+              const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          tabs: const [
+            Tab(text: 'Pending'),
+            Tab(text: 'Completed'),
+          ],
+        ),
       ),
       body: BlocBuilder<MyRequestsBloc, MyRequestsState>(
         builder: (context, state) {
@@ -52,7 +94,24 @@ class _MyRequestsView extends StatelessWidget {
               child: CircularProgressIndicator(color: Color(0xFF2CE07F)),
             );
           }
-          if (state is MyRequestsError) {
+          if (state is MyRequestsCancelLoading) {
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                _RequestList(
+                  requests: _pending(state.requests),
+                  emptyMessage: 'No pending requests',
+                  cancellingId: state.cancellingId,
+                ),
+                _RequestList(
+                  requests: _completed(state.requests),
+                  emptyMessage: 'No completed requests',
+                  isCompleted: true,
+                ),
+              ],
+            );
+          }
+          if (state is MyRequestsErrorState) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -64,7 +123,6 @@ class _MyRequestsView extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.grey),
                   ),
-                  // const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<MyRequestsBloc>().add(LoadMyRequests()),
@@ -82,41 +140,80 @@ class _MyRequestsView extends StatelessWidget {
             );
           }
           if (state is MyRequestsLoaded) {
-            if (state.requests.isEmpty) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.menu_book_outlined, size: 64, color: Colors.grey),
-                    SizedBox(height: 16),
-                    Text(
-                      'No book requests yet.',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
-                  ],
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                _RequestList(
+                  requests: _pending(state.requests),
+                  emptyMessage: 'No pending requests',
                 ),
+                _RequestList(
+                  requests: _completed(state.requests),
+                  emptyMessage: 'No completed requests',
+                  isCompleted: true,
+                ),
+              ],
+            );
+          }
+          if (state is MyRequestsCancelError) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
               );
-            }
-            return _buildList(state.requests);
+            });
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                _RequestList(
+                  requests: _pending(state.requests),
+                  emptyMessage: 'No pending requests',
+                ),
+                _RequestList(
+                  requests: _completed(state.requests),
+                  emptyMessage: 'No completed requests',
+                  isCompleted: true,
+                ),
+              ],
+            );
           }
           return const SizedBox.shrink();
         },
       ),
     );
   }
+}
 
-  Widget _buildList(List requests) {
+class _RequestList extends StatelessWidget {
+  final List<BookRequestEntity> requests;
+  final String emptyMessage;
+  final bool isCompleted;
+  final String? cancellingId;
+
+  const _RequestList({
+    required this.requests,
+    required this.emptyMessage,
+    this.isCompleted = false,
+    this.cancellingId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     if (requests.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.menu_book_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'No book requests yet.',
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+            Icon(
+              isCompleted
+                  ? Icons.check_circle_outline
+                  : Icons.menu_book_outlined,
+              size: 64,
+              color: Colors.grey.shade300,
             ),
+            const SizedBox(height: 16),
+            Text(emptyMessage,
+                style:
+                    const TextStyle(color: Colors.grey, fontSize: 16)),
           ],
         ),
       );
@@ -125,16 +222,25 @@ class _MyRequestsView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: requests.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) =>
-          _RequestCard(request: requests[index]),
+      itemBuilder: (context, index) => _RequestCard(
+        request: requests[index],
+        isCompleted: isCompleted,
+        isCancelling: cancellingId == requests[index].id,
+      ),
     );
   }
 }
 
 class _RequestCard extends StatelessWidget {
   final BookRequestEntity request;
+  final bool isCompleted;
+  final bool isCancelling;
 
-  const _RequestCard({required this.request});
+  const _RequestCard({
+    required this.request,
+    this.isCompleted = false,
+    this.isCancelling = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -143,9 +249,19 @@ class _RequestCard extends StatelessWidget {
         statusLower == 'requested' || statusLower == 'pending';
     final isApproved =
         statusLower == 'approved' || statusLower == 'accepted';
+    final canCancel = isPendingOrRequested;
+    final canMarkDelivered =
+        statusLower == 'pickup_scheduled' || statusLower == 'shipping';
 
     VoidCallback? onTap;
-    if (isPendingOrRequested) {
+    if (isCompleted) {
+      onTap = () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DeliveredRequestDetailPage(request: request),
+            ),
+          );
+    } else if (isPendingOrRequested) {
       onTap = () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -233,7 +349,7 @@ class _RequestCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title + status chip top-right
+                      // Title + status chip + cancel button
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -249,11 +365,11 @@ class _RequestCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          // const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           _statusChip(request.status),
                         ],
                       ),
-                      // const SizedBox(height: 8),
+                      const SizedBox(height: 4),
 
                       // Book type (format) as plain text
                       if (request.bookFormat != null &&
@@ -279,6 +395,100 @@ class _RequestCard extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                      if (canCancel) ...[
+                        const SizedBox(height: 8),
+                        isCancelling
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFFFF5252),
+                                ),
+                              )
+                            : GestureDetector(
+                                onTap: () => _confirmCancel(context),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFEBEB),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                        color: const Color(0xFFFF5252)
+                                            .withValues(alpha: 0.4)),
+                                  ),
+                                  child: const Text(
+                                    'Cancel Request',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFFFF5252),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ],
+                      if (canMarkDelivered) ...[
+                        const SizedBox(height: 8),
+                        isCancelling
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF2CE07F),
+                                ),
+                              )
+                            : SizedBox(
+                                width: double.infinity,
+                                height: 36,
+                                child: ElevatedButton(
+                                  onPressed: () => _confirmDelivered(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2CE07F),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Mark as Delivered',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF052E44),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ],
+                      if ((statusLower == 'declined' || statusLower == 'rejected')) ...[
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF8E1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.info_outline, size: 13, color: Color(0xFFB07D00)),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  request.rejectionReason ?? 'Request not approved. Contact support.',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF7A5800),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 8),
                     ],
                   ),
@@ -286,9 +496,95 @@ class _RequestCard extends StatelessWidget {
               ],
             ),
           ),
+
         ],
       ),
     ),
+    );
+  }
+
+  void _confirmDelivered(BuildContext context) {
+    final isShipping = request.status.toLowerCase() == 'shipping';
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(isShipping ? 'Confirm Delivery' : 'Confirm Collection'),
+        content: Text(
+          isShipping
+              ? 'Have you received the book at your delivery address?'
+              : 'Have you collected the book from the library?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Not Yet',
+                style: TextStyle(color: Color(0xFF888888))),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<MyRequestsBloc>().add(MarkAsDelivered(request.id));
+            },
+            child: Text(
+              isShipping ? 'Yes, Received' : 'Yes, Collected',
+              style: const TextStyle(
+                  color: Color(0xFF052E44), fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmCancel(BuildContext context) {
+    final reasonController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Cancel Request'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Are you sure you want to cancel this request?'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonController,
+              maxLines: 2,
+              decoration: InputDecoration(
+                hintText: 'Reason for cancellation...',
+                hintStyle: const TextStyle(fontSize: 13, color: Color(0xFFAAAAAA)),
+                contentPadding: const EdgeInsets.all(10),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF052E44)),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No',
+                style: TextStyle(color: Color(0xFF888888))),
+          ),
+          TextButton(
+            onPressed: () {
+              final reason = reasonController.text.trim();
+              if (reason.isEmpty) return;
+              Navigator.pop(context);
+              context.read<MyRequestsBloc>().add(
+                    CancelRequest(request.id, reason),
+                  );
+            },
+            child: const Text('Yes, Cancel',
+                style: TextStyle(
+                    color: Color(0xFF052E44), fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -311,6 +607,11 @@ class _RequestCard extends StatelessWidget {
     IconData icon;
 
     switch (status.toLowerCase()) {
+      case 'delivered':
+        bg = const Color(0xFFE8F5E9);
+        textColor = const Color(0xFF4CAF50);
+        icon = Icons.check_circle_outline;
+        break;
       case 'approved':
       case 'accepted':
         bg = const Color(0xFFE6FAF0);
@@ -319,6 +620,7 @@ class _RequestCard extends StatelessWidget {
         break;
       case 'declined':
       case 'rejected':
+      case 'cancelled':
         bg = const Color(0xFFFFEBEB);
         textColor = Colors.red;
         icon = Icons.cancel_outlined;

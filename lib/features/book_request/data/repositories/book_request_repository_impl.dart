@@ -36,8 +36,8 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   }
 
   @override
-  Future<void> cancelBookRequest(String id) async {
-    return await remoteDataSource.cancelBookRequest(id);
+  Future<void> cancelBookRequest(String id, String reason) async {
+    return await remoteDataSource.cancelBookRequest(id, reason);
   }
 
   @override
@@ -66,12 +66,12 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   }
 
   @override
-  Future<void> setFulfillment(String id, String method, String name, String phone, String? address) async {
-    return await remoteDataSource.setFulfillment(id, method, name, phone, address);
+  Future<void> updateRequestStatus(String id, String status) async {
+    return await remoteDataSource.updateRequestStatus(id, status);
   }
 
   @override
-  Future<void> confirmPayment(String id, int amount) async {
-    return await remoteDataSource.confirmPayment(id, amount);
+  Future<void> scheduleDelivery(String id, String name, String phone, String address, String pincode, String preferredDate, String preferredTime) async {
+    return await remoteDataSource.scheduleDelivery(id, name, phone, address, pincode, preferredDate, preferredTime);
   }
 }

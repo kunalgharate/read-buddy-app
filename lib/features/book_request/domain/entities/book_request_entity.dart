@@ -20,11 +20,18 @@ class BookRequestEntity extends Equatable {
   final String? userName;
   final String? bookCondition;
   final String? deliveryAddress;
+  final String? deliveryName;
+  final String? deliveryPhone;
+  final String? deliveryPincode;
+  final String? deliveryPreferredDate;
+  final String? deliveryPreferredTime;
+  final String? userEmail;
   final String? pickupUserName;
   final String? pickupPhone;
   final String? pickupAddress;
   final String? pickupDate;
   final String? pickupTime;
+  final String? rejectionReason;
 
   const BookRequestEntity({
     required this.id,
@@ -46,11 +53,18 @@ class BookRequestEntity extends Equatable {
     this.userName,
     this.bookCondition,
     this.deliveryAddress,
+    this.deliveryName,
+    this.deliveryPhone,
+    this.deliveryPincode,
+    this.deliveryPreferredDate,
+    this.deliveryPreferredTime,
+    this.userEmail,
     this.pickupUserName,
     this.pickupPhone,
     this.pickupAddress,
     this.pickupDate,
     this.pickupTime,
+    this.rejectionReason,
   });
 
   @override
@@ -59,6 +73,7 @@ class BookRequestEntity extends Equatable {
         dueDate, returnDate, returnPaymentStatus, returnCondition,
         bookId, bookTitle, bookAuthor, bookCoverUrl, bookFormat,
         donorName, bookCondition, userName, deliveryAddress,
-        pickupUserName, pickupPhone, pickupAddress, pickupDate, pickupTime,
+        deliveryName, deliveryPhone, deliveryPincode, deliveryPreferredDate, deliveryPreferredTime,
+        userEmail, pickupUserName, pickupPhone, pickupAddress, pickupDate, pickupTime, rejectionReason,
       ];
 }

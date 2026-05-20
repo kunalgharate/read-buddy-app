@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/features/banner/domain/entity/banner_entity.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:read_buddy_app/features/book_request/presentation/pages/book_detail_page.dart';
 import 'package:read_buddy_app/features/homebooks/data/datasource/home_remote_datasource.dart';
 import 'package:read_buddy_app/features/homebooks/data/model/home_monthly_status_model.dart';
 import 'package:read_buddy_app/features/homebooks/domain/entities/book_entity.dart';
@@ -641,7 +642,12 @@ class _BookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {}, // TODO: navigate to detail
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BookDetailPage(bookId: book.id),
+        ),
+      ),
       child: Container(
         width: 140,
         margin: const EdgeInsets.only(right: 14),

@@ -50,9 +50,9 @@ class PickupScheduleError extends BookRequestState {
 
 // ── Delivery states ───────────────────────────────────────────────────────────
 
-class DeliveryFulfillmentLoading extends BookRequestState {}
+class DeliveryScheduling extends BookRequestState {}
 
-class DeliveryFulfillmentSet extends BookRequestState {}
+class DeliveryScheduled extends BookRequestState {}
 
 class DeliveryPaymentLoading extends BookRequestState {}
 

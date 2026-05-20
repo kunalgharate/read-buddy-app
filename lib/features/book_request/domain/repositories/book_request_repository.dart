@@ -9,12 +9,12 @@ abstract class BookRequestRepository {
   Future<List<BookRequestEntity>> getMyBookRequests();
   Future<List<BookRequestEntity>> getAllBookRequests();
   Future<List<BookRequestEntity>> getUpcomingPickups();
-  Future<void> cancelBookRequest(String id);
+  Future<void> cancelBookRequest(String id, String reason);
   Future<void> acceptBookRequest(String id, {String? notes});
   Future<void> declineBookRequest(String id, {String reason});
   Future<LibraryEntity> getLibraryDetails();
   Future<BookRequestEntity> schedulePickup(PickupDetailsEntity details);
   Future<BookRequestEntity> getRequestDetails(String id);
-  Future<void> setFulfillment(String id, String method, String name, String phone, String? address);
-  Future<void> confirmPayment(String id, int amount);
+  Future<void> updateRequestStatus(String id, String status);
+  Future<void> scheduleDelivery(String id, String name, String phone, String address, String pincode, String preferredDate, String preferredTime);
 }

@@ -3,6 +3,7 @@ import '../../domain/entities/book_request_entity.dart';
 import '../../domain/usecases/get_all_book_requests.dart';
 import '../../domain/usecases/accept_book_request.dart';
 import '../../domain/usecases/decline_book_request.dart';
+import '../../domain/usecases/update_request_status.dart';
 
 // ─── Events ────────────────────────────────────────────────────────────────
 
@@ -23,7 +24,8 @@ class UpdateRequestStatus extends AdminRequestsEvent {
 
 class DeclineRequest extends AdminRequestsEvent {
   final String requestId;
-  DeclineRequest(this.requestId);
+  final String reason;
+  DeclineRequest(this.requestId, this.reason);
 }
 
 // ─── States ────────────────────────────────────────────────────────────────
@@ -71,11 +73,13 @@ class AdminRequestsBloc
   final GetAllBookRequestsUsecase getAllBookRequests;
   final AcceptBookRequestUsecase acceptBookRequest;
   final DeclineBookRequestUsecase declineBookRequest;
+  final UpdateRequestStatusUsecase updateRequestStatus;
 
   AdminRequestsBloc({
     required this.getAllBookRequests,
     required this.acceptBookRequest,
     required this.declineBookRequest,
+    required this.updateRequestStatus,
   }) : super(AdminRequestsInitial()) {
     on<LoadAllRequests>(_onLoadAll);
     on<AcceptRequest>(_onAccept);
@@ -113,7 +117,7 @@ class AdminRequestsBloc
     final currentList = _currentList();
     emit(AdminRequestActionLoading(currentList, event.requestId));
     try {
-      await declineBookRequest(event.requestId);
+      await declineBookRequest(event.requestId, reason: event.reason);
       final updated = await getAllBookRequests();
       emit(AdminRequestActionSuccess(updated, 'Request declined'));
     } catch (e) {
@@ -126,16 +130,7 @@ class AdminRequestsBloc
     final currentList = _currentList();
     emit(AdminRequestActionLoading(currentList, event.requestId));
     try {
-      switch (event.status) {
-        case 'approved':
-          await acceptBookRequest(event.requestId);
-          break;
-        case 'declined':
-          await declineBookRequest(event.requestId);
-          break;
-        default:
-          await acceptBookRequest(event.requestId);
-      }
+      await updateRequestStatus(event.requestId, event.status);
       final updated = await getAllBookRequests();
       emit(AdminRequestActionSuccess(
           updated, 'Status updated to ${event.status}'));

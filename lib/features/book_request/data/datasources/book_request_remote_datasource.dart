@@ -13,15 +13,14 @@ abstract class BookRequestRemoteDataSource {
   Future<List<BookRequestModel>> getMyBookRequests();
   Future<List<BookRequestModel>> getAllBookRequests();
   Future<List<BookRequestModel>> getUpcomingPickups();
-  Future<void> cancelBookRequest(String id);
+  Future<void> cancelBookRequest(String id, String reason);
   Future<void> acceptBookRequest(String id, {String? notes});
   Future<void> declineBookRequest(String id, {String reason});
-  Future<void> markAsDelivered(String id);
   Future<LibraryEntity> getLibraryDetails();
   Future<BookRequestModel> schedulePickup(PickupDetailsEntity details);
   Future<BookRequestModel> getRequestDetails(String id);
-  Future<void> setFulfillment(String id, String method, String name, String phone, String? address);
-  Future<void> confirmPayment(String id, int amount);
+  Future<void> updateRequestStatus(String id, String status);
+  Future<void> scheduleDelivery(String id, String name, String phone, String address, String pincode, String preferredDate, String preferredTime);
 }
 
 class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
@@ -121,8 +120,19 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<void> cancelBookRequest(String id) async {
-    throw UnimplementedError('Cancel book request is not supported');
+  Future<void> cancelBookRequest(String id, String reason) async {
+    try {
+      final response = await dio.delete(
+        '${ApiConstants.v1BookRequests}/$id',
+        data: {'reason': reason},
+      );
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw Exception('Failed to cancel book request');
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
@@ -149,25 +159,11 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
     try {
       final response = await dio.patch(
         '${ApiConstants.v1BookRequests}/$id/reject',
+        data: {'reason': reason},
       );
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {
         throw Exception('Failed to decline book request');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> markAsDelivered(String id) async {
-    try {
-      final response = await dio.patch(
-        '${ApiConstants.v1BookRequests}/$id/deliver',
-      );
-      if (response.statusCode != ApiConstants.success &&
-          response.statusCode != ApiConstants.created) {
-        throw Exception('Failed to mark as delivered');
       }
     } catch (e) {
       rethrow;
@@ -203,19 +199,15 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<void> setFulfillment(
-      String id, String method, String name, String phone, String? address) async {
+  Future<void> updateRequestStatus(String id, String status) async {
     try {
       final response = await dio.patch(
-        '${ApiConstants.v1BookRequests}/$id/fulfillment',
-        data: {
-          'fulfillmentMethod': method,
-          if (address != null) 'address': address,
-        },
+        '${ApiConstants.v1BookRequests}/$id/status',
+        data: {'status': status},
       );
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {
-        throw Exception('Failed to set fulfillment');
+        throw Exception('Failed to update status');
       }
     } catch (e) {
       rethrow;
@@ -223,21 +215,29 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<void> confirmPayment(String id, int amount) async {
+  Future<void> scheduleDelivery(
+      String id, String name, String phone, String address, String pincode, String preferredDate, String preferredTime) async {
     try {
       final response = await dio.post(
-        '${ApiConstants.v1BookRequests}/$id/payment',
+        '${ApiConstants.v1BookRequests}/$id/deliver-to-me',
         data: {
-          'amount': amount,
-          'currency': 'INR',
-          'paymentMethod': 'WALLET',
-          'description': 'Shipping charges for Book Request',
+          'name': name,
+          'phone': phone,
+          'address': address,
+          'pincode': pincode,
+          'preferredDate': preferredDate,
+          'preferredTime': preferredTime,
         },
       );
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {
-        throw Exception('Failed to confirm payment');
+        throw Exception('Failed to schedule delivery');
       }
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error']) as String?
+          : null;
+      throw Exception(serverMsg ?? 'Failed to schedule delivery. Please try again.');
     } catch (e) {
       rethrow;
     }
