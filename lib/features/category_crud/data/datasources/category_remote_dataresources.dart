@@ -48,7 +48,18 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
         throw Exception('Failed to load categories');
       }
 
-      return (response.data as List).map((json) {
+      final dynamic rawData = response.data;
+      final List<dynamic> list;
+
+      if (rawData is Map<String, dynamic> && rawData.containsKey('categories')) {
+        list = rawData['categories'] as List<dynamic>;
+      } else if (rawData is List) {
+        list = rawData;
+      } else {
+        throw Exception('Unexpected response format for categories');
+      }
+
+      return list.map((json) {
         BookValueItems.bookCategories.add(ItemModel.fromJson(json));
         CategoryItems.parentCategoryItems
             .add(parentCategoryModel.fromJson(json));
