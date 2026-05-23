@@ -33,9 +33,15 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
     emit(BannerLoading());
     try {
       final banners = await getBannerUsecase.call();
-      emit(BannerLoaded(banners: banners));
+
+      // Only show homepage banners
+      final homepageBanners = banners
+          .where((b) => b.bannerType.toLowerCase() == 'homepage')
+          .toList();
+
+      emit(BannerLoaded(banners: homepageBanners));
     } catch (e) {
-      emit(BannerError('Failed to create banner : ${e.toString()}'));
+      emit(BannerError('Failed to load banners: ${e.toString()}'));
     }
   }
 

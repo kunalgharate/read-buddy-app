@@ -18,11 +18,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    MainTab(),
-    CategoryTab(),
-    DonationTab(),
-    ProfileScreen(),
+  List<Widget> get _pages => [
+    MainTab(onDonatePressed: () => setState(() => _currentIndex = 2)),
+    const CategoryTab(),
+    const DonationTab(),
+    const ProfileScreen(),
   ];
 
   Future<void> _logout() async {
