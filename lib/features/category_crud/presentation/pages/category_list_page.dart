@@ -178,7 +178,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
                 height: 80,
                 fit: BoxFit.cover,
                 placeholder: (context, url) {
-                  print('🖼️ Loading image: $url');
                   return Container(
                     width: 70,
                     height: 80,
@@ -187,8 +186,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
                   );
                 },
                 errorWidget: (context, url, error) {
-                  print('🚨 Image load error for URL: $url');
-                  print('🚨 Error details: $error');
                   return Container(
                     width: 70,
                     height: 80,

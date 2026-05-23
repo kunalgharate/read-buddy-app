@@ -26,9 +26,9 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
       final dynamic rawData = response.data;
       final List<dynamic> list;
 
-      if (rawData is Map<String, dynamic> && rawData.containsKey('books')) {
+      if (rawData is Map<String, dynamic> && rawData['books'] is List) {
         list = rawData['books'] as List<dynamic>;
-      } else if (rawData is Map<String, dynamic> && rawData.containsKey('data')) {
+      } else if (rawData is Map<String, dynamic> && rawData['data'] is List) {
         list = rawData['data'] as List<dynamic>;
       } else if (rawData is List) {
         list = rawData;
@@ -37,6 +37,7 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
       }
 
       return list
+          .whereType<Map<String, dynamic>>()
           .map((json) => BookModel.fromJson(json))
           .toList();
     } catch (e) {

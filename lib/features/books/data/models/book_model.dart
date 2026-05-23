@@ -18,33 +18,39 @@ class BookModel extends Book {
       bookimage: (json['coverImageUrl'] ?? '').toString(),
       genre: (json['genre'] ?? '').toString(),
       book_category: categoryJson is Map<String, dynamic>
-          ? BookCategory.fromJson(categoryJson)
-          : BookCategory(id: '', category_name: ''),
+          ? BookCategoryModel.fromJson(categoryJson)
+          : const BookCategory(id: '', category_name: ''),
     );
   }
 
   Map<String, dynamic> toJson() => {
     '_id': id,
     'title': title,
-    'bookimage': bookimage,
+    'coverImageUrl': bookimage,
     'genre': genre,
-    'book_category': book_category.toJson(),
+    'category': book_category is BookCategoryModel 
+        ? (book_category as BookCategoryModel).toJson() 
+        : BookCategoryModel.fromEntity(book_category).toJson(),
   };
 }  // ← this was missing
 
-class BookCategory {
-  final String id;
-  final String category_name;
-
-  BookCategory({
-    required this.id,
-    required this.category_name,
+class BookCategoryModel extends BookCategory {
+  const BookCategoryModel({
+    required super.id,
+    required super.category_name,
   });
 
-  factory BookCategory.fromJson(Map<String, dynamic> json) {
-    return BookCategory(
+  factory BookCategoryModel.fromJson(Map<String, dynamic> json) {
+    return BookCategoryModel(
       id: (json['_id'] ?? '').toString(),
       category_name: (json['name'] ?? '').toString(),
+    );
+  }
+
+  factory BookCategoryModel.fromEntity(BookCategory entity) {
+    return BookCategoryModel(
+      id: entity.id,
+      category_name: entity.category_name,
     );
   }
 

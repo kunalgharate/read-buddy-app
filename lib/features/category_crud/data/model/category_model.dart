@@ -11,11 +11,8 @@ class CategoryModel extends CategoryEntity {
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     final parent = json['parentCategoryId'];
-    final imageUrl = json['imageUrl'] ?? '';
-    
-    // Debug logging to see what imageUrl we're getting
-    print('🖼️ CategoryModel.fromJson - imageUrl: "$imageUrl"');
-    
+    final imageUrl = (json['imageUrl'] ?? '').toString();
+
     return CategoryModel(
       id: json['_id'] ?? '',
       title: json['name'] ?? '',
