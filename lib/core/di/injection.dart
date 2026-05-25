@@ -12,115 +12,128 @@ import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/locati
 import 'package:read_buddy_app/features/profile/domain/usecases/get_profile.dart';
 
 // Core
-import '../../features/profile/data/datasource/profile_remote_data_source.dart';
-import '../../features/profile/domain/usecases/update_user_avatar.dart';
-import '../network/dio_client.dart';
-import '../utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/features/donate/domain/usecases/upload_receipt.dart';
+import 'package:read_buddy_app/features/profile/data/datasource/profile_remote_data_source.dart';
+import 'package:read_buddy_app/features/profile/domain/usecases/update_user_avatar.dart';
+import 'package:read_buddy_app/core/network/dio_client.dart';
+import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 
 // Auth
-import '../../features/auth/data/remotesource/auth_remote_data_source.dart';
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/auth/domain/repositories/auth_repository.dart';
-import '../../features/auth/domain/usecases/register_user_usecase.dart';
-import '../../features/auth/domain/usecases/sign_in.dart';
-import '../../features/auth/domain/usecases/sign_in_with_google.dart';
-import '../../features/auth/domain/usecases/verify_email_usecase.dart';
-import '../../features/auth/domain/usecases/send_otp_usecase.dart';
-import '../../features/auth/domain/usecases/verify_reset_otp_usecase.dart';
-import '../../features/auth/domain/usecases/change_password_usecase.dart';
-import '../../features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
-import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
-import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
+import 'package:read_buddy_app/features/auth/data/remotesource/auth_remote_data_source.dart';
+import 'package:read_buddy_app/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:read_buddy_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/register_user_usecase.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/verify_email_usecase.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/send_otp_usecase.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/verify_reset_otp_usecase.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/change_password_usecase.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
+import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
 
 // Profile
-import '../../features/profile/data/repositories/profile_repository_impl.dart';
-import '../../features/profile/domain/repositories/profile_repository.dart';
-import '../../features/profile/domain/usecases/update_profile_usecase.dart';
-import '../../features/profile/presentation/blocs/profile_bloc.dart';
+import 'package:read_buddy_app/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:read_buddy_app/features/profile/domain/repositories/profile_repository.dart';
+import 'package:read_buddy_app/features/profile/domain/usecases/update_profile_usecase.dart';
+import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 
 // Home Books
-import '../../features/homebooks/data/datasource/home_remote_datasource.dart';
-import '../../features/homebooks/data/repositories/home_book_repository_impl.dart';
-import '../../features/homebooks/domain/repositories/home_book_repository.dart';
-import '../../features/homebooks/domain/usecases/get_latest_books_usecase.dart';
-import '../../features/homebooks/domain/usecases/get_trending_books_usecase.dart';
-import '../../features/homebooks/domain/usecases/get_recommended_books_usecase.dart';
-import '../../features/homebooks/presentation/bloc/home_book_bloc.dart';
+import 'package:read_buddy_app/features/homebooks/data/datasource/home_remote_datasource.dart';
+import 'package:read_buddy_app/features/homebooks/data/repositories/home_book_repository_impl.dart';
+import 'package:read_buddy_app/features/homebooks/domain/repositories/home_book_repository.dart';
+import 'package:read_buddy_app/features/homebooks/domain/usecases/get_latest_books_usecase.dart';
+import 'package:read_buddy_app/features/homebooks/domain/usecases/get_trending_books_usecase.dart';
+import 'package:read_buddy_app/features/homebooks/domain/usecases/get_recommended_books_usecase.dart';
+import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_bloc.dart';
 
 // Books
-import '../../features/books/data/datasources/book_remote_data_source.dart';
-import '../../features/books/data/repositories/book_repository_impl.dart';
-import '../../features/books/domain/repositories/book_repository.dart';
-import '../../features/books/domain/usecases/get_books.dart';
-import '../../features/books/presentation/bloc/book_bloc.dart';
+import 'package:read_buddy_app/features/books/data/datasources/book_remote_data_source.dart';
+import 'package:read_buddy_app/features/books/data/repositories/book_repository_impl.dart';
+import 'package:read_buddy_app/features/books/domain/repositories/book_repository.dart';
+import 'package:read_buddy_app/features/books/domain/usecases/get_books.dart';
+import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
 
 // Book CRUD
-import '../../features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
-import '../../features/bookcrud/data/dataresources/user_remote_resources.dart';
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/user_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/search_location_remote_resources.dart';
-import '../../features/bookcrud/data/repositories/bookcrud_repo_impl.dart';
-import '../../features/bookcrud/data/repositories/user_repo_impl.dart';
-import '../../features/bookcrud/domain/respository/bookcrud_repo.dart';
-import '../../features/bookcrud/domain/respository/user_repo.dart';
-import '../../features/bookcrud/domain/usecases/add_book.dart';
-import '../../features/bookcrud/domain/usecases/delete_book.dart';
-import '../../features/bookcrud/domain/usecases/get_books.dart';
-import '../../features/bookcrud/domain/usecases/get_books_by_id.dart';
-import '../../features/bookcrud/domain/usecases/update_book.dart';
-import '../../features/bookcrud/domain/usecases/user_listcase.dart';
-import '../../features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
-import '../../features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
+import 'package:read_buddy_app/features/bookcrud/data/repositories/bookcrud_repo_impl.dart';
+import 'package:read_buddy_app/features/bookcrud/data/repositories/user_repo_impl.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/respository/bookcrud_repo.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/respository/user_repo.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/add_book.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/delete_book.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_books.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_books_by_id.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/update_book.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/user_listcase.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 
 // Category CRUD
-import '../../features/category_crud/data/datasources/category_remote_dataresources.dart';
-import '../../features/category_crud/data/repositories/category_repo_impl.dart';
-import '../../features/category_crud/domain/repository/category_repository.dart';
-import '../../features/category_crud/domain/usecases/add_categories.dart';
-import '../../features/category_crud/domain/usecases/dele_category.dart';
-import '../../features/category_crud/domain/usecases/get_caategories.dart';
-import '../../features/category_crud/domain/usecases/update_category.dart';
-import '../../features/category_crud/presentation/bloc/bloc/category_bloc.dart';
+import 'package:read_buddy_app/features/category_crud/data/datasources/category_remote_dataresources.dart';
+import 'package:read_buddy_app/features/category_crud/data/repositories/category_repo_impl.dart';
+import 'package:read_buddy_app/features/category_crud/domain/repository/category_repository.dart';
+import 'package:read_buddy_app/features/category_crud/domain/usecases/add_categories.dart';
+import 'package:read_buddy_app/features/category_crud/domain/usecases/dele_category.dart';
+import 'package:read_buddy_app/features/category_crud/domain/usecases/get_caategories.dart';
+import 'package:read_buddy_app/features/category_crud/domain/usecases/update_category.dart';
+import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 
 // Banner
-import '../../features/banner/datasources/data/createbanner_remote_datasource.dart';
-import '../../features/banner/datasources/repositories/banner_repo_impl.dart';
-import '../../features/banner/domain/repository/banner_repository.dart';
-import '../../features/banner/domain/usecase/create_banner.dart';
-import '../../features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:read_buddy_app/features/banner/datasources/data/createbanner_remote_datasource.dart';
+import 'package:read_buddy_app/features/banner/datasources/repositories/banner_repo_impl.dart';
+import 'package:read_buddy_app/features/banner/domain/repository/banner_repository.dart';
+import 'package:read_buddy_app/features/banner/domain/usecase/create_banner.dart';
+import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 
 // Questionaries
-import '../../features/questionaries/data/datasources/onboarding_remote_datasource.dart';
-import '../../features/questionaries/data/repositories/question_repository_impl.dart';
-import '../../features/questionaries/domain/repositories/onboarding_repository.dart';
-import '../../features/questionaries/domain/usecases/get_questions.dart';
-import '../../features/questionaries/domain/usecases/set_preferences.dart';
-import '../../features/questionaries/domain/usecases/update_user_preferences.dart';
-import '../../features/questionaries/domain/usecases/delete_user_preferences.dart';
-import '../../features/questionaries/domain/usecases/set_onboarding_status.dart';
-import '../../features/questionaries/presentations/bloc/on_boarding_bloc.dart';
+import 'package:read_buddy_app/features/questionaries/data/datasources/onboarding_remote_datasource.dart';
+import 'package:read_buddy_app/features/questionaries/data/repositories/question_repository_impl.dart';
+import 'package:read_buddy_app/features/questionaries/domain/repositories/onboarding_repository.dart';
+import 'package:read_buddy_app/features/questionaries/domain/usecases/get_questions.dart';
+import 'package:read_buddy_app/features/questionaries/domain/usecases/set_preferences.dart';
+import 'package:read_buddy_app/features/questionaries/domain/usecases/update_user_preferences.dart';
+import 'package:read_buddy_app/features/questionaries/domain/usecases/delete_user_preferences.dart';
+import 'package:read_buddy_app/features/questionaries/domain/usecases/set_onboarding_status.dart';
+import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_bloc.dart';
 
 // Donated Books
-import '../../features/donated_books/data/datasources/donation_remote_data_source.dart';
-import '../../features/donated_books/data/repositories/donated_books_repository_impl.dart';
-import '../../features/donated_books/domain/repositories/donated_books_repository.dart';
-import '../../features/donated_books/domain/usecases/get_donated_books.dart';
-import '../../features/donated_books/presentation/bloc/donated_books_bloc.dart';
+import 'package:read_buddy_app/features/donated_books/data/datasources/donation_remote_data_source.dart';
+import 'package:read_buddy_app/features/donated_books/data/repositories/donated_books_repository_impl.dart';
+import 'package:read_buddy_app/features/donated_books/domain/repositories/donated_books_repository.dart';
+import 'package:read_buddy_app/features/donated_books/domain/usecases/get_donated_books.dart';
+import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
 
 // Question CRUD (Admin)
-import '../../features/question_crud/data/datasources/question_remote_datasource.dart'
+import 'package:read_buddy_app/features/question_crud/data/datasources/question_remote_datasource.dart'
     as QuestionCrudDataSource;
-import '../../features/question_crud/data/repositories/question_repository_impl.dart'
+import 'package:read_buddy_app/features/question_crud/data/repositories/question_repository_impl.dart'
     as QuestionCrudRepo;
-import '../../features/question_crud/domain/repositories/question_repository.dart'
+import 'package:read_buddy_app/features/question_crud/domain/repositories/question_repository.dart'
     as QuestionCrudDomain;
-import '../../features/question_crud/domain/usecases/get_questions.dart'
+import 'package:read_buddy_app/features/question_crud/domain/usecases/get_questions.dart'
     as QuestionCrudUseCases;
-import '../../features/question_crud/domain/usecases/add_question.dart'
+import 'package:read_buddy_app/features/question_crud/domain/usecases/add_question.dart'
     as QuestionCrudUseCases;
-import '../../features/question_crud/domain/usecases/update_question.dart'
+import 'package:read_buddy_app/features/question_crud/domain/usecases/update_question.dart'
     as QuestionCrudUseCases;
-import '../../features/question_crud/domain/usecases/delete_question.dart'
+import 'package:read_buddy_app/features/question_crud/domain/usecases/delete_question.dart'
     as QuestionCrudUseCases;
+
+// Donation Stats
+
+// Donate
+import 'package:read_buddy_app/features/donate/data/datasources/donate_remote_datasource.dart';
+import 'package:read_buddy_app/features/donate/data/repositories/donate_repository_impl.dart';
+import 'package:read_buddy_app/features/donate/domain/repositories/donate_repository.dart';
+import 'package:read_buddy_app/features/donate/domain/usecases/get_donation_stats.dart'
+    as DonateUseCases;
+import 'package:read_buddy_app/features/donate/domain/usecases/get_nearest_agents.dart';
+import 'package:read_buddy_app/features/donate/domain/usecases/create_book_donation.dart';
+import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -129,7 +142,8 @@ final getIt = GetIt.instance;
   preferRelativeImports: true,
   asExtension: true,
 )
-void configureDependencies() {
+Future<void> configureDependencies() async {
+  await GetIt.instance.reset();
   _registerUtils();
   _registerDataSources();
   _registerRepositories();
@@ -218,6 +232,11 @@ void _registerDataSources() {
       getIt<SecureStorageUtil>(),
     ),
   );
+
+  // Donate
+  getIt.registerLazySingleton<DonateRemoteDataSource>(
+    () => DonateRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
 }
 
 // ========================================
@@ -283,6 +302,13 @@ void _registerRepositories() {
   getIt.registerLazySingleton<QuestionCrudDomain.QuestionRepository>(
     () => QuestionCrudRepo.QuestionRepositoryImpl(
       getIt<QuestionCrudDataSource.QuestionRemoteDataSource>(),
+    ),
+  );
+
+  // Donate
+  getIt.registerLazySingleton<DonateRepository>(
+    () => DonateRepositoryImpl(
+      remoteDataSource: getIt<DonateRemoteDataSource>(),
     ),
   );
 }
@@ -389,6 +415,16 @@ void _registerUseCases() {
       getIt<QuestionCrudDomain.QuestionRepository>()));
   getIt.registerLazySingleton(() => QuestionCrudUseCases.DeleteQuestion(
       getIt<QuestionCrudDomain.QuestionRepository>()));
+
+  // Donate
+  getIt.registerLazySingleton(() =>
+      DonateUseCases.GetDonationStats(repository: getIt<DonateRepository>()));
+  getIt.registerLazySingleton(
+      () => GetNearestAgents(repository: getIt<DonateRepository>()));
+  getIt.registerLazySingleton(
+      () => CreateBookDonation(repository: getIt<DonateRepository>()));
+  getIt.registerLazySingleton(
+      () => UploadReceipt(repository: getIt<DonateRepository>()));
 }
 
 // ========================================
@@ -464,6 +500,14 @@ void _registerBlocs() {
         updatePreferencesUseCase: getIt<UpdatePreferencesUseCase>(),
         deletePreferencesUseCase: getIt<DeletePreferencesUseCase>(),
         setOnboardingStatusUseCase: getIt<SetOnboardingStatusUseCase>(),
+      ));
+
+  // Donate
+  getIt.registerFactory(() => DonateBookBloc(
+        getDonationStats: getIt<DonateUseCases.GetDonationStats>(),
+        getNearestAgents: getIt<GetNearestAgents>(),
+        createBookDonation: getIt<CreateBookDonation>(),
+        uploadReceipt: getIt<UploadReceipt>(),
       ));
 }
 

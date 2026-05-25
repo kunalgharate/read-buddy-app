@@ -2,34 +2,46 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class NetworkUtils {
-  /// Check if device has internet connectivity
+  /// Check if device has internet connectivity.
+  /// Uses multiple strategies to handle emulator DNS issues.
   static Future<bool> hasInternetConnection() async {
-    try {
-      // Try to lookup a reliable host
-      final result = await InternetAddress.lookup('google.com');
-
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        if (kDebugMode) {
-          print('🌐 NetworkUtils: Internet connection available');
+    // Strategy 1: DNS lookup with multiple hosts
+    final hosts = ['google.com', 'cloudflare.com', '1.1.1.1'];
+    for (final host in hosts) {
+      try {
+        final result = await InternetAddress.lookup(host)
+            .timeout(const Duration(seconds: 3));
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          if (kDebugMode) {
+            print('🌐 NetworkUtils: Internet connection available (via $host)');
+          }
+          return true;
         }
-        return true;
+      } catch (_) {
+        // Try next host
       }
-
-      if (kDebugMode) {
-        print('🌐 NetworkUtils: No internet connection');
-      }
-      return false;
-    } on SocketException catch (e) {
-      if (kDebugMode) {
-        print('🌐 NetworkUtils: Socket exception - $e');
-      }
-      return false;
-    } catch (e) {
-      if (kDebugMode) {
-        print('🌐 NetworkUtils: Unexpected error checking connectivity - $e');
-      }
-      return false;
     }
+
+    // Strategy 2: Raw socket connection (bypasses DNS)
+    try {
+      final socket = await Socket.connect(
+        '1.1.1.1',
+        53,
+        timeout: const Duration(seconds: 3),
+      );
+      socket.destroy();
+      if (kDebugMode) {
+        print('🌐 NetworkUtils: Internet connection available (via socket)');
+      }
+      return true;
+    } catch (_) {
+      // Socket failed
+    }
+
+    if (kDebugMode) {
+      print('🌐 NetworkUtils: No internet connection');
+    }
+    return false;
   }
 
   /// Check if specific server is reachable
