@@ -28,7 +28,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../network/api_constants.dart';
+import 'package:read_buddy_app/core/network/api_constants.dart';
 
 class AppInterceptor extends Interceptor {
   final FlutterSecureStorage _secureStorage;
@@ -74,7 +74,12 @@ class AppInterceptor extends Interceptor {
   }
 
   bool _shouldAttemptTokenRefresh(DioException err) {
-    return err.response?.statusCode == ApiConstants.unauthorized &&
+    final statusCode = err.response?.statusCode;
+    final isTokenExpired = err.response?.data is Map && 
+        (err.response?.data['error']?.toString().contains('token') == true ||
+         err.response?.data['message']?.toString().contains('token') == true);
+
+    return (statusCode == ApiConstants.unauthorized || (statusCode == ApiConstants.forbidden && isTokenExpired)) &&
         !err.requestOptions.uri.path.contains('/auth/refresh') &&
         !err.requestOptions.uri.path.contains('/login') &&
         !err.requestOptions.uri.path.contains('/register');

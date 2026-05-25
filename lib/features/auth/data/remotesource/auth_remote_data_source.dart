@@ -87,6 +87,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (response.statusCode == ApiConstants.success ||
           response.statusCode == ApiConstants.created) {
+        // Check if the API returned "user already registered" with 200 status
+        final responseData = response.data;
+        if (responseData is Map<String, dynamic>) {
+          final message =
+              responseData['message']?.toString().toLowerCase() ?? '';
+          if (message.contains('already registered') ||
+              message.contains('user already exists')) {
+            throw DioException(
+              requestOptions: response.requestOptions,
+              response: Response(
+                requestOptions: response.requestOptions,
+                statusCode: ApiConstants.forbidden,
+                data: responseData,
+              ),
+              message: 'user already registered',
+            );
+          }
+        }
+
         return AppUserModel.fromJson(response.data);
       }
 

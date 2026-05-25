@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
-import '../../../banner/presentation/bloc/banner_bloc.dart';
-import '../../../homebooks/data/datasource/home_remote_datasource.dart';
-import '../../../homebooks/data/model/home_monthly_status_model.dart';
-import '../../../homebooks/domain/entities/book_entity.dart';
-import '../../../homebooks/presentation/bloc/home_book_bloc.dart';
-import '../../../homebooks/presentation/bloc/home_book_event.dart';
-import '../../../homebooks/presentation/bloc/home_book_state.dart';
+import 'package:read_buddy_app/features/banner/domain/entity/banner_entity.dart';
+import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:read_buddy_app/features/homebooks/data/datasource/home_remote_datasource.dart';
+import 'package:read_buddy_app/features/homebooks/data/model/home_monthly_status_model.dart';
+import 'package:read_buddy_app/features/homebooks/domain/entities/book_entity.dart';
+import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_bloc.dart';
+import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_event.dart';
+import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_state.dart';
 
 const _primary = Color(0xFF03405B);
 
@@ -16,7 +17,8 @@ const _primary = Color(0xFF03405B);
 // ─────────────────────────────────────────────
 
 class MainTab extends StatelessWidget {
-  const MainTab({super.key});
+  final VoidCallback? onDonatePressed;
+  const MainTab({super.key, this.onDonatePressed});
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +29,14 @@ class MainTab extends StatelessWidget {
             create: (_) =>
                 getIt<BannerBloc>()), // no event yet — fired conditionally
       ],
-      child: const _MainTabView(),
+      child: _MainTabView(onDonatePressed: onDonatePressed),
     );
   }
 }
 
 class _MainTabView extends StatelessWidget {
-  const _MainTabView();
+  final VoidCallback? onDonatePressed;
+  const _MainTabView({this.onDonatePressed});
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +79,7 @@ class _MainTabView extends StatelessWidget {
                       trendingCover:
                           state.trendingBooks.firstOrNull?.coverImageUrl,
                       isPrime: state.isPrime,
+                      onDonatePressed: onDonatePressed,
                     ),
                     const SizedBox(height: 32),
                     _BookSection(title: 'Latest', books: state.latestBooks),
@@ -101,43 +105,39 @@ class _MainTabView extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-// Banner — prime: API data | non-prime: static donation card
+// Banner — prime: image carousel | non-prime: static donation card
 // ─────────────────────────────────────────────
 
 class _BannerSection extends StatelessWidget {
   final String? trendingCover;
   final bool isPrime;
-  const _BannerSection({this.trendingCover, required this.isPrime});
+  final VoidCallback? onDonatePressed;
+  const _BannerSection({this.trendingCover, required this.isPrime, this.onDonatePressed});
 
   @override
   Widget build(BuildContext context) {
-    // Non-prime: skip BlocBuilder entirely, show static donation card
+    // Non-prime: show static donation card
     if (!isPrime) {
-      return _buildCard(
-        title: 'Support a Reader',
-        description: 'Donate a book and make a difference.',
-      );
+      return _buildDonationCard();
     }
 
-    // Prime: wait for BannerBloc
+    // Prime: show banner image carousel from API
     return BlocBuilder<BannerBloc, BannerState>(
       builder: (context, state) {
         if (state is! BannerLoaded || state.banners.isEmpty) {
-          return _buildCard(
-            title: 'Support a Reader',
-            description: 'Donate a book and make a difference.',
-          );
+          return _buildDonationCard();
         }
-        final banner = state.banners.first;
-        return _buildCard(title: banner.title, description: banner.description);
+        return _BannerCarousel(banners: state.banners);
       },
     );
   }
 
-  Widget _buildCard({required String title, String? description}) {
+  Widget _buildDonationCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
+      child: GestureDetector(
+        onTap: onDonatePressed,
+        child: Container(
         height: 165,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
@@ -155,7 +155,6 @@ class _BannerSection extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // Left: text + donate button
             Positioned(
               left: 20,
               top: 20,
@@ -165,48 +164,40 @@ class _BannerSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(title,
+                  const Text('Support a Reader',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         height: 1.35,
                       )),
-                  if (description?.isNotEmpty == true)
-                    Text(description!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.75),
-                          fontSize: 11,
-                          height: 1.4,
-                        )),
-                  GestureDetector(
-                    onTap: () {
-                      // TODO: switch to donation tab
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF3DAA6E),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: const Text('Donate',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          )),
+                  Text('Donate a book and make a difference.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.75),
+                        fontSize: 11,
+                        height: 1.4,
+                      )),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3DAA6E),
+                      borderRadius: BorderRadius.circular(24),
                     ),
+                    child: const Text('Donate',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        )),
                   ),
                 ],
               ),
             ),
-
-            // Right: book cover raised above card
             Positioned(
               right: 16,
               top: -12,
@@ -224,14 +215,170 @@ class _BannerSection extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _coverPlaceholder() => Container(
         width: 115,
         color: Colors.white12,
         child: const Icon(Icons.menu_book, color: Colors.white38, size: 40),
       );
+}
+
+// ─────────────────────────────────────────────
+// Banner Carousel — auto-scrolling image banners
+// ─────────────────────────────────────────────
+
+class _BannerCarousel extends StatefulWidget {
+  final List<BannerEntity> banners;
+  const _BannerCarousel({required this.banners});
+
+  @override
+  State<_BannerCarousel> createState() => _BannerCarouselState();
+}
+
+class _BannerCarouselState extends State<_BannerCarousel> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+  late final int _totalPages;
+
+  @override
+  void initState() {
+    super.initState();
+    _totalPages = widget.banners.length;
+    _pageController = PageController(viewportFraction: 0.92);
+    // Auto-scroll every 4 seconds
+    _startAutoScroll();
+  }
+
+  void _startAutoScroll() {
+    Future.delayed(const Duration(seconds: 4), () {
+      if (!mounted) return;
+      final next = (_currentPage + 1) % _totalPages;
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+      _startAutoScroll();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 175,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _totalPages,
+            onPageChanged: (i) => setState(() => _currentPage = i),
+            itemBuilder: (context, index) {
+              final banner = widget.banners[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Banner image
+                      Image.network(
+                        banner.bannerImage,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: const Color(0xFF03405B),
+                          child: const Center(
+                            child: Icon(Icons.image_not_supported,
+                                color: Colors.white38, size: 40),
+                          ),
+                        ),
+                      ),
+                      // Gradient overlay for text readability
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(16, 28, 16, 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                banner.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (banner.description?.isNotEmpty == true) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  banner.description!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Dot indicators
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(_totalPages, (i) {
+            final isActive = i == _currentPage;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              height: 6,
+              width: isActive ? 20 : 6,
+              decoration: BoxDecoration(
+                color: isActive
+                    ? const Color(0xFF2CE07F)
+                    : const Color(0xFFD0D5DD),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
 }
 
 // ─────────────────────────────────────────────

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:read_buddy_app/features/books/presentation/pages/book_page.dart';
-import 'package:read_buddy_app/features/donate/presentation/donation_page.dart';
 import 'package:read_buddy_app/features/home/presentation/pages/home_page.dart';
 import 'package:read_buddy_app/features/mybook/presentation/mybook.dart';
+
+import '../features/donate/presentation/pages/book_donation_page.dart';
 
 class BottomNavLayout extends StatefulWidget {
   const BottomNavLayout({super.key});
