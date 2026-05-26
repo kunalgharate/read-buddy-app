@@ -177,18 +177,22 @@ class _CategoryListPageState extends State<CategoryListPage> {
                 width: 70,
                 height: 80,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  width: 70,
-                  height: 80,
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.image, color: Colors.grey),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  width: 70,
-                  height: 80,
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.broken_image, color: Colors.grey),
-                ),
+                placeholder: (context, url) {
+                  return Container(
+                    width: 70,
+                    height: 80,
+                    color: Colors.grey.shade300,
+                    child: const Icon(Icons.image, color: Colors.grey),
+                  );
+                },
+                errorWidget: (context, url, error) {
+                  return Container(
+                    width: 70,
+                    height: 80,
+                    color: Colors.grey.shade300,
+                    child: const Icon(Icons.broken_image, color: Colors.grey),
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),

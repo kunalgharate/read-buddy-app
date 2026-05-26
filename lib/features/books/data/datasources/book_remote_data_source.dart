@@ -23,7 +23,21 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
         throw Exception('Failed to load books');
       }
 
-      return (response.data as List)
+      final dynamic rawData = response.data;
+      final List<dynamic> list;
+
+      if (rawData is Map<String, dynamic> && rawData['books'] is List) {
+        list = rawData['books'] as List<dynamic>;
+      } else if (rawData is Map<String, dynamic> && rawData['data'] is List) {
+        list = rawData['data'] as List<dynamic>;
+      } else if (rawData is List) {
+        list = rawData;
+      } else {
+        throw Exception('Unexpected response format for books');
+      }
+
+      return list
+          .whereType<Map<String, dynamic>>()
           .map((json) => BookModel.fromJson(json))
           .toList();
     } catch (e) {
