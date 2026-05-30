@@ -32,11 +32,11 @@ class AdminDashboardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Manage books, categories and users',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
+            // const Text(
+            //   'Manage books, categories and users',
+            //   style: TextStyle(fontSize: 16, color: Colors.grey),
+            // ),
+            // const SizedBox(height: 16),
             const TextField(
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.search),
@@ -62,7 +62,9 @@ class AdminDashboardScreen extends StatelessWidget {
                     title: 'Books Request',
                     count: 8,
                     color: Colors.redAccent,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-book-requests');
+                    },
                   ),
                   DashboardBoxWidget(
                     title: 'New Users',
@@ -108,7 +110,9 @@ class AdminDashboardScreen extends StatelessWidget {
                     title: 'Request',
                     count: 12,
                     icon: Icons.list_alt,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-book-requests');
+                    },
                   ),
                   DashboardBoxWidget(
                     title: 'Users',
@@ -130,6 +134,14 @@ class AdminDashboardScreen extends StatelessWidget {
                     icon: Icons.quiz,
                     onPressed: () {
                       Navigator.of(context).pushNamed('/questions');
+                    },
+                  ),
+                  DashboardBoxWidget(
+                    title: 'Upcoming Pickups',
+                    count: 0,
+                    icon: Icons.local_shipping_outlined,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-book-requests');
                     },
                   ),
                 ],

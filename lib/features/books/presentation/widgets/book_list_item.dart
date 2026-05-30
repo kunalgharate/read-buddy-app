@@ -2,6 +2,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/book.dart';
+import 'package:read_buddy_app/features/book_request/presentation/pages/book_detail_page.dart';
 
 class BookListItem extends StatelessWidget {
   final Book book;
@@ -10,7 +11,12 @@ class BookListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => BookDetailPage(bookId: book.id)),
+      ),
+      child: Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black), // visible border
         borderRadius: BorderRadius.circular(12),
@@ -70,6 +76,7 @@ class BookListItem extends StatelessWidget {
           ),
         ],
       ),
+    )
     );
   }
 }

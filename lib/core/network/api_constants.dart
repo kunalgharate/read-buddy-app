@@ -32,8 +32,26 @@ class ApiConstants {
   // Donation endpoints
   static const String getAllDonations = '$baseUrl/donations';
   static const String myImpact = '$baseUrl/v1/donations/my-impact';
-  static const String createBookDonation = '$baseUrl/v1/donations/createBookDonation';
-  static String uploadDonationReceipt(String donationId) => '$baseUrl/v1/donations/$donationId/uploadReceipt';
+  static const String createBookDonation =
+      '$baseUrl/v1/donations/createBookDonation';
+  static String uploadDonationReceipt(String donationId) =>
+      '$baseUrl/v1/donations/$donationId/uploadReceipt';
+
+  // ─── Book Request endpoints ──────────────────────────────────────────────
+  // User's own requests
+  static const String userBookRequests = '$baseUrl/users/book-requests';
+  // v1 book-requests base
+  // GET all: /api/v1/book-requests
+  // PATCH approve: /api/v1/book-requests/:id/approve
+  // PATCH reject: /api/v1/book-requests/:id/reject
+  static const String v1BookRequests = '$baseUrl/v1/book-requests';
+  // Admin — all requests
+  static const String getAllBookRequests = '$baseUrl/bookrequests';
+  static const String bookRequests = '$baseUrl/bookrequests';
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Library endpoints
+  static const String libraryDetails = '$baseUrl/v1/libraries/details';
 
   static const String olaMap = '$baseUrl/ola/address?input';
 

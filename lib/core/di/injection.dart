@@ -107,6 +107,27 @@ import 'package:read_buddy_app/features/donated_books/domain/repositories/donate
 import 'package:read_buddy_app/features/donated_books/domain/usecases/get_donated_books.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
 
+// Book Request
+import '../../features/book_request/data/datasources/book_request_remote_datasource.dart';
+import '../../features/book_request/data/repositories/book_request_repository_impl.dart';
+import '../../features/book_request/domain/repositories/book_request_repository.dart';
+import '../../features/book_request/domain/usecases/get_book_detail.dart';
+import '../../features/book_request/domain/usecases/create_book_request.dart';
+import '../../features/book_request/domain/usecases/get_my_book_requests.dart';
+import '../../features/book_request/domain/usecases/get_all_book_requests.dart';
+import '../../features/book_request/domain/usecases/accept_book_request.dart';
+import '../../features/book_request/domain/usecases/decline_book_request.dart';
+import '../../features/book_request/domain/usecases/get_library_details.dart';
+import '../../features/book_request/domain/usecases/schedule_pickup.dart';
+import '../../features/book_request/domain/usecases/schedule_delivery.dart';
+import '../../features/book_request/domain/usecases/update_request_status.dart';
+import '../../features/book_request/domain/usecases/get_upcoming_pickups.dart';
+import '../../features/book_request/domain/usecases/cancel_book_request.dart';
+import '../../features/book_request/presentation/bloc/book_request_bloc.dart';
+import '../../features/book_request/presentation/bloc/my_requests_bloc.dart';
+import '../../features/book_request/presentation/bloc/admin_requests_bloc.dart';
+import '../../features/book_request/presentation/bloc/admin_upcoming_pickups_bloc.dart';
+
 // Question CRUD (Admin)
 import 'package:read_buddy_app/features/question_crud/data/datasources/question_remote_datasource.dart'
     as QuestionCrudDataSource;
@@ -156,7 +177,7 @@ Future<void> configureDependencies() async {
 // UTILS & CORE
 // ========================================
 void _registerUtils() {
-  getIt.registerLazySingleton<SecureStorageUtil>(() => SecureStorageUtil());
+  getIt.registerSingleton<SecureStorageUtil>(SecureStorageUtil());
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
 }
 
@@ -223,6 +244,14 @@ void _registerDataSources() {
   // Donated Books
   getIt.registerLazySingleton<DonatedBooksRemoteDataSource>(
     () => DonatedBooksRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Book Request
+  getIt.registerLazySingleton<BookRequestRemoteDataSource>(
+    () => BookRequestRemoteDataSourceImpl(
+      dio: getIt<Dio>(),
+      secureStorage: getIt<SecureStorageUtil>(),
+    ),
   );
 
   // Question CRUD (Admin)
@@ -296,6 +325,11 @@ void _registerRepositories() {
   // Donated Books
   getIt.registerLazySingleton<DonatedBooksRepository>(
     () => DonatedBooksRepositoryImpl(getIt<DonatedBooksRemoteDataSource>()),
+  );
+
+  // Book Request
+  getIt.registerLazySingleton<BookRequestRepository>(
+    () => BookRequestRepositoryImpl(getIt<BookRequestRemoteDataSource>()),
   );
 
   // Question CRUD (Admin)
@@ -406,6 +440,32 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => GetDonatedBooks(getIt<DonatedBooksRepository>()));
 
+  // Book Request
+  getIt.registerLazySingleton(
+      () => GetBookDetailUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => CreateBookRequestUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => GetMyBookRequestsUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => CancelBookRequestUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => GetAllBookRequestsUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => AcceptBookRequestUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => DeclineBookRequestUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => GetLibraryDetailsUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => SchedulePickupUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => SetFulfillmentUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => ConfirmPaymentUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => GetUpcomingPickupsUsecase(getIt<BookRequestRepository>()));
+
   // Question CRUD (Admin)
   getIt.registerLazySingleton(() => QuestionCrudUseCases.GetQuestions(
       getIt<QuestionCrudDomain.QuestionRepository>()));
@@ -508,6 +568,29 @@ void _registerBlocs() {
         getNearestAgents: getIt<GetNearestAgents>(),
         createBookDonation: getIt<CreateBookDonation>(),
         uploadReceipt: getIt<UploadReceipt>(),
+      ));
+
+  // Book Request
+  getIt.registerFactory(() => BookRequestBloc(
+        getBookDetail: getIt<GetBookDetailUsecase>(),
+        createBookRequest: getIt<CreateBookRequestUsecase>(),
+        getLibraryDetails: getIt<GetLibraryDetailsUsecase>(),
+        schedulePickup: getIt<SchedulePickupUsecase>(),
+        scheduleDelivery: getIt<ScheduleDeliveryUsecase>(),
+      ));
+  getIt.registerFactory(() => MyRequestsBloc(
+        getMyBookRequests: getIt<GetMyBookRequestsUsecase>(),
+        cancelBookRequest: getIt<CancelBookRequestUsecase>(),
+        updateRequestStatus: getIt<UpdateRequestStatusUsecase>(),
+      ));
+  getIt.registerFactory(() => AdminRequestsBloc(
+        getAllBookRequests: getIt<GetAllBookRequestsUsecase>(),
+        acceptBookRequest: getIt<AcceptBookRequestUsecase>(),
+        declineBookRequest: getIt<DeclineBookRequestUsecase>(),
+        updateRequestStatus: getIt<UpdateRequestStatusUsecase>(),
+      ));
+  getIt.registerFactory(() => AdminUpcomingPickupsBloc(
+        getUpcomingPickups: getIt<GetUpcomingPickupsUsecase>(),
       ));
 }
 

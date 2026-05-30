@@ -26,6 +26,8 @@ import 'package:read_buddy_app/features/home/presentation/widgets/Format_screen.
 import 'package:read_buddy_app/features/questionaries/presentations/pages/onboarding_questionaire.dart';
 import 'package:read_buddy_app/features/question_crud/presentation/pages/question_list_page.dart';
 import 'package:read_buddy_app/features/auth/presentation/widgets/email_verification_widget.dart';
+import 'package:read_buddy_app/features/book_request/presentation/pages/admin_book_requests_page.dart';
+import 'package:read_buddy_app/features/book_request/presentation/pages/admin_upcoming_pickups_page.dart';
 import 'package:read_buddy_app/features/books/presentation/pages/book_page.dart';
 import 'package:read_buddy_app/features/dashboard/presentation/screens/admin_dashboard_screen.dart';
 import 'package:read_buddy_app/features/onboarding/onboarding_screens.dart';
@@ -40,6 +42,11 @@ class AppRouter {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => const SplashScreen());
+      case '/admin-book-requests':
+        return MaterialPageRoute(builder: (_) => const AdminBookRequestsPage());
+      case '/admin-upcoming-pickups':
+        return MaterialPageRoute(
+            builder: (_) => const AdminUpcomingPickupsPage());
       case '/book':
         return MaterialPageRoute(builder: (_) => const BookPage());
       case '/onboarding':
