@@ -205,7 +205,8 @@ class _QuestionListPageState extends State<QuestionListPage> {
                                   const SizedBox(width: 8),
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.green.withOpacity(0.1),
+                                      color:
+                                          Colors.green.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     padding: const EdgeInsets.symmetric(
@@ -275,7 +276,8 @@ class _QuestionListPageState extends State<QuestionListPage> {
                                         width: 20,
                                         height: 20,
                                         decoration: BoxDecoration(
-                                          color: Colors.green.withOpacity(0.1),
+                                          color: Colors.green
+                                              .withValues(alpha: 0.1),
                                           borderRadius:
                                               BorderRadius.circular(10),
                                         ),
