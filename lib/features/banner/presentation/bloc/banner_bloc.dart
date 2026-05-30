@@ -12,6 +12,8 @@ part 'banner_event.dart';
 part 'banner_state.dart';
 
 class BannerBloc extends Bloc<BannerEvent, BannerState> {
+  String? _currentTypeFilter;
+
   final GetBannerUsecase getBannerUsecase;
   final CreateBannerUsecase createBannerUsecase;
   final UpdateBannerUsecase updateBannerUsecase;
@@ -30,12 +32,22 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
 
   Future<void> _onGetBanners(
       GetBannerListEvent event, Emitter<BannerState> emit) async {
+    _currentTypeFilter = event.typeFilter;
     emit(BannerLoading());
     try {
       final banners = await getBannerUsecase.call();
-      emit(BannerLoaded(banners: banners));
+
+      final filteredBanners = _currentTypeFilter != null
+          ? banners
+              .where((b) =>
+                  b.bannerType.toLowerCase() ==
+                  _currentTypeFilter!.toLowerCase())
+              .toList()
+          : banners;
+
+      emit(BannerLoaded(banners: filteredBanners));
     } catch (e) {
-      emit(BannerError('Failed to create banner : ${e.toString()}'));
+      emit(BannerError('Failed to load banners: ${e.toString()}'));
     }
   }
 
@@ -50,7 +62,7 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
         bannerType: event.bannerType,
         bannerImage: event.bannerImage,
       );
-      add(GetBannerListEvent());
+      add(GetBannerListEvent(typeFilter: _currentTypeFilter));
     } catch (e) {
       emit(BannerError('Failed to create banner : ${e.toString()}'));
     }
@@ -68,7 +80,7 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
         bannerType: event.bannerType,
         bannerImage: event.bannerImage,
       );
-      add(GetBannerListEvent());
+      add(GetBannerListEvent(typeFilter: _currentTypeFilter));
     } catch (e) {
       emit(BannerError('Failed to update banner : ${e.toString()}'));
     }
@@ -79,7 +91,7 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
     emit(BannerLoading());
     try {
       await deleteBannerUsecase.call(id: event.id);
-      add(GetBannerListEvent());
+      add(GetBannerListEvent(typeFilter: _currentTypeFilter));
     } catch (e) {
       emit(BannerError('Failed to delete banner : ${e.toString()}'));
     }

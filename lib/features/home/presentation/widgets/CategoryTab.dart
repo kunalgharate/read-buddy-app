@@ -163,9 +163,7 @@ class _CategoryTabState extends State<CategoryTab> {
             child: IconButton(
               icon: const Icon(Icons.tune, color: _primary),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Filter functionality coming soon')),
-                );
+                // Future Filter/Sorting implementation
               },
             ),
           ),
@@ -227,8 +225,8 @@ class _CategoryTabState extends State<CategoryTab> {
 
   // ─── Default All View (Figma Screen 3 - Default category page) ──────────────
   Widget _buildDefaultAllView(List<CategoryEntity> allCategories, List<Book> allBooks) {
-    // Show 'Popular Genres' using all parent categories (limit to 8 for premium design)
-    final popularGenres = allCategories.where((c) => c.parentCategoryName == null).take(8).toList();
+    // Show 'Popular Genres' using all categories (limit to 6 for premium design)
+    final popularGenres = allCategories.take(8).toList();
 
     // Group books by category and filter by search query
     final filteredBooks = allBooks.where((book) {
@@ -426,8 +424,8 @@ class _CategoryTabState extends State<CategoryTab> {
     // Exact match: "fiction" == "fiction"
     if (genre == catName) return true;
 
-    // Partial: "science fiction" contains "fiction"
-    if (genre.contains(catName)) return true;
+    // Partial: "fiction" inside "science fiction", "literary fiction" or vice versa
+    if (catName.contains(genre) || genre.contains(catName)) return true;
 
     return false;
   }

@@ -1,4 +1,5 @@
 import '../../domain/entities/book.dart';
+import '../../domain/entities/book_category.dart';
 
 class BookModel extends Book {
   const BookModel({
@@ -28,11 +29,9 @@ class BookModel extends Book {
     'title': title,
     'coverImageUrl': bookimage,
     'genre': genre,
-    'category': book_category is BookCategoryModel 
-        ? (book_category as BookCategoryModel).toJson() 
-        : BookCategoryModel.fromEntity(book_category).toJson(),
+    'category': BookCategoryModel(id: book_category.id, category_name: book_category.category_name).toJson(),
   };
-}  // ← this was missing
+}
 
 class BookCategoryModel extends BookCategory {
   const BookCategoryModel({
@@ -44,13 +43,6 @@ class BookCategoryModel extends BookCategory {
     return BookCategoryModel(
       id: (json['_id'] ?? '').toString(),
       category_name: (json['name'] ?? '').toString(),
-    );
-  }
-
-  factory BookCategoryModel.fromEntity(BookCategory entity) {
-    return BookCategoryModel(
-      id: entity.id,
-      category_name: entity.category_name,
     );
   }
 

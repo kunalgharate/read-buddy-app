@@ -25,9 +25,7 @@ class MainTab extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<HomeBloc>()..add(LoadHomeData())),
-        BlocProvider(
-            create: (_) =>
-                getIt<BannerBloc>()), // no event yet — fired conditionally
+        BlocProvider(create: (_) => getIt<BannerBloc>()),
       ],
       child: _MainTabView(onDonatePressed: onDonatePressed),
     );
@@ -43,11 +41,10 @@ class _MainTabView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F4F7),
       body: BlocConsumer<HomeBloc, HomeState>(
-        // Fire banner event only once when HomeLoaded first arrives
         listenWhen: (prev, curr) => curr is HomeLoaded && prev is! HomeLoaded,
         listener: (context, state) {
           if (state is HomeLoaded && state.isPrime) {
-            context.read<BannerBloc>().add(GetBannerListEvent());
+            context.read<BannerBloc>().add(const GetBannerListEvent(typeFilter: 'homepage'));
           }
         },
         builder: (context, state) {
@@ -61,7 +58,8 @@ class _MainTabView extends StatelessWidget {
                 Text(state.message, textAlign: TextAlign.center),
                 const SizedBox(height: 12),
                 ElevatedButton(
-                  onPressed: () => context.read<HomeBloc>().add(LoadHomeData()),
+                  onPressed: () =>
+                      context.read<HomeBloc>().add(LoadHomeData()),
                   child: const Text('Retry'),
                 ),
               ]),
@@ -77,16 +75,20 @@ class _MainTabView extends StatelessWidget {
                   children: [
                     _BannerSection(
                       trendingCover:
-                          state.trendingBooks.firstOrNull?.coverImageUrl,
+                      state.trendingBooks.firstOrNull?.coverImageUrl,
                       isPrime: state.isPrime,
                       onDonatePressed: onDonatePressed,
                     ),
                     const SizedBox(height: 32),
-                    _BookSection(title: 'Latest', books: state.latestBooks),
+                    _BookSection(
+                      title: 'Latest',
+                      books: state.latestBooks,
+                    ),
                     const SizedBox(height: 32),
                     _BookSection(
-                        title: 'Recommended for you',
-                        books: state.recommendedBooks),
+                      title: 'Recommended for you',
+                      books: state.recommendedBooks,
+                    ),
                     const SizedBox(height: 32),
                     _MonthlyStatsCard(
                         dataSource: getIt<HomeRemoteDataSource>()),
@@ -112,22 +114,34 @@ class _BannerSection extends StatelessWidget {
   final String? trendingCover;
   final bool isPrime;
   final VoidCallback? onDonatePressed;
-  const _BannerSection({this.trendingCover, required this.isPrime, this.onDonatePressed});
+  const _BannerSection(
+      {this.trendingCover, required this.isPrime, this.onDonatePressed});
 
   @override
   Widget build(BuildContext context) {
-    // Non-prime: show static donation card
     if (!isPrime) {
       return _buildDonationCard();
     }
 
-    // Prime: show banner image carousel from API
+    // Prime: wait for banners, show loader until ready
     return BlocBuilder<BannerBloc, BannerState>(
       builder: (context, state) {
-        if (state is! BannerLoaded || state.banners.isEmpty) {
-          return _buildDonationCard();
+        if (state is BannerLoading || state is BannerInitial) {
+          return const SizedBox(
+            height: 175,
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: _primary,
+              ),
+            ),
+          );
         }
-        return _BannerCarousel(banners: state.banners);
+        if (state is BannerLoaded && state.banners.isNotEmpty) {
+          return _BannerCarousel(banners: state.banners);
+        }
+        // Banners failed or empty — fall back to donation card
+        return _buildDonationCard();
       },
     );
   }
@@ -138,81 +152,82 @@ class _BannerSection extends StatelessWidget {
       child: GestureDetector(
         onTap: onDonatePressed,
         child: Container(
-        height: 165,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF03405B), Color(0xFF076A8F)],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: _primary.withOpacity(0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+          height: 165,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF03405B), Color(0xFF076A8F)],
             ),
-          ],
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              left: 20,
-              top: 20,
-              bottom: 20,
-              right: 150,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Support a Reader',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        height: 1.35,
-                      )),
-                  Text('Donate a book and make a difference.',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.75),
-                        fontSize: 11,
-                        height: 1.4,
-                      )),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF3DAA6E),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: const Text('Donate',
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: _primary.withOpacity(0.35),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                left: 20,
+                top: 20,
+                bottom: 20,
+                right: 150,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Support a Reader',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          height: 1.35,
+                        )),
+                    Text('Donate a book and make a difference.',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         )),
-                  ),
-                ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF3DAA6E),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: const Text('Donate',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          )),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Positioned(
-              right: 16,
-              top: -12,
-              bottom: 10,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: trendingCover?.isNotEmpty == true
-                    ? Image.network(trendingCover!,
-                        width: 115,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _coverPlaceholder())
-                    : _coverPlaceholder(),
+              Positioned(
+                right: 16,
+                top: -12,
+                bottom: 10,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: trendingCover?.isNotEmpty == true
+                      ? Image.network(trendingCover!,
+                      width: 115,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _coverPlaceholder())
+                      : _coverPlaceholder(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ),
@@ -220,10 +235,162 @@ class _BannerSection extends StatelessWidget {
 }
 
   Widget _coverPlaceholder() => Container(
-        width: 115,
-        color: Colors.white12,
-        child: const Icon(Icons.menu_book, color: Colors.white38, size: 40),
+    width: 115,
+    color: Colors.white12,
+    child: const Icon(Icons.menu_book, color: Colors.white38, size: 40),
+  );
+}
+
+// ─────────────────────────────────────────────
+// Banner Carousel — auto-scrolling image banners
+// ─────────────────────────────────────────────
+
+class _BannerCarousel extends StatefulWidget {
+  final List<BannerEntity> banners;
+  const _BannerCarousel({required this.banners});
+
+  @override
+  State<_BannerCarousel> createState() => _BannerCarouselState();
+}
+
+class _BannerCarouselState extends State<_BannerCarousel> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+  late final int _totalPages;
+
+  @override
+  void initState() {
+    super.initState();
+    _totalPages = widget.banners.length;
+    _pageController = PageController();
+    _startAutoScroll();
+  }
+
+  void _startAutoScroll() {
+    Future.delayed(const Duration(seconds: 4), () {
+      if (!mounted) return;
+      final next = (_currentPage + 1) % _totalPages;
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
       );
+      _startAutoScroll();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 175,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _totalPages,
+            onPageChanged: (i) => setState(() => _currentPage = i),
+            itemBuilder: (context, index) {
+              final banner = widget.banners[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        banner.bannerImage,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: const Color(0xFF03405B),
+                          child: const Center(
+                            child: Icon(Icons.image_not_supported,
+                                color: Colors.white38, size: 40),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding:
+                          const EdgeInsets.fromLTRB(16, 28, 16, 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                banner.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (banner.description?.isNotEmpty == true) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  banner.description!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(_totalPages, (i) {
+            final isActive = i == _currentPage;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              height: 6,
+              width: isActive ? 20 : 6,
+              decoration: BoxDecoration(
+                color: isActive
+                    ? const Color(0xFF2CE07F)
+                    : const Color(0xFFD0D5DD),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -385,11 +552,33 @@ class _BannerCarouselState extends State<_BannerCarousel> {
 // Book section = header + horizontal list
 // ─────────────────────────────────────────────
 
-class _BookSection extends StatelessWidget {
+class _BookSection extends StatefulWidget {
   final String title;
   final List<BookEntity> books;
 
   const _BookSection({required this.title, required this.books});
+
+  @override
+  State<_BookSection> createState() => _BookSectionState();
+}
+
+class _BookSectionState extends State<_BookSection> {
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollToEnd() {
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 300 * widget.books.length.clamp(1, 10)),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -401,14 +590,14 @@ class _BookSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title,
+              Text(widget.title,
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                     color: _primary,
                   )),
               GestureDetector(
-                onTap: () {},
+                onTap: _scrollToEnd,
                 child: const Row(children: [
                   Text('See All',
                       style: TextStyle(
@@ -425,14 +614,16 @@ class _BookSection extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           height: 240,
-          child: books.isEmpty
+          child: widget.books.isEmpty
               ? const Center(child: Text('No books available'))
               : ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: books.length,
-                  itemBuilder: (_, i) => _BookCard(book: books[i]),
-                ),
+            controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: widget.books.length,
+            itemBuilder: (_, i) =>
+                _BookCard(book: widget.books[i]),
+          ),
         ),
       ],
     );
@@ -471,13 +662,13 @@ class _BookCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(14)),
+                  const BorderRadius.vertical(top: Radius.circular(14)),
                   child: book.coverImageUrl?.isNotEmpty == true
                       ? Image.network(book.coverImageUrl!,
-                          height: 170,
-                          width: 140,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _imgPlaceholder())
+                      height: 170,
+                      width: 140,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _imgPlaceholder())
                       : _imgPlaceholder(),
                 ),
                 Positioned(
@@ -516,14 +707,14 @@ class _BookCard extends StatelessWidget {
   }
 
   Widget _imgPlaceholder() => Container(
-        height: 170,
-        width: 140,
-        decoration: const BoxDecoration(
-          color: Color(0xFFE8EDF2),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-        ),
-        child: const Icon(Icons.book, size: 44, color: Color(0xFFB0BEC5)),
-      );
+    height: 170,
+    width: 140,
+    decoration: const BoxDecoration(
+      color: Color(0xFFE8EDF2),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+    ),
+    child: const Icon(Icons.book, size: 44, color: Color(0xFFB0BEC5)),
+  );
 }
 
 // ─────────────────────────────────────────────
@@ -605,13 +796,15 @@ class _MonthlyStatsCardState extends State<_MonthlyStatsCard> {
             if (snap.connectionState == ConnectionState.waiting) {
               return const SizedBox(
                   height: 100,
-                  child:
-                      Center(child: CircularProgressIndicator(strokeWidth: 2)));
+                  child: Center(
+                      child:
+                      CircularProgressIndicator(strokeWidth: 2)));
             }
             if (snap.hasError) {
               return const SizedBox(
                   height: 100,
-                  child: Center(child: Text('Could not load stats')));
+                  child:
+                  Center(child: Text('Could not load stats')));
             }
 
             final s = snap.data!;
@@ -665,7 +858,9 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 8),
         Text('$value',
             style: const TextStyle(
-                fontSize: 22, fontWeight: FontWeight.bold, color: _primary)),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: _primary)),
         const SizedBox(height: 4),
         Text(label,
             style: const TextStyle(
