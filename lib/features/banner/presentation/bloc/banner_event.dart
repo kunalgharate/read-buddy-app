@@ -7,7 +7,14 @@ sealed class BannerEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class GetBannerListEvent extends BannerEvent {}
+class GetBannerListEvent extends BannerEvent {
+  final String? typeFilter;
+
+  const GetBannerListEvent({this.typeFilter});
+
+  @override
+  List<Object> get props => [if (typeFilter != null) typeFilter!];
+}
 
 class CreateBannerEvent extends BannerEvent {
   final String title;

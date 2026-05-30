@@ -44,7 +44,7 @@ class _MainTabView extends StatelessWidget {
         listenWhen: (prev, curr) => curr is HomeLoaded && prev is! HomeLoaded,
         listener: (context, state) {
           if (state is HomeLoaded && state.isPrime) {
-            context.read<BannerBloc>().add(GetBannerListEvent());
+            context.read<BannerBloc>().add(const GetBannerListEvent(typeFilter: 'homepage'));
           }
         },
         builder: (context, state) {
