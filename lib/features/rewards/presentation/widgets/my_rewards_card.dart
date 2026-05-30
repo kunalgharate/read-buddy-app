@@ -20,11 +20,11 @@ class MyRewardsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
+              const Row(
                 children: [
-                  const Icon(Icons.menu_book, color: Colors.white, size: 28),
-                  const SizedBox(width: 8),
-                  const Text(
+                  Icon(Icons.menu_book, color: Colors.white, size: 28),
+                  SizedBox(width: 8),
+                  Text(
                     'Book',
                     style: TextStyle(
                       fontFamily: 'Poppins',

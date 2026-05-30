@@ -5,10 +5,10 @@ class ChallengesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Current Challenges',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -17,15 +17,15 @@ class ChallengesSection extends StatelessWidget {
             color: Color(0xFF052E44),
           ),
         ),
-        const SizedBox(height: 10),
-        const _ChallengeCard(
+        SizedBox(height: 10),
+        _ChallengeCard(
           title: 'Read 2 Book in this Week',
           progress: '1/3',
           points: 100,
           backgroundColor: Color(0xFFEAEAEA),
         ),
-        const SizedBox(height: 8),
-        const _ChallengeCard(
+        SizedBox(height: 8),
+        _ChallengeCard(
           title: 'Write your Review',
           progress: '0/3',
           points: 100,

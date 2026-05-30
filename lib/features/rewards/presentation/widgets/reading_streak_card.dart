@@ -19,10 +19,10 @@ class ReadingStreakCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header row
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Reading Streak',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -31,7 +31,7 @@ class ReadingStreakCard extends StatelessWidget {
                   color: Color(0xFF000000),
                 ),
               ),
-              const Text(
+              Text(
                 '7 days',
                 style: TextStyle(
                   fontFamily: 'Poppins',
