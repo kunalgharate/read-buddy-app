@@ -460,9 +460,9 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => SchedulePickupUsecase(getIt<BookRequestRepository>()));
   getIt.registerLazySingleton(
-      () => SetFulfillmentUsecase(getIt<BookRequestRepository>()));
+      () => ScheduleDeliveryUsecase(getIt<BookRequestRepository>()));
   getIt.registerLazySingleton(
-      () => ConfirmPaymentUsecase(getIt<BookRequestRepository>()));
+      () => UpdateRequestStatusUsecase(getIt<BookRequestRepository>()));
   getIt.registerLazySingleton(
       () => GetUpcomingPickupsUsecase(getIt<BookRequestRepository>()));
 
