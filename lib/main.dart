@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'features/splash/splash_screen.dart';
+import 'package:read_buddy_app/features/splash/splash_screen.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_bloc.dart';
@@ -12,19 +12,20 @@ import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
+import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_bloc.dart';
-import 'core/di/injection.dart';
-import 'core/services/connectivity_service.dart';
-import 'core/utils/app_bloc_observer.dart';
-import 'core/widgets/connectivity_wrapper.dart';
-import 'routes/app_router.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/services/connectivity_service.dart';
+import 'package:read_buddy_app/core/utils/app_bloc_observer.dart';
+import 'package:read_buddy_app/core/widgets/connectivity_wrapper.dart';
+import 'package:read_buddy_app/routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  configureDependencies();
+  await configureDependencies();
   await ConnectivityService.instance.init();
   Bloc.observer = AppBlocObserver();
 
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<UserCubit>()..fetchUsers()),
         BlocProvider(create: (_) => getIt<LocationCubit>()),
         BlocProvider(create: (_) => getIt<OnboardingBloc>()),
+        BlocProvider(create: (_) => getIt<DonateBookBloc>()),
       ],
       child: MaterialApp(
         title: 'Read Buddy',

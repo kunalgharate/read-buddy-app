@@ -1,4 +1,5 @@
 import '../../domain/entities/book.dart';
+import '../../domain/entities/book_category.dart';
 
 class BookModel extends Book {
   const BookModel({
@@ -18,31 +19,28 @@ class BookModel extends Book {
       bookimage: (json['coverImageUrl'] ?? '').toString(),
       genre: (json['genre'] ?? '').toString(),
       book_category: categoryJson is Map<String, dynamic>
-          ? BookCategory.fromJson(categoryJson)
-          : BookCategory(id: '', category_name: ''),
+          ? BookCategoryModel.fromJson(categoryJson)
+          : const BookCategory(id: '', category_name: ''),
     );
   }
 
   Map<String, dynamic> toJson() => {
     '_id': id,
     'title': title,
-    'bookimage': bookimage,
+    'coverImageUrl': bookimage,
     'genre': genre,
-    'book_category': book_category.toJson(),
+    'category': BookCategoryModel(id: book_category.id, category_name: book_category.category_name).toJson(),
   };
-}  // ← this was missing
+}
 
-class BookCategory {
-  final String id;
-  final String category_name;
-
-  BookCategory({
-    required this.id,
-    required this.category_name,
+class BookCategoryModel extends BookCategory {
+  const BookCategoryModel({
+    required super.id,
+    required super.category_name,
   });
 
-  factory BookCategory.fromJson(Map<String, dynamic> json) {
-    return BookCategory(
+  factory BookCategoryModel.fromJson(Map<String, dynamic> json) {
+    return BookCategoryModel(
       id: (json['_id'] ?? '').toString(),
       category_name: (json['name'] ?? '').toString(),
     );

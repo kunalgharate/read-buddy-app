@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/utils/ui_utils.dart';
+import 'package:read_buddy_app/core/utils/ui_utils.dart';
 
 class DonateMoneyPage extends StatefulWidget {
   const DonateMoneyPage({super.key});
@@ -46,6 +46,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final paddingH = size.width * 0.05;
+
     return Scaffold(
       backgroundColor: _background,
       appBar: AppBar(
@@ -65,8 +68,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
+        padding: EdgeInsets.symmetric(
+          horizontal: paddingH,
           vertical: 16,
         ),
         child: Column(
@@ -74,14 +77,14 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
             // Illustration placeholder
             Container(
               width: double.infinity,
-              height: 160,
+              height: size.height * 0.2,
               decoration: BoxDecoration(
                 color: _primaryGreen.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.volunteer_activism,
-                size: 72,
+                size: size.height * 0.08,
                 color: _primaryGreen,
               ),
             ),

@@ -13,9 +13,6 @@ class CategoryModel extends CategoryEntity {
     final parent = json['parentCategoryId'];
     final imageUrl = json['imageUrl'] ?? '';
     
-    // Debug logging to see what imageUrl we're getting
-    print('🖼️ CategoryModel.fromJson - imageUrl: "$imageUrl"');
-    
     return CategoryModel(
       id: json['_id'] ?? '',
       title: json['name'] ?? '',

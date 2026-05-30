@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../data/models/book_model.dart';
-
-class Book extends Equatable {
+import 'book_category.dart';class Book extends Equatable {
   final String id;
   final String title;
   final String bookimage;

@@ -424,8 +424,8 @@ class _CategoryTabState extends State<CategoryTab> {
     // Exact match: "fiction" == "fiction"
     if (genre == catName) return true;
 
-    // Partial: "fiction" inside "science fiction", "literary fiction"
-    if (catName.contains(genre)) return true;
+    // Partial: "fiction" inside "science fiction", "literary fiction" or vice versa
+    if (catName.contains(genre) || genre.contains(catName)) return true;
 
     return false;
   }
