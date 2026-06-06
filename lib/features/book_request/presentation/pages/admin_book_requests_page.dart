@@ -178,24 +178,57 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
 
   void _showDeclineDialog(BuildContext context, String requestId) {
     final controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Decline Request',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF052E44))),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: InputDecoration(
-            hintText: 'Enter reason for declining...',
-            hintStyle: const TextStyle(fontSize: 13, color: Color(0xFFAAAAAA)),
-            contentPadding: const EdgeInsets.all(12),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF2CE07F)),
+        title: const Text(
+          'Decline Request',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF052E44),
+          ),
+        ),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            maxLines: 3,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'A rejection reason is mandatory';
+              }
+              if (value.trim().length < 5) {
+                return 'Please provide a more descriptive reason';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              hintText: 'Enter reason for declining...',
+              hintStyle:
+                  const TextStyle(fontSize: 13, color: Color(0xFFAAAAAA)),
+              contentPadding: const EdgeInsets.all(12),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFF2CE07F)),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.redAccent),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide:
+                    const BorderSide(color: Colors.redAccent, width: 1.5),
+              ),
+              errorStyle:
+                  const TextStyle(fontSize: 12, color: Colors.redAccent),
             ),
           ),
         ),
@@ -206,17 +239,22 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
           ),
           ElevatedButton(
             onPressed: () {
+              if (!formKey.currentState!.validate()) return;
               final reason = controller.text.trim();
-              if (reason.isEmpty) return;
               Navigator.pop(dialogContext);
-              context.read<AdminRequestsBloc>().add(DeclineRequest(requestId, reason));
+              context
+                  .read<AdminRequestsBloc>()
+                  .add(DeclineRequest(requestId, reason));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-            child: const Text('Decline', style: TextStyle(color: Colors.white)),
+            child:
+                const Text('Decline', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

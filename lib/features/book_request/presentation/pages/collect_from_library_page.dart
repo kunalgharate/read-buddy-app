@@ -318,7 +318,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                   const SizedBox(height: 8),
                   _InputField(
                     controller: _addressController,
-                    hint: 'Enter home address',
+                    hint: 'e.g. Flat 12, Sunrise Apts, MG Road, Mumbai',
                     keyboardType: TextInputType.streetAddress,
                     prefixIcon: const Icon(
                       Icons.location_on_outlined,
@@ -327,6 +327,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                     ),
                     maxLines: 3,
                     minLines: 3,
+                    helperText: 'Include flat/house no., street, area  •  min 10 characters',
                   ),
 
                   const SizedBox(height: 16),
@@ -746,6 +747,7 @@ class _InputField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final int maxLines;
   final int minLines;
+  final String? helperText;
 
   const _InputField({
     required this.controller,
@@ -755,6 +757,7 @@ class _InputField extends StatelessWidget {
     this.inputFormatters,
     this.maxLines = 1,
     this.minLines = 1,
+    this.helperText,
   });
 
   @override
@@ -769,6 +772,13 @@ class _InputField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(fontSize: 14, color: Color(0xFFAAAAAA)),
+        helperText: helperText,
+        helperMaxLines: 3,
+        helperStyle: const TextStyle(
+          fontSize: 11,
+          color: Color(0xFF999999),
+          height: 1.4,
+        ),
         prefixIcon: prefixIcon,
         contentPadding: EdgeInsets.symmetric(
           horizontal: prefixIcon != null ? 0 : 16,

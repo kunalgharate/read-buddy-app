@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -97,11 +98,72 @@ class _DonationPageState extends State<DonationPage> {
       );
       return;
     }
-    if (_deliveryType == 'pickup' && _addressController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your pickup address')),
-      );
-      return;
+    if (_deliveryType == 'pickup') {
+      final address = _addressController.text.trim();
+      final pin = _pinController.text.trim();
+      final phone = _contractController.text.trim();
+
+      if (address.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your pickup address')),
+        );
+        return;
+      }
+      // Bug 4: address minimum 10 chars + must contain both letters and digits
+      if (address.length < 10) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Address must be at least 10 characters'),
+          ),
+        );
+        return;
+      }
+      final hasLetter = address.contains(RegExp(r'[a-zA-Z]'));
+      final hasDigit = address.contains(RegExp(r'[0-9]'));
+      if (!hasLetter || !hasDigit) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Please enter a valid address (include street name and number)',
+            ),
+          ),
+        );
+        return;
+      }
+
+      // Bug 2: PIN must be exactly 6 digits, first digit non-zero
+      if (pin.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your PIN code')),
+        );
+        return;
+      }
+      if (!RegExp(r'^[1-9][0-9]{5}$').hasMatch(pin)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Please enter a valid 6-digit PIN code (e.g. 400001)',
+            ),
+          ),
+        );
+        return;
+      }
+
+      // Bug 3: contact number must be exactly 10 digits
+      if (phone.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your contact number')),
+        );
+        return;
+      }
+      if (!RegExp(r'^[0-9]{10}$').hasMatch(phone)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Contact number must be exactly 10 digits'),
+          ),
+        );
+        return;
+      }
     }
     if (_deliveryType == 'dropoff' && _selectedAgent == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -626,20 +688,40 @@ class _DonationPageState extends State<DonationPage> {
         if (_deliveryType == 'pickup') ...[
           _label('Your Address'),
           const SizedBox(height: 8),
-          _textField(_addressController, 'Enter address',
-              prefixIcon: Icons.location_on_outlined, maxLines: 5),
+          _textField(
+            _addressController,
+            'e.g. Flat 12, Sunrise Apartments, MG Road, Mumbai',
+            prefixIcon: Icons.location_on_outlined,
+            maxLines: 3,
+            helperText:
+                'Include flat/house no., street, area • min 10 characters • must include letters and numbers',
+          ),
           const SizedBox(height: 16),
           _label('Pin Code'),
           const SizedBox(height: 8),
-          _textField(_pinController, 'Enter Code',
-              prefixIcon: Icons.pin_drop_outlined,
-              keyboardType: TextInputType.number),
+          _textField(
+            _pinController,
+            'Enter Code',
+            prefixIcon: Icons.pin_drop_outlined,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(6),
+            ],
+          ),
           const SizedBox(height: 16),
           _label('Contact Number'),
           const SizedBox(height: 8),
-          _textField(_contractController, 'Enter Number',
-              prefixIcon: Icons.phone_outlined,
-              keyboardType: TextInputType.phone),
+          _textField(
+            _contractController,
+            'Enter Number',
+            prefixIcon: Icons.phone_outlined,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(10),
+            ],
+          ),
         ] else ...[
           BlocBuilder<DonateBookBloc, DonateBookState>(
             builder: (context, state) {
@@ -742,16 +824,26 @@ class _DonationPageState extends State<DonationPage> {
     int maxLines = 1,
     IconData? prefixIcon,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    String? helperText,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       style: GoogleFonts.poppins(fontSize: 14, color: _textDark),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle:
             GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF999999)),
+        helperText: helperText,
+        helperMaxLines: 3,
+        helperStyle: GoogleFonts.poppins(
+          fontSize: 11,
+          color: const Color(0xFF999999),
+          height: 1.4,
+        ),
         prefixIcon: prefixIcon != null
             ? Icon(prefixIcon, size: 18, color: const Color(0xFF7A9BB5))
             : null,

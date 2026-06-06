@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/features/banner/domain/usecase/delete_banner.dart';
 import 'package:read_buddy_app/features/banner/domain/usecase/get_banner.dart';
 import 'package:read_buddy_app/features/banner/domain/usecase/update_banner.dart';
@@ -128,6 +127,14 @@ import '../../features/book_request/presentation/bloc/my_requests_bloc.dart';
 import '../../features/book_request/presentation/bloc/admin_requests_bloc.dart';
 import '../../features/book_request/presentation/bloc/admin_upcoming_pickups_bloc.dart';
 
+// Notification
+import '../../features/notification/data/datasources/notification_remote_datasource.dart';
+import '../../features/notification/data/repositories/notification_repository_impl.dart';
+import '../../features/notification/domain/repositories/notification_repository.dart';
+import '../../features/notification/domain/usecases/get_my_notifications.dart';
+import '../../features/notification/domain/usecases/send_notification.dart';
+import '../../features/notification/presentation/bloc/notification_bloc.dart';
+
 // Question CRUD (Admin)
 import 'package:read_buddy_app/features/question_crud/data/datasources/question_remote_datasource.dart'
     as QuestionCrudDataSource;
@@ -155,14 +162,10 @@ import 'package:read_buddy_app/features/donate/domain/usecases/get_donation_stat
 import 'package:read_buddy_app/features/donate/domain/usecases/get_nearest_agents.dart';
 import 'package:read_buddy_app/features/donate/domain/usecases/create_book_donation.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
+import 'package:read_buddy_app/features/explore/presentation/bloc/explore_bloc.dart';
 
 final getIt = GetIt.instance;
 
-@InjectableInit(
-  initializerName: 'init',
-  preferRelativeImports: true,
-  asExtension: true,
-)
 Future<void> configureDependencies() async {
   await GetIt.instance.reset();
   _registerUtils();
@@ -266,6 +269,11 @@ void _registerDataSources() {
   getIt.registerLazySingleton<DonateRemoteDataSource>(
     () => DonateRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
+
+  // Notification
+  getIt.registerLazySingleton<NotificationRemoteDataSource>(
+    () => NotificationRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
 }
 
 // ========================================
@@ -344,6 +352,11 @@ void _registerRepositories() {
     () => DonateRepositoryImpl(
       remoteDataSource: getIt<DonateRemoteDataSource>(),
     ),
+  );
+
+  // Notification — was previously missing; required by SendNotificationUsecase
+  getIt.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(getIt<NotificationRemoteDataSource>()),
   );
 }
 
@@ -485,6 +498,12 @@ void _registerUseCases() {
       () => CreateBookDonation(repository: getIt<DonateRepository>()));
   getIt.registerLazySingleton(
       () => UploadReceipt(repository: getIt<DonateRepository>()));
+
+  // Notification
+  getIt.registerLazySingleton(
+      () => GetMyNotificationsUsecase(getIt<NotificationRepository>()));
+  getIt.registerLazySingleton(
+      () => SendNotificationUsecase(getIt<NotificationRepository>()));
 }
 
 // ========================================
@@ -588,9 +607,22 @@ void _registerBlocs() {
         acceptBookRequest: getIt<AcceptBookRequestUsecase>(),
         declineBookRequest: getIt<DeclineBookRequestUsecase>(),
         updateRequestStatus: getIt<UpdateRequestStatusUsecase>(),
+        sendNotification: getIt<SendNotificationUsecase>(),
       ));
   getIt.registerFactory(() => AdminUpcomingPickupsBloc(
         getUpcomingPickups: getIt<GetUpcomingPickupsUsecase>(),
+      ));
+
+  // Notification
+  getIt.registerFactory(() => NotificationBloc(
+        getMyNotifications: getIt<GetMyNotificationsUsecase>(),
+        repository: getIt<NotificationRepository>(),
+      ));
+
+  // Explore
+  getIt.registerFactory(() => ExploreBloc(
+        categoryDataSource: getIt<CategoryRemoteDataSource>(),
+        bookDataSource: getIt<BookCrudRemoteDataSource>(),
       ));
 }
 

@@ -15,10 +15,10 @@ allprojects {
     }
 }
 
-rootProject.layout.buildDirectory.set(file("../build"))
+rootProject.layout.buildDirectory.set(file("C:/projects/readbuddy/build"))
 subprojects {
     layout.buildDirectory.set(
-            rootProject.layout.buildDirectory.dir(project.name)
+        rootProject.layout.buildDirectory.dir(project.name)
     )
     project.evaluationDependsOn(":app")
 }
