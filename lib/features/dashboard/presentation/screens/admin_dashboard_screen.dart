@@ -55,7 +55,7 @@ class AdminDashboardScreen extends StatelessWidget {
                     count: 5,
                     color: Colors.grey,
                     onPressed: () {
-                      Navigator.of(context).pushNamed('/donated-books');
+                      Navigator.of(context).pushNamed('/admin-donations');
                     },
                   ),
                   DashboardBoxWidget(
@@ -103,7 +103,7 @@ class AdminDashboardScreen extends StatelessWidget {
                     count: 318,
                     icon: Icons.card_giftcard,
                     onPressed: () {
-                      Navigator.of(context).pushNamed('/donation');
+                      Navigator.of(context).pushNamed('/donated-books');
                     },
                   ),
                   DashboardBoxWidget(
@@ -117,7 +117,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   DashboardBoxWidget(
                     title: 'Users',
                     count: 12,
-                    icon: Icons.people,
+                    icon: Icons.  people,
                     onPressed: () {},
                   ),
                   DashboardBoxWidget(

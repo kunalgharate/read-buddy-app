@@ -31,6 +31,10 @@ class ApiConstants {
 
   // Donation endpoints
   static const String getAllDonations = '$baseUrl/donations';
+  static const String adminDonations = '$baseUrl/admin/donations';
+  static String donationById(String id) => '$baseUrl/donations/$id';
+  static String updateDonationStatus(String id) => '$baseUrl/donations/$id';
+  static String updateAdminDonationStatus(String id) => '$baseUrl/admin/donations/$id';
   static const String myImpact = '$baseUrl/v1/donations/my-impact';
   static const String createBookDonation =
       '$baseUrl/v1/donations/createBookDonation';

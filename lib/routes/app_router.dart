@@ -30,6 +30,8 @@ import 'package:read_buddy_app/features/book_request/presentation/pages/admin_bo
 import 'package:read_buddy_app/features/book_request/presentation/pages/admin_upcoming_pickups_page.dart';
 import 'package:read_buddy_app/features/books/presentation/pages/book_page.dart';
 import 'package:read_buddy_app/features/dashboard/presentation/screens/admin_dashboard_screen.dart';
+import 'package:read_buddy_app/features/dashboard/presentation/screens/admin_donations_page.dart';
+import 'package:read_buddy_app/features/dashboard/presentation/screens/admin_donation_detail_page.dart';
 import 'package:read_buddy_app/features/onboarding/onboarding_screens.dart';
 import 'package:read_buddy_app/features/mybook/presentation/mybook.dart';
 import 'package:read_buddy_app/features/notification/presentation/pages/notification_page.dart';
@@ -66,6 +68,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
       case '/admin':
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
+      case '/admin-donations':
+        return MaterialPageRoute(builder: (_) => const AdminDonationsPage());
       case '/category':
         return MaterialPageRoute(builder: (_) => const CategoryListPage());
       case '/books':
@@ -141,6 +145,11 @@ class AppRouter {
         final book = settings.arguments as DonatedBooksEntity;
         return MaterialPageRoute(
           builder: (_) => DonatedBookDetailPage(book: book),
+        );
+      case '/admin-donated-book-detail':
+        final book = settings.arguments as DonatedBooksEntity;
+        return MaterialPageRoute(
+          builder: (_) => AdminDonationDetailPage(book: book),
         );
       default:
         return MaterialPageRoute(

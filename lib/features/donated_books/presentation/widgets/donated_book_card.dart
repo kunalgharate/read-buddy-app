@@ -3,10 +3,15 @@ import 'package:read_buddy_app/features/donated_books/domain/entities/donated_bo
 
 class DonatedBookCard extends StatelessWidget {
   final DonatedBooksEntity book;
+  final VoidCallback? onTap;
 
-  const DonatedBookCard({super.key, required this.book});
+  const DonatedBookCard({super.key, required this.book, this.onTap});
 
   void _showBookDetails(BuildContext context) {
+    if (onTap != null) {
+      onTap!();
+      return;
+    }
     Navigator.pushNamed(
       context,
       '/donated-book-detail',
