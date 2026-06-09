@@ -15,7 +15,7 @@ allprojects {
     }
 }
 
-rootProject.layout.buildDirectory.set(file("C:/projects/readbuddy/build"))
+rootProject.layout.buildDirectory.set(rootProject.file("../build"))
 subprojects {
     layout.buildDirectory.set(
         rootProject.layout.buildDirectory.dir(project.name)
