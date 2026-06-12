@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/deletecrud_book.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/widgets/updatebook_stepper.dart';
 
@@ -115,7 +116,36 @@ class BooksCollection extends StatelessWidget {
                             bookcollection.format,
                             style: const TextStyle(
                                 color: Color.fromARGB(255, 6, 86, 150)),
-                          ))
+                          )),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/book-variants',
+                              arguments: BookCrudModel.fromEntity(bookcollection),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                              backgroundColor: const Color(0xFFE8F0FF),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5))),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.translate, size: 14, color: Color(0xFF1565C0)),
+                              SizedBox(width: 4),
+                              Text(
+                                "Variants",
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF1565C0),
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          )),
                     ],
                   ),
                   const SizedBox(
@@ -157,6 +187,19 @@ void updatedialog(BuildContext context, BookCrudEntity book) async {
                               book_id: book.id ?? "",
                             )));
                 // Optional: close bottom sheet
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.translate),
+              title: const Text("Manage Variants"),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(
+                  context,
+                  '/book-variants',
+                  arguments: BookCrudModel.fromEntity(book),
+                );
               },
             ),
             const Divider(),

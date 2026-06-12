@@ -15,12 +15,12 @@ class EmailVerificationScreen extends StatelessWidget {
       List.generate(6, (_) => TextEditingController());
 
   Widget _buildCodeBox(int index, BuildContext context) {
-    return SizedBox(
-      width: 60,
-      height: 60,
+    return Expanded(
       child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: TextField(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: TextField(
           controller: _controllers[index],
           focusNode: _focusNodes[index],
           keyboardType: TextInputType.number,
@@ -59,11 +59,12 @@ class EmailVerificationScreen extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _verifyOTP(BuildContext context, String email) {
-    String otp = _controllers.map((c) => c.text).join();
+    final otp = _controllers.map((c) => c.text).join();
 
     if (otp.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -73,18 +74,16 @@ class EmailVerificationScreen extends StatelessWidget {
         ),
       );
       return;
-    } else {
-      BlocProvider.of<SignUpBloc>(context).add(VerifyEmailEvent(email, otp));
     }
+    BlocProvider.of<SignUpBloc>(context).add(VerifyEmailEvent(email, otp));
   }
 
-  void _resendCode(BuildContext context, String email) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Verification code sent to $email'),
-        backgroundColor: Colors.blue,
-      ),
-    );
+  void _resendCode(
+    BuildContext context,
+    Map<String, dynamic> userData,
+  ) {
+    BlocProvider.of<SignUpBloc>(context)
+        .add(ResendVerificationEmailEvent(userData));
   }
 
   @override
@@ -102,11 +101,37 @@ class EmailVerificationScreen extends StatelessWidget {
           if (!context.mounted) return;
           Navigator.pushNamedAndRemoveUntil(
               context, '/onboarding-questionnaire', (route) => false);
+        } else if (state is ResendVerificationEmailSuccess) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Verification code re-sent to ${state.user.email}',
+              ),
+              backgroundColor: const Color(0xFF00C853),
+            ),
+          );
+        } else if (state is SignUpError) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       },
       child: BlocBuilder<SignUpBloc, SignUpState>(
           builder: (context, signUpBlocState) {
-        if (signUpBlocState is SignUpSuccess) {
+        // Accept both SignUpSuccess and ResendVerificationEmailSuccess
+        // so the OTP screen stays visible after a resend.
+        final currentUser = switch (signUpBlocState) {
+          SignUpSuccess s => s.user,
+          ResendVerificationEmailSuccess s => s.user,
+          _ => null,
+        };
+
+        if (currentUser != null) {
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
@@ -141,7 +166,7 @@ class EmailVerificationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    signUpBlocState.user.email,
+                    currentUser.email,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 18,
@@ -151,14 +176,15 @@ class EmailVerificationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(
                         6, (index) => _buildCodeBox(index, context)),
                   ),
                   const SizedBox(height: 32),
                   GestureDetector(
-                    onTap: () =>
-                        _resendCode(context, signUpBlocState.user.email),
+                    onTap: () => _resendCode(
+                      context,
+                      currentUser.toResendPayload(),
+                    ),
                     child: const Text.rich(
                       TextSpan(
                         text: 'If you did not receive code? ',
@@ -183,8 +209,7 @@ class EmailVerificationScreen extends StatelessWidget {
                   const SizedBox(height: 48),
                   CustomButton(
                     text: 'Continue',
-                    onPressed: () =>
-                        _verifyOTP(context, signUpBlocState.user.email),
+                    onPressed: () => _verifyOTP(context, currentUser.email),
                     backgroundColor: const Color(0xFF00C853),
                   ),
                 ],

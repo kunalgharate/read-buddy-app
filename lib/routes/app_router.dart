@@ -36,6 +36,8 @@ import 'package:read_buddy_app/features/notification/presentation/pages/notifica
 import 'package:read_buddy_app/features/rewards/presentation/pages/rewards_page.dart';
 import 'package:read_buddy_app/features/search/presentation/screens/search_screen.dart';
 import 'package:read_buddy_app/features/splash/splash_screen.dart';
+import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/pages/Add/manage_book_variants_page.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -91,6 +93,11 @@ class AppRouter {
         );
       case '/verification':
         return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
+      case '/book-variants':
+        final book = settings.arguments as BookCrudModel;
+        return MaterialPageRoute(
+          builder: (_) => ManageBookVariantsPage(bookCrudModel: book),
+        );
       case '/banner':
         return MaterialPageRoute(builder: (_) => const BannersList());
       case '/rewards':

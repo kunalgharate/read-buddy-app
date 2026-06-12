@@ -2,6 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../bookcrud/data/model/book_crud_model.dart';
+import '../../../bookcrud/domain/entities/book_variant_entity.dart';
+import '../../../bookcrud/domain/respository/variant_repository.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
@@ -190,10 +193,68 @@ class _BottomActionBar extends StatelessWidget {
   }
 }
 
-class _BookDetailContent extends StatelessWidget {
+class _BookDetailContent extends StatefulWidget {
   final BookDetailEntity book;
 
   const _BookDetailContent({required this.book});
+
+  @override
+  State<_BookDetailContent> createState() => _BookDetailContentState();
+}
+
+class _BookDetailContentState extends State<_BookDetailContent> {
+  List<BookVariantEntity> _variants = [];
+  bool _isLoadingVariants = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVariants();
+  }
+
+  Future<void> _loadVariants() async {
+    try {
+      final repository = getIt<VariantRepository>();
+      final variants = await repository.getVariantsForBook(widget.book.id);
+      if (mounted) {
+        setState(() {
+          _variants = variants;
+          _isLoadingVariants = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingVariants = false);
+      }
+    }
+  }
+
+  BookCrudModel _toBookCrudModel(BookDetailEntity detail) {
+    return BookCrudModel(
+      id: detail.id,
+      title: detail.title,
+      author: detail.author,
+      publisher: detail.publisher,
+      publicationYear: detail.publicationYear,
+      isbn: detail.isbn,
+      edition: '',
+      condition: detail.condition,
+      isAvailable: detail.isAvailable,
+      status: detail.status,
+      numberOfCopies: detail.numberOfCopies,
+      format: detail.format,
+      language: detail.language,
+      genre: '',
+      tags: detail.tags,
+      category: '',
+      ownerId: detail.owner.id,
+      location: detail.address.city,
+      coverImageUrl: detail.coverImageUrl,
+      additionalImages: [],
+      description: detail.description,
+      notes: '',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,13 +262,166 @@ class _BookDetailContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CoverImageSection(book: book),
-          _TitleSection(book: book),
+          _CoverImageSection(book: widget.book),
+          _TitleSection(book: widget.book),
           const SizedBox(height: 12),
-          _AboutSection(book: book),
+          _AboutSection(book: widget.book),
           const SizedBox(height: 12),
-          _HighlightSection(book: book),
+          _buildVariantsSection(),
+          const SizedBox(height: 12),
+          _HighlightSection(book: widget.book),
           const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVariantsSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Variants',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A237E),
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  await Navigator.pushNamed(
+                    context,
+                    '/book-variants',
+                    arguments: _toBookCrudModel(widget.book),
+                  );
+                  _loadVariants();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.add, size: 16, color: Colors.white),
+                label: const Text(
+                  'Add Variant',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_isLoadingVariants)
+            const Center(child: CircularProgressIndicator(color: Colors.green))
+          else if (_variants.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                'No variants added yet',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _variants.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final variant = _variants[index];
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        variant.language.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E2939),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: variant.formats.map((format) {
+                          IconData icon;
+                          Color color;
+                          String text = format.type.toUpperCase();
+
+                          switch (format.type) {
+                            case 'hardcover':
+                              icon = Icons.menu_book_rounded;
+                              color = const Color(0xFF4F46E5);
+                              if (format.copies != null) {
+                                text += ' (${format.copies} copies)';
+                              }
+                              break;
+                            case 'ebook':
+                              icon = Icons.book_online_rounded;
+                              color = const Color(0xFF0D9488);
+                              if (format.fileName != null) {
+                                text += ' (${format.fileName})';
+                              }
+                              break;
+                            case 'audiobook':
+                              icon = Icons.headphones_rounded;
+                              color = const Color(0xFFD97706);
+                              if (format.audioFileName != null) {
+                                text += ' (${format.audioFileName})';
+                              }
+                              break;
+                            default:
+                              icon = Icons.bookmark_border_rounded;
+                              color = Colors.grey;
+                          }
+
+                          return Chip(
+                            avatar: Icon(icon, size: 14, color: color),
+                            label: Text(
+                              text,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            backgroundColor: color.withOpacity(0.08),
+                            side: BorderSide(color: color.withOpacity(0.2)),
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );

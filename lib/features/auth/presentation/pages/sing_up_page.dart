@@ -18,7 +18,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
-  String? _phoneError;
   bool _obscurePassword = true;
 
   @override
@@ -30,14 +29,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _validatePhone(String value) {
-    setState(() {
-      if (value.length > 10) {
-        _phoneError = "Phone number cannot exceed 10 digits";
-      } else {
-        _phoneError = null;
-      }
-    });
+  String? _validatePhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Phone number is required';
+    }
+    if (value.trim().length != 10) {
+      return 'Phone number must be exactly 10 digits';
+    }
+    if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+      return 'Phone number must contain only digits';
+    }
+    return null;
   }
 
   String? _validateName(String? value) {
@@ -71,14 +73,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _handleSignUp() {
-    if (_formKey.currentState!.validate() && _phoneError == null) {
+    if (_formKey.currentState!.validate()) {
       final data = {
         "name": _nameController.text.trim(),
         "email": _emailController.text.trim().toLowerCase(),
         "password": _passwordController.text,
-        "phno": _phoneController.text.trim().isEmpty
-            ? ''
-            : _phoneController.text.trim(),
+        "phno": _phoneController.text.trim(),
         "userRole": "user",
         "picture": "https://example.com/profile.jpg",
         "deviceInfo": {
@@ -234,14 +234,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                   // Phone
                   const Text(
-                    'Phone Number (Optional)',
+                    'Phone Number',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: _phoneController,
+                    validator: _validatePhone,
                     keyboardType: TextInputType.number,
-                    onChanged: _validatePhone,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
@@ -250,7 +250,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       prefixIcon: const Icon(Icons.phone_outlined),
-                      errorText: _phoneError,
                     ),
                   ),
 

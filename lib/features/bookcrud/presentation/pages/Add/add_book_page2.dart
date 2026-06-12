@@ -22,11 +22,13 @@ import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_c
 class AddBookPage2 extends StatefulWidget {
   final VoidCallback onBack;
   final BookCrudModel bookCrudModel;
+  final Function(BookCrudModel) onContinue;
 
   const AddBookPage2({
     super.key,
     required this.onBack,
     required this.bookCrudModel,
+    required this.onContinue,
   });
 
   @override
@@ -419,11 +421,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
         notes: notesController.text,
         tags: _tags,
       );
-      context.read<BookCrudBloc>().add(AddBookCrudEvent(completeBook));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Adding the Book')),
-      );
-      Navigator.pop(context);
+      widget.onContinue(completeBook);
     }
   }
 

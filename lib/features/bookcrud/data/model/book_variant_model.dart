@@ -1,0 +1,97 @@
+import '../../domain/entities/book_variant_entity.dart';
+
+class BookFormatModel extends BookFormatEntity {
+  const BookFormatModel({
+    required super.type,
+    super.isbn,
+    super.copies,
+    super.available,
+    super.fileUrl,
+    super.fileName,
+    super.audioUrl,
+    super.audioFileName,
+    super.duration,
+  });
+
+  factory BookFormatModel.fromJson(Map<String, dynamic> json) {
+    return BookFormatModel(
+      type: json['type'] ?? '',
+      isbn: json['isbn'],
+      copies: json['copies'],
+      available: json['available'],
+      fileUrl: json['fileUrl'],
+      fileName: json['fileName'],
+      audioUrl: json['audioUrl'],
+      audioFileName: json['audioFileName'],
+      duration: json['duration'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      if (isbn != null) 'isbn': isbn,
+      if (copies != null) 'copies': copies,
+      if (available != null) 'available': available,
+      if (fileUrl != null) 'fileUrl': fileUrl,
+      if (fileName != null) 'fileName': fileName,
+      if (audioUrl != null) 'audioUrl': audioUrl,
+      if (audioFileName != null) 'audioFileName': audioFileName,
+      if (duration != null) 'duration': duration,
+    };
+  }
+
+  factory BookFormatModel.fromEntity(BookFormatEntity entity) {
+    return BookFormatModel(
+      type: entity.type,
+      isbn: entity.isbn,
+      copies: entity.copies,
+      available: entity.available,
+      fileUrl: entity.fileUrl,
+      fileName: entity.fileName,
+      audioUrl: entity.audioUrl,
+      audioFileName: entity.audioFileName,
+      duration: entity.duration,
+    );
+  }
+}
+
+class BookVariantModel extends BookVariantEntity {
+  const BookVariantModel({
+    required super.id,
+    required super.bookId,
+    required super.language,
+    required super.formats,
+  });
+
+  factory BookVariantModel.fromJson(Map<String, dynamic> json) {
+    return BookVariantModel(
+      id: json['_id'] ?? json['id'] ?? '',
+      bookId: json['bookId'] ?? '',
+      language: json['language'] ?? '',
+      formats: (json['formats'] as List? ?? [])
+          .map((item) => BookFormatModel.fromJson(item))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'bookId': bookId,
+      'language': language,
+      'formats': formats
+          .map((item) => BookFormatModel.fromEntity(item).toJson())
+          .toList(),
+    };
+  }
+
+  factory BookVariantModel.fromEntity(BookVariantEntity entity) {
+    return BookVariantModel(
+      id: entity.id,
+      bookId: entity.bookId,
+      language: entity.language,
+      formats: entity.formats,
+    );
+  }
+}

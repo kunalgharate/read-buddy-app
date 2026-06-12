@@ -26,3 +26,8 @@ class SignUpError extends SignUpState {
     this.isUserAlreadyExists = false,
   });
 }
+
+class ResendVerificationEmailSuccess extends SignUpState {
+  final AppUser user;
+  ResendVerificationEmailSuccess(this.user);
+}
