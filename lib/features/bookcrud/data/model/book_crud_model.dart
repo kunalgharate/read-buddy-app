@@ -44,6 +44,28 @@ class BookCrudModel extends BookCrudEntity {
         );
 
   factory BookCrudModel.fromJson(Map<String, dynamic> json) {
+    final categoryData = json['category'];
+    String categoryName = "category";
+    String? categoryId;
+    if (categoryData is Map<String, dynamic>) {
+      categoryName = categoryData['name'] ?? "category";
+      categoryId = categoryData['_id'];
+    } else if (categoryData is String) {
+      categoryName = categoryData;
+      categoryId = categoryData;
+    }
+
+    final ownerData = json['ownerId'];
+    String ownerId = "";
+    String? ownerName;
+    if (ownerData is Map<String, dynamic>) {
+      ownerId = ownerData['_id'] ?? "";
+      ownerName = ownerData['name'];
+    } else if (ownerData is String) {
+      ownerId = ownerData;
+      ownerName = ownerData;
+    }
+
     return BookCrudModel(
       title: json['title'] ?? "title",
       subtitle: json['subtitle'] ?? "subtitle",
@@ -60,11 +82,11 @@ class BookCrudModel extends BookCrudEntity {
       language: json['language'] ?? "language",
       genre: json['genre'] ?? "genre",
       tags: List<String>.from(json['tags'] ?? []),
-      category: json['category']?['name'] ?? "category",
-      categoryId: json['category']?['_id'],
+      category: categoryName,
+      categoryId: categoryId,
       id: json['_id'],
-      ownerId: json['ownerId']?['_id'] ?? "",
-      ownerName: json['ownerId']?['name'],
+      ownerId: ownerId,
+      ownerName: ownerName,
       location: json['location'] ?? "location",
       coverImageUrl: json['coverImageUrl'] ?? "",
       additionalImageUrls: List<String>.from(json['additional_images'] ?? []),
