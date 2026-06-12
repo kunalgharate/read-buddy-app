@@ -13,3 +13,8 @@ class VerifyEmailEvent extends SignUpEvent {
   final String code;
   VerifyEmailEvent(this.email, this.code);
 }
+
+class ResendVerificationEmailEvent extends SignUpEvent {
+  final Map<String, dynamic> userData;
+  ResendVerificationEmailEvent(this.userData);
+}

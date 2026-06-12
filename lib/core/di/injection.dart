@@ -62,6 +62,8 @@ import 'package:read_buddy_app/features/bookcrud/data/repositories/bookcrud_repo
 import 'package:read_buddy_app/features/bookcrud/data/repositories/user_repo_impl.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/respository/bookcrud_repo.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/respository/user_repo.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/respository/variant_repository.dart';
+import 'package:read_buddy_app/features/bookcrud/data/repositories/variant_repository_impl.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/add_book.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/delete_book.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_books.dart';
@@ -303,6 +305,11 @@ void _registerRepositories() {
   // Book CRUD
   getIt.registerLazySingleton<BookCrudRepository>(
     () => BookCrudRepositoryImpl(getIt<BookCrudRemoteDataSource>()),
+  );
+
+  // Book Variants
+  getIt.registerLazySingleton<VariantRepository>(
+    () => VariantRepositoryImpl(),
   );
 
   // User

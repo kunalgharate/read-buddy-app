@@ -1,0 +1,23 @@
+# Exclude build output and dependencies
+build/
+.dart_tool/
+.git/
+.idea/
+
+# Exclude local/temporary files
+*.log
+tmp/
+
+{
+  "files.watcherExclude": {
+    "**/build/**": true,
+    "**/.dart_tool/**": true,
+    "**/.idea/**": true,
+    "**/.git/**": true
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/.idea": true
+  }
+}
