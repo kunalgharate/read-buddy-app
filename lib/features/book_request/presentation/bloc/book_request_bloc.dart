@@ -48,7 +48,16 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   ) async {
     emit(BookRequestCreating());
     try {
-      await createBookRequest(event.bookId);
+      await createBookRequest(
+        bookId: event.bookId,
+        name: event.name,
+        phone: event.phone,
+        address: event.address,
+        pincode: event.pincode,
+        fulfillmentMethod: event.fulfillmentMethod,
+        preferredDate: event.preferredDate,
+        preferredTime: event.preferredTime,
+      );
       emit(BookRequestCreated());
     } catch (e) {
       emit(BookRequestError('Failed to create book request: $e'));

@@ -1,14 +1,18 @@
 {
-  "enabled": false,
+  "enabled": true,
   "name": "Dart Format on Save",
   "description": "Runs dart format on Dart source files when saved. Excludes generated files.",
   "version": "1.0.0",
   "when": {
     "type": "fileEdited",
-    "patterns": ["lib/**/*.dart"]
+    "patterns": [
+      "lib/**/*.dart"
+    ]
   },
   "then": {
     "type": "runCommand",
     "command": "dart format --fix lib/"
-  }
+  },
+  "workspaceFolderName": "readbuddy",
+  "shortName": "format-on-save"
 }

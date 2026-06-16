@@ -54,6 +54,14 @@ class BookDonationRequestModel extends BookDonationRequest {
         pickup['longitude'] = pickupDetails!.longitude;
       }
 
+      // Preferred date/time for pickup scheduling
+      if (pickupDetails!.preferredDate != null) {
+        pickup['preferredDate'] = pickupDetails!.preferredDate;
+      }
+      if (pickupDetails!.preferredTime != null) {
+        pickup['preferredTime'] = pickupDetails!.preferredTime;
+      }
+
       data['pickup'] = pickup; // ✅ server expects 'pickup' not 'pickupDetails'
     }
 

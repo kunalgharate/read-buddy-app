@@ -61,6 +61,8 @@ class PickupDetails extends Equatable {
   final String address;
   final String pincode;
   final String mobile; // ✅ renamed from 'phoneNumber' to match server
+  final String? preferredDate; // DD/MM/YYYY
+  final String? preferredTime; // HH:mm
   final double? latitude;
   final double? longitude;
 
@@ -69,6 +71,8 @@ class PickupDetails extends Equatable {
     required this.address,
     required this.pincode,
     required this.mobile, // ✅
+    this.preferredDate,
+    this.preferredTime,
     this.latitude,
     this.longitude,
   });
@@ -79,6 +83,8 @@ class PickupDetails extends Equatable {
     address,
     pincode,
     mobile,
+    preferredDate,
+    preferredTime,
     latitude,
     longitude,
   ];

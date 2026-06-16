@@ -9,7 +9,16 @@ import '../../domain/entities/pickup_details_entity.dart';
 
 abstract class BookRequestRemoteDataSource {
   Future<BookDetailModel> getBookById(String id);
-  Future<void> createBookRequest(String bookId);
+  Future<void> createBookRequest({
+    required String bookId,
+    required String name,
+    required String phone,
+    required String address,
+    required String pincode,
+    required String fulfillmentMethod,
+    String? preferredDate,
+    String? preferredTime,
+  });
   Future<List<BookRequestModel>> getMyBookRequests();
   Future<List<BookRequestModel>> getAllBookRequests();
   Future<List<BookRequestModel>> getUpcomingPickups();
@@ -46,14 +55,31 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<void> createBookRequest(String bookId) async {
+  Future<void> createBookRequest({
+    required String bookId,
+    required String name,
+    required String phone,
+    required String address,
+    required String pincode,
+    required String fulfillmentMethod,
+    String? preferredDate,
+    String? preferredTime,
+  }) async {
     try {
+      final data = <String, dynamic>{
+        'bookId': bookId,
+        'name': name,
+        'phone': phone,
+        'address': address,
+        'pincode': pincode,
+        'fulfillmentMethod': fulfillmentMethod,
+      };
+      if (preferredDate != null) data['preferredDate'] = preferredDate;
+      if (preferredTime != null) data['preferredTime'] = preferredTime;
+
       final response = await dio.post(
         ApiConstants.userBookRequests,
-        data: {
-          'bookId': bookId,
-          'fulfillmentMethod': 'PICKUP',
-        },
+        data: data,
       );
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {

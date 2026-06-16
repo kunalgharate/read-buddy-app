@@ -47,6 +47,7 @@ class _CollectFromLibraryView extends StatefulWidget {
 
 class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   late int _selectedTab;
+  bool _showingConfirmation = false;
 
   @override
   void initState() {
@@ -123,41 +124,44 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     return '${hour.toString().padLeft(2, '0')}:$minute $period';
   }
 
-  void _onConfirm() {
+  bool _validateStep() {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final address = _addressController.text.trim();
 
     if (name.isEmpty || phone.isEmpty || address.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
-      return;
+      _showSnack('Please fill in all fields');
+      return false;
     }
     if (phone.length != 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Phone number must be exactly 10 digits')),
-      );
-      return;
+      _showSnack('Phone number must be exactly 10 digits');
+      return false;
     }
     if (address.length < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid address')),
-      );
-      return;
+      _showSnack('Please enter a valid address');
+      return false;
     }
     if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a pickup date')),
-      );
-      return;
+      _showSnack('Please select a date');
+      return false;
     }
     if (_selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a pickup time')),
-      );
-      return;
+      _showSnack('Please select a time');
+      return false;
     }
+    return true;
+  }
+
+  void _onConfirm() {
+    if (_validateStep()) {
+      setState(() => _showingConfirmation = true);
+    }
+  }
+
+  void _onActualConfirm() {
+    final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final address = _addressController.text.trim();
 
     final timeStr =
         '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
@@ -174,6 +178,87 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
             ),
           ),
         );
+  }
+
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Widget _buildConfirmationView() {
+    final isPickup = _selectedTab == 0;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _BookCard(request: widget.request),
+          const SizedBox(height: 20),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9F9F9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Confirm Details',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E2939),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _confirmRow('Method', isPickup ? 'Pick Up' : 'Drop Off'),
+                _confirmRow('Name', _nameController.text.trim()),
+                _confirmRow('Phone', _phoneController.text.trim()),
+                _confirmRow('Address', _addressController.text.trim()),
+                _confirmRow('Date', _formatDate(_selectedDate)),
+                _confirmRow('Time', _formatTime(_selectedTime)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _confirmRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF888888),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E2939),
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -216,7 +301,9 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
             );
           }
         },
-        child: Column(
+        child: _showingConfirmation
+            ? _buildConfirmationView()
+            : Column(
         children: [
           // ── Tab row ──────────────────────────────────────────────────
           Padding(
@@ -378,43 +465,96 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         ],
       ), // end Column (BlocListener child)
       ), // end BlocListener
-      bottomNavigationBar: Padding(
+      bottomNavigationBar: _showingConfirmation
+          ? Padding(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: BlocBuilder<BookRequestBloc, BookRequestState>(
+                      builder: (context, state) {
+                        final isLoading = state is PickupScheduling;
+                        return ElevatedButton(
+                          onPressed: isLoading ? null : _onActualConfirm,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2CE07F),
+                            disabledBackgroundColor: const Color(0xFF2CE07F).withValues(alpha: 0.6),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF1E2939),
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Text(
+                                  'Confirm',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF1E2939),
+                                  ),
+                                ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: OutlinedButton(
+                      onPressed: () => setState(() => _showingConfirmation = false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF1E2939),
+                        side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Back',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : Padding(
         padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
         child: SizedBox(
           width: double.infinity,
           height: 52,
-          child: BlocBuilder<BookRequestBloc, BookRequestState>(
-            builder: (context, state) {
-              final isLoading = state is PickupScheduling;
-              return ElevatedButton(
-                onPressed: isLoading ? null : _onConfirm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2CE07F),
-                  disabledBackgroundColor: const Color(0xFF2CE07F).withValues(alpha: 0.6),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: isLoading
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF1E2939),
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : Text(
-                        _selectedTab == 0 ? 'Confirm Pick Up' : 'Confirm Drop Off',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E2939),
-                        ),
-                      ),
-              );
-            },
+          child: ElevatedButton(
+            onPressed: _onConfirm,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2CE07F),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Next',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1E2939),
+              ),
+            ),
           ),
         ),
       ),

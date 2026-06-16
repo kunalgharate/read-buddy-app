@@ -5,7 +5,16 @@ import '../entities/pickup_details_entity.dart';
 
 abstract class BookRequestRepository {
   Future<BookDetailEntity> getBookById(String id);
-  Future<void> createBookRequest(String bookId);
+  Future<void> createBookRequest({
+    required String bookId,
+    required String name,
+    required String phone,
+    required String address,
+    required String pincode,
+    required String fulfillmentMethod,
+    String? preferredDate,
+    String? preferredTime,
+  });
   Future<List<BookRequestEntity>> getMyBookRequests();
   Future<List<BookRequestEntity>> getAllBookRequests();
   Future<List<BookRequestEntity>> getUpcomingPickups();

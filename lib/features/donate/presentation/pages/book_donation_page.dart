@@ -41,6 +41,7 @@ class _DonationPageState extends State<DonationPage> {
   final _addressController = TextEditingController();
   final _pinController = TextEditingController();
   final _contractController = TextEditingController();
+  DateTime? _preferredDate;
   Agent? _selectedAgent;
   File? _receiptImage;
 
@@ -57,6 +58,35 @@ class _DonationPageState extends State<DonationPage> {
         }
       });
     }
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _preferredDate ?? now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: _primaryGreen,
+            onPrimary: Colors.white,
+            onSurface: _textDark,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) setState(() => _preferredDate = picked);
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Select Date';
+    final d = date.day.toString().padLeft(2, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final y = date.year;
+    return '$d/$m/$y';
   }
 
   static const _primaryGreen = Color(0xFF2CE07F);
@@ -164,6 +194,13 @@ class _DonationPageState extends State<DonationPage> {
         );
         return;
       }
+
+      if (_preferredDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a preferred pickup date')),
+        );
+        return;
+      }
     }
     if (_deliveryType == 'dropoff' && _selectedAgent == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -190,6 +227,11 @@ class _DonationPageState extends State<DonationPage> {
               address: _addressController.text.trim(),
               pincode: _pinController.text.trim(),
               mobile: _contractController.text.trim(), // ✅ was 'phoneNumber'
+              preferredDate: _preferredDate != null
+                  ? '${_preferredDate!.day.toString().padLeft(2, '0')}'
+                      '/${_preferredDate!.month.toString().padLeft(2, '0')}'
+                      '/${_preferredDate!.year}'
+                  : null,
             )
           : null,
       dropoffDetails: _deliveryType == 'dropoff' && _selectedAgent != null
@@ -504,7 +546,11 @@ class _DonationPageState extends State<DonationPage> {
               child: SingleChildScrollView(
                 padding:
                     EdgeInsets.symmetric(horizontal: paddingH, vertical: 16),
-                child: _currentStep == 0 ? _buildStep1() : _buildStep2(),
+                child: _currentStep == 0
+                    ? _buildStep1()
+                    : _currentStep == 1
+                        ? _buildStep2()
+                        : _buildStep3(),
               ),
             ),
           ],
@@ -722,6 +768,16 @@ class _DonationPageState extends State<DonationPage> {
               LengthLimitingTextInputFormatter(10),
             ],
           ),
+          const SizedBox(height: 16),
+          _label('Preferred Pickup Date'),
+          const SizedBox(height: 8),
+          _dateTimeButton(
+            icon: Icons.calendar_month_outlined,
+            label: _formatDate(_preferredDate),
+            isPlaceholder: _preferredDate == null,
+            onTap: _pickDate,
+          ),
+          const SizedBox(height: 16),
         ] else ...[
           BlocBuilder<DonateBookBloc, DonateBookState>(
             builder: (context, state) {
@@ -781,6 +837,125 @@ class _DonationPageState extends State<DonationPage> {
           ),
         ],
         const SizedBox(height: 32),
+        _primaryButton('Next', _goToStep3),
+        const SizedBox(height: 12),
+        _outlineButton('Back', () => setState(() => _currentStep = 0)),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  bool _validateStep2() {
+    if (_deliveryType == 'pickup') {
+      final address = _addressController.text.trim();
+      final pin = _pinController.text.trim();
+      final phone = _contractController.text.trim();
+
+      if (address.isEmpty) {
+        _showSnack('Please enter your pickup address');
+        return false;
+      }
+      if (address.length < 10) {
+        _showSnack('Address must be at least 10 characters');
+        return false;
+      }
+      final hasLetter = address.contains(RegExp(r'[a-zA-Z]'));
+      final hasDigit = address.contains(RegExp(r'[0-9]'));
+      if (!hasLetter || !hasDigit) {
+        _showSnack('Please enter a valid address (include street name and number)');
+        return false;
+      }
+      if (pin.isEmpty) {
+        _showSnack('Please enter your PIN code');
+        return false;
+      }
+      if (!RegExp(r'^[1-9][0-9]{5}$').hasMatch(pin)) {
+        _showSnack('Please enter a valid 6-digit PIN code (e.g. 400001)');
+        return false;
+      }
+      if (phone.isEmpty) {
+        _showSnack('Please enter your contact number');
+        return false;
+      }
+      if (!RegExp(r'^[0-9]{10}$').hasMatch(phone)) {
+        _showSnack('Contact number must be exactly 10 digits');
+        return false;
+      }
+      if (_preferredDate == null) {
+        _showSnack('Please select a preferred pickup date');
+        return false;
+      }
+    }
+    if (_deliveryType == 'dropoff' && _selectedAgent == null) {
+      _showSnack('Please select a library for drop-off');
+      return false;
+    }
+    return true;
+  }
+
+  void _goToStep3() {
+    if (_validateStep2()) {
+      setState(() => _currentStep = 2);
+    }
+  }
+
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  // ─── Step 3: Confirmation ─────────────────────────────────
+
+  Widget _buildStep3() {
+    final isPickup = _deliveryType == 'pickup';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        _sectionSubtitle('Review Your Donation'),
+        const SizedBox(height: 20),
+
+        // ── Book details card ──────────────────────────────────
+        _confirmCard([
+          _confirmRow('Book Title', _titleController.text.trim()),
+          _confirmRow('Category', _selectedCategory?.title.capitalizeEachWord ?? '—'),
+          _confirmRow('Condition', _bookCondition.replaceAll('_', ' ').capitalizeEachWord),
+          _confirmRow('Language', _languageController.text.trim()),
+          _confirmRow('Donor Name', _nameController.text.trim()),
+        ]),
+        const SizedBox(height: 16),
+
+        // ── Fulfillment details card ────────────────────────────
+        _confirmCard([
+          _confirmRow('Method', isPickup ? 'Pickup' : 'Drop Off'),
+          if (isPickup) ...[
+            _confirmRow('Address', _addressController.text.trim()),
+            _confirmRow('PIN Code', _pinController.text.trim()),
+            _confirmRow('Phone', _contractController.text.trim()),
+            _confirmRow('Preferred Date', _formatDate(_preferredDate)),
+          ],
+          if (!isPickup && _selectedAgent != null)
+            _confirmRow('Library', _selectedAgent!.name),
+        ]),
+        const SizedBox(height: 16),
+
+        // ── Image indicators ────────────────────────────────────
+        if (_bookImage != null)
+          _confirmCard([
+            _confirmRow('Cover Image', 'Attached ✓'),
+          ]),
+        if (_receiptImage != null)
+          _confirmCard([
+            _confirmRow('Receipt Image', 'Attached ✓'),
+          ]),
+
+        const SizedBox(height: 32),
         BlocBuilder<DonateBookBloc, DonateBookState>(
           builder: (context, state) {
             final isLoading = state is DonateBookLoading;
@@ -792,9 +967,57 @@ class _DonationPageState extends State<DonationPage> {
           },
         ),
         const SizedBox(height: 12),
-        _outlineButton('Back', () => setState(() => _currentStep = 0)),
+        _outlineButton('Back', () => setState(() => _currentStep = 1)),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _confirmCard(List<Widget> rows) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Column(
+        children: rows,
+      ),
+    );
+  }
+
+  Widget _confirmRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF7A9BB5),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _textDark,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -977,6 +1200,44 @@ class _DonationPageState extends State<DonationPage> {
     );
   }
 
+  Widget _dateTimeButton({
+    required IconData icon,
+    required String label,
+    required bool isPlaceholder,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE0E0E0)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF7A9BB5)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: isPlaceholder
+                      ? const Color(0xFF999999)
+                      : _textDark,
+                  fontWeight: isPlaceholder ? FontWeight.normal : FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _primaryButton(String label, VoidCallback? onPressed,
       {bool isLoading = false}) {
     return SizedBox(
@@ -1057,8 +1318,16 @@ class _StepperHeader extends StatelessWidget {
             number: 2,
             label: 'Pickup',
             isActive: currentStep >= 1,
-            isDone: false,
+            isDone: currentStep > 1,
             onTap: () => onStepTapped(1),
+          ),
+          _StepLine(isActive: currentStep > 1),
+          _StepCircle(
+            number: 3,
+            label: 'Confirm',
+            isActive: currentStep >= 2,
+            isDone: false,
+            onTap: () => onStepTapped(2),
           ),
         ],
       ),
