@@ -128,17 +128,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
     }
   }
 
-  void _submit() {
-    final isDropoff = _fulfillmentMethod == 'dropoff';
-    context.read<BookRequestBloc>().add(CreateBookRequest(
-      bookId: widget.bookId,
-      name: _nameController.text.trim(),
-      phone: _phoneController.text.trim(),
-      address: isDropoff ? _addressController.text.trim() : '',
-      pincode: isDropoff ? _pincodeController.text.trim() : '',
-      fulfillmentMethod: isDropoff ? 'DROP_OFF' : 'PICKUP',
-      preferredDate: isDropoff ? _formatDate(_preferredDate) : null,
-    ));
+  void _submit(BuildContext blocContext) {
+    blocContext.read<BookRequestBloc>().add(CreateBookRequest(widget.bookId));
   }
 
   void _showSnack(String message) {
@@ -196,7 +187,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             body: SafeArea(
               child: state is BookRequestCreating
                   ? const Center(child: CircularProgressIndicator(color: Color(0xFF2CE07F)))
-                  : _currentStep == 0 ? _buildStep1() : _buildStep2(),
+                  : _currentStep == 0 ? _buildStep1() : _buildStep2(context),
             ),
           );
         },
@@ -378,7 +369,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
 
   // ─── Step 2: Confirmation ─────────────────────────────────
 
-  Widget _buildStep2() {
+  Widget _buildStep2(BuildContext blocContext) {
     final isDropoff = _fulfillmentMethod == 'dropoff';
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -414,7 +405,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: _submit,
+              onPressed: () => _submit(blocContext),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2CE07F),
                 elevation: 0,
