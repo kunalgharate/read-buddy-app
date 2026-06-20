@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
-import '../../domain/entities/book_entity.dart';
+
 import '../../domain/usecases/get_latest_books_usecase.dart';
 import '../../domain/usecases/get_trending_books_usecase.dart';
 import '../../domain/usecases/get_recommended_books_usecase.dart';

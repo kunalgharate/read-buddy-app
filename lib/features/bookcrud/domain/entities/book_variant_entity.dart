@@ -42,14 +42,19 @@ class BookVariantEntity extends Equatable {
   final String bookId;
   final String language; // 'english', 'hindi', 'marathi', 'tamil', 'malayalam'
   final List<BookFormatEntity> formats;
+  final String? isbn;
+  final String? donatorInfo;
 
   const BookVariantEntity({
     required this.id,
     required this.bookId,
     required this.language,
     required this.formats,
+    this.isbn,
+    this.donatorInfo,
   });
 
   @override
-  List<Object?> get props => [id, bookId, language, formats];
+  List<Object?> get props => [id, bookId, language, formats, isbn, donatorInfo];
 }
+

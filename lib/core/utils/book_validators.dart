@@ -76,6 +76,25 @@ class BookFormValidator {
     return null;
   }
 
+  /// ISBN is optional for eBook and Audiobook formats.
+  /// If a value is provided, it must still be a valid ISBN-10 or ISBN-13.
+  static String? validateISBNOptional(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // optional – empty is fine
+    }
+
+    String isbn = value.replaceAll('-', '').replaceAll(' ', '');
+
+    final isISBN10 = RegExp(r'^\d{9}[\dXx]$').hasMatch(isbn);
+    final isISBN13 = RegExp(r'^\d{13}$').hasMatch(isbn);
+
+    if (!isISBN10 && !isISBN13) {
+      return 'Invalid ISBN format (should be ISBN-10 or ISBN-13)';
+    }
+
+    return null;
+  }
+
   static String? validatePublisher(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Publisher is required';

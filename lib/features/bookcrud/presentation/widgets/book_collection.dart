@@ -37,7 +37,7 @@ class BooksCollection extends StatelessWidget {
                 height: 120,
                 width: 100,
                 placeholder: (context, url) =>
-                    const Center(child: CircularProgressIndicator()),
+                const Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
                 fit: BoxFit.cover,
               ),
@@ -90,12 +90,18 @@ class BooksCollection extends StatelessWidget {
                           ))
                     ],
                   ),
-                  Row(
+                  Wrap(
+                    spacing: 5,
+                    runSpacing: 4,
                     children: [
                       TextButton(
                           onPressed: () {},
                           style: TextButton.styleFrom(
                               backgroundColor: Colors.green,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5))),
                           child: Text(
@@ -103,13 +109,14 @@ class BooksCollection extends StatelessWidget {
                             style: const TextStyle(
                                 color: Color.fromARGB(255, 6, 86, 150)),
                           )),
-                      const SizedBox(
-                        width: 5,
-                      ),
                       TextButton(
                           onPressed: () {},
                           style: TextButton.styleFrom(
                               backgroundColor: Colors.green,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5))),
                           child: Text(
@@ -117,9 +124,6 @@ class BooksCollection extends StatelessWidget {
                             style: const TextStyle(
                                 color: Color.fromARGB(255, 6, 86, 150)),
                           )),
-                      const SizedBox(
-                        width: 5,
-                      ),
                       TextButton(
                           onPressed: () {
                             Navigator.pushNamed(
@@ -130,12 +134,17 @@ class BooksCollection extends StatelessWidget {
                           },
                           style: TextButton.styleFrom(
                               backgroundColor: const Color(0xFFE8F0FF),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5))),
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.translate, size: 14, color: Color(0xFF1565C0)),
+                              Icon(Icons.translate,
+                                  size: 14, color: Color(0xFF1565C0)),
                               SizedBox(width: 4),
                               Text(
                                 "Variants",
@@ -184,8 +193,8 @@ void updatedialog(BuildContext context, BookCrudEntity book) async {
                     context,
                     MaterialPageRoute(
                         builder: (_) => UpdateBookStepper(
-                              book_id: book.id ?? "",
-                            )));
+                          book_id: book.id ?? "",
+                        )));
                 // Optional: close bottom sheet
               },
             ),

@@ -6,7 +6,7 @@ import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/services/app_preferences.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
-import 'package:read_buddy_app/features/book_request/presentation/pages/my_requests_page.dart';
+
 import 'package:read_buddy_app/features/profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,12 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  List<Widget> get _pages => [
-        MainTab(onDonatePressed: () => setState(() => _currentIndex = 2)),
-        const CategoryTab(),
-        const DonationTab(),
-        const ProfileScreen(),
-      ];
+
 
   Future<void> _logout() async {
     try {

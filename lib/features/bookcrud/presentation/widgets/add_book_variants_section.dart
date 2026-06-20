@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
@@ -32,8 +31,15 @@ class LocalBookFormat {
 class LocalBookVariant {
   final String language;
   final List<LocalBookFormat> formats;
+  final String? isbn;
+  final String? donatorInfo;
 
-  LocalBookVariant({required this.language, required this.formats});
+  LocalBookVariant({
+    required this.language,
+    required this.formats,
+    this.isbn,
+    this.donatorInfo,
+  });
 }
 
 class AddBookVariantsSection extends StatefulWidget {
@@ -56,8 +62,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
   int? _editingIndex;
 
   // Form Fields for Add/Edit Variant
-  String? _selectedLanguage;
-  final List<String> _languages = ['english', 'hindi', 'marathi', 'tamil', 'malayalam'];
+  final TextEditingController _languageController = TextEditingController();
+  final TextEditingController _variantIsbnController = TextEditingController();
+  final TextEditingController _donatorInfoController = TextEditingController();
 
   bool _hasHardcover = false;
   bool _hasEbook = false;
@@ -110,6 +117,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               _variants.add(LocalBookVariant(
                 language: entity.language,
                 formats: formats,
+                isbn: entity.isbn,
+                donatorInfo: entity.donatorInfo,
               ));
             }
           });
@@ -122,6 +131,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
   @override
   void dispose() {
+    _languageController.dispose();
+    _variantIsbnController.dispose();
+    _donatorInfoController.dispose();
     _isbnController.dispose();
     _copiesController.dispose();
     _audioDurationController.dispose();
@@ -130,7 +142,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
   void _resetForm() {
     setState(() {
-      _selectedLanguage = null;
+      _languageController.clear();
+      _variantIsbnController.clear();
+      _donatorInfoController.clear();
       _hasHardcover = false;
       _hasEbook = false;
       _hasAudiobook = false;
@@ -154,7 +168,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
     setState(() {
       _isAddingOrEditing = true;
       _editingIndex = index;
-      _selectedLanguage = variant.language;
+      _languageController.text = variant.language;
+      _variantIsbnController.text = variant.isbn ?? '';
+      _donatorInfoController.text = variant.donatorInfo ?? '';
       _hasHardcover = false;
       _hasEbook = false;
       _hasAudiobook = false;
@@ -344,9 +360,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
   void _saveVariant() {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedLanguage == null) {
+    final language = _languageController.text.trim();
+    if (language.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a variant language'), backgroundColor: Colors.orangeAccent),
+        const SnackBar(content: Text('Please enter a language'), backgroundColor: Colors.orangeAccent),
       );
       return;
     }
@@ -395,9 +412,14 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       ));
     }
 
+    final isbn = _variantIsbnController.text.trim();
+    final donatorInfo = _donatorInfoController.text.trim();
+
     final newVariant = LocalBookVariant(
-      language: _selectedLanguage!,
+      language: language,
       formats: formats,
+      isbn: isbn.isNotEmpty ? isbn : null,
+      donatorInfo: donatorInfo.isNotEmpty ? donatorInfo : null,
     );
 
     setState(() {
@@ -465,6 +487,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           bookId: bookId,
           language: localVariant.language,
           formats: formats,
+          isbn: localVariant.isbn,
+          donatorInfo: localVariant.donatorInfo,
         );
         
         await repository.saveVariant(variant);
@@ -680,11 +704,13 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const Text('Select Language *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153))),
+                    const Text('Language *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153))),
                     const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _selectedLanguage,
+                    TextFormField(
+                      controller: _languageController,
+                      enabled: _editingIndex == null,
                       decoration: InputDecoration(
+                        hintText: 'e.g. English, Hindi, Marathi...',
                         prefixIcon: const Icon(Icons.language_rounded, color: Colors.grey, size: 20),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         focusedBorder: OutlineInputBorder(
@@ -693,27 +719,42 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
                       ),
-                      items: _languages.map((lang) {
-                        final isAlreadyAdded = _variants.any(
-                          (v) => v.language == lang && (_editingIndex == null || _variants[_editingIndex!].language != lang),
-                        );
-                        return DropdownMenuItem<String>(
-                          value: lang,
-                          enabled: !isAlreadyAdded,
-                          child: Text(
-                            lang.toUpperCase() + (isAlreadyAdded ? ' (Already Added)' : ''),
-                            style: TextStyle(
-                              color: isAlreadyAdded ? Colors.grey : const Color(0xFF042153),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: _editingIndex != null ? null : (val) => setState(() => _selectedLanguage = val),
                       validator: (val) {
-                        if (val == null || val.isEmpty) return 'Please select a language';
+                        if (val == null || val.trim().isEmpty) return 'Please enter a language';
                         return null;
                       },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('ISBN Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153))),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _variantIsbnController,
+                      decoration: InputDecoration(
+                        hintText: 'e.g. 978-3-16-148410-0',
+                        prefixIcon: const Icon(Icons.qr_code_rounded, color: Colors.grey, size: 20),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Color(0xFF042153)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Donator Info', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153))),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _donatorInfoController,
+                      decoration: InputDecoration(
+                        hintText: 'e.g. Donated by Ramesh Kumar',
+                        prefixIcon: const Icon(Icons.volunteer_activism_rounded, color: Colors.grey, size: 20),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Color(0xFF042153)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     _buildFormatSelectors(),
@@ -730,14 +771,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       TextFormField(
                         controller: _isbnController,
                         decoration: InputDecoration(
-                          labelText: 'ISBN Number *',
+                          labelText: 'Hardcover ISBN Number *',
                           prefixIcon: const Icon(Icons.qr_code_rounded, size: 20),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         validator: (val) => _hasHardcover && (val == null || val.isEmpty) ? 'ISBN is required' : null,
                       ),
-                      const SizedBox(height: 16),
-                      _buildCopiesSelector(),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -748,7 +787,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                           ),
                           Switch(
                             value: _hardcoverAvailable,
-                            activeColor: const Color(0xFF4F46E5),
+                            activeThumbColor: const Color(0xFF4F46E5),
                             onChanged: (val) => setState(() => _hardcoverAvailable = val),
                           ),
                         ],
@@ -989,68 +1028,6 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
     );
   }
 
-  Widget _buildCopiesSelector() {
-    return Row(
-      children: [
-        const Text(
-          'Number of Copies *',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF042153)),
-        ),
-        const Spacer(),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-            color: Colors.grey.shade50,
-          ),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.remove, size: 18),
-                onPressed: () {
-                  int val = int.tryParse(_copiesController.text) ?? 1;
-                  if (val > 1) {
-                    setState(() {
-                      _copiesController.text = (val - 1).toString();
-                    });
-                  }
-                },
-              ),
-              SizedBox(
-                width: 50,
-                child: TextFormField(
-                  controller: _copiesController,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  validator: (val) {
-                    if (_hasHardcover) {
-                      if (val == null || val.isEmpty) return 'Required';
-                      if (int.tryParse(val) == null) return 'Invalid';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.add, size: 18),
-                onPressed: () {
-                  int val = int.tryParse(_copiesController.text) ?? 1;
-                  setState(() {
-                    _copiesController.text = (val + 1).toString();
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildSimulatedUploadCard({
     required bool isEbook,

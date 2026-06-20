@@ -1,0 +1,4 @@
+POST /api/books/:bookId/variants — Add variant
+GET /api/books/:bookId/variants — Get all variants of a book
+PUT /api/books/:bookId/variants/:variantId — Update variant
+DELETE /api/books/:bookId/variants/:variantId — Delete variant
