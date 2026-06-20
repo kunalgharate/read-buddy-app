@@ -20,6 +20,7 @@ class ApiConstants {
   // Book endpoints
   static const String books = '$baseUrl/books';
   static const String searchBooks = '$baseUrl/searchbook/search';
+  static const String bookVariants = '$baseUrl/book-variants';
   //homebooks
   static const String trendingBooks = '$baseUrl/home/trending-books';
   static const String recommendedBooks = '$baseUrl/home/recommended-books';
@@ -70,7 +71,7 @@ class ApiConstants {
   static const deleteCategory = '$baseUrl/categories'; // append /:id
 
 //Banner Apis
-  static const Banner = '$baseUrl/banners';
+  static const banner = '$baseUrl/banners';
 
   static const String updateUserInfo = '$baseUrl/users/update-user-info';
   // Onboarding base

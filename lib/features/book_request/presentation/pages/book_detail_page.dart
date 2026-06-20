@@ -5,6 +5,7 @@ import '../../../../core/di/injection.dart';
 import '../../../bookcrud/data/model/book_crud_model.dart';
 import '../../../bookcrud/domain/entities/book_variant_entity.dart';
 import '../../../bookcrud/domain/respository/variant_repository.dart';
+import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
@@ -298,29 +299,42 @@ class _BookDetailContentState extends State<_BookDetailContent> {
                   color: Color(0xFF1A237E),
                 ),
               ),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  await Navigator.pushNamed(
-                    context,
-                    '/book-variants',
-                    arguments: _toBookCrudModel(widget.book),
+              BlocBuilder<ProfileBloc, ProfileState>(
+                builder: (context, profileState) {
+                  bool canManage = false;
+                  if (profileState is ProfileLoaded) {
+                    final currentUser = profileState.user;
+                    if (currentUser.role == 'admin' || currentUser.id == widget.book.owner.id) {
+                      canManage = true;
+                    }
+                  }
+                  if (!canManage) return const SizedBox.shrink();
+
+                  return ElevatedButton.icon(
+                    onPressed: () async {
+                      await Navigator.pushNamed(
+                        context,
+                        '/book-variants',
+                        arguments: _toBookCrudModel(widget.book),
+                      );
+                      _loadVariants();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add, size: 16, color: Colors.white),
+                    label: const Text(
+                      'Add Variant',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
                   );
-                  _loadVariants();
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: const Icon(Icons.add, size: 16, color: Colors.white),
-                label: const Text(
-                  'Add Variant',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
               ),
             ],
           ),

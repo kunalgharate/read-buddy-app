@@ -1,108 +1,63 @@
-import 'dart:convert';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/parent_book_entity.dart';
 import '../../domain/entities/book_variant_entity.dart';
 import '../../domain/respository/variant_repository.dart';
-import '../model/parent_book_model.dart';
 import '../model/book_variant_model.dart';
+import '../dataresources/variant_remote_data_source.dart';
 
+/// VariantRepositoryImpl — routes all Book Variant operations to the live backend
+/// via [VariantRemoteDataSource] (Dio).
+///
+/// SharedPreferences has been removed entirely:
+///  - Parent book creation is handled by [BookCrudBloc] → AddBookCrudEvent.
+///  - Variant CRUD is persisted on the server (readbuddy-server / BookVariantRoutes.js).
 @LazySingleton(as: VariantRepository)
 class VariantRepositoryImpl implements VariantRepository {
-  static const String _parentBooksKey = 'parent_books_v1';
-  static const String _variantsKey = 'book_variants_v1';
+  final VariantRemoteDataSource remoteDataSource;
 
-  VariantRepositoryImpl();
+  VariantRepositoryImpl(this.remoteDataSource);
 
+  /// Parent books are managed by the BookCrudBloc / books API.
+  /// This method is a no-op — no local storage is used.
   @override
-  Future<List<ParentBookEntity>> getParentBooks() async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getStringList(_parentBooksKey) ?? [];
-    return data.map((jsonStr) {
-      final jsonMap = json.decode(jsonStr) as Map<String, dynamic>;
-      return ParentBookModel.fromJson(jsonMap);
-    }).toList();
-  }
+  Future<List<ParentBookEntity>> getParentBooks() async => [];
 
+  /// Parent book persistence is delegated to BookCrudBloc → AddBookCrudEvent.
+  /// This method is a no-op — no local storage is used.
   @override
   Future<void> saveParentBook(ParentBookEntity book) async {
-    final prefs = await SharedPreferences.getInstance();
-    final currentList = await getParentBooks();
-    
-    final model = ParentBookModel.fromEntity(book);
-    final index = currentList.indexWhere((item) => item.id == book.id);
-    
-    final updatedList = List<ParentBookEntity>.from(currentList);
-    if (index != -1) {
-      updatedList[index] = model;
-    } else {
-      updatedList.add(model);
-    }
-
-    final jsonList = updatedList.map((item) {
-      return json.encode(ParentBookModel.fromEntity(item).toJson());
-    }).toList();
-    await prefs.setStringList(_parentBooksKey, jsonList);
+    // intentionally empty — parent book is saved via the /api/books endpoint
+    // through BookCrudBloc, not through the variant repository.
   }
 
+  /// Fetches all active variants for [bookId] from the backend.
+  /// Backend: GET /api/book-variants/:bookId → raw JSON array.
   @override
   Future<List<BookVariantEntity>> getVariantsForBook(String bookId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getStringList(_variantsKey) ?? [];
-    final allVariants = data.map((jsonStr) {
-      final jsonMap = json.decode(jsonStr) as Map<String, dynamic>;
-      return BookVariantModel.fromJson(jsonMap);
-    }).toList();
-
-    return allVariants.where((variant) => variant.bookId == bookId).toList();
+    return await remoteDataSource.getVariantsForBook(bookId);
   }
 
+  /// Creates or updates a variant on the backend.
+  ///
+  /// Decision rule:
+  ///  - If [variant.id] is empty or starts with 'var_' (a local temp ID generated
+  ///    in the UI before the server assigns a real _id), call POST (create).
+  ///  - Otherwise, the variant has a real MongoDB _id → call PUT (update).
   @override
   Future<void> saveVariant(BookVariantEntity variant) async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getStringList(_variantsKey) ?? [];
-    
-    final allVariants = data.map((jsonStr) {
-      final jsonMap = json.decode(jsonStr) as Map<String, dynamic>;
-      return BookVariantModel.fromJson(jsonMap);
-    }).toList();
-
     final model = BookVariantModel.fromEntity(variant);
-    final index = allVariants.indexWhere((item) => item.id == variant.id);
-
-    if (index != -1) {
-      allVariants[index] = model;
+    final isNew = variant.id.isEmpty || variant.id.startsWith('var_');
+    if (isNew) {
+      await remoteDataSource.createVariant(model);
     } else {
-      final exists = allVariants.any((item) =>
-          item.bookId == variant.bookId &&
-          item.language.toLowerCase() == variant.language.toLowerCase());
-      if (exists) {
-        throw Exception('Variant for ${variant.language} already exists.');
-      }
-      allVariants.add(model);
+      await remoteDataSource.updateVariant(variant.id, model);
     }
-
-    final jsonList = allVariants.map((item) {
-      return json.encode(BookVariantModel.fromEntity(item).toJson());
-    }).toList();
-    await prefs.setStringList(_variantsKey, jsonList);
   }
 
+  /// Soft-deletes a variant by ID on the backend.
+  /// Backend: DELETE /api/book-variants/:id → { message: '...' }
   @override
   Future<void> deleteVariant(String variantId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getStringList(_variantsKey) ?? [];
-    
-    final allVariants = data.map((jsonStr) {
-      final jsonMap = json.decode(jsonStr) as Map<String, dynamic>;
-      return BookVariantModel.fromJson(jsonMap);
-    }).toList();
-
-    allVariants.removeWhere((item) => item.id == variantId);
-
-    final jsonList = allVariants.map((item) {
-      return json.encode(BookVariantModel.fromEntity(item).toJson());
-    }).toList();
-    await prefs.setStringList(_variantsKey, jsonList);
+    await remoteDataSource.deleteVariant(variantId);
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
@@ -89,6 +91,10 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted) return;
       _navigate(const SignInScreen());
       return;
+    }
+
+    if (mounted) {
+      context.read<ProfileBloc>().add(LoadProfileEvent());
     }
 
     // Route based on onboardingCompleted

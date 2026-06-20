@@ -59,6 +59,7 @@ import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/user_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/search_location_remote_resources.dart';
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/variant_remote_data_source.dart';
 import 'package:read_buddy_app/features/bookcrud/data/repositories/bookcrud_repo_impl.dart';
 import 'package:read_buddy_app/features/bookcrud/data/repositories/user_repo_impl.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/respository/bookcrud_repo.dart';
@@ -132,19 +133,19 @@ import '../../features/book_request/presentation/bloc/admin_upcoming_pickups_blo
 
 // Question CRUD (Admin)
 import 'package:read_buddy_app/features/question_crud/data/datasources/question_remote_datasource.dart'
-    as QuestionCrudDataSource;
+    as question_crud_data_source;
 import 'package:read_buddy_app/features/question_crud/data/repositories/question_repository_impl.dart'
-    as QuestionCrudRepo;
+    as question_crud_repo;
 import 'package:read_buddy_app/features/question_crud/domain/repositories/question_repository.dart'
-    as QuestionCrudDomain;
+    as question_crud_domain;
 import 'package:read_buddy_app/features/question_crud/domain/usecases/get_questions.dart'
-    as QuestionCrudUseCases;
+    as question_crud_use_cases;
 import 'package:read_buddy_app/features/question_crud/domain/usecases/add_question.dart'
-    as QuestionCrudUseCases;
+    as question_crud_use_cases;
 import 'package:read_buddy_app/features/question_crud/domain/usecases/update_question.dart'
-    as QuestionCrudUseCases;
+    as question_crud_use_cases;
 import 'package:read_buddy_app/features/question_crud/domain/usecases/delete_question.dart'
-    as QuestionCrudUseCases;
+    as question_crud_use_cases;
 
 // Donation Stats
 
@@ -153,7 +154,7 @@ import 'package:read_buddy_app/features/donate/data/datasources/donate_remote_da
 import 'package:read_buddy_app/features/donate/data/repositories/donate_repository_impl.dart';
 import 'package:read_buddy_app/features/donate/domain/repositories/donate_repository.dart';
 import 'package:read_buddy_app/features/donate/domain/usecases/get_donation_stats.dart'
-    as DonateUseCases;
+    as donate_use_cases;
 import 'package:read_buddy_app/features/donate/domain/usecases/get_nearest_agents.dart';
 import 'package:read_buddy_app/features/donate/domain/usecases/create_book_donation.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
@@ -215,6 +216,11 @@ void _registerDataSources() {
     () => BookCrudRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
+  // Book Variants Remote
+  getIt.registerLazySingleton<VariantRemoteDataSource>(
+    () => VariantRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
   // User
   getIt.registerLazySingleton<UserRemoteResources>(
     () => UserRemoteResourcesImpl(dio: getIt<Dio>()),
@@ -257,8 +263,8 @@ void _registerDataSources() {
   );
 
   // Question CRUD (Admin)
-  getIt.registerLazySingleton<QuestionCrudDataSource.QuestionRemoteDataSource>(
-    () => QuestionCrudDataSource.QuestionRemoteDataSource(
+  getIt.registerLazySingleton<question_crud_data_source.QuestionRemoteDataSource>(
+    () => question_crud_data_source.QuestionRemoteDataSource(
       getIt<Dio>(),
       getIt<SecureStorageUtil>(),
     ),
@@ -301,7 +307,7 @@ void _registerRepositories() {
 
   // Book Variants
   getIt.registerLazySingleton<VariantRepository>(
-    () => VariantRepositoryImpl(),
+    () => VariantRepositoryImpl(getIt<VariantRemoteDataSource>()),
   );
 
   // User
@@ -340,9 +346,9 @@ void _registerRepositories() {
   );
 
   // Question CRUD (Admin)
-  getIt.registerLazySingleton<QuestionCrudDomain.QuestionRepository>(
-    () => QuestionCrudRepo.QuestionRepositoryImpl(
-      getIt<QuestionCrudDataSource.QuestionRemoteDataSource>(),
+  getIt.registerLazySingleton<question_crud_domain.QuestionRepository>(
+    () => question_crud_repo.QuestionRepositoryImpl(
+      getIt<question_crud_data_source.QuestionRemoteDataSource>(),
     ),
   );
 
@@ -474,18 +480,18 @@ void _registerUseCases() {
       () => GetUpcomingPickupsUsecase(getIt<BookRequestRepository>()));
 
   // Question CRUD (Admin)
-  getIt.registerLazySingleton(() => QuestionCrudUseCases.GetQuestions(
-      getIt<QuestionCrudDomain.QuestionRepository>()));
-  getIt.registerLazySingleton(() => QuestionCrudUseCases.AddQuestion(
-      getIt<QuestionCrudDomain.QuestionRepository>()));
-  getIt.registerLazySingleton(() => QuestionCrudUseCases.UpdateQuestion(
-      getIt<QuestionCrudDomain.QuestionRepository>()));
-  getIt.registerLazySingleton(() => QuestionCrudUseCases.DeleteQuestion(
-      getIt<QuestionCrudDomain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => question_crud_use_cases.GetQuestions(
+      getIt<question_crud_domain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => question_crud_use_cases.AddQuestion(
+      getIt<question_crud_domain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => question_crud_use_cases.UpdateQuestion(
+      getIt<question_crud_domain.QuestionRepository>()));
+  getIt.registerLazySingleton(() => question_crud_use_cases.DeleteQuestion(
+      getIt<question_crud_domain.QuestionRepository>()));
 
   // Donate
   getIt.registerLazySingleton(() =>
-      DonateUseCases.GetDonationStats(repository: getIt<DonateRepository>()));
+      donate_use_cases.GetDonationStats(repository: getIt<DonateRepository>()));
   getIt.registerLazySingleton(
       () => GetNearestAgents(repository: getIt<DonateRepository>()));
   getIt.registerLazySingleton(
@@ -571,7 +577,7 @@ void _registerBlocs() {
 
   // Donate
   getIt.registerFactory(() => DonateBookBloc(
-        getDonationStats: getIt<DonateUseCases.GetDonationStats>(),
+        getDonationStats: getIt<donate_use_cases.GetDonationStats>(),
         getNearestAgents: getIt<GetNearestAgents>(),
         createBookDonation: getIt<CreateBookDonation>(),
         uploadReceipt: getIt<UploadReceipt>(),

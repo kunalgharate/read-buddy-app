@@ -41,7 +41,7 @@ class BannerRemoteDataSourceImpl implements BannerRemoteDataSource {
     try {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
       final response = await dio.get(
-        ApiConstants.Banner,
+        ApiConstants.banner,
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -104,7 +104,7 @@ class BannerRemoteDataSourceImpl implements BannerRemoteDataSource {
       print("Image path: ${bannerImage.path}");
 
       final response = await dio.post(
-        ApiConstants.Banner,
+        ApiConstants.banner,
         data: formData,
         options: Options(
           headers: {
@@ -141,7 +141,7 @@ class BannerRemoteDataSourceImpl implements BannerRemoteDataSource {
     try {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
       final response = await dio.delete(
-        '${ApiConstants.Banner}/$id',
+        '${ApiConstants.banner}/$id',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -202,7 +202,7 @@ class BannerRemoteDataSourceImpl implements BannerRemoteDataSource {
       print("Updating banner with data: $data");
 
       final response = await dio.put(
-        "${ApiConstants.Banner}/$id",
+        "${ApiConstants.banner}/$id",
         data: formData,
         options: Options(
           headers: {

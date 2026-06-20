@@ -38,7 +38,7 @@ class SearchLocationRemoteResourcesImpl extends SearchLocationRemoteResources {
         }).toList();
       }
     } catch (e, stackTrace) {
-      print("❌ Error fetching usrslist: $e");
+      print("❌ Error fetching location suggestions: $e");
       print("🔍 StackTrace: $stackTrace");
       rethrow; // rethrowing allows the error to be handled further up the chain (e.g., in Bloc)
     }

@@ -51,3 +51,9 @@ android/local.properties
 
 # Assets mock data
 assets/mock/
+
+# Markdown documentation & task lists (Do NOT commit)
+walkthrough.md
+variants_changes.md
+implementation_plan.md
+task.md

@@ -1,7 +1,6 @@
 // lib/features/books/presentation/pages/book_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../auth/presentation/pages/sign_in_page.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/widgets/addbook_stepper.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/add_category.dart';
@@ -31,14 +30,6 @@ class _BookPageState extends State<BookPage> {
 
   @override
   Widget build(BuildContext context) {
-    final actions = [
-      ElevatedButton(
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const SignInScreen()));
-          },
-          child: const Text("Login")),
-    ];
 
     context.read<BookBloc>().add(LoadBooks());
     return Scaffold(

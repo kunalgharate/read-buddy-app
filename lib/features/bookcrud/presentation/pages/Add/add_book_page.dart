@@ -141,17 +141,23 @@ class _AddBookPageState extends State<AddBookPage> {
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'ISBN',
-                style: TextStyle(
+              Text(
+                selectedFormat == 'eBook' || selectedFormat == 'audioBook'
+                    ? 'ISBN (Optional)'
+                    : 'ISBN',
+                style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                     color: Color.fromARGB(255, 4, 33, 83)),
               ),
               MyTextField(
                 controller: isbnController,
-                validator: BookFormValidator.validateISBN,
-                hintText: " Enter ISBN",
+                validator: selectedFormat == 'eBook' || selectedFormat == 'audioBook'
+                    ? BookFormValidator.validateISBNOptional
+                    : BookFormValidator.validateISBN,
+                hintText: selectedFormat == 'eBook' || selectedFormat == 'audioBook'
+                    ? " Enter ISBN (leave blank if unavailable)"
+                    : " Enter ISBN",
                 obscureText: false,
                 digitsOnly: true,
                 keyboardType: TextInputType.number,

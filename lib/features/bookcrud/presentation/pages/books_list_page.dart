@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/pages/book_crud_detail_page.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_event.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_state.dart';
@@ -99,8 +100,20 @@ class _BooksListPageState extends State<BooksListPage> {
                         itemCount: booksCollection.length,
                         itemBuilder: (context, index) {
                           final bookCollectionItem = booksCollection[index];
-                          return BooksCollection(
-                            bookcollection: bookCollectionItem,
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BookCrudDetailPage(
+                                    book: bookCollectionItem,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: BooksCollection(
+                              bookcollection: bookCollectionItem,
+                            ),
                           );
                         });
                   case BookCrudError(:final message):
@@ -119,29 +132,37 @@ class _BooksListPageState extends State<BooksListPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.large(
-        backgroundColor: const Color.fromARGB(255, 96, 177, 228),
-        shape: const CircleBorder(),
-        tooltip: 'Add Book',
-        onPressed: () {
-          // Your action
-          Navigator.push(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 12, right: 4),
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-
-                      //CategoryListPage()
-                      const BookStepper()));
-        },
-        child: const Center(
-          child: Text(
+                builder: (context) => const BookStepper(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: const Text(
             'Add Book',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color.fromARGB(255, 96, 177, 228),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            elevation: 4,
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

@@ -14,8 +14,7 @@ import 'package:read_buddy_app/core/widgets/my_textfields.dart';
 
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/user_entity.dart';
-import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
-import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_event.dart';
+
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 

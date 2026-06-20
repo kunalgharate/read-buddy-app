@@ -4,6 +4,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
+import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
 import '../blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../blocs/sign_in/sign_in_bloc.dart';
@@ -104,6 +105,7 @@ class _SignInScreenState extends State<SignInScreen> {
               await AppPreferences.setLoggedIn(true);
 
               if (!context.mounted) return;
+              context.read<ProfileBloc>().add(LoadProfileEvent());
               if (state.user.role == 'admin') {
                 Navigator.pushReplacementNamed(context, '/admin');
               } else if (state.user.onboardingCompleted) {
@@ -142,6 +144,7 @@ class _SignInScreenState extends State<SignInScreen> {
               await AppPreferences.setLoggedIn(true);
 
               if (!context.mounted) return;
+              context.read<ProfileBloc>().add(LoadProfileEvent());
               if (state.user.role == 'admin') {
                 Navigator.pushReplacementNamed(context, '/admin');
               } else if (state.user.onboardingCompleted) {
