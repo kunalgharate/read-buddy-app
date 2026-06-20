@@ -4,6 +4,7 @@ import '../../domain/usecases/get_all_book_requests.dart';
 import '../../domain/usecases/accept_book_request.dart';
 import '../../domain/usecases/decline_book_request.dart';
 import '../../domain/usecases/update_request_status.dart';
+import '../../../notification/domain/usecases/send_notification.dart';
 
 // ─── Events ────────────────────────────────────────────────────────────────
 
@@ -74,12 +75,14 @@ class AdminRequestsBloc
   final AcceptBookRequestUsecase acceptBookRequest;
   final DeclineBookRequestUsecase declineBookRequest;
   final UpdateRequestStatusUsecase updateRequestStatus;
+  final SendNotificationUsecase sendNotification;
 
   AdminRequestsBloc({
     required this.getAllBookRequests,
     required this.acceptBookRequest,
     required this.declineBookRequest,
     required this.updateRequestStatus,
+    required this.sendNotification,
   }) : super(AdminRequestsInitial()) {
     on<LoadAllRequests>(_onLoadAll);
     on<AcceptRequest>(_onAccept);
@@ -104,6 +107,26 @@ class AdminRequestsBloc
     emit(AdminRequestActionLoading(currentList, event.requestId));
     try {
       await acceptBookRequest(event.requestId);
+
+      // BUG 5 FIX: Dispatch an in-app notification to the user whose request
+      // was just approved. We look up the userId from the current list before
+      // the reload so we have it even after the list is refreshed.
+      final approvedRequest = currentList
+          .where((r) => r.id == event.requestId)
+          .firstOrNull;
+      final userId = approvedRequest?.userId;
+      final bookTitle = approvedRequest?.bookTitle ?? 'your book';
+
+      if (userId != null && userId.isNotEmpty) {
+        // Fire-and-forget — notification failure must NOT block the approval.
+        await sendNotification(
+          userId: userId,
+          message: 'Your request for "$bookTitle" has been approved! '
+              'Please schedule your pickup or delivery.',
+          type: 'book_request',
+        );
+      }
+
       // Reload the list after action
       final updated = await getAllBookRequests();
       emit(AdminRequestActionSuccess(updated, 'Request accepted'));
@@ -118,6 +141,20 @@ class AdminRequestsBloc
     emit(AdminRequestActionLoading(currentList, event.requestId));
     try {
       await declineBookRequest(event.requestId, reason: event.reason);
+
+      // Send decline notification — fire-and-forget, same pattern as approve.
+      final declinedRequest =
+          currentList.where((r) => r.id == event.requestId).firstOrNull;
+      final userId = declinedRequest?.userId;
+      final bookTitle = declinedRequest?.bookTitle ?? 'your book';
+
+      if (userId != null && userId.isNotEmpty) {
+        await sendNotification(
+          userId: userId,
+          message: 'Your request for "$bookTitle" was declined. Reason: ${event.reason}',
+          type: 'book_request',
+        );
+      }
       final updated = await getAllBookRequests();
       emit(AdminRequestActionSuccess(updated, 'Request declined'));
     } catch (e) {

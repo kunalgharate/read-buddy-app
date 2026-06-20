@@ -196,6 +196,18 @@ class _BookOrderViewState extends State<_BookOrderView> {
                             );
                             return;
                           }
+                          final hasLetter = address.contains(RegExp(r'[a-zA-Z]'));
+                          final hasDigit = address.contains(RegExp(r'[0-9]'));
+                          if (!hasLetter || !hasDigit) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Please enter a valid address (include street name and number)',
+                                ),
+                              ),
+                            );
+                            return;
+                          }
                           if (pincode.length != 6 || pincode[0] == '0') {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Please enter a valid 6-digit pincode')),
@@ -481,9 +493,10 @@ class _BookOrderTab extends StatelessWidget {
           const SizedBox(height: 8),
           _InputField(
             controller: addressController,
-            hint: 'Enter delivery address',
+            hint: 'e.g. Flat 12, Sunrise Apartments, MG Road, Mumbai',
             keyboardType: TextInputType.streetAddress,
             maxLines: 3,
+            helperText: 'Include flat/house no., street, area  •  min 10 characters  •  must include letters and numbers',
           ),
           const SizedBox(height: 16),
           const _FieldLabel(label: 'Pincode'),
@@ -893,6 +906,7 @@ class _InputField extends StatelessWidget {
   final TextInputType keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final int maxLines;
+  final String? helperText;
 
   const _InputField({
     required this.controller,
@@ -900,6 +914,7 @@ class _InputField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.inputFormatters,
     this.maxLines = 1,
+    this.helperText,
   });
 
   @override
@@ -913,6 +928,13 @@ class _InputField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(fontSize: 14, color: Color(0xFFAAAAAA)),
+        helperText: helperText,
+        helperMaxLines: 3,
+        helperStyle: const TextStyle(
+          fontSize: 11,
+          color: Color(0xFF999999),
+          height: 1.4,
+        ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         filled: true,

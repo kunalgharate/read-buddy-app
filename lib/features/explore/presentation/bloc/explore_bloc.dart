@@ -1,12 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/features/category_crud/data/datasources/category_remote_dataresources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
 import 'package:read_buddy_app/features/explore/domain/entities/explore_category.dart';
 import 'explore_event.dart';
 import 'explore_state.dart';
 
-@injectable
 class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
   final CategoryRemoteDataSource categoryDataSource;
   final BookCrudRemoteDataSource bookDataSource;

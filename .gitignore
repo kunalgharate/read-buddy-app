@@ -27,6 +27,7 @@ doc/api/
 # IDE files
 .idea/
 *.iml
+*.code-workspace
 
 # OS files
 .DS_Store

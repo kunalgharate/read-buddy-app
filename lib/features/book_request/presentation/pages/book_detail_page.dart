@@ -6,7 +6,7 @@ import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
 import '../../domain/entities/book_detail_entity.dart';
-import 'book_request_success_page.dart';
+import 'book_request_form_page.dart';
 
 class BookDetailPage extends StatelessWidget {
   final String bookId;
@@ -37,20 +37,9 @@ class _BookDetailViewState extends State<_BookDetailView> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocConsumer<BookRequestBloc, BookRequestState>(
-        listenWhen: (_, current) =>
-            current is BookRequestCreated || current is BookRequestError,
+        listenWhen: (_, current) => current is BookRequestError,
         listener: (context, state) {
-          if (state is BookRequestCreated && _cachedBook != null) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BookRequestSuccessPage(
-                  bookTitle: _cachedBook!.title,
-                  coverImageUrl: _cachedBook!.coverImageUrl,
-                ),
-              ),
-            );
-          } else if (state is BookRequestError) {
+          if (state is BookRequestError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
@@ -97,6 +86,9 @@ class _BookDetailViewState extends State<_BookDetailView> {
         builder: (context, state) {
           if (state is BookDetailLoaded) return _BottomActionBar(book: state.book);
           if (state is BookRequestCreating && _cachedBook != null) {
+            return _BottomActionBar(book: _cachedBook!);
+          }
+          if (state is BookRequestError && _cachedBook != null) {
             return _BottomActionBar(book: _cachedBook!);
           }
           return const SizedBox.shrink();
@@ -149,9 +141,16 @@ class _BottomActionBar extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: () => context
-                  .read<BookRequestBloc>()
-                  .add(CreateBookRequest(book.id)),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BookRequestFormPage(
+                    bookId: book.id,
+                    bookTitle: book.title,
+                    coverImageUrl: book.coverImageUrl,
+                  ),
+                ),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2CE07F),
                 padding: const EdgeInsets.symmetric(vertical: 15),
@@ -160,27 +159,13 @@ class _BottomActionBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: BlocBuilder<BookRequestBloc, BookRequestState>(
-                builder: (context, state) {
-                  if (state is BookRequestCreating) {
-                    return const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    );
-                  }
-                  return Text(
-                    'Request to Book',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  );
-                },
+              child: const Text(
+                'Request to Book',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
