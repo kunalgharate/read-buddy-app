@@ -142,7 +142,7 @@ class AdminRequestsBloc
     try {
       await declineBookRequest(event.requestId, reason: event.reason);
 
-      // Send decline notification — fire-and-forget, same pattern as approve.
+      // Send decline notification â€” fire-and-forget, same pattern as approve.
       final declinedRequest =
           currentList.where((r) => r.id == event.requestId).firstOrNull;
       final userId = declinedRequest?.userId;
