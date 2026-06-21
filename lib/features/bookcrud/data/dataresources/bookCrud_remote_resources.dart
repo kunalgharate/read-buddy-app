@@ -30,14 +30,26 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
             'Failed to load books. Status code: ${response.statusCode}');
       }
 
-      return (response.data as List).map((json) {
-        return BookCrudModel.fromJson(json);
-      }).toList();
+      return _parseBookList(response.data);
     } catch (e, stackTrace) {
       print("❌ Error fetching books: $e");
       print("🔍 StackTrace: $stackTrace");
       rethrow; // rethrowing allows the error to be handled further up the chain (e.g., in Bloc)
     }
+  }
+
+  /// Handles both array and wrapped responses (e.g. { "books": [...] } or { "data": [...] })
+  List<BookCrudModel> _parseBookList(dynamic data) {
+    List<dynamic> list;
+    if (data is List) {
+      list = data;
+    } else if (data is Map<String, dynamic>) {
+      // Try common wrapper keys
+      list = data['books'] ?? data['data'] ?? data['results'] ?? [];
+    } else {
+      list = [];
+    }
+    return list.map((json) => BookCrudModel.fromJson(json)).toList();
   }
 
   @override
@@ -205,9 +217,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
             'Failed to load books. Status code: ${response.statusCode}');
       }
 
-      return (response.data as List).map((json) {
-        return BookCrudModel.fromJson(json);
-      }).toList();
+      return _parseBookList(response.data);
     } catch (e, stackTrace) {
       print("❌ Error fetching searching books: $e");
       print("🔍 StackTrace: $stackTrace");

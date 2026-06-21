@@ -88,7 +88,8 @@ class _BookDetailViewState extends State<_BookDetailView> {
       ),
       bottomNavigationBar: BlocBuilder<BookRequestBloc, BookRequestState>(
         builder: (context, state) {
-          if (state is BookDetailLoaded) return _BottomActionBar(book: state.book);
+          if (state is BookDetailLoaded)
+            return _BottomActionBar(book: state.book);
           if (state is BookRequestCreating && _cachedBook != null) {
             return _BottomActionBar(book: _cachedBook!);
           }
@@ -289,7 +290,8 @@ class _BookDetailContentState extends State<_BookDetailContent> {
                   bool canManage = false;
                   if (profileState is ProfileLoaded) {
                     final currentUser = profileState.user;
-                    if (currentUser.role == 'admin' || currentUser.id == widget.book.owner.id) {
+                    if (currentUser.role == 'admin' ||
+                        currentUser.id == widget.book.owner.id) {
                       canManage = true;
                     }
                   }
@@ -308,7 +310,8 @@ class _BookDetailContentState extends State<_BookDetailContent> {
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -316,7 +319,10 @@ class _BookDetailContentState extends State<_BookDetailContent> {
                     icon: const Icon(Icons.add, size: 16, color: Colors.white),
                     label: const Text(
                       'Add Variant',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
                   );
                 },
@@ -384,15 +390,16 @@ class _BookDetailContentState extends State<_BookDetailContent> {
                             case 'ebook':
                               icon = Icons.book_online_rounded;
                               color = const Color(0xFF0D9488);
-                              if (format.fileName != null) {
-                                text += ' (${format.fileName})';
+                              if (format.fileUrl != null) {
+                                text += ' (${format.fileUrl!.split('/').last})';
                               }
                               break;
                             case 'audiobook':
                               icon = Icons.headphones_rounded;
                               color = const Color(0xFFD97706);
-                              if (format.audioFileName != null) {
-                                text += ' (${format.audioFileName})';
+                              if (format.totalDuration != null) {
+                                final mins = format.totalDuration! ~/ 60;
+                                text += ' ($mins min)';
                               }
                               break;
                             default:

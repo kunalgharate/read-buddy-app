@@ -71,7 +71,14 @@ import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_books.dart'
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_books_by_id.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/update_book.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/user_listcase.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/create_variant.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/update_variant.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/delete_variant.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/add_format.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/remove_format.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_variants_for_book.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/bloc/variant/variant_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 
 // Category CRUD
@@ -266,7 +273,8 @@ void _registerDataSources() {
   );
 
   // Question CRUD (Admin)
-  getIt.registerLazySingleton<question_crud_data_source.QuestionRemoteDataSource>(
+  getIt.registerLazySingleton<
+      question_crud_data_source.QuestionRemoteDataSource>(
     () => question_crud_data_source.QuestionRemoteDataSource(
       getIt<Dio>(),
       getIt<SecureStorageUtil>(),
@@ -422,6 +430,20 @@ void _registerUseCases() {
   getIt.registerLazySingleton(
       () => DeleteBookusecase(getIt<BookCrudRepository>()));
 
+  // Book Variant Use Cases
+  getIt.registerLazySingleton(
+      () => CreateVariantUsecase(getIt<VariantRepository>()));
+  getIt.registerLazySingleton(
+      () => UpdateVariantUsecase(getIt<VariantRepository>()));
+  getIt.registerLazySingleton(
+      () => DeleteVariantUsecase(getIt<VariantRepository>()));
+  getIt.registerLazySingleton(
+      () => AddFormatUsecase(getIt<VariantRepository>()));
+  getIt.registerLazySingleton(
+      () => RemoveFormatUsecase(getIt<VariantRepository>()));
+  getIt.registerLazySingleton(
+      () => GetVariantsForBookUsecase(getIt<VariantRepository>()));
+
   // User
   getIt
       .registerLazySingleton(() => GetUserListUseCase(getIt<UserRepository>()));
@@ -567,6 +589,16 @@ void _registerBlocs() {
         getBookByIdCrud: getIt<GetBookByIdUsecase>(),
         updateBookCrud: getIt<UpdateBookUsecase>(),
         deleteBookCrud: getIt<DeleteBookusecase>(),
+      ));
+
+  // Book Variant
+  getIt.registerFactory(() => VariantBloc(
+        getVariantsForBook: getIt<GetVariantsForBookUsecase>(),
+        createVariant: getIt<CreateVariantUsecase>(),
+        updateVariant: getIt<UpdateVariantUsecase>(),
+        deleteVariant: getIt<DeleteVariantUsecase>(),
+        addFormat: getIt<AddFormatUsecase>(),
+        removeFormat: getIt<RemoveFormatUsecase>(),
       ));
 
   // Category CRUD

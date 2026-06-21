@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_variant_entity.dart';
-import 'package:read_buddy_app/features/bookcrud/domain/entities/parent_book_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/respository/variant_repository.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_event.dart';
@@ -72,7 +71,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
   // Hardcover sub-fields
   final TextEditingController _isbnController = TextEditingController();
-  final TextEditingController _copiesController = TextEditingController(text: "1");
+  final TextEditingController _copiesController =
+      TextEditingController(text: "1");
   bool _hardcoverAvailable = true;
 
   // Ebook sub-fields
@@ -84,7 +84,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
   String? _audioFileName;
   bool _audioUploading = false;
   double _audioUploadProgress = 0.0;
-  final TextEditingController _audioDurationController = TextEditingController();
+  final TextEditingController _audioDurationController =
+      TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -104,21 +105,23 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           setState(() {
             _variants.clear();
             for (final entity in existingEntities) {
-              final formats = entity.formats.map((f) => LocalBookFormat(
-                type: f.type,
-                isbn: f.isbn,
-                copies: f.copies,
-                available: f.available,
-                fileName: f.fileName,
-                audioFileName: f.audioFileName,
-                duration: f.duration,
-              )).toList();
-              
+              final formats = entity.formats
+                  .map((f) => LocalBookFormat(
+                        type: f.type,
+                        isbn: f.isbn,
+                        copies: f.copies,
+                        available: f.available,
+                        fileName: f.fileUrl,
+                        audioFileName: null,
+                        duration: f.totalDuration,
+                      ))
+                  .toList();
+
               _variants.add(LocalBookVariant(
                 language: entity.language,
                 formats: formats,
-                isbn: entity.isbn,
-                donatorInfo: entity.donatorInfo,
+                isbn: null,
+                donatorInfo: entity.donorId,
               ));
             }
           });
@@ -200,7 +203,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       if (extension != 'pdf' && extension != 'epub') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Invalid E-Book format! Only PDF or EPUB files are supported.'),
+            content: Text(
+                'Invalid E-Book format! Only PDF or EPUB files are supported.'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -225,7 +229,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       if (extension != 'mp3' && extension != 'wav' && extension != 'm4a') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Invalid Audio format! Only MP3, WAV or M4A are supported.'),
+            content: Text(
+                'Invalid Audio format! Only MP3, WAV or M4A are supported.'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -257,11 +262,15 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(isEbook ? Icons.book_online_rounded : Icons.headphones_rounded, color: const Color(0xFF042153)),
+            Icon(isEbook ? Icons.book_online_rounded : Icons.headphones_rounded,
+                color: const Color(0xFF042153)),
             const SizedBox(width: 10),
             Text(
               isEbook ? 'Upload E-Book File' : 'Upload Audiobook Track',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF042153)),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Color(0xFF042153)),
             ),
           ],
         ),
@@ -271,7 +280,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           children: [
             const Text(
               'Select a preset file:',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.grey),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: Colors.grey),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -316,7 +328,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             const SizedBox(height: 8),
             const Text(
               'Or enter custom filename:',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.grey),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: Colors.grey),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -324,7 +339,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               decoration: InputDecoration(
                 labelText: 'Filename',
                 hintText: isEbook ? 'e.g. guide.pdf' : 'e.g. narration.mp3',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 focusedBorder: OutlineInputBorder(
                   borderSide: const BorderSide(color: Color(0xFF042153)),
                   borderRadius: BorderRadius.circular(10),
@@ -341,7 +357,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF042153),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
@@ -363,28 +380,36 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
     final language = _languageController.text.trim();
     if (language.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a language'), backgroundColor: Colors.orangeAccent),
+        const SnackBar(
+            content: Text('Please enter a language'),
+            backgroundColor: Colors.orangeAccent),
       );
       return;
     }
 
     if (!_hasHardcover && !_hasEbook && !_hasAudiobook) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one format option'), backgroundColor: Colors.orangeAccent),
+        const SnackBar(
+            content: Text('Please select at least one format option'),
+            backgroundColor: Colors.orangeAccent),
       );
       return;
     }
 
     if (_hasEbook && _ebookFileName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please upload an E-Book file'), backgroundColor: Colors.orangeAccent),
+        const SnackBar(
+            content: Text('Please upload an E-Book file'),
+            backgroundColor: Colors.orangeAccent),
       );
       return;
     }
 
     if (_hasAudiobook && _audioFileName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please upload an Audiobook audio file'), backgroundColor: Colors.orangeAccent),
+        const SnackBar(
+            content: Text('Please upload an Audiobook audio file'),
+            backgroundColor: Colors.orangeAccent),
       );
       return;
     }
@@ -436,62 +461,47 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
     if (_variants.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please add at least one language variant before submitting.'),
+          content: Text(
+              'Please add at least one language variant before submitting.'),
           backgroundColor: Colors.redAccent,
         ),
       );
       return;
     }
 
-    final bookId = widget.bookCrudModel.id ?? 'book_${DateTime.now().millisecondsSinceEpoch}';
+    final bookId = widget.bookCrudModel.id ??
+        'book_${DateTime.now().millisecondsSinceEpoch}';
     final bool isExistingBook = widget.bookCrudModel.id != null &&
         widget.bookCrudModel.id!.isNotEmpty &&
         !widget.bookCrudModel.id!.startsWith('id-');
-    
-    // 1. Create and populate parent book entity
-    final parentBook = ParentBookEntity(
-      id: bookId,
-      title: widget.bookCrudModel.title,
-      author: widget.bookCrudModel.author,
-      publisher: widget.bookCrudModel.publisher,
-      description: widget.bookCrudModel.description,
-      coverImageUrl: widget.bookCrudModel.coverImageUrl,
-      coversingleImage: widget.bookCrudModel.coversingleImage,
-      categories: [widget.bookCrudModel.category],
-      tags: widget.bookCrudModel.tags,
-      status: isDraft ? 'Draft' : 'Published',
-    );
 
     try {
       final repository = getIt<VariantRepository>();
-      
-      // Save Parent book details
-      await repository.saveParentBook(parentBook);
 
       // 2. Create and populate variant entities
       for (final localVariant in _variants) {
-        final formats = localVariant.formats.map((f) => BookFormatEntity(
-          type: f.type,
-          isbn: f.isbn,
-          copies: f.copies,
-          available: f.available,
-          fileUrl: f.type == 'ebook' ? 'https://mock-s3.com/ebooks/${f.fileName}' : null,
-          fileName: f.fileName,
-          audioUrl: f.type == 'audiobook' ? 'https://mock-s3.com/audio/${f.audioFileName}' : null,
-          audioFileName: f.audioFileName,
-          duration: f.duration,
-        )).toList();
+        final formats = localVariant.formats
+            .map((f) => BookFormatEntity(
+                  type: f.type,
+                  isbn: f.isbn,
+                  copies: f.copies,
+                  available: f.available,
+                  fileUrl: f.type == 'ebook'
+                      ? 'https://mock-s3.com/ebooks/${f.fileName}'
+                      : null,
+                  totalDuration: f.duration,
+                ))
+            .toList();
 
         final variant = BookVariantEntity(
-          id: 'var_${localVariant.language}_${DateTime.now().millisecondsSinceEpoch}',
+          id: '',
           bookId: bookId,
           language: localVariant.language,
+          donorId: localVariant.donatorInfo,
           formats: formats,
-          isbn: localVariant.isbn,
-          donatorInfo: localVariant.donatorInfo,
         );
-        
-        await repository.saveVariant(variant);
+
+        await repository.createVariant(variant);
       }
 
       if (isExistingBook) {
@@ -499,8 +509,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(isDraft
-                  ? 'Book "${parentBook.title}" variants saved as Draft successfully!'
-                  : 'Book "${parentBook.title}" variants published successfully!'),
+                  ? 'Book "${widget.bookCrudModel.title}" variants saved as Draft successfully!'
+                  : 'Book "${widget.bookCrudModel.title}" variants published successfully!'),
               backgroundColor: isDraft ? Colors.orange[800] : Colors.green,
               behavior: SnackBarBehavior.floating,
             ),
@@ -509,14 +519,16 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
         }
       } else {
         // Save parent book using existing BLoC
-        context.read<BookCrudBloc>().add(AddBookCrudEvent(widget.bookCrudModel));
+        context
+            .read<BookCrudBloc>()
+            .add(AddBookCrudEvent(widget.bookCrudModel));
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(isDraft
-                  ? 'Book "${parentBook.title}" and its variants saved as Draft successfully!'
-                  : 'Book "${parentBook.title}" and its variants published successfully!'),
+                  ? 'Book "${widget.bookCrudModel.title}" and its variants saved as Draft successfully!'
+                  : 'Book "${widget.bookCrudModel.title}" and its variants published successfully!'),
               backgroundColor: isDraft ? Colors.orange[800] : Colors.green,
               behavior: SnackBarBehavior.floating,
             ),
@@ -562,15 +574,21 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.grey[100],
                     boxShadow: const [
-                      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                      BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2))
                     ],
                   ),
                   child: widget.bookCrudModel.coversingleImage != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.file(widget.bookCrudModel.coversingleImage!, fit: BoxFit.cover),
+                          child: Image.file(
+                              widget.bookCrudModel.coversingleImage!,
+                              fit: BoxFit.cover),
                         )
-                      : const Icon(Icons.book_rounded, color: Colors.grey, size: 30),
+                      : const Icon(Icons.book_rounded,
+                          color: Colors.grey, size: 30),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -578,25 +596,35 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xFF042153).withOpacity(0.08),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
                           'PARENT BOOK METADATA',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 9, color: Color(0xFF042153)),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 9,
+                              color: Color(0xFF042153)),
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         widget.bookCrudModel.title,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF042153)),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Color(0xFF042153)),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'By ${widget.bookCrudModel.author}',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -614,18 +642,28 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             children: [
               const Text(
                 'Language Variants',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF042153)),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF042153)),
               ),
               ElevatedButton.icon(
                 onPressed: () => setState(() => _isAddingOrEditing = true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
                   elevation: 1,
                 ),
-                icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-                label: const Text('Add Variant', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                icon: const Icon(Icons.add_rounded,
+                    color: Colors.white, size: 20),
+                label: const Text('Add Variant',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14)),
               ),
             ],
           ),
@@ -640,9 +678,14 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     side: BorderSide(color: Colors.grey.shade300, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Back', style: TextStyle(color: Color(0xFF042153), fontWeight: FontWeight.bold, fontSize: 15)),
+                  child: const Text('Back',
+                      style: TextStyle(
+                          color: Color(0xFF042153),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -652,10 +695,15 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange[850],
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     elevation: 1,
                   ),
-                  child: const Text('Save Draft', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                  child: const Text('Save Draft',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -665,10 +713,15 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     elevation: 1,
                   ),
-                  child: const Text('Publish', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                  child: const Text('Publish',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15)),
                 ),
               ),
             ],
@@ -693,67 +746,99 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     Row(
                       children: [
                         Icon(
-                          _editingIndex != null ? Icons.edit_note_rounded : Icons.translate_rounded,
+                          _editingIndex != null
+                              ? Icons.edit_note_rounded
+                              : Icons.translate_rounded,
                           color: const Color(0xFF042153),
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _editingIndex != null ? 'Edit Language Variant' : 'Add Language Variant',
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF042153)),
+                          _editingIndex != null
+                              ? 'Edit Language Variant'
+                              : 'Add Language Variant',
+                          style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF042153)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const Text('Language *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153))),
+                    const Text('Language *',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF042153))),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _languageController,
                       enabled: _editingIndex == null,
                       decoration: InputDecoration(
                         hintText: 'e.g. English, Hindi, Marathi...',
-                        prefixIcon: const Icon(Icons.language_rounded, color: Colors.grey, size: 20),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        prefixIcon: const Icon(Icons.language_rounded,
+                            color: Colors.grey, size: 20),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Color(0xFF042153)),
+                          borderSide:
+                              const BorderSide(color: Color(0xFF042153)),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 12),
                       ),
                       validator: (val) {
-                        if (val == null || val.trim().isEmpty) return 'Please enter a language';
+                        if (val == null || val.trim().isEmpty)
+                          return 'Please enter a language';
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text('ISBN Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153))),
+                    const Text('ISBN Number',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF042153))),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _variantIsbnController,
                       decoration: InputDecoration(
                         hintText: 'e.g. 978-3-16-148410-0',
-                        prefixIcon: const Icon(Icons.qr_code_rounded, color: Colors.grey, size: 20),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        prefixIcon: const Icon(Icons.qr_code_rounded,
+                            color: Colors.grey, size: 20),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Color(0xFF042153)),
+                          borderSide:
+                              const BorderSide(color: Color(0xFF042153)),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 12),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text('Donator Info', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153))),
+                    const Text('Donator Info',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF042153))),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _donatorInfoController,
                       decoration: InputDecoration(
                         hintText: 'e.g. Donated by Ramesh Kumar',
-                        prefixIcon: const Icon(Icons.volunteer_activism_rounded, color: Colors.grey, size: 20),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        prefixIcon: const Icon(Icons.volunteer_activism_rounded,
+                            color: Colors.grey, size: 20),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Color(0xFF042153)),
+                          borderSide:
+                              const BorderSide(color: Color(0xFF042153)),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 12),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -765,17 +850,25 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       const Divider(height: 32),
                       const Text(
                         'Hardcover Details',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF4F46E5)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Color(0xFF4F46E5)),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _isbnController,
                         decoration: InputDecoration(
                           labelText: 'Hardcover ISBN Number *',
-                          prefixIcon: const Icon(Icons.qr_code_rounded, size: 20),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          prefixIcon:
+                              const Icon(Icons.qr_code_rounded, size: 20),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        validator: (val) => _hasHardcover && (val == null || val.isEmpty) ? 'ISBN is required' : null,
+                        validator: (val) =>
+                            _hasHardcover && (val == null || val.isEmpty)
+                                ? 'ISBN is required'
+                                : null,
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -783,12 +876,14 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         children: [
                           const Text(
                             'Instantly Available for Requests',
-                            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500, fontSize: 13),
                           ),
                           Switch(
                             value: _hardcoverAvailable,
                             activeThumbColor: const Color(0xFF4F46E5),
-                            onChanged: (val) => setState(() => _hardcoverAvailable = val),
+                            onChanged: (val) =>
+                                setState(() => _hardcoverAvailable = val),
                           ),
                         ],
                       ),
@@ -799,7 +894,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       const Divider(height: 32),
                       const Text(
                         'E-Book File Upload',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF0D9488)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Color(0xFF0D9488)),
                       ),
                       const SizedBox(height: 16),
                       _buildSimulatedUploadCard(
@@ -822,7 +920,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       const Divider(height: 32),
                       const Text(
                         'Audiobook Audio Track',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFFD97706)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Color(0xFFD97706)),
                       ),
                       const SizedBox(height: 16),
                       _buildSimulatedUploadCard(
@@ -844,13 +945,17 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText: 'Track Duration (in seconds) *',
-                          prefixIcon: const Icon(Icons.timer_outlined, size: 20),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          prefixIcon:
+                              const Icon(Icons.timer_outlined, size: 20),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         validator: (val) {
                           if (_hasAudiobook) {
-                            if (val == null || val.isEmpty) return 'Duration is required';
-                            if (int.tryParse(val) == null) return 'Must be a valid integer';
+                            if (val == null || val.isEmpty)
+                              return 'Duration is required';
+                            if (int.tryParse(val) == null)
+                              return 'Must be a valid integer';
                           }
                           return null;
                         },
@@ -864,20 +969,30 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         TextButton(
                           onPressed: _resetForm,
                           style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
                           ),
-                          child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                          child: const Text('Cancel',
+                              style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF042153),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
                           ),
                           onPressed: _saveVariant,
-                          icon: const Icon(Icons.check_rounded, color: Colors.white, size: 18),
-                          label: const Text('Save Variant', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          icon: const Icon(Icons.check_rounded,
+                              color: Colors.white, size: 18),
+                          label: const Text('Save Variant',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -931,7 +1046,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: selected ? activeColor.withOpacity(0.12) : Colors.grey.shade50,
+                      color: selected
+                          ? activeColor.withOpacity(0.12)
+                          : Colors.grey.shade50,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -991,7 +1108,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       children: [
         const Text(
           'Select Content Formats *',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153)),
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Color(0xFF042153)),
         ),
         const SizedBox(height: 12),
         Row(
@@ -1028,7 +1148,6 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
     );
   }
 
-
   Widget _buildSimulatedUploadCard({
     required bool isEbook,
     required String label,
@@ -1045,7 +1164,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       onTap: uploading ? null : (fileName == null ? onSelect : null),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        color: fileName != null ? accentColor.withOpacity(0.01) : Colors.grey.shade50,
+        color: fileName != null
+            ? accentColor.withOpacity(0.01)
+            : Colors.grey.shade50,
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         width: double.infinity,
         child: uploading
@@ -1053,7 +1174,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 children: [
                   Row(
                     children: [
-                      Icon(isEbook ? Icons.picture_as_pdf_rounded : Icons.audiotrack_rounded, color: accentColor, size: 24),
+                      Icon(
+                          isEbook
+                              ? Icons.picture_as_pdf_rounded
+                              : Icons.audiotrack_rounded,
+                          color: accentColor,
+                          size: 24),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -1061,12 +1187,16 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                           children: [
                             Text(
                               'Uploading $label...',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey.shade800),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Colors.grey.shade800),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${(progress * 100).toInt()}% • ${(2.4 * progress).toStringAsFixed(1)} MB/s',
-                              style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+                              style: TextStyle(
+                                  fontSize: 10, color: Colors.grey.shade500),
                             ),
                           ],
                         ),
@@ -1098,7 +1228,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                           color: accentColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(isEbook ? Icons.document_scanner_rounded : Icons.music_note_rounded, color: accentColor, size: 20),
+                        child: Icon(
+                            isEbook
+                                ? Icons.document_scanner_rounded
+                                : Icons.music_note_rounded,
+                            color: accentColor,
+                            size: 20),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -1107,19 +1242,26 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                           children: [
                             Text(
                               fileName,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF042153)),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Color(0xFF042153)),
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              isEbook ? 'Format: ${fileName.split('.').last.toUpperCase()} • 12.4 MB' : 'Format: ${fileName.split('.').last.toUpperCase()} • 8.6 MB',
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                              isEbook
+                                  ? 'Format: ${fileName.split('.').last.toUpperCase()} • 12.4 MB'
+                                  : 'Format: ${fileName.split('.').last.toUpperCase()} • 8.6 MB',
+                              style: TextStyle(
+                                  fontSize: 11, color: Colors.grey.shade500),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                        icon: const Icon(Icons.delete_outline_rounded,
+                            color: Colors.redAccent, size: 20),
                         onPressed: onClear,
                       ),
                     ],
@@ -1127,19 +1269,27 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 : Column(
                     children: [
                       Icon(
-                        isEbook ? Icons.cloud_upload_outlined : Icons.audio_file_outlined,
+                        isEbook
+                            ? Icons.cloud_upload_outlined
+                            : Icons.audio_file_outlined,
                         size: 36,
                         color: Colors.grey.shade400,
                       ),
                       const SizedBox(height: 10),
                       Text(
                         'Select $label File',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153)),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF042153)),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        isEbook ? 'Supports PDF, EPUB up to 25MB' : 'Supports MP3, WAV, M4A up to 50MB',
-                        style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+                        isEbook
+                            ? 'Supports PDF, EPUB up to 25MB'
+                            : 'Supports MP3, WAV, M4A up to 50MB',
+                        style: TextStyle(
+                            fontSize: 11, color: Colors.grey.shade400),
                       ),
                     ],
                   )),
@@ -1165,12 +1315,16 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   color: Colors.green.withOpacity(0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.translate_rounded, size: 36, color: Colors.green),
+                child: const Icon(Icons.translate_rounded,
+                    size: 36, color: Colors.green),
               ),
               const SizedBox(height: 12),
               const Text(
                 'No language variants added yet',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153)),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Color(0xFF042153)),
               ),
               const SizedBox(height: 4),
               Text(
@@ -1205,10 +1359,13 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
+                  border:
+                      Border(bottom: BorderSide(color: Colors.grey.shade200)),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     Container(
@@ -1217,23 +1374,29 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         color: Colors.blue.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.language_rounded, color: Colors.blue, size: 16),
+                      child: const Icon(Icons.language_rounded,
+                          color: Colors.blue, size: 16),
                     ),
                     const SizedBox(width: 10),
                     Text(
                       variant.language.toUpperCase(),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF042153)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Color(0xFF042153)),
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                      icon: const Icon(Icons.edit_outlined,
+                          color: Colors.blue, size: 20),
                       onPressed: () => _startEdit(index),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
                     const SizedBox(width: 14),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                      icon: const Icon(Icons.delete_outline_rounded,
+                          color: Colors.redAccent, size: 20),
                       onPressed: () {
                         setState(() {
                           _variants.removeAt(index);
@@ -1253,11 +1416,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     Color accentColor;
                     IconData icon;
                     String details = '';
-                    
+
                     if (format.type == 'hardcover') {
                       accentColor = const Color(0xFF4F46E5);
                       icon = Icons.menu_book_rounded;
-                      details = 'ISBN: ${format.isbn} • Copies: ${format.copies} • Available: ${format.available == true ? "Yes" : "No"}';
+                      details =
+                          'ISBN: ${format.isbn} • Copies: ${format.copies} • Available: ${format.available == true ? "Yes" : "No"}';
                     } else if (format.type == 'ebook') {
                       accentColor = const Color(0xFF0D9488);
                       icon = Icons.book_online_rounded;
@@ -1265,7 +1429,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     } else {
                       accentColor = const Color(0xFFD97706);
                       icon = Icons.headphones_rounded;
-                      details = 'Track: ${format.audioFileName} • Duration: ${format.duration}s';
+                      details =
+                          'Track: ${format.audioFileName} • Duration: ${format.duration}s';
                     }
 
                     return Container(
@@ -1274,7 +1439,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       decoration: BoxDecoration(
                         color: accentColor.withOpacity(0.04),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: accentColor.withOpacity(0.12)),
+                        border:
+                            Border.all(color: accentColor.withOpacity(0.12)),
                       ),
                       child: Row(
                         children: [
@@ -1286,12 +1452,17 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                               children: [
                                 Text(
                                   format.type.toUpperCase(),
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: accentColor),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                      color: accentColor),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   details,
-                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade700),
                                 ),
                               ],
                             ),

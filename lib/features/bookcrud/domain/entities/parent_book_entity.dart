@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:equatable/equatable.dart';
 
+/// Core book metadata — the "parent" book entity.
+/// BookVariants attach to this via bookId.
 class ParentBookEntity extends Equatable {
   final String id;
   final String title;
@@ -8,10 +10,9 @@ class ParentBookEntity extends Equatable {
   final String publisher;
   final String description;
   final String coverImageUrl;
-  final File? coversingleImage;
-  final List<String> categories;
+  final File? coverImage;
+  final List<String> categories; // category ObjectIds
   final List<String> tags;
-  final String status; // 'Draft' or 'Published'
 
   const ParentBookEntity({
     required this.id,
@@ -20,10 +21,9 @@ class ParentBookEntity extends Equatable {
     required this.publisher,
     required this.description,
     required this.coverImageUrl,
-    this.coversingleImage,
+    this.coverImage,
     required this.categories,
     required this.tags,
-    required this.status,
   });
 
   @override
@@ -34,9 +34,8 @@ class ParentBookEntity extends Equatable {
         publisher,
         description,
         coverImageUrl,
-        coversingleImage,
+        coverImage,
         categories,
         tags,
-        status,
       ];
 }
