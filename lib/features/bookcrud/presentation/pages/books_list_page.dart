@@ -8,6 +8,7 @@ import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_cru
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_state.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/widgets/addbook_stepper.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/widgets/book_collection.dart';
+import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 
 class BooksListPage extends StatefulWidget {
   const BooksListPage({super.key});
@@ -23,6 +24,11 @@ class _BooksListPageState extends State<BooksListPage> {
   void initState() {
     searchBookController.addListener(_onSearchChanged);
     context.read<BookCrudBloc>().add(LoadBookCrudList());
+    // Ensure categories are loaded for ID → name resolution
+    final catState = context.read<CategoryBloc>().state;
+    if (catState is! CategoryLoaded) {
+      context.read<CategoryBloc>().add(LoadCategories());
+    }
     super.initState();
   }
 

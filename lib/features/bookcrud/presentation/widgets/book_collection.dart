@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -6,10 +7,25 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/deletecrud_book.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/widgets/updatebook_stepper.dart';
+import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 
 class BooksCollection extends StatelessWidget {
   final BookCrudEntity bookcollection;
   const BooksCollection({super.key, required this.bookcollection});
+
+  /// Resolves category ID to name using loaded CategoryBloc state.
+  /// Falls back to the raw value if no match is found.
+  String _resolveCategoryName(BuildContext context) {
+    final categoryValue = bookcollection.category;
+    final categoryState = context.read<CategoryBloc>().state;
+    if (categoryState is CategoryLoaded) {
+      final match = categoryState.categories.where(
+        (cat) => cat.id == categoryValue || cat.id == bookcollection.categoryId,
+      );
+      if (match.isNotEmpty) return match.first.title;
+    }
+    return categoryValue;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +53,7 @@ class BooksCollection extends StatelessWidget {
                 height: 120,
                 width: 100,
                 placeholder: (context, url) =>
-                const Center(child: CircularProgressIndicator()),
+                    const Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
                 fit: BoxFit.cover,
               ),
@@ -105,7 +121,7 @@ class BooksCollection extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5))),
                           child: Text(
-                            bookcollection.category,
+                            _resolveCategoryName(context),
                             style: const TextStyle(
                                 color: Color.fromARGB(255, 6, 86, 150)),
                           )),
@@ -129,7 +145,8 @@ class BooksCollection extends StatelessWidget {
                             Navigator.pushNamed(
                               context,
                               '/book-variants',
-                              arguments: BookCrudModel.fromEntity(bookcollection),
+                              arguments:
+                                  BookCrudModel.fromEntity(bookcollection),
                             );
                           },
                           style: TextButton.styleFrom(
@@ -193,8 +210,8 @@ void updatedialog(BuildContext context, BookCrudEntity book) async {
                     context,
                     MaterialPageRoute(
                         builder: (_) => UpdateBookStepper(
-                          book_id: book.id ?? "",
-                        )));
+                              book_id: book.id ?? "",
+                            )));
                 // Optional: close bottom sheet
               },
             ),
