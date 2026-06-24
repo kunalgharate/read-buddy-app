@@ -38,8 +38,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       try {
         results.add(BookModel.fromJson(e as Map<String, dynamic>));
       } catch (err) {
-        if (kDebugMode)
+        if (kDebugMode) {
           print('⚠️ Skipping malformed record in $endpoint: $err');
+        }
       }
     }
     return results;
@@ -75,8 +76,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch latest books',
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🌐 HomeRemoteDataSource: getLatestBooks exception: $e');
+      }
       rethrow;
     }
   }
@@ -110,8 +112,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch trending books',
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🌐 HomeRemoteDataSource: getTrendingBooks exception: $e');
+      }
       rethrow;
     }
   }
@@ -141,8 +144,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch recommended books',
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🌐 HomeRemoteDataSource: getRecommendedBooks exception: $e');
+      }
       rethrow;
     }
   }
@@ -166,8 +170,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         message: 'Failed to fetch monthly stats',
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🌐 HomeRemoteDataSource: getMonthlyStats exception: $e');
+      }
       rethrow;
     }
   }

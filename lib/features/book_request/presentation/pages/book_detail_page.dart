@@ -687,8 +687,9 @@ class _BookDetailContentState extends State<_BookDetailContent> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            backgroundColor: color.withOpacity(0.08),
-                            side: BorderSide(color: color.withOpacity(0.2)),
+                            backgroundColor: color.withValues(alpha: 0.08),
+                            side:
+                                BorderSide(color: color.withValues(alpha: 0.2)),
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                           );
                         }).toList(),
@@ -770,7 +771,7 @@ class _CoverImageSection extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.35),
+                  Colors.black.withValues(alpha: 0.35),
                   Colors.transparent,
                 ],
               ),
@@ -823,7 +824,7 @@ class _IconCircleButton extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, size: 20, color: const Color(0xFF1E2939)),
@@ -865,7 +866,7 @@ class _TitleSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _StarRating(rating: 1),
+          const _StarRating(rating: 1),
           const SizedBox(height: 4),
           const Text(
             '10+ readers loved this',

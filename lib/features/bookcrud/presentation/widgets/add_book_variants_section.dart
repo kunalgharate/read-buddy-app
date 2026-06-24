@@ -844,7 +844,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF042153).withOpacity(0.08),
+                      color: const Color(0xFF042153).withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
@@ -1218,16 +1218,16 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF0D9488).withOpacity(0.04),
+            color: const Color(0xFF0D9488).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF0D9488).withOpacity(0.2)),
+            border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0D9488).withOpacity(0.1),
+                  color: const Color(0xFF0D9488).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.description_rounded,
@@ -1279,9 +1279,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFD97706).withOpacity(0.04),
+            color: const Color(0xFFD97706).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFD97706).withOpacity(0.2)),
+            border: Border.all(color: const Color(0xFFD97706).withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1292,7 +1292,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD97706).withOpacity(0.12),
+                      color: const Color(0xFFD97706).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -1340,7 +1340,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                   decoration: BoxDecoration(
                     color: part.file != null
-                        ? Colors.green.withOpacity(0.05)
+                        ? Colors.green.withValues(alpha: 0.05)
                         : Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
@@ -1409,9 +1409,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF7C3AED).withOpacity(0.04),
+            color: const Color(0xFF7C3AED).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.2)),
+            border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1422,7 +1422,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7C3AED).withOpacity(0.12),
+                      color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -1469,7 +1469,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                   decoration: BoxDecoration(
                     color: part.file != null
-                        ? Colors.green.withOpacity(0.05)
+                        ? Colors.green.withValues(alpha: 0.05)
                         : Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
@@ -1592,7 +1592,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           decoration: BoxDecoration(
-            color: selected ? activeColor.withOpacity(0.05) : Colors.white,
+            color: selected ? activeColor.withValues(alpha: 0.05) : Colors.white,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: selected ? activeColor : Colors.grey.shade200,
@@ -1601,7 +1601,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: activeColor.withOpacity(0.12),
+                      color: activeColor.withValues(alpha: 0.12),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     )
@@ -1618,7 +1618,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: selected
-                          ? activeColor.withOpacity(0.12)
+                          ? activeColor.withValues(alpha: 0.12)
                           : Colors.grey.shade50,
                       shape: BoxShape.circle,
                     ),
@@ -1670,16 +1670,16 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
     return GestureDetector(
       onTap: onTap,
       child: DashedContainer(
-        color: accentColor.withOpacity(0.5),
+        color: accentColor.withValues(alpha: 0.5),
         borderRadius: 12,
         child: Container(
-          color: accentColor.withOpacity(0.02),
+          color: accentColor.withValues(alpha: 0.02),
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           width: double.infinity,
           child: Column(
             children: [
               Icon(Icons.cloud_upload_outlined,
-                  size: 32, color: accentColor.withOpacity(0.7)),
+                  size: 32, color: accentColor.withValues(alpha: 0.7)),
               const SizedBox(height: 8),
               Text(label,
                   style: TextStyle(
@@ -1713,7 +1713,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.08),
+                  color: Colors.green.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.translate_rounded,
@@ -1768,7 +1768,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Colors.blue.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.language_rounded,
@@ -1830,10 +1830,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: accentColor.withOpacity(0.04),
+                        color: accentColor.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(10),
                         border:
-                            Border.all(color: accentColor.withOpacity(0.12)),
+                            Border.all(color: accentColor.withValues(alpha: 0.12)),
                       ),
                       child: Row(
                         children: [
@@ -1948,7 +1948,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           contentPadding:
               const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
           filled: true,
-          fillColor: Colors.green.withOpacity(0.04),
+          fillColor: Colors.green.withValues(alpha: 0.04),
         ),
       );
     }
@@ -2014,7 +2014,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     dense: true,
                     leading: CircleAvatar(
                       radius: 16,
-                      backgroundColor: const Color(0xFF042153).withOpacity(0.1),
+                      backgroundColor: const Color(0xFF042153).withValues(alpha: 0.1),
                       child: Text(
                         user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                         style: const TextStyle(

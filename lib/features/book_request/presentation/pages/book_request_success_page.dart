@@ -73,9 +73,9 @@ class BookRequestSuccessPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               // Title
-              Text(
+              const Text(
                 'Request Submitted!',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1A237E),
@@ -84,9 +84,9 @@ class BookRequestSuccessPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               // Message
-              Text(
+              const Text(
                 'Your book request has been created successfully. We will review and approve it within a few hours.',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   color: Color(0xFF555555),
                   height: 1.6,

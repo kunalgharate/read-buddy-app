@@ -72,12 +72,11 @@ class MyRewardsCard extends StatelessWidget {
           // Progress bar
           ClipRRect(
             borderRadius: BorderRadius.circular(40),
-            child: LinearProgressIndicator(
+            child: const LinearProgressIndicator(
               value: 450 / 1000,
               minHeight: 8,
-              backgroundColor: const Color(0xFFE0E0E0),
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(Color(0xFF2CE07F)),
+              backgroundColor: Color(0xFFE0E0E0),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2CE07F)),
             ),
           ),
           const SizedBox(height: 8),

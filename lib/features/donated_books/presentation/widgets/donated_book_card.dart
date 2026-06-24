@@ -30,7 +30,7 @@ class DonatedBookCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -56,13 +56,15 @@ class DonatedBookCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const AspectRatio(
                             aspectRatio: 113 / 136,
-                            child: Icon(Icons.menu_book, color: Colors.grey, size: 40),
+                            child: Icon(Icons.menu_book,
+                                color: Colors.grey, size: 40),
                           ),
                         ),
                       )
                     : const AspectRatio(
                         aspectRatio: 113 / 136,
-                        child: Icon(Icons.menu_book, color: Colors.grey, size: 40),
+                        child:
+                            Icon(Icons.menu_book, color: Colors.grey, size: 40),
                       ),
               ),
               const SizedBox(width: 12),
@@ -194,4 +196,3 @@ class DonatedBookCard extends StatelessWidget {
     );
   }
 }
-

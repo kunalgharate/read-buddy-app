@@ -2,13 +2,13 @@ import '../../domain/entities/audiobook.dart';
 
 final List<AudioBook> dummyAudioBooks = [
   // Wings of Fire — English (8 parts)
-  AudioBook(
+  const AudioBook(
     id: 'ab-1',
     title: 'Wings of Fire (English)',
     author: 'APJ Abdul Kalam',
     coverUrl: '',
-    totalDuration: const Duration(hours: 3, minutes: 20),
-    tracks: const [
+    totalDuration: Duration(hours: 3, minutes: 20),
+    tracks: [
       AudioBookTrack(
         id: 'ab-1-t-1',
         title: 'Part 1',
@@ -68,13 +68,13 @@ final List<AudioBook> dummyAudioBooks = [
     ],
   ),
   // Wings of Fire — Hindi (single file)
-  AudioBook(
+  const AudioBook(
     id: 'ab-2',
     title: 'Wings of Fire (Hindi)',
     author: 'APJ Abdul Kalam',
     coverUrl: '',
-    totalDuration: const Duration(hours: 2, minutes: 30),
-    tracks: const [
+    totalDuration: Duration(hours: 2, minutes: 30),
+    tracks: [
       AudioBookTrack(
         id: 'ab-2-t-1',
         title: 'Wings of Fire - Full Audiobook',

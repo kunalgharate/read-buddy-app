@@ -5,10 +5,10 @@ class BadgesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Your Badges',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -17,10 +17,10 @@ class BadgesSection extends StatelessWidget {
             color: Color(0xFF052E44),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
+          children: [
             _BadgeItem(
               label: 'Book\nBeginner',
               isUnlocked: true,

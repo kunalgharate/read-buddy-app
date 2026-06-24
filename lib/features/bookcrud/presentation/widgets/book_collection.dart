@@ -234,7 +234,7 @@ void updatedialog(BuildContext context, BookCrudEntity book) async {
                     context,
                     MaterialPageRoute(
                         builder: (_) => UpdateBookStepper(
-                              book_id: book.id ?? "",
+                              bookId: book.id ?? "",
                             )));
                 // Optional: close bottom sheet
               },

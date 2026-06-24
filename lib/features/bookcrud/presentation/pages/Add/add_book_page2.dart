@@ -495,6 +495,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
       if (source == ImageSource.gallery) {
         final images = await ImagePickerHelper.pickMultipleImages();
         if (images != null && images.isNotEmpty) {
+          if (!mounted) return;
           setState(() {
             int available = 5 - selectedImages.length;
             if (available > 0) {
@@ -510,6 +511,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
       } else {
         final image = await ImagePicker().pickImage(source: source);
         if (image != null) {
+          if (!mounted) return;
           setState(() {
             if (selectedImages.length < 5) {
               selectedImages.add(image);
@@ -522,6 +524,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image(s): $e')),
       );
@@ -567,12 +570,14 @@ class _AddBookPage2State extends State<AddBookPage2> {
       final pickedImage = await ImagePicker().pickImage(source: source);
       if (pickedImage != null) {
         final file = File(pickedImage.path);
+        if (!mounted) return;
         setState(() {
           selectedCoverImageFile = file;
           coverImageController.text = file.path.split('/').last;
         });
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
     }

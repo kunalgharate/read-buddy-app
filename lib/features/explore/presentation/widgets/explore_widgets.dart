@@ -17,17 +17,17 @@ class ExploreSearchBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
+      child: const Row(
         children: [
-          const Icon(Icons.search, color: Colors.grey, size: 20),
-          const SizedBox(width: 12),
-          const Expanded(
+          Icon(Icons.search, color: Colors.grey, size: 20),
+          SizedBox(width: 12),
+          Expanded(
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search any Books',
@@ -37,9 +37,9 @@ class ExploreSearchBar extends StatelessWidget {
               ),
             ),
           ),
-          const Icon(Icons.qr_code_scanner, color: Colors.grey, size: 20),
-          const SizedBox(width: 12),
-          const Icon(Icons.tune, color: Colors.grey, size: 20),
+          Icon(Icons.qr_code_scanner, color: Colors.grey, size: 20),
+          SizedBox(width: 12),
+          Icon(Icons.tune, color: Colors.grey, size: 20),
         ],
       ),
     );
@@ -142,7 +142,8 @@ class ExploreBookCard extends StatelessWidget {
                     bottom: 8,
                     left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: _green,
                         borderRadius: BorderRadius.circular(4),

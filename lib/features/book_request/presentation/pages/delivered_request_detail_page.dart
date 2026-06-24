@@ -96,7 +96,7 @@ class DeliveredRequestDetailPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Book info
-            _SectionTitle('Book Info'),
+            const _SectionTitle('Book Info'),
             const SizedBox(height: 10),
             if (request.donorName != null)
               _InfoRow('Donated By', request.donorName!),
@@ -106,7 +106,7 @@ class DeliveredRequestDetailPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Fulfillment info
-            _SectionTitle('Fulfillment'),
+            const _SectionTitle('Fulfillment'),
             const SizedBox(height: 10),
             _InfoRow(
               'Method',
@@ -136,7 +136,7 @@ class DeliveredRequestDetailPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Dates
-            _SectionTitle('Dates'),
+            const _SectionTitle('Dates'),
             const SizedBox(height: 10),
             _InfoRow('Requested On', _fmtDate(request.requestDate)),
             if (request.dueDate != null)
@@ -271,8 +271,7 @@ class _InfoRow extends StatelessWidget {
           SizedBox(
             width: 130,
             child: Text(label,
-                style: const TextStyle(
-                    fontSize: 13, color: Color(0xFF888888))),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF888888))),
           ),
           Expanded(
             child: Text(value,
@@ -304,8 +303,8 @@ class _StatusChip extends StatelessWidget {
       ),
       child: const Text(
         'Delivered',
-        style: TextStyle(
-            fontSize: 11, fontWeight: FontWeight.w700, color: color),
+        style:
+            TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
       ),
     );
   }
@@ -316,8 +315,18 @@ String _fmtDate(String? s) {
   try {
     final dt = DateTime.parse(s);
     const m = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return '${dt.day} ${m[dt.month - 1]} ${dt.year}';
   } catch (_) {

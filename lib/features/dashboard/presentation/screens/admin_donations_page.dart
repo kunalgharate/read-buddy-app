@@ -148,14 +148,12 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
       if (data is Map<String, dynamic>) {
         if (data.containsKey('donations')) {
           return (data['donations'] as List)
-              .map((e) =>
-                  DonatedBooksModel.fromJson(e as Map<String, dynamic>))
+              .map((e) => DonatedBooksModel.fromJson(e as Map<String, dynamic>))
               .toList();
         }
         if (data.containsKey('donation')) {
           return [
-            DonatedBooksModel.fromJson(
-                data['donation'] as Map<String, dynamic>)
+            DonatedBooksModel.fromJson(data['donation'] as Map<String, dynamic>)
           ];
         }
         if (isSingle) {
@@ -216,8 +214,7 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
         children: [
           // Search bar
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Container(
               height: 48,
               decoration: BoxDecoration(
@@ -232,8 +229,7 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
                 },
                 decoration: InputDecoration(
                   hintText: 'Search by Donation ID...',
-                  hintStyle:
-                      const TextStyle(color: Colors.grey, fontSize: 14),
+                  hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
                   prefixIcon:
                       const Icon(Icons.search, color: Color(0xFF052E44)),
                   suffixIcon: _searchController.text.isNotEmpty
@@ -246,8 +242,7 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
                         )
                       : null,
                   border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
@@ -260,16 +255,15 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: const Color(0xFF052E44),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       '${_filtered.length} record${_filtered.length == 1 ? '' : 's'}',
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 12),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),
                   const Spacer(),
@@ -278,8 +272,8 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
                     icon: const Icon(Icons.refresh,
                         size: 16, color: Color(0xFF052E44)),
                     label: const Text('Refresh',
-                        style: TextStyle(
-                            color: Color(0xFF052E44), fontSize: 12)),
+                        style:
+                            TextStyle(color: Color(0xFF052E44), fontSize: 12)),
                   ),
                 ],
               ),
@@ -310,16 +304,15 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
               Text(
                 _errorMessage!,
                 textAlign: TextAlign.center,
-                style:
-                    const TextStyle(color: Colors.red, fontSize: 14),
+                style: const TextStyle(color: Colors.red, fontSize: 14),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _fetchAllDonations,
                 style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF052E44)),
-                child: const Text('Retry',
-                    style: TextStyle(color: Colors.white)),
+                child:
+                    const Text('Retry', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -342,8 +335,6 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
         ),
       );
     }
-
-    final isPendingTab = _tabController.index == 0;
 
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),

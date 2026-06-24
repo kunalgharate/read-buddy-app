@@ -57,7 +57,8 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       final dynamic rawData = response.data;
       final List<dynamic> list;
 
-      if (rawData is Map<String, dynamic> && rawData.containsKey('categories')) {
+      if (rawData is Map<String, dynamic> &&
+          rawData.containsKey('categories')) {
         list = rawData['categories'] as List<dynamic>;
       } else if (rawData is List) {
         list = rawData;
@@ -68,7 +69,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       return list.map((json) {
         BookValueItems.bookCategories.add(ItemModel.fromJson(json));
         CategoryItems.parentCategoryItems
-            .add(parentCategoryModel.fromJson(json));
+            .add(ParentCategoryModel.fromJson(json));
         return CategoryModel.fromJson(json);
       }).toList();
     } catch (e) {

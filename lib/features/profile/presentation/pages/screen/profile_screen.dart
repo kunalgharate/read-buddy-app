@@ -496,7 +496,7 @@ class _AvatarBottomSheet extends StatelessWidget {
               boxShadow: selected
                   ? [
                       BoxShadow(
-                        color: _green.withOpacity(0.25),
+                        color: _green.withValues(alpha: 0.25),
                         blurRadius: 8,
                         spreadRadius: 1,
                       )

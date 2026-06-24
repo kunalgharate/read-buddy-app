@@ -20,19 +20,19 @@ class AddBanner extends StatefulWidget {
 
 class _AddBannerState extends State<AddBanner> {
   List<XFile?> selectedImages = [];
-  String? BannerType;
-  TextEditingController BannerTypeController = TextEditingController();
-  TextEditingController BannerTitleController = TextEditingController();
-  TextEditingController BannerDescriptionController = TextEditingController();
-  TextEditingController BannerlinkController = TextEditingController();
+  String? bannerType;
+  TextEditingController bannerTypeController = TextEditingController();
+  TextEditingController bannerTitleController = TextEditingController();
+  TextEditingController bannerDescriptionController = TextEditingController();
+  TextEditingController bannerLinkController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    BannerTypeController.dispose();
-    BannerTitleController.dispose();
-    BannerDescriptionController.dispose();
-    BannerlinkController.dispose();
+    bannerTypeController.dispose();
+    bannerTitleController.dispose();
+    bannerDescriptionController.dispose();
+    bannerLinkController.dispose();
     super.dispose();
   }
 
@@ -137,10 +137,10 @@ class _AddBannerState extends State<AddBanner> {
                 ),
                 const SizedBox(height: 16),
                 DropdownSearch<String>(
-                  selectedItem: BannerType,
+                  selectedItem: bannerType,
                   onChanged: (value) {
-                    BannerTypeController.text = value!;
-                    BannerType = value;
+                    bannerTypeController.text = value!;
+                    bannerType = value;
                   },
                   validator: BookFormValidator.validateBannerTypes,
                   decoratorProps: const DropDownDecoratorProps(
@@ -156,7 +156,7 @@ class _AddBannerState extends State<AddBanner> {
                 const SizedBox(height: 16),
                 const Text('Banner Title', style: TextStyles.labelStyle),
                 MyTextField(
-                  controller: BannerTitleController,
+                  controller: bannerTitleController,
                   validator: BookFormValidator.validateBannerTitle,
                   hintText: "Banner Title",
                   obscureText: false,
@@ -165,7 +165,7 @@ class _AddBannerState extends State<AddBanner> {
                 const SizedBox(height: 16),
                 const Text('Banner Description', style: TextStyles.labelStyle),
                 MyTextField(
-                  controller: BannerDescriptionController,
+                  controller: bannerDescriptionController,
                   //validator: BookFormValidator.validateBannerDescription,
                   hintText: "Banner Description",
                   obscureText: false,
@@ -175,7 +175,7 @@ class _AddBannerState extends State<AddBanner> {
                 const SizedBox(height: 16),
                 const Text('Banner Link', style: TextStyles.labelStyle),
                 MyTextField(
-                  controller: BannerlinkController,
+                  controller: bannerLinkController,
                   validator: BookFormValidator.validateBannerLink,
                   hintText: "Banner link",
                   obscureText: false,
@@ -195,12 +195,15 @@ class _AddBannerState extends State<AddBanner> {
                         );
                         return;
                       }
-                      final url = BannerlinkController.text.trim();
+                      final url = bannerLinkController.text.trim();
 
                       final isDomain =
                           await BookFormValidator.isDomainReachable(url);
 
+                      if (!mounted) return;
+
                       if (!isDomain) {
+                        // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                               content: Text("The URL domain is not reachable")),
@@ -208,23 +211,26 @@ class _AddBannerState extends State<AddBanner> {
                         return; // stop execution if not reachable
                       }
 
+                      // ignore: use_build_context_synchronously
                       context.read<BannerBloc>().add(CreateBannerEvent(
-                            title: BannerTitleController.text,
-                            link: BannerlinkController.text.isNotEmpty
-                                ? BannerlinkController.text
+                            title: bannerTitleController.text,
+                            link: bannerLinkController.text.isNotEmpty
+                                ? bannerLinkController.text
                                 : null,
-                            description: BannerDescriptionController.text,
-                            // BannerDescriptionController.text.isNotEmpty
-                            //     ? BannerDescriptionController.text
+                            description: bannerDescriptionController.text,
+                            // bannerDescriptionController.text.isNotEmpty
+                            //     ? bannerDescriptionController.text
                             //     : null,
-                            bannerType: BannerTypeController.text,
+                            bannerType: bannerTypeController.text,
                             bannerImage: File(selectedImages[0]!.path),
                           ));
 
+                      // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text('Banner submitted successfully!')),
                       );
+                      // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                     }
                   },
@@ -279,15 +285,18 @@ class _AddBannerState extends State<AddBanner> {
       if (source == ImageSource.gallery) {
         final images = await ImagePickerHelper.pickMultipleImages();
         if (images != null && images.isNotEmpty) {
+          if (!mounted) return;
           setState(() => selectedImages = images);
         }
       } else {
         final image = await ImagePicker().pickImage(source: source);
         if (image != null) {
+          if (!mounted) return;
           setState(() => selectedImages = [image]);
         }
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image(s): $e')),
       );

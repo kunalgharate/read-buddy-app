@@ -1,6 +1,6 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:meta/meta.dart';
 import '../../../../../core/utils/error_handler.dart';
 import '../../../domain/entities/app_user.dart';
 import '../../../domain/usecases/register_user_usecase.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../domain/entities/question_entity.dart';
-import '../../domain/usecases/add_question.dart' as QuestionCrudUseCases;
-import '../../domain/usecases/update_question.dart' as QuestionCrudUseCases;
+import '../../domain/usecases/add_question.dart' as question_crud_usecases;
+import '../../domain/usecases/update_question.dart' as question_crud_usecases;
 
 class AddEditQuestionPage extends StatefulWidget {
   final QuestionEntity? question;
@@ -20,15 +20,15 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
   String selectedType = 'single';
   bool _isLoading = false;
 
-  late final QuestionCrudUseCases.AddQuestion _addQuestionUseCase;
-  late final QuestionCrudUseCases.UpdateQuestion _updateQuestionUseCase;
+  late final question_crud_usecases.AddQuestion _addQuestionUseCase;
+  late final question_crud_usecases.UpdateQuestion _updateQuestionUseCase;
 
   @override
   void initState() {
     super.initState();
-    _addQuestionUseCase = GetIt.instance<QuestionCrudUseCases.AddQuestion>();
+    _addQuestionUseCase = GetIt.instance<question_crud_usecases.AddQuestion>();
     _updateQuestionUseCase =
-        GetIt.instance<QuestionCrudUseCases.UpdateQuestion>();
+        GetIt.instance<question_crud_usecases.UpdateQuestion>();
 
     if (widget.question != null) {
       questionController.text = widget.question!.question;
@@ -118,12 +118,11 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
         SnackBar(content: Text('Error saving question: $e')),
       );
     } finally {
-      // ✅ P1 Fix: Check mounted before setState in finally block
-      if (!mounted) return;
-
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -225,7 +224,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: selectedType == 'single'
-                                ? Colors.green.withOpacity(0.1)
+                                ? Colors.green.withValues(alpha: 0.1)
                                 : Colors.grey[50],
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
@@ -264,7 +263,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: selectedType == 'multiple'
-                                ? Colors.green.withOpacity(0.1)
+                                ? Colors.green.withValues(alpha: 0.1)
                                 : Colors.grey[50],
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
@@ -340,7 +339,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                             width: 32,
                             height: 32,
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
+                              color: Colors.green.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Center(

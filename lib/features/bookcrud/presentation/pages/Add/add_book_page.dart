@@ -96,8 +96,9 @@ class _AddBookPageState extends State<AddBookPage> {
               Navigator.pop(ctx);
               final picked =
                   await ImagePicker().pickImage(source: ImageSource.camera);
-              if (picked != null)
+              if (picked != null) {
                 setState(() => _coverImage = File(picked.path));
+              }
             },
           ),
           const Divider(),
@@ -108,8 +109,9 @@ class _AddBookPageState extends State<AddBookPage> {
               Navigator.pop(ctx);
               final picked =
                   await ImagePicker().pickImage(source: ImageSource.gallery);
-              if (picked != null)
+              if (picked != null) {
                 setState(() => _coverImage = File(picked.path));
+              }
             },
           ),
         ],

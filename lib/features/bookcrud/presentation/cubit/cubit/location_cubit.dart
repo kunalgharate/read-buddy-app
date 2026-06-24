@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/search_location_entity.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_location.dart';
 

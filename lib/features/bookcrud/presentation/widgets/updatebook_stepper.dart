@@ -4,8 +4,8 @@ import 'package:read_buddy_app/features/bookcrud/presentation/pages/update/updat
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/update/update_book_page2.dart';
 
 class UpdateBookStepper extends StatefulWidget {
-  final String book_id;
-  const UpdateBookStepper({super.key, required this.book_id});
+  final String bookId;
+  const UpdateBookStepper({super.key, required this.bookId});
 
   @override
   State<UpdateBookStepper> createState() => _UpdateBookStepperState();
@@ -53,7 +53,7 @@ class _UpdateBookStepperState extends State<UpdateBookStepper> {
             state: currentStep == 0 ? StepState.editing : StepState.complete,
             content: UpdateBookPage(
               onContinue: nextStep,
-              id: widget.book_id,
+              id: widget.bookId,
             ),
           ),
           Step(
@@ -70,7 +70,7 @@ class _UpdateBookStepperState extends State<UpdateBookStepper> {
                 : UpdateBookPage2(
                     onBack: previousStep,
                     bookCrudModel: bookModel!,
-                    id: widget.book_id,
+                    id: widget.bookId,
                   ),
           ),
         ],

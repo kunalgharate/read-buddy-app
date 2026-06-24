@@ -1,32 +1,14 @@
 import 'package:read_buddy_app/features/banner/domain/entity/banner_entity.dart';
 
 class BannerModel extends BannerEntity {
-  @override
-  final String title;
-  @override
-  final String? link;
-  @override
-  final String? description;
-  @override
-  final String bannerType;
-  @override
-  final String bannerImage;
-  @override
-  final String? id;
   const BannerModel({
-    required this.title,
-    this.link,
-    this.description,
-    required this.bannerType,
-    required this.bannerImage,
-    this.id,
-  }) : super(
-          title: title,
-          link: link,
-          description: description,
-          bannerType: bannerType,
-          bannerImage: bannerImage,
-        );
+    required super.title,
+    super.link,
+    super.description,
+    required super.bannerType,
+    required super.bannerImage,
+    super.id,
+  });
 
   factory BannerModel.fromJson(Map<String, dynamic> json) {
     return BannerModel(

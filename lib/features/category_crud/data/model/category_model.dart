@@ -1,7 +1,7 @@
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 
 class CategoryModel extends CategoryEntity {
-  CategoryModel({
+  const CategoryModel({
     required super.id,
     required super.title,
     super.parentCategoryName,
@@ -12,7 +12,7 @@ class CategoryModel extends CategoryEntity {
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     final parent = json['parentCategoryId'];
     final imageUrl = json['imageUrl'] ?? '';
-    
+
     return CategoryModel(
       id: json['_id'] ?? '',
       title: json['name'] ?? '',

@@ -55,7 +55,7 @@ import 'package:read_buddy_app/features/books/domain/usecases/get_books.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
 
 // Book CRUD
-import 'package:read_buddy_app/features/bookcrud/data/dataresources/bookCrud_remote_resources.dart';
+import 'package:read_buddy_app/features/bookcrud/data/dataresources/book_crud_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/user_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/search_location_remote_resources.dart';
 import 'package:read_buddy_app/features/bookcrud/data/dataresources/variant_remote_data_source.dart';

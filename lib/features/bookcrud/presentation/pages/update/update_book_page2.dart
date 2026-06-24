@@ -46,8 +46,8 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
   final TextEditingController tagController = TextEditingController();
   UserEntity? selectedUser;
   final List<String> _tags = [];
-  String? cover_image;
-  List<String> Images = [];
+  String? coverImage;
+  List<String> images = [];
   List<XFile?> selectedImages = [];
 
   @override
@@ -100,9 +100,9 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
     locationController.text = book.location;
     descriptionController.text = book.description;
     ownerIdController.text = book.ownerName ?? "hhoo";
-    cover_image = book.coverImageUrl;
-    print("coverImageUrl is $cover_image");
-    Images.addAll(book.additionalImageUrls ?? []);
+    coverImage = book.coverImageUrl;
+    print("coverImageUrl is $coverImage");
+    images.addAll(book.additionalImageUrls ?? []);
     // Tags
     _tags.clear();
     _tags.addAll(book.tags);
@@ -248,13 +248,13 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                             ),
                           ],
                         )
-                      : (cover_image != null && cover_image!.isNotEmpty)
+                      : (coverImage != null && coverImage!.isNotEmpty)
                           ? Stack(
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: CachedNetworkImage(
-                                    imageUrl: cover_image!,
+                                    imageUrl: coverImage!,
                                     width: double.infinity,
                                     height: 180,
                                     fit: BoxFit.cover,
@@ -270,7 +270,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        cover_image = null;
+                                        coverImage = null;
                                       });
                                     },
                                     child: _buildCloseButton(),
@@ -288,14 +288,14 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Book Images', style: _labelStyle),
+              const Text('Book images', style: _labelStyle),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Book Images', style: TextStyle(fontSize: 16)),
+                  const Text('Book images', style: TextStyle(fontSize: 16)),
                   IconButton(
                     onPressed: () {
-                      if (Images.length + selectedImages.length >= 5) {
+                      if (images.length + selectedImages.length >= 5) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                               content: Text('Maximum 5 images allowed')),
@@ -309,12 +309,12 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                 ],
               ),
               Container(
-                height: (Images.isEmpty && selectedImages.isEmpty) ? 150 : 300,
+                height: (images.isEmpty && selectedImages.isEmpty) ? 150 : 300,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: (Images.isEmpty && selectedImages.isEmpty)
+                child: (images.isEmpty && selectedImages.isEmpty)
                     ? const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -322,7 +322,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                             Icon(Icons.cloud_upload, color: Colors.grey),
                             SizedBox(height: 4),
                             Text(
-                              "Upload Book Images",
+                              "Upload Book images",
                               style:
                                   TextStyle(fontSize: 12, color: Colors.grey),
                             ),
@@ -332,7 +332,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                     : ListView(
                         scrollDirection: Axis.vertical,
                         children: [
-                          ...List.generate(Images.length, (index) {
+                          ...List.generate(images.length, (index) {
                             return Stack(
                               children: [
                                 Container(
@@ -340,7 +340,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: CachedNetworkImage(
-                                      imageUrl: Images[index],
+                                      imageUrl: images[index],
                                       width: double.infinity,
                                       height: 180,
                                       placeholder: (context, url) =>
@@ -359,7 +359,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        Images.removeAt(index);
+                                        images.removeAt(index);
                                       });
                                     },
                                     child: Container(
@@ -387,7 +387,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                             );
                           }),
 
-                          // ✅ Local Selected Images (Vertical List)
+                          // ✅ Local Selected images (Vertical List)
                           ...List.generate(selectedImages.length, (index) {
                             return Stack(
                               children: [
@@ -490,7 +490,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                     return;
                   }
                   if (_formKey.currentState!.validate()) {
-                    if (Images.isEmpty && selectedImages.isEmpty) {
+                    if (images.isEmpty && selectedImages.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please upload an image')),
                       );
@@ -510,8 +510,8 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                           ? selectedImages
                               .map((xfile) => File(xfile!.path))
                               .toList()
-                          : Images.isNotEmpty
-                              ? Images.map((imgPath) => File(imgPath)).toList()
+                          : images.isNotEmpty
+                              ? images.map((imgPath) => File(imgPath)).toList()
                               : null,
                       description: descriptionController.text,
                       notes: notesController.text,
@@ -610,6 +610,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
       if (source == ImageSource.gallery) {
         final images = await ImagePickerHelper.pickMultipleImages();
         if (images != null && images.isNotEmpty) {
+          if (!mounted) return;
           setState(() {
             int available = 5 - selectedImages.length;
             if (available > 0) {
@@ -625,6 +626,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
       } else {
         final image = await ImagePicker().pickImage(source: source);
         if (image != null) {
+          if (!mounted) return;
           setState(() {
             if (selectedImages.length < 5) {
               selectedImages.add(image);
@@ -637,6 +639,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image(s): $e')),
       );
@@ -687,10 +690,12 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
 
       final file = File(pickedImage.path);
 
+      if (!mounted) return;
       setState(() {
         selectedCoverImageFile = file;
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image: $e')),
       );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/CategoryTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/DonationTab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/MainTab.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/category_tab.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/donation_tab.dart';
+import 'package:read_buddy_app/features/home/presentation/widgets/main_tab.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/services/app_preferences.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
@@ -18,8 +18,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-
-
 
   Future<void> _logout() async {
     try {

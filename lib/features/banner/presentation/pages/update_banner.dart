@@ -27,7 +27,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
   late TextEditingController descriptionController;
   late TextEditingController bannerTypeController;
 
-  List<String> Images = [];
+  List<String> images = [];
 
   List<XFile?> selectedImages = [];
 
@@ -40,7 +40,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
         TextEditingController(text: widget.banner.description ?? "");
     bannerTypeController =
         TextEditingController(text: widget.banner.bannerType);
-    Images.add(widget.banner.bannerImage);
+    images.add(widget.banner.bannerImage);
   }
 
   @override
@@ -120,14 +120,14 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: (Images.isNotEmpty || selectedImages.isNotEmpty)
+                child: (images.isNotEmpty || selectedImages.isNotEmpty)
                     ? ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: Images.isNotEmpty
-                            ? Images.length
+                        itemCount: images.isNotEmpty
+                            ? images.length
                             : selectedImages.length,
                         itemBuilder: (context, index) {
-                          final isNetworkImage = Images.isNotEmpty;
+                          final isNetworkImage = images.isNotEmpty;
 
                           return Stack(
                             children: [
@@ -137,7 +137,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                                   borderRadius: BorderRadius.circular(8),
                                   child: isNetworkImage
                                       ? CachedNetworkImage(
-                                          imageUrl: Images[index],
+                                          imageUrl: images[index],
                                           width: 160,
                                           height: 180,
                                           fit: BoxFit.cover,
@@ -163,7 +163,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                                   onTap: () {
                                     setState(() {
                                       if (isNetworkImage) {
-                                        Images.removeAt(index);
+                                        images.removeAt(index);
                                       } else {
                                         selectedImages.removeAt(index);
                                       }
@@ -201,7 +201,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                             Icon(Icons.cloud_upload, color: Colors.grey),
                             SizedBox(height: 4),
                             Text(
-                              "Upload Images",
+                              "Upload images",
                               style:
                                   TextStyle(fontSize: 12, color: Colors.grey),
                             ),
@@ -223,7 +223,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      if (Images.isEmpty && selectedImages.isEmpty) {
+      if (images.isEmpty && selectedImages.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please upload an image')),
         );
@@ -241,7 +241,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
             bannerType: bannerTypeController.text,
             bannerImage: selectedImages.isNotEmpty
                 ? File(selectedImages.first!.path)
-                : File(Images.first),
+                : File(images.first),
           ));
 
       Navigator.pop(context);
@@ -288,9 +288,11 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
     try {
       final image = await ImagePicker().pickImage(source: source);
       if (image != null) {
+        if (!mounted) return;
         setState(() => selectedImages = [image]);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image: $e')),
       );

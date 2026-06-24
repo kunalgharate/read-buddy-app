@@ -84,15 +84,21 @@ class AppInterceptor extends Interceptor {
 
     // Check if session was replaced (another device logged in)
     final responseData = err.response?.data;
-    if (status == 401 && responseData is Map && responseData['code'] == 'SESSION_REPLACED') {
+    if (status == 401 &&
+        responseData is Map &&
+        responseData['code'] == 'SESSION_REPLACED') {
       SessionEventBus.instance.fire(SessionEvent.sessionReplaced);
       return false; // Don't retry — session is permanently invalidated
     }
 
     // Refresh on 401, or 404 on bookrequests action routes (server quirk)
-    if (status == ApiConstants.unauthorized) return true;
+    if (status == ApiConstants.unauthorized) {
+      return true;
+    }
     if (status == ApiConstants.notFound &&
-        (path.contains('/accept') || path.contains('/decline'))) return true;
+        (path.contains('/accept') || path.contains('/decline'))) {
+      return true;
+    }
     return false;
   }
 

@@ -162,7 +162,7 @@ class _BannerSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: _primary.withOpacity(0.35),
+                color: _primary.withValues(alpha: 0.35),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -189,7 +189,7 @@ class _BannerSection extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           height: 1.35,
                         )),
-                    Text('Donate a book and make a difference.',
+                    const Text('Donate a book and make a difference.',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -328,7 +328,7 @@ class _BannerCarouselState extends State<_BannerCarousel> {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.7),
+                                Colors.black.withValues(alpha: 0.7),
                               ],
                             ),
                           ),
@@ -353,7 +353,7 @@ class _BannerCarouselState extends State<_BannerCarousel> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.85),
+                                    color: Colors.white.withValues(alpha: 0.85),
                                     fontSize: 11,
                                   ),
                                 ),
@@ -499,7 +499,7 @@ class _BookCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, 4)),
           ],
@@ -588,7 +588,7 @@ class _FormatBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.9),
+        color: color.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(5),
       ),
       child: Text(label,
@@ -634,7 +634,7 @@ class _MonthlyStatsCardState extends State<_MonthlyStatsCard> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.07),
+                color: Colors.black.withValues(alpha: 0.07),
                 blurRadius: 12,
                 offset: const Offset(0, 4)),
           ],

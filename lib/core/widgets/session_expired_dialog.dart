@@ -23,10 +23,11 @@ void showSessionExpiredDialog(BuildContext context) {
       actions: [
         FilledButton(
           onPressed: () async {
-            await SecureStorageUtils.clearAll();
+            await SecureStorageUtil().clearAll();
             await AppPreferences.clear();
             if (ctx.mounted) {
-              Navigator.of(ctx).pushNamedAndRemoveUntil('/signin', (_) => false);
+              Navigator.of(ctx)
+                  .pushNamedAndRemoveUntil('/signin', (_) => false);
             }
           },
           child: const Text('Sign In Again'),

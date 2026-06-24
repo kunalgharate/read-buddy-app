@@ -46,7 +46,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
     final amount = _amount;
     if (amount < 100) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Minimum donation is ₹100 for Prime membership')),
+        const SnackBar(
+            content: Text('Minimum donation is ₹100 for Prime membership')),
       );
       return;
     }
@@ -74,11 +75,15 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
 
       _razorpay.open(options);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to initiate payment: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to initiate payment: $e')),
+        );
+      }
     } finally {
-      setState(() => _processing = false);
+      if (mounted) {
+        setState(() => _processing = false);
+      }
     }
   }
 
@@ -97,12 +102,20 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Row(
-              children: [Icon(Icons.check_circle, color: Colors.green), SizedBox(width: 8), Text('Thank You!')],
+              children: [
+                Icon(Icons.check_circle, color: Colors.green),
+                SizedBox(width: 8),
+                Text('Thank You!')
+              ],
             ),
-            content: Text('Your donation of ₹$_currentAmount was successful.\nYou are now a Prime member for 1 year! 🎉'),
+            content: Text(
+                'Your donation of ₹$_currentAmount was successful.\nYou are now a Prime member for 1 year! 🎉'),
             actions: [
               FilledButton(
-                onPressed: () { Navigator.pop(ctx); Navigator.pop(context); },
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.pop(context);
+                },
                 child: const Text('Continue'),
               ),
             ],
@@ -120,13 +133,16 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
 
   void _onPaymentError(PaymentFailureResponse response) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Payment failed: ${response.message ?? 'Unknown error'}')),
+      SnackBar(
+          content:
+              Text('Payment failed: ${response.message ?? 'Unknown error'}')),
     );
   }
 
   void _onExternalWallet(ExternalWalletResponse response) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('External wallet selected: ${response.walletName}')),
+      SnackBar(
+          content: Text('External wallet selected: ${response.walletName}')),
     );
   }
 
@@ -149,7 +165,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
               style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 24),
-            const Text('Select Amount', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            const Text('Select Amount',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
@@ -157,10 +174,11 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
               children: _presetAmounts.map((amt) {
                 final selected = _selectedAmount == amt;
                 return ChoiceChip(
-                  label: Text('₹$amt', style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: selected ? Colors.white : Colors.black87,
-                  )),
+                  label: Text('₹$amt',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: selected ? Colors.white : Colors.black87,
+                      )),
                   selected: selected,
                   selectedColor: const Color(0xFF2CE07F),
                   onSelected: (_) => setState(() {
@@ -182,17 +200,25 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
               onChanged: (_) => setState(() => _selectedAmount = null),
             ),
             const SizedBox(height: 8),
-            const Text('Minimum ₹100 required for Prime membership', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const Text('Minimum ₹100 required for Prime membership',
+                style: TextStyle(fontSize: 12, color: Colors.grey)),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               height: 52,
               child: FilledButton(
                 onPressed: _processing ? null : _initiatePayment,
-                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2CE07F)),
+                style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF2CE07F)),
                 child: _processing
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text('Donate ₹${_amount > 0 ? _amount : '---'}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
+                    : Text('Donate ₹${_amount > 0 ? _amount : '---'}',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],

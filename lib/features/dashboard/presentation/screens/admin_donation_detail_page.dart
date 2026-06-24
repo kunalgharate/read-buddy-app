@@ -11,7 +11,8 @@ class AdminDonationDetailPage extends StatefulWidget {
   const AdminDonationDetailPage({super.key, required this.book});
 
   @override
-  State<AdminDonationDetailPage> createState() => _AdminDonationDetailPageState();
+  State<AdminDonationDetailPage> createState() =>
+      _AdminDonationDetailPageState();
 }
 
 class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
@@ -46,7 +47,7 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
 
     try {
       final dio = getIt<Dio>();
-      
+
       // Sending only the status field as sending populated fields like 'category'
       // causes BSON Cast errors on the backend.
       final updatedBody = {
@@ -58,7 +59,8 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
         data: updatedBody,
       );
 
-      if (response.statusCode == ApiConstants.success || response.statusCode == 201) {
+      if (response.statusCode == ApiConstants.success ||
+          response.statusCode == 201) {
         if (mounted) {
           setState(() {
             _currentStatus = newStatus;
@@ -89,7 +91,7 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -114,7 +116,6 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildCoverHeader(size),
-            
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -138,7 +139,7 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  
+
                   if (widget.book.category.isNotEmpty)
                     Text(
                       widget.book.category,
@@ -148,9 +149,9 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Update Status Section
                   _buildSectionCard(
                     Column(
@@ -166,9 +167,11 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(color: Color(0xFF7A9BB5)),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFF7A9BB5)),
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
                                 ),
                                 items: _statusOptions.map((status) {
                                   return DropdownMenuItem(
@@ -176,9 +179,11 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
                                     child: Text(status.toUpperCase()),
                                   );
                                 }).toList(),
-                                onChanged: _isUpdating ? null : (val) {
-                                  if (val != null) _updateStatus(val);
-                                },
+                                onChanged: _isUpdating
+                                    ? null
+                                    : (val) {
+                                        if (val != null) _updateStatus(val);
+                                      },
                               ),
                             ),
                             if (_isUpdating)
@@ -191,22 +196,29 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   _buildSectionCard(_buildInfoGrid()),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   _buildSectionCard(
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildSectionTitle('Donation Info'),
                         const SizedBox(height: 16),
-                        _buildDetailRow(Icons.person_outline, 'Donor', widget.book.donorName.isNotEmpty ? widget.book.donorName : 'You'),
-                        _buildDetailRow(Icons.calendar_today_outlined, 'Donated on', _formatDate(widget.book.createdAt)),
-                        _buildDetailRow(Icons.confirmation_number_outlined, 'Donation ID', widget.book.id ?? 'N/A'),
+                        _buildDetailRow(
+                            Icons.person_outline,
+                            'Donor',
+                            widget.book.donorName.isNotEmpty
+                                ? widget.book.donorName
+                                : 'You'),
+                        _buildDetailRow(Icons.calendar_today_outlined,
+                            'Donated on', _formatDate(widget.book.createdAt)),
+                        _buildDetailRow(Icons.confirmation_number_outlined,
+                            'Donation ID', widget.book.id ?? 'N/A'),
                       ],
                     ),
                   ),
@@ -228,7 +240,7 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -265,8 +277,8 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.5),
+                    Colors.black.withValues(alpha: 0.1),
+                    Colors.black.withValues(alpha: 0.5),
                   ],
                 ),
               ),
@@ -285,7 +297,10 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
     } else if (apiStatus.contains('progress') || apiStatus.contains('pickup')) {
       displayStatus = 'In Progress';
       color = const Color(0xFF2196F3);
-    } else if (apiStatus.contains('complete') || apiStatus.contains('success') || apiStatus.contains('done') || apiStatus.contains('delivered')) {
+    } else if (apiStatus.contains('complete') ||
+        apiStatus.contains('success') ||
+        apiStatus.contains('done') ||
+        apiStatus.contains('delivered')) {
       displayStatus = 'Completed';
       color = _primaryGreen;
     } else {
@@ -296,7 +311,7 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color, width: 1),
       ),
@@ -315,8 +330,10 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildInfoItem(Icons.menu_book, 'Format', widget.book.format.isEmpty ? 'Physical' : widget.book.format),
-        _buildInfoItem(Icons.language, 'Language', widget.book.language.isEmpty ? 'English' : widget.book.language),
+        _buildInfoItem(Icons.menu_book, 'Format',
+            widget.book.format.isEmpty ? 'Physical' : widget.book.format),
+        _buildInfoItem(Icons.language, 'Language',
+            widget.book.language.isEmpty ? 'English' : widget.book.language),
         _buildInfoItem(Icons.star_outline, 'Condition', 'Good'),
       ],
     );
@@ -336,11 +353,13 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
         const SizedBox(height: 8),
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF7A9BB5)),
+          style:
+              GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF7A9BB5)),
         ),
         Text(
           value,
-          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: _textDark),
+          style: GoogleFonts.poppins(
+              fontSize: 13, fontWeight: FontWeight.w600, color: _textDark),
         ),
       ],
     );
@@ -369,7 +388,8 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
             children: [
               Text(
                 label,
-                style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF7A9BB5)),
+                style: GoogleFonts.poppins(
+                    fontSize: 12, color: const Color(0xFF7A9BB5)),
               ),
               Text(
                 value,
@@ -389,7 +409,20 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
   String _formatDate(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ];
       return '${date.day} ${months[date.month - 1]}, ${date.year}';
     } catch (_) {
       return dateStr;

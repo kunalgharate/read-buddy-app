@@ -13,7 +13,7 @@ class DonatedBookDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -39,7 +39,7 @@ class DonatedBookDetailPage extends StatelessWidget {
           children: [
             // --- Book Cover Header ---
             _buildCoverHeader(size),
-            
+
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -64,7 +64,7 @@ class DonatedBookDetailPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  
+
                   if (book.category.isNotEmpty)
                     Text(
                       book.category,
@@ -74,14 +74,14 @@ class DonatedBookDetailPage extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // --- Info Grid ---
                   _buildSectionCard(_buildInfoGrid()),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // --- Donation Info ---
                   _buildSectionCard(
                     Column(
@@ -89,9 +89,12 @@ class DonatedBookDetailPage extends StatelessWidget {
                       children: [
                         _buildSectionTitle('Donation Info'),
                         const SizedBox(height: 16),
-                        _buildDetailRow(Icons.person_outline, 'Donor', book.donorName.isNotEmpty ? book.donorName : 'You'),
-                        _buildDetailRow(Icons.calendar_today_outlined, 'Donated on', _formatDate(book.createdAt)),
-                        _buildDetailRow(Icons.confirmation_number_outlined, 'Donation ID', book.id ?? 'N/A'),
+                        _buildDetailRow(Icons.person_outline, 'Donor',
+                            book.donorName.isNotEmpty ? book.donorName : 'You'),
+                        _buildDetailRow(Icons.calendar_today_outlined,
+                            'Donated on', _formatDate(book.createdAt)),
+                        _buildDetailRow(Icons.confirmation_number_outlined,
+                            'Donation ID', book.id ?? 'N/A'),
                       ],
                     ),
                   ),
@@ -113,7 +116,7 @@ class DonatedBookDetailPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -150,8 +153,8 @@ class DonatedBookDetailPage extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.5),
+                    Colors.black.withValues(alpha: 0.1),
+                    Colors.black.withValues(alpha: 0.5),
                   ],
                 ),
               ),
@@ -170,7 +173,8 @@ class DonatedBookDetailPage extends StatelessWidget {
     } else if (apiStatus.contains('progress') || apiStatus.contains('pickup')) {
       displayStatus = 'In Progress';
       color = const Color(0xFF2196F3);
-    } else if (apiStatus.contains('complete') || apiStatus.contains('success')) {
+    } else if (apiStatus.contains('complete') ||
+        apiStatus.contains('success')) {
       displayStatus = 'Completed';
       color = _primaryGreen;
     } else {
@@ -181,7 +185,7 @@ class DonatedBookDetailPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color, width: 1),
       ),
@@ -200,9 +204,12 @@ class DonatedBookDetailPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildInfoItem(Icons.menu_book, 'Format', book.format.isEmpty ? 'Physical' : book.format),
-        _buildInfoItem(Icons.language, 'Language', book.language.isEmpty ? 'English' : book.language),
-        _buildInfoItem(Icons.star_outline, 'Condition', 'Good'), // condition not in entity
+        _buildInfoItem(Icons.menu_book, 'Format',
+            book.format.isEmpty ? 'Physical' : book.format),
+        _buildInfoItem(Icons.language, 'Language',
+            book.language.isEmpty ? 'English' : book.language),
+        _buildInfoItem(
+            Icons.star_outline, 'Condition', 'Good'), // condition not in entity
       ],
     );
   }
@@ -221,11 +228,13 @@ class DonatedBookDetailPage extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF7A9BB5)),
+          style:
+              GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF7A9BB5)),
         ),
         Text(
           value,
-          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: _textDark),
+          style: GoogleFonts.poppins(
+              fontSize: 13, fontWeight: FontWeight.w600, color: _textDark),
         ),
       ],
     );
@@ -254,7 +263,8 @@ class DonatedBookDetailPage extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF7A9BB5)),
+                style: GoogleFonts.poppins(
+                    fontSize: 12, color: const Color(0xFF7A9BB5)),
               ),
               Text(
                 value,
@@ -274,7 +284,20 @@ class DonatedBookDetailPage extends StatelessWidget {
   String _formatDate(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ];
       return '${date.day} ${months[date.month - 1]}, ${date.year}';
     } catch (_) {
       return dateStr;

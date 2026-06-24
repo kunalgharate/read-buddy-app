@@ -420,8 +420,12 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
   Future<void> _pick(ImageSource source) async {
     try {
       final image = await ImagePicker().pickImage(source: source);
-      if (image != null) setState(() => _pickedImage = image);
+      if (image != null) {
+        if (!mounted) return;
+        setState(() => _pickedImage = image);
+      }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
     }

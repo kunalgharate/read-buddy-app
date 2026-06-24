@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../domain/entities/question_entity.dart';
-import '../../domain/usecases/get_questions.dart' as QuestionCrudUseCases;
-import '../../domain/usecases/delete_question.dart' as QuestionCrudUseCases;
+import '../../domain/usecases/get_questions.dart' as question_crud_usecases;
+import '../../domain/usecases/delete_question.dart' as question_crud_usecases;
 import 'add_edit_question_page.dart';
 
 class QuestionListPage extends StatefulWidget {
@@ -16,15 +16,15 @@ class _QuestionListPageState extends State<QuestionListPage> {
   List<QuestionEntity> _questions = [];
   bool _isLoading = true;
 
-  late final QuestionCrudUseCases.GetQuestions _getQuestionsUseCase;
-  late final QuestionCrudUseCases.DeleteQuestion _deleteQuestionUseCase;
+  late final question_crud_usecases.GetQuestions _getQuestionsUseCase;
+  late final question_crud_usecases.DeleteQuestion _deleteQuestionUseCase;
 
   @override
   void initState() {
     super.initState();
-    _getQuestionsUseCase = GetIt.instance<QuestionCrudUseCases.GetQuestions>();
+    _getQuestionsUseCase = GetIt.instance<question_crud_usecases.GetQuestions>();
     _deleteQuestionUseCase =
-        GetIt.instance<QuestionCrudUseCases.DeleteQuestion>();
+        GetIt.instance<question_crud_usecases.DeleteQuestion>();
     loadQuestions();
   }
 

@@ -1,13 +1,13 @@
 import 'package:read_buddy_app/features/bookcrud/domain/entities/item_entity.dart';
 
-class parentCategoryModel extends Item {
-  const parentCategoryModel({
+class ParentCategoryModel extends Item {
+  const ParentCategoryModel({
     required super.id,
     required super.name,
   });
 
-  factory parentCategoryModel.fromJson(Map<String, dynamic> json) {
-    return parentCategoryModel(
+  factory ParentCategoryModel.fromJson(Map<String, dynamic> json) {
+    return ParentCategoryModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
     );

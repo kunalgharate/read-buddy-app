@@ -197,7 +197,8 @@ class _DonationPageState extends State<DonationPage> {
 
       if (_preferredDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a preferred pickup date')),
+          const SnackBar(
+              content: Text('Please select a preferred pickup date')),
         );
         return;
       }
@@ -396,7 +397,8 @@ class _DonationPageState extends State<DonationPage> {
                                             horizontal: 12, vertical: 10),
                                         decoration: BoxDecoration(
                                           color: isSelected
-                                              ? _primaryGreen.withOpacity(0.08)
+                                              ? _primaryGreen.withValues(
+                                                  alpha: 0.08)
                                               : Colors.transparent,
                                           borderRadius:
                                               BorderRadius.circular(12),
@@ -408,8 +410,8 @@ class _DonationPageState extends State<DonationPage> {
                                               height: 36,
                                               decoration: BoxDecoration(
                                                 color: isSelected
-                                                    ? _primaryGreen
-                                                        .withOpacity(0.2)
+                                                    ? _primaryGreen.withValues(
+                                                        alpha: 0.2)
                                                     : const Color(0xFFF1F5F9),
                                                 borderRadius:
                                                     BorderRadius.circular(8),
@@ -619,7 +621,7 @@ class _DonationPageState extends State<DonationPage> {
                       height: 32,
                       decoration: BoxDecoration(
                         color: _selectedCategory != null
-                            ? _primaryGreen.withOpacity(0.12)
+                            ? _primaryGreen.withValues(alpha: 0.12)
                             : const Color(0xFFF0F4F8),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -862,7 +864,8 @@ class _DonationPageState extends State<DonationPage> {
       final hasLetter = address.contains(RegExp(r'[a-zA-Z]'));
       final hasDigit = address.contains(RegExp(r'[0-9]'));
       if (!hasLetter || !hasDigit) {
-        _showSnack('Please enter a valid address (include street name and number)');
+        _showSnack(
+            'Please enter a valid address (include street name and number)');
         return false;
       }
       if (pin.isEmpty) {
@@ -924,8 +927,10 @@ class _DonationPageState extends State<DonationPage> {
         // ── Book details card ──────────────────────────────────
         _confirmCard([
           _confirmRow('Book Title', _titleController.text.trim()),
-          _confirmRow('Category', _selectedCategory?.title.capitalizeEachWord ?? '—'),
-          _confirmRow('Condition', _bookCondition.replaceAll('_', ' ').capitalizeEachWord),
+          _confirmRow(
+              'Category', _selectedCategory?.title.capitalizeEachWord ?? '—'),
+          _confirmRow('Condition',
+              _bookCondition.replaceAll('_', ' ').capitalizeEachWord),
           _confirmRow('Language', _languageController.text.trim()),
           _confirmRow('Donor Name', _nameController.text.trim()),
         ]),
@@ -1225,10 +1230,9 @@ class _DonationPageState extends State<DonationPage> {
                 label,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
-                  color: isPlaceholder
-                      ? const Color(0xFF999999)
-                      : _textDark,
-                  fontWeight: isPlaceholder ? FontWeight.normal : FontWeight.w500,
+                  color: isPlaceholder ? const Color(0xFF999999) : _textDark,
+                  fontWeight:
+                      isPlaceholder ? FontWeight.normal : FontWeight.w500,
                 ),
               ),
             ),

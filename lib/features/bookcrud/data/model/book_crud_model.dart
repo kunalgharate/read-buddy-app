@@ -5,14 +5,10 @@ import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart'
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_variant_entity.dart';
 
 class BookCrudModel extends BookCrudEntity {
-  @override
-  final List<String> additionalImageUrls;
-  @override
-  final File? coversingleImage;
-
   /// Variants returned inline from GET /api/books response.
   final List<BookVariantEntity> variants;
 
+  // ignore: prefer_const_constructors_in_immutables
   BookCrudModel({
     required super.title,
     String? subtitle,
@@ -35,18 +31,16 @@ class BookCrudModel extends BookCrudEntity {
     required super.ownerId,
     super.ownerName,
     required super.location,
-    this.coversingleImage,
+    super.coversingleImage,
     required super.coverImageUrl,
     required super.additionalImages,
-    List<String>? additionalImageUrls,
+    super.additionalImageUrls,
     required super.description,
     required super.notes,
     this.variants = const [],
-  })  : additionalImageUrls = additionalImageUrls ?? [],
-        super(
+  }) : super(
           subtitle: subtitle ?? "subtitle",
           id: id ?? "id-",
-          coversingleImage: coversingleImage,
         );
 
   factory BookCrudModel.fromJson(Map<String, dynamic> json) {

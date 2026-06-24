@@ -34,7 +34,7 @@ import '../../features/auth/presentation/blocs/sign_in/sign_in_bloc.dart'
     as _i78;
 import '../../features/auth/presentation/blocs/sign_up/sign_up_bloc.dart'
     as _i725;
-import '../../features/bookcrud/data/dataresources/bookCrud_remote_resources.dart'
+import '../../features/bookcrud/data/dataresources/book_crud_remote_resources.dart'
     as _i673;
 import '../../features/bookcrud/data/repositories/bookcrud_repo_impl.dart'
     as _i473;

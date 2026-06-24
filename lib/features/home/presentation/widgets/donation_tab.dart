@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
-import 'Format_screen.dart';
+import 'format_screen.dart';
 
 class DonationTab extends StatefulWidget {
   const DonationTab({super.key});
@@ -137,7 +137,7 @@ class _DonationTabContent extends StatelessWidget {
                   backgroundColor: Colors.white,
                   shape: const RoundedRectangleBorder(
                     borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(24)),
+                        BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   builder: (_) => const BookFormatBottomSheet(),
                 ),
@@ -154,7 +154,7 @@ class _DonationTabContent extends StatelessWidget {
                   backgroundColor: Colors.white,
                   shape: const RoundedRectangleBorder(
                     borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(24)),
+                        BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   builder: (_) => const RazorpayBottomSheet(),
                 ),
@@ -204,7 +204,8 @@ class _ImpactSection extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => context.read<DonateBookBloc>().add(LoadDonationStats()),
+                  onPressed: () =>
+                      context.read<DonateBookBloc>().add(LoadDonationStats()),
                   child: Text(
                     'Retry',
                     style: GoogleFonts.poppins(
@@ -219,9 +220,9 @@ class _ImpactSection extends StatelessWidget {
         }
 
         final booksDonated =
-        state is DonationStatsLoaded ? state.stats.booksDonated : 0;
+            state is DonationStatsLoaded ? state.stats.booksDonated : 0;
         final studentsHelped =
-        state is DonationStatsLoaded ? state.stats.studentsHelped : 0;
+            state is DonationStatsLoaded ? state.stats.studentsHelped : 0;
 
         return Row(
           children: [
@@ -240,8 +241,7 @@ class _ImpactSection extends StatelessWidget {
                 icon: Icons.people,
                 iconColor: const Color(0xFF2196F3),
                 iconBgColor: const Color(0x1A2196F3),
-                count:
-                studentsHelped > 20 ? '20+' : studentsHelped.toString(),
+                count: studentsHelped > 20 ? '20+' : studentsHelped.toString(),
                 label: 'Students Helped',
               ),
             ),
@@ -277,8 +277,8 @@ class _BookStatusSection extends StatelessWidget {
         return (label: 'Cancelled', color: const Color(0xFFF44336));
       default:
         return (
-        label: apiStatus.replaceAll('_', ' ').toUpperCase(),
-        color: const Color(0xFF9E9E9E),
+          label: apiStatus.replaceAll('_', ' ').toUpperCase(),
+          color: const Color(0xFF9E9E9E),
         );
     }
   }
@@ -289,16 +289,16 @@ class _BookStatusSection extends StatelessWidget {
 
     // Shared card decoration used in all states
     BoxDecoration cardDecoration() => const BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-      boxShadow: [
-        BoxShadow(
-          color: DonationTab._cardShadow,
-          blurRadius: 10,
-          offset: Offset(0, 2),
-        ),
-      ],
-    );
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          boxShadow: [
+            BoxShadow(
+              color: DonationTab._cardShadow,
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
+        );
 
     return BlocBuilder<DonateBookBloc, DonateBookState>(
       builder: (context, state) {
@@ -335,7 +335,8 @@ class _BookStatusSection extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => context.read<DonateBookBloc>().add(LoadDonationStats()),
+                    onPressed: () =>
+                        context.read<DonateBookBloc>().add(LoadDonationStats()),
                     child: Text(
                       'Retry',
                       style: GoogleFonts.poppins(
@@ -403,16 +404,14 @@ class _BookStatusSection extends StatelessWidget {
                       category: books[i].categoryName ?? '',
                       donorName: 'You',
                       coverImageUrl: books[i].coverImageUrl ?? '',
-                      createdAt:
-                      books[i].createdAt ?? DateTime.now().toIso8601String(),
+                      createdAt: books[i].createdAt ??
+                          DateTime.now().toIso8601String(),
                       language: 'English',
                     ),
                   );
                 },
-
                 child: Padding(
-                  padding:
-                  EdgeInsets.symmetric(vertical: size.height * 0.015),
+                  padding: EdgeInsets.symmetric(vertical: size.height * 0.015),
                   child: _BookStatusRow(
                     title: books[i].title,
                     format: books[i].format,

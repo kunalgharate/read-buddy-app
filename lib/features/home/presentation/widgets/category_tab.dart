@@ -128,7 +128,7 @@ class _CategoryTabState extends State<CategoryTab> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -160,7 +160,7 @@ class _CategoryTabState extends State<CategoryTab> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -205,7 +205,7 @@ class _CategoryTabState extends State<CategoryTab> {
                   _onCategorySelected(category);
                 }
               },
-              selectedColor: _green.withOpacity(0.12),
+              selectedColor: _green.withValues(alpha: 0.12),
               backgroundColor: Colors.white,
               labelStyle: TextStyle(
                 color: isSelected ? _green : Colors.grey.shade600,
@@ -221,7 +221,7 @@ class _CategoryTabState extends State<CategoryTab> {
               ),
               showCheckmark: false,
               elevation: isSelected ? 0 : 2,
-              shadowColor: Colors.black.withOpacity(0.05),
+              shadowColor: Colors.black.withValues(alpha: 0.05),
             ),
           );
         },
@@ -424,9 +424,13 @@ class _CategoryTabState extends State<CategoryTab> {
 
     // Primary: category object match (when DB has proper category data)
     if (book.book_category.id.isNotEmpty &&
-        book.book_category.id == category.id) return true;
+        book.book_category.id == category.id) {
+      return true;
+    }
     if (book.book_category.category_name.isNotEmpty &&
-        book.book_category.category_name.toLowerCase() == catName) return true;
+        book.book_category.category_name.toLowerCase() == catName) {
+      return true;
+    }
 
     // Fallback: genre match (current state — category[] is empty in DB)
     final genre = book.genre.toLowerCase().trim();
@@ -453,7 +457,7 @@ class _CategoryTabState extends State<CategoryTab> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -500,7 +504,7 @@ class _CategoryTabState extends State<CategoryTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _green.withOpacity(0.1),
+                          color: _green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
@@ -540,7 +544,7 @@ class _CategoryTabState extends State<CategoryTab> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -596,7 +600,7 @@ class _CategoryTabState extends State<CategoryTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 7, vertical: 3),
                         decoration: BoxDecoration(
-                          color: _green.withOpacity(0.12),
+                          color: _green.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(

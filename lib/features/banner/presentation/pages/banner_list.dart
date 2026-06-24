@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
-import 'package:read_buddy_app/features/banner/presentation/pages/Add_banner.dart';
+import 'package:read_buddy_app/features/banner/presentation/pages/add_banner.dart';
 import 'package:read_buddy_app/features/banner/presentation/widgets/banner_collection.dart';
 
 class BannersList extends StatefulWidget {
@@ -14,7 +14,7 @@ class BannersList extends StatefulWidget {
 class _BannersListState extends State<BannersList> {
   @override
   void initState() {
-    context.read<BannerBloc>().add(GetBannerListEvent());
+    context.read<BannerBloc>().add(const GetBannerListEvent());
     super.initState();
   }
 

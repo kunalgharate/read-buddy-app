@@ -55,7 +55,9 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _sessionSub = SessionEventBus.instance.stream.listen((event) {
       if (event == SessionEvent.sessionReplaced) {
+        if (!mounted) return;
         final ctx = _navigatorKey.currentContext;
+        // ignore: use_build_context_synchronously
         if (ctx != null) showSessionExpiredDialog(ctx);
       }
     });
@@ -74,7 +76,8 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => getIt<BookBloc>()),
         BlocProvider(create: (_) => getIt<DonatedBooksBloc>()),
         BlocProvider(create: (_) => getIt<SignInBloc>()),
-        BlocProvider(create: (_) => getIt<GoogleSignInBloc>()),                                   BlocProvider(create: (_) => getIt<SignUpBloc>()),
+        BlocProvider(create: (_) => getIt<GoogleSignInBloc>()),
+        BlocProvider(create: (_) => getIt<SignUpBloc>()),
         BlocProvider(create: (_) => getIt<ProfileBloc>()),
         // BlocProvider(create: (_) => getIt<HomeBloc>()),
         BlocProvider(create: (_) => getIt<BannerBloc>()),
