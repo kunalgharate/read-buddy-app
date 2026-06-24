@@ -74,4 +74,9 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   Future<void> scheduleDelivery(String id, String name, String phone, String address, String pincode, String preferredDate, String preferredTime) async {
     return await remoteDataSource.scheduleDelivery(id, name, phone, address, pincode, preferredDate, preferredTime);
   }
+
+  @override
+  Future<void> initiateReturn(String id, String returnMethod, {String? returnBranchId}) async {
+    return await remoteDataSource.initiateReturn(id, returnMethod, returnBranchId: returnBranchId);
+  }
 }

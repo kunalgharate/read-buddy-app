@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/widgets/prime_required_dialog.dart';
 import '../../../bookcrud/data/model/book_crud_model.dart';
 import '../../../bookcrud/domain/entities/book_variant_entity.dart';
 import '../../../bookcrud/domain/respository/variant_repository.dart';
@@ -35,6 +36,22 @@ class _BookDetailView extends StatefulWidget {
 
 class _BookDetailViewState extends State<_BookDetailView> {
   BookDetailEntity? _cachedBook;
+  List<BookVariantEntity> _variants = [];
+
+  void _updateVariants(List<BookVariantEntity> variants) {
+    setState(() => _variants = variants);
+  }
+
+  bool get _hasPhysicalCopy {
+    for (final variant in _variants) {
+      for (final format in variant.formats) {
+        if (format.type == 'hardcover' || format.type == 'paperback') {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +69,12 @@ class _BookDetailViewState extends State<_BookDetailView> {
         builder: (context, state) {
           if (state is BookDetailLoaded) {
             _cachedBook = state.book;
-            return _BookDetailContent(book: state.book);
+            return _BookDetailContent(
+                book: state.book, onVariantsLoaded: _updateVariants);
           }
           if (state is BookRequestCreating && _cachedBook != null) {
-            return _BookDetailContent(book: _cachedBook!);
+            return _BookDetailContent(
+                book: _cachedBook!, onVariantsLoaded: _updateVariants);
           }
           if (state is BookRequestLoading || state is BookRequestInitial) {
             return const Center(
@@ -88,13 +107,17 @@ class _BookDetailViewState extends State<_BookDetailView> {
       ),
       bottomNavigationBar: BlocBuilder<BookRequestBloc, BookRequestState>(
         builder: (context, state) {
-          if (state is BookDetailLoaded)
-            return _BottomActionBar(book: state.book);
+          if (state is BookDetailLoaded) {
+            return _BottomActionBar(
+                book: state.book, hasPhysicalCopy: _hasPhysicalCopy);
+          }
           if (state is BookRequestCreating && _cachedBook != null) {
-            return _BottomActionBar(book: _cachedBook!);
+            return _BottomActionBar(
+                book: _cachedBook!, hasPhysicalCopy: _hasPhysicalCopy);
           }
           if (state is BookRequestError && _cachedBook != null) {
-            return _BottomActionBar(book: _cachedBook!);
+            return _BottomActionBar(
+                book: _cachedBook!, hasPhysicalCopy: _hasPhysicalCopy);
           }
           return const SizedBox.shrink();
         },
@@ -105,8 +128,9 @@ class _BookDetailViewState extends State<_BookDetailView> {
 
 class _BottomActionBar extends StatelessWidget {
   final BookDetailEntity book;
+  final bool hasPhysicalCopy;
 
-  const _BottomActionBar({required this.book});
+  const _BottomActionBar({required this.book, this.hasPhysicalCopy = false});
 
   @override
   Widget build(BuildContext context) {
@@ -146,30 +170,34 @@ class _BottomActionBar extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BookRequestFormPage(
-                    bookId: book.id,
-                    bookTitle: book.title,
-                    coverImageUrl: book.coverImageUrl,
-                  ),
-                ),
-              ),
+              onPressed: hasPhysicalCopy
+                  ? () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BookRequestFormPage(
+                            bookId: book.id,
+                            bookTitle: book.title,
+                            coverImageUrl: book.coverImageUrl,
+                          ),
+                        ),
+                      )
+                  : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2CE07F),
+                disabledBackgroundColor: Colors.grey.shade300,
+                disabledForegroundColor: Colors.grey.shade500,
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Request to Book',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: hasPhysicalCopy ? Colors.white : Colors.grey.shade500,
                 ),
               ),
             ),
@@ -182,8 +210,9 @@ class _BottomActionBar extends StatelessWidget {
 
 class _BookDetailContent extends StatefulWidget {
   final BookDetailEntity book;
+  final void Function(List<BookVariantEntity>)? onVariantsLoaded;
 
-  const _BookDetailContent({required this.book});
+  const _BookDetailContent({required this.book, this.onVariantsLoaded});
 
   @override
   State<_BookDetailContent> createState() => _BookDetailContentState();
@@ -192,6 +221,7 @@ class _BookDetailContent extends StatefulWidget {
 class _BookDetailContentState extends State<_BookDetailContent> {
   List<BookVariantEntity> _variants = [];
   bool _isLoadingVariants = true;
+  String? _selectedLanguage;
 
   @override
   void initState() {
@@ -200,6 +230,18 @@ class _BookDetailContentState extends State<_BookDetailContent> {
   }
 
   Future<void> _loadVariants() async {
+    // First try using inline variants from book response
+    if (widget.book.variants.isNotEmpty) {
+      setState(() {
+        _variants = widget.book.variants;
+        _isLoadingVariants = false;
+        _selectedLanguage = _variants.first.language;
+      });
+      widget.onVariantsLoaded?.call(_variants);
+      return;
+    }
+
+    // Fallback: fetch separately if not inline
     try {
       final repository = getIt<VariantRepository>();
       final variants = await repository.getVariantsForBook(widget.book.id);
@@ -207,13 +249,42 @@ class _BookDetailContentState extends State<_BookDetailContent> {
         setState(() {
           _variants = variants;
           _isLoadingVariants = false;
+          if (variants.isNotEmpty) {
+            _selectedLanguage = variants.first.language;
+          }
         });
+        widget.onVariantsLoaded?.call(variants);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingVariants = false);
       }
     }
+  }
+
+  BookVariantEntity? get _selectedVariant {
+    if (_selectedLanguage == null || _variants.isEmpty) return null;
+    final matches = _variants.where((v) => v.language == _selectedLanguage);
+    return matches.isNotEmpty ? matches.first : null;
+  }
+
+  bool _hasFormat(String type) {
+    return _selectedVariant?.formats.any((f) => f.type == type) ?? false;
+  }
+
+  BookFormatEntity? _getFormat(String type) {
+    final matches = _selectedVariant?.formats.where((f) => f.type == type);
+    return (matches != null && matches.isNotEmpty) ? matches.first : null;
+  }
+
+  /// Checks if user is Prime. If not, shows donation dialog. Returns true if Prime.
+  bool _checkPrimeOrPrompt(BuildContext context) {
+    final profileState = context.read<ProfileBloc>().state;
+    if (profileState is ProfileLoaded && profileState.user.isPrime) {
+      return true;
+    }
+    showPrimeRequiredDialog(context);
+    return false;
   }
 
   BookCrudModel _toBookCrudModel(BookDetailEntity detail) {
@@ -252,6 +323,16 @@ class _BookDetailContentState extends State<_BookDetailContent> {
           _CoverImageSection(book: widget.book),
           _TitleSection(book: widget.book),
           const SizedBox(height: 12),
+          // ── Language Tabs + Action Buttons ────────────────────────────
+          if (!_isLoadingVariants && _variants.isNotEmpty)
+            _buildLanguageAndActions(),
+          if (_isLoadingVariants)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                  child: CircularProgressIndicator(color: Color(0xFF2CE07F))),
+            ),
+          const SizedBox(height: 12),
           _AboutSection(book: widget.book),
           const SizedBox(height: 12),
           _buildVariantsSection(),
@@ -259,6 +340,195 @@ class _BookDetailContentState extends State<_BookDetailContent> {
           _HighlightSection(book: widget.book),
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+
+  // ── Language Tabs + Read/Listen/Watch Buttons ──────────────────────────
+
+  Widget _buildLanguageAndActions() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Available in',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF042153))),
+          const SizedBox(height: 10),
+          // Language chips
+          SizedBox(
+            height: 36,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _variants.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final lang = _variants[index].language;
+                final isSelected = lang == _selectedLanguage;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedLanguage = lang),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                    decoration: BoxDecoration(
+                      color:
+                          isSelected ? const Color(0xFF042153) : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF042153)
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Text(
+                      lang[0].toUpperCase() + lang.substring(1),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isSelected ? Colors.white : const Color(0xFF042153),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Action buttons based on selected variant's formats
+          _buildActionButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    final buttons = <Widget>[];
+
+    // Read (ebook)
+    if (_hasFormat('ebook')) {
+      final format = _getFormat('ebook');
+      buttons.add(_actionBtn(
+        icon: Icons.chrome_reader_mode_rounded,
+        label: 'Read',
+        color: const Color(0xFF0D9488),
+        onTap: () {
+          if (!_checkPrimeOrPrompt(context)) return;
+          if (format?.fileUrl != null) {
+            final url = format!.fileUrl!;
+            Navigator.pushNamed(
+              context,
+              url.toLowerCase().contains('.epub')
+                  ? '/epub-reader'
+                  : '/pdf-reader',
+              arguments: {
+                'url': url,
+                'title': widget.book.title,
+                'language': _selectedLanguage ?? 'en',
+              },
+            );
+          }
+        },
+      ));
+    }
+
+    // Request (hardcover/paperback)
+    if (_hasFormat('hardcover') || _hasFormat('paperback')) {
+      buttons.add(_actionBtn(
+        icon: Icons.menu_book_rounded,
+        label: 'Request',
+        color: const Color(0xFF4F46E5),
+        onTap: () {
+          if (!_checkPrimeOrPrompt(context)) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BookRequestFormPage(
+                bookId: widget.book.id,
+                bookTitle: widget.book.title,
+                coverImageUrl: widget.book.coverImageUrl,
+              ),
+            ),
+          );
+        },
+      ));
+    }
+
+    // Listen (audiobook)
+    if (_hasFormat('audiobook')) {
+      buttons.add(_actionBtn(
+        icon: Icons.headphones_rounded,
+        label: 'Listen',
+        color: const Color(0xFFD97706),
+        onTap: () {
+          if (!_checkPrimeOrPrompt(context)) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Audiobook player coming soon!'),
+                behavior: SnackBarBehavior.floating),
+          );
+        },
+      ));
+    }
+
+    // Watch (videobook)
+    if (_hasFormat('videobook')) {
+      buttons.add(_actionBtn(
+        icon: Icons.play_circle_rounded,
+        label: 'Watch',
+        color: const Color(0xFF7C3AED),
+        onTap: () {
+          if (!_checkPrimeOrPrompt(context)) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Video player coming soon!'),
+                behavior: SnackBarBehavior.floating),
+          );
+        },
+      ));
+    }
+
+    if (buttons.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      children: buttons
+          .expand((btn) => [Expanded(child: btn), const SizedBox(width: 10)])
+          .toList()
+        ..removeLast(),
+    );
+  }
+
+  Widget _actionBtn({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(width: 6),
+            Text(label,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13)),
+          ],
+        ),
       ),
     );
   }
@@ -457,7 +727,7 @@ class _CoverImageSection extends StatelessWidget {
                   fit: BoxFit.fitWidth,
                   placeholder: (_, __) => Container(
                     height: 300,
-                    color: const Color(0xFFF0F0F0),
+                    color: const Color(0xFF042153),
                     child: const Center(
                       child: CircularProgressIndicator(
                         color: Color(0xFF2CE07F),
@@ -466,15 +736,27 @@ class _CoverImageSection extends StatelessWidget {
                   ),
                   errorWidget: (_, __, ___) => Container(
                     height: 300,
-                    color: const Color(0xFFF0F0F0),
-                    child: const Icon(
-                      Icons.broken_image_outlined,
-                      size: 64,
-                      color: Colors.grey,
+                    color: const Color(0xFF042153),
+                    child: const Center(
+                      child: Icon(
+                        Icons.menu_book_rounded,
+                        size: 64,
+                        color: Colors.white30,
+                      ),
                     ),
                   ),
                 )
-              : Container(height: 300, color: const Color(0xFFF0F0F0)),
+              : Container(
+                  height: 300,
+                  color: const Color(0xFF042153),
+                  child: const Center(
+                    child: Icon(
+                      Icons.menu_book_rounded,
+                      size: 80,
+                      color: Colors.white30,
+                    ),
+                  ),
+                ),
         ),
         // Gradient overlay at top for icon visibility
         Positioned(

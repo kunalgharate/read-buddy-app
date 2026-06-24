@@ -1,12 +1,17 @@
 import 'dart:io';
 
+import 'package:read_buddy_app/features/bookcrud/data/model/book_variant_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/entities/book_variant_entity.dart';
 
 class BookCrudModel extends BookCrudEntity {
   @override
   final List<String> additionalImageUrls;
   @override
   final File? coversingleImage;
+
+  /// Variants returned inline from GET /api/books response.
+  final List<BookVariantEntity> variants;
 
   BookCrudModel({
     required super.title,
@@ -36,6 +41,7 @@ class BookCrudModel extends BookCrudEntity {
     List<String>? additionalImageUrls,
     required super.description,
     required super.notes,
+    this.variants = const [],
   })  : additionalImageUrls = additionalImageUrls ?? [],
         super(
           subtitle: subtitle ?? "subtitle",
@@ -44,14 +50,39 @@ class BookCrudModel extends BookCrudEntity {
         );
 
   factory BookCrudModel.fromJson(Map<String, dynamic> json) {
-    final categoryData = json['category'];
-    String categoryName = "category";
+    // Handle categories — API returns multiple formats:
+    // 1. New books: "categories": [{ _id, name, imageUrl, description }] — populated
+    // 2. Old books: "category": "687671aeea6072ce4a153bf7" — plain string ID
+    // 3. Old books: "category": ["id1", "id2"] — array of string IDs
+    String categoryName = "";
     String? categoryId;
-    if (categoryData is Map<String, dynamic>) {
-      categoryName = categoryData['name'] ?? "category";
+
+    final categoriesData = json['categories'];
+    final categoryData = json['category'];
+
+    if (categoriesData is List && categoriesData.isNotEmpty) {
+      final first = categoriesData.first;
+      if (first is Map<String, dynamic>) {
+        // Populated object — extract name directly
+        categoryName = first['name'] ?? "";
+        categoryId = first['_id'];
+      } else if (first is String) {
+        // Array of string IDs
+        categoryId = first;
+      }
+    } else if (categoryData is List && categoryData.isNotEmpty) {
+      // "category": ["id1", "id2"] — old format with array of IDs
+      final first = categoryData.first;
+      if (first is Map<String, dynamic>) {
+        categoryName = first['name'] ?? "";
+        categoryId = first['_id'];
+      } else if (first is String) {
+        categoryId = first;
+      }
+    } else if (categoryData is Map<String, dynamic>) {
+      categoryName = categoryData['name'] ?? "";
       categoryId = categoryData['_id'];
-    } else if (categoryData is String) {
-      categoryName = categoryData;
+    } else if (categoryData is String && categoryData.isNotEmpty) {
       categoryId = categoryData;
     }
 
@@ -63,7 +94,6 @@ class BookCrudModel extends BookCrudEntity {
       ownerName = ownerData['name'];
     } else if (ownerData is String) {
       ownerId = ownerData;
-      ownerName = ownerData;
     }
 
     return BookCrudModel(
@@ -94,6 +124,10 @@ class BookCrudModel extends BookCrudEntity {
       description: json['description'] ?? "",
       notes: json['notes'] ?? "",
       coversingleImage: null,
+      variants: (json['variants'] as List?)
+              ?.map((v) => BookVariantModel.fromJson(v))
+              .toList() ??
+          const [],
     );
   }
 
@@ -155,6 +189,7 @@ class BookCrudModel extends BookCrudEntity {
       description: book.description,
       notes: book.notes,
       coversingleImage: book.coversingleImage,
+      variants: book is BookCrudModel ? book.variants : const [],
     );
   }
 

@@ -1,0 +1,427 @@
+{
+  "info": {
+    "name": "ReadBuddy - Book & BookVariant CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Complete CRUD for Book and BookVariant APIs.\n\nAll file uploads go through Cloudinary automatically.\nDuration for audio/video is auto-calculated on server — no need to send it.\n\nResponse format:\n- Success: { data: {...} }\n- Error: { error: \"message\" }\n\nGET responses return populated objects:\n- categories: [{ _id, name, imageUrl, description }]\n- donorId: { _id, name, email }\n- formats[].donorId: { _id, name, email }"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "description": "Server base URL" },
+    { "key": "token", "value": "", "description": "JWT Bearer token from login response" },
+    { "key": "bookId", "value": "", "description": "Book _id from create/get response" },
+    { "key": "variantId", "value": "", "description": "BookVariant _id from create/get response" },
+    { "key": "formatId", "value": "", "description": "Format _id from variant.formats[]._id" },
+    { "key": "categoryId", "value": "", "description": "Category _id from /api/categories" },
+    { "key": "donorId", "value": "", "description": "User _id (logged-in user's ID)" }
+  ],
+  "item": [
+    {
+      "name": "Book CRUD",
+      "description": "Core book metadata APIs. Books contain shared info (title, author, etc). Language/format-specific data lives in BookVariant.",
+      "item": [
+        {
+          "name": "Create Book",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/books", "host": ["{{baseUrl}}"], "path": ["api", "books"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Atomic Habits", "description": "REQUIRED | String | Book title", "type": "text" },
+                { "key": "author", "value": "James Clear", "description": "REQUIRED | String | Author full name", "type": "text" },
+                { "key": "publisher", "value": "Penguin", "description": "OPTIONAL | String | Publisher name", "type": "text" },
+                { "key": "description", "value": "An easy way to build good habits and break bad ones", "description": "OPTIONAL | String | Short summary/description", "type": "text" },
+                { "key": "categories", "value": "[\"667abc123def456789012345\"]", "description": "OPTIONAL | JSON String Array of Category ObjectIds | Get IDs from GET /api/categories", "type": "text" },
+                { "key": "tags", "value": "[\"habit\", \"productivity\", \"self-help\"]", "description": "OPTIONAL | JSON String Array | Searchable tags", "type": "text" },
+                { "key": "coverImage", "description": "OPTIONAL | File | jpg/png/jpeg | Uploaded to Cloudinary, URL stored as coverImageUrl", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Creates a new book entry with core metadata.\n\nRequired fields: title, author\nOptional fields: publisher, description, categories, tags, coverImage\n\nResponse includes the created book with _id.\nSave _id as {{bookId}} for subsequent requests."
+          },
+          "response": [
+            {
+              "name": "201 - Success",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"_id\": \"667def456abc789012345678\",\n    \"title\": \"Atomic Habits\",\n    \"author\": \"James Clear\",\n    \"publisher\": \"Penguin\",\n    \"description\": \"An easy way to build good habits and break bad ones\",\n    \"coverImageUrl\": \"https://res.cloudinary.com/xxx/image/upload/v123/uploads/abc.jpg\",\n    \"categories\": [\"667abc123def456789012345\"],\n    \"tags\": [\"habit\", \"productivity\", \"self-help\"],\n    \"deleted_at\": null,\n    \"createdAt\": \"2026-06-21T16:00:00.000Z\",\n    \"updatedAt\": \"2026-06-21T16:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 - Validation Error",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"error\": \"Title is required\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Books (with variants & populated data)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/books", "host": ["{{baseUrl}}"], "path": ["api", "books"] },
+            "description": "Returns all non-deleted books with:\n- categories: populated objects with { _id, name, imageUrl, description }\n- variants: array of BookVariant documents with populated donor info\n- variants[].donorId: { _id, name, email }\n- variants[].formats[].donorId: { _id, name, email }"
+          },
+          "response": [
+            {
+              "name": "200 - Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"_id\": \"667def456abc789012345678\",\n      \"title\": \"Atomic Habits\",\n      \"author\": \"James Clear\",\n      \"publisher\": \"Penguin\",\n      \"description\": \"An easy way to build good habits\",\n      \"coverImageUrl\": \"https://res.cloudinary.com/xxx/image/upload/v123/uploads/abc.jpg\",\n      \"categories\": [\n        {\n          \"_id\": \"667abc123def456789012345\",\n          \"name\": \"self help\",\n          \"imageUrl\": \"https://res.cloudinary.com/xxx/category.jpg\",\n          \"description\": \"Books about personal development\"\n        }\n      ],\n      \"tags\": [\"habit\", \"productivity\"],\n      \"deleted_at\": null,\n      \"createdAt\": \"2026-06-21T16:00:00.000Z\",\n      \"updatedAt\": \"2026-06-21T16:00:00.000Z\",\n      \"variants\": [\n        {\n          \"_id\": \"667var789012345678abcdef\",\n          \"bookId\": \"667def456abc789012345678\",\n          \"language\": \"hindi\",\n          \"donorId\": {\n            \"_id\": \"667user123456789012abcde\",\n            \"name\": \"Kunal Gharate\",\n            \"email\": \"kunal@example.com\"\n          },\n          \"formats\": [\n            {\n              \"_id\": \"667fmt111222333444555666\",\n              \"type\": \"hardcover\",\n              \"donorId\": {\n                \"_id\": \"667user123456789012abcde\",\n                \"name\": \"Kunal Gharate\",\n                \"email\": \"kunal@example.com\"\n              },\n              \"isbn\": \"978-0-7352-1448-2\",\n              \"copies\": 5,\n              \"available\": true\n            },\n            {\n              \"_id\": \"667fmt222333444555666777\",\n              \"type\": \"ebook\",\n              \"donorId\": {\n                \"_id\": \"667user234567890123bcdef\",\n                \"name\": \"Ashutosh Patil\",\n                \"email\": \"ashutosh@example.com\"\n              },\n              \"fileUrl\": \"https://res.cloudinary.com/xxx/raw/upload/v123/book-variants/abc.pdf\",\n              \"fileUrls\": [\n                \"https://res.cloudinary.com/xxx/raw/upload/v123/book-variants/abc.pdf\"\n              ]\n            },\n            {\n              \"_id\": \"667fmt333444555666777888\",\n              \"type\": \"audiobook\",\n              \"donorId\": {\n                \"_id\": \"667user123456789012abcde\",\n                \"name\": \"Kunal Gharate\",\n                \"email\": \"kunal@example.com\"\n              },\n              \"totalDuration\": 9600,\n              \"parts\": [\n                {\n                  \"partNumber\": 1,\n                  \"title\": \"Introduction\",\n                  \"audioUrl\": \"https://res.cloudinary.com/xxx/video/upload/v123/book-variants/part1.mp3\",\n                  \"duration\": 4200\n                },\n                {\n                  \"partNumber\": 2,\n                  \"title\": \"Chapter 1\",\n                  \"audioUrl\": \"https://res.cloudinary.com/xxx/video/upload/v123/book-variants/part2.mp3\",\n                  \"duration\": 5400\n                }\n              ]\n            }\n          ],\n          \"createdAt\": \"2026-06-21T16:05:00.000Z\",\n          \"updatedAt\": \"2026-06-21T16:05:00.000Z\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Book by ID (with variants & populated data)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/books/{{bookId}}", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{bookId}}"] },
+            "description": "Returns a single book with all variants.\n\nSame populated response structure as Get All Books but for one book.\nReturns 404 if book is soft-deleted or doesn't exist."
+          },
+          "response": [
+            {
+              "name": "200 - Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"_id\": \"667def456abc789012345678\",\n    \"title\": \"Atomic Habits\",\n    \"author\": \"James Clear\",\n    \"publisher\": \"Penguin\",\n    \"categories\": [\n      { \"_id\": \"667abc...\", \"name\": \"self help\", \"imageUrl\": \"...\", \"description\": \"...\" }\n    ],\n    \"variants\": [\n      {\n        \"_id\": \"667var...\",\n        \"language\": \"hindi\",\n        \"donorId\": { \"_id\": \"667user...\", \"name\": \"Kunal Gharate\", \"email\": \"kunal@example.com\" },\n        \"formats\": [\n          {\n            \"_id\": \"667fmt...\",\n            \"type\": \"hardcover\",\n            \"donorId\": { \"_id\": \"667user...\", \"name\": \"Kunal Gharate\", \"email\": \"kunal@example.com\" },\n            \"copies\": 5,\n            \"available\": true\n          }\n        ]\n      }\n    ]\n  }\n}"
+            },
+            {
+              "name": "404 - Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"error\": \"Book not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Latest Books (last N days)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/books/latest/7", "host": ["{{baseUrl}}"], "path": ["api", "books", "latest", "7"] },
+            "description": "Get books created in the last N days.\nChange '7' in URL to any positive integer.\n\nReturns same structure as Get All Books (with categories populated)."
+          }
+        },
+        {
+          "name": "Get Books by Category",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/books/category/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["api", "books", "category", "{{categoryId}}"] },
+            "description": "Get all books in a specific category.\nReturns 404 if no books found for that category."
+          }
+        },
+        {
+          "name": "Update Book",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/books/{{bookId}}", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{bookId}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Atomic Habits - 2nd Edition", "description": "OPTIONAL | String", "type": "text" },
+                { "key": "author", "value": "James Clear", "description": "OPTIONAL | String", "type": "text" },
+                { "key": "publisher", "value": "Penguin Random House", "description": "OPTIONAL | String", "type": "text" },
+                { "key": "description", "value": "Updated description here", "description": "OPTIONAL | String", "type": "text" },
+                { "key": "categories", "value": "[\"667abc123def456789012345\"]", "description": "OPTIONAL | JSON String Array of ObjectIds | Replaces existing categories", "type": "text" },
+                { "key": "tags", "value": "[\"habits\", \"self-help\"]", "description": "OPTIONAL | JSON String Array | Replaces existing tags", "type": "text" },
+                { "key": "coverImage", "description": "OPTIONAL | File | Replaces existing cover image", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Update any book fields. All fields are optional — only send what you want to change.\nRequires auth token."
+          }
+        },
+        {
+          "name": "Delete Book (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/books/{{bookId}}", "host": ["{{baseUrl}}"], "path": ["api", "books", "{{bookId}}"] },
+            "description": "Soft-deletes the book (sets deleted_at timestamp).\nBook won't appear in any GET queries after this.\nRequires auth token."
+          },
+          "response": [
+            {
+              "name": "200 - Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Book deleted successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BookVariant CRUD",
+      "description": "BookVariant = one language edition of a book.\nEach variant has a formats[] array containing different format types.\n\nFormat types: hardcover, paperback, ebook, audiobook, videobook\n\nFiles are uploaded via multipart/form-data and stored in Cloudinary.\nDuration is auto-calculated from uploaded audio/video files.\n\nConstraint: Only ONE variant per (bookId + language) combination.\nOnly the variant owner (donorId) can update/delete.",
+      "item": [
+        {
+          "name": "Create Variant - Hardcover Only (no file upload)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants", "host": ["{{baseUrl}}"], "path": ["api", "book-variants"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "bookId", "value": "{{bookId}}", "description": "REQUIRED | ObjectId | Parent book's _id", "type": "text" },
+                { "key": "language", "value": "english", "description": "REQUIRED | String | e.g. hindi, english, marathi, gujarati", "type": "text" },
+                { "key": "donorId", "value": "{{donorId}}", "description": "REQUIRED | ObjectId | User creating this variant", "type": "text" },
+                { "key": "formats", "value": "[{\"type\":\"hardcover\",\"donorId\":\"{{donorId}}\",\"isbn\":\"978-0-7352-1448-2\",\"copies\":5,\"available\":true}]", "description": "REQUIRED | JSON String Array | Min 1 format object. See description for format fields.", "type": "text" }
+              ]
+            },
+            "description": "Create a variant with just a hardcover format.\n\nFormat fields for hardcover/paperback:\n- type: REQUIRED | \"hardcover\" or \"paperback\"\n- donorId: REQUIRED | ObjectId of donor\n- isbn: OPTIONAL | String | ISBN-13\n- copies: OPTIONAL | Number | Physical copies count\n- available: OPTIONAL | Boolean | Is it available to borrow"
+          },
+          "response": [
+            {
+              "name": "201 - Success",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"_id\": \"667var789012345678abcdef\",\n    \"bookId\": \"667def456abc789012345678\",\n    \"language\": \"english\",\n    \"donorId\": \"667user123456789012abcde\",\n    \"formats\": [\n      {\n        \"_id\": \"667fmt111222333444555666\",\n        \"type\": \"hardcover\",\n        \"donorId\": \"667user123456789012abcde\",\n        \"isbn\": \"978-0-7352-1448-2\",\n        \"copies\": 5,\n        \"available\": true\n      }\n    ],\n    \"createdAt\": \"2026-06-21T16:05:00.000Z\",\n    \"updatedAt\": \"2026-06-21T16:05:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 - Duplicate Variant",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"error\": \"E11000 duplicate key error... bookId_1_language_1\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Variant - Ebook with File Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants", "host": ["{{baseUrl}}"], "path": ["api", "book-variants"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "bookId", "value": "{{bookId}}", "description": "REQUIRED | ObjectId", "type": "text" },
+                { "key": "language", "value": "hindi", "description": "REQUIRED | String", "type": "text" },
+                { "key": "donorId", "value": "{{donorId}}", "description": "REQUIRED | ObjectId", "type": "text" },
+                { "key": "formats", "value": "[{\"type\":\"ebook\",\"donorId\":\"{{donorId}}\"}]", "description": "REQUIRED | JSON String Array | fileUrl & fileUrls auto-filled from uploaded files", "type": "text" },
+                { "key": "ebookFiles", "description": "UPLOAD | 1 or more files | PDF/EPUB | No limit on file count | URLs stored in fileUrls[] array, first file also in fileUrl", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Create variant with ebook format.\n\nUpload PDF/EPUB files via 'ebookFiles' field.\nYou can upload multiple files (no limit).\n\nFormat fields for ebook:\n- type: REQUIRED | \"ebook\"\n- donorId: REQUIRED | ObjectId\n- fileUrl: AUTO-FILLED | First uploaded file URL\n- fileUrls: AUTO-FILLED | Array of all uploaded file URLs"
+          }
+        },
+        {
+          "name": "Create Variant - Audiobook with File Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants", "host": ["{{baseUrl}}"], "path": ["api", "book-variants"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "bookId", "value": "{{bookId}}", "description": "REQUIRED | ObjectId", "type": "text" },
+                { "key": "language", "value": "english", "description": "REQUIRED | String", "type": "text" },
+                { "key": "donorId", "value": "{{donorId}}", "description": "REQUIRED | ObjectId", "type": "text" },
+                { "key": "formats", "value": "[{\"type\":\"audiobook\",\"donorId\":\"{{donorId}}\",\"parts\":[{\"partNumber\":1,\"title\":\"Introduction\"},{\"partNumber\":2,\"title\":\"Chapter 1\"},{\"partNumber\":3,\"title\":\"Chapter 2\"}]}]", "description": "REQUIRED | JSON String Array | parts[] needs partNumber & title only. Duration & totalDuration are AUTO-CALCULATED from files.", "type": "text" },
+                { "key": "audioParts", "description": "UPLOAD | MP3/M4A files | One file per part, in ORDER (1st file = part 1, 2nd = part 2, etc.) | No file count limit", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Create variant with audiobook format.\n\nUpload audio files via 'audioParts' field.\nFiles are matched to parts IN ORDER.\nDuration is AUTO-CALCULATED from each uploaded file.\ntotalDuration is AUTO-SUMMED from all parts.\n\nFormat fields for audiobook:\n- type: REQUIRED | \"audiobook\"\n- donorId: REQUIRED | ObjectId\n- totalDuration: AUTO-CALCULATED | Number (seconds)\n- parts[]: REQUIRED in formats JSON\n  - partNumber: REQUIRED | Number (1, 2, 3...)\n  - title: REQUIRED | String\n  - audioUrl: AUTO-FILLED from upload\n  - duration: AUTO-CALCULATED (seconds)"
+          }
+        },
+        {
+          "name": "Create Variant - Videobook with File Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants", "host": ["{{baseUrl}}"], "path": ["api", "book-variants"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "bookId", "value": "{{bookId}}", "description": "REQUIRED | ObjectId", "type": "text" },
+                { "key": "language", "value": "marathi", "description": "REQUIRED | String", "type": "text" },
+                { "key": "donorId", "value": "{{donorId}}", "description": "REQUIRED | ObjectId", "type": "text" },
+                { "key": "formats", "value": "[{\"type\":\"videobook\",\"donorId\":\"{{donorId}}\",\"parts\":[{\"partNumber\":1,\"title\":\"Introduction\"},{\"partNumber\":2,\"title\":\"Chapter 1\"}]}]", "description": "REQUIRED | JSON String Array | Same as audiobook but uses videoParts field for upload", "type": "text" },
+                { "key": "videoParts", "description": "UPLOAD | MP4/WEBM files | One file per part, in ORDER | No file count limit | Duration auto-calculated", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Create variant with videobook format.\n\nSame as audiobook but:\n- Upload via 'videoParts' field\n- Stores videoUrl instead of audioUrl\n\nFormat fields for videobook:\n- type: REQUIRED | \"videobook\"\n- donorId: REQUIRED | ObjectId\n- totalDuration: AUTO-CALCULATED | Number (seconds)\n- parts[]: REQUIRED in formats JSON\n  - partNumber: REQUIRED | Number (1, 2, 3...)\n  - title: REQUIRED | String\n  - videoUrl: AUTO-FILLED from upload\n  - duration: AUTO-CALCULATED (seconds)"
+          }
+        },
+        {
+          "name": "Create Variant - All Formats Together",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants", "host": ["{{baseUrl}}"], "path": ["api", "book-variants"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "bookId", "value": "{{bookId}}", "description": "REQUIRED | ObjectId", "type": "text" },
+                { "key": "language", "value": "hindi", "description": "REQUIRED | String", "type": "text" },
+                { "key": "donorId", "value": "{{donorId}}", "description": "REQUIRED | ObjectId", "type": "text" },
+                { "key": "formats", "value": "[{\"type\":\"hardcover\",\"donorId\":\"{{donorId}}\",\"isbn\":\"978-0-7352-1448-2\",\"copies\":5,\"available\":true},{\"type\":\"ebook\",\"donorId\":\"{{donorId}}\"},{\"type\":\"audiobook\",\"donorId\":\"{{donorId}}\",\"parts\":[{\"partNumber\":1,\"title\":\"Intro\"},{\"partNumber\":2,\"title\":\"Ch 1\"}]},{\"type\":\"videobook\",\"donorId\":\"{{donorId}}\",\"parts\":[{\"partNumber\":1,\"title\":\"Intro\"},{\"partNumber\":2,\"title\":\"Ch 1\"}]}]", "description": "REQUIRED | All 4 formats in one request", "type": "text" },
+                { "key": "ebookFiles", "description": "UPLOAD | PDF/EPUB for ebook format", "type": "file", "src": "" },
+                { "key": "audioParts", "description": "UPLOAD | MP3/M4A for audiobook parts (in order)", "type": "file", "src": "" },
+                { "key": "videoParts", "description": "UPLOAD | MP4/WEBM for videobook parts (in order)", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Create variant with all formats at once.\nUpload all files together — server maps them to correct formats."
+          }
+        },
+        {
+          "name": "Add Format - Ebook (to existing variant)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants/{{variantId}}/formats", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "{{variantId}}", "formats"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "formats", "value": "[{\"type\":\"ebook\",\"donorId\":\"{{donorId}}\"}]", "description": "REQUIRED | JSON String Array | Min 1 format", "type": "text" },
+                { "key": "ebookFiles", "description": "UPLOAD | 1 or more PDF/EPUB files", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Add ebook format to an existing variant.\n\nUse when you receive a new format later.\nOnly the variant owner (donorId) can add formats.\nReturns 403 if not owner."
+          }
+        },
+        {
+          "name": "Add Format - Audiobook (to existing variant)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants/{{variantId}}/formats", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "{{variantId}}", "formats"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "formats", "value": "[{\"type\":\"audiobook\",\"donorId\":\"{{donorId}}\",\"parts\":[{\"partNumber\":1,\"title\":\"Introduction\"},{\"partNumber\":2,\"title\":\"Chapter 1\"},{\"partNumber\":3,\"title\":\"Chapter 2\"}]}]", "description": "REQUIRED | JSON String Array | Only partNumber & title needed. Duration auto-calculated.", "type": "text" },
+                { "key": "audioParts", "description": "UPLOAD | MP3/M4A files in part order | No limit", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Add audiobook to existing variant.\nUpload files in same order as parts in JSON.\nDuration auto-calculated."
+          }
+        },
+        {
+          "name": "Add Format - Videobook (to existing variant)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants/{{variantId}}/formats", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "{{variantId}}", "formats"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "formats", "value": "[{\"type\":\"videobook\",\"donorId\":\"{{donorId}}\",\"parts\":[{\"partNumber\":1,\"title\":\"Introduction\"},{\"partNumber\":2,\"title\":\"Chapter 1\"}]}]", "description": "REQUIRED | JSON String Array | Only partNumber & title needed.", "type": "text" },
+                { "key": "videoParts", "description": "UPLOAD | MP4/WEBM files in part order | No limit", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Add videobook to existing variant.\nUpload files in same order as parts.\nDuration auto-calculated."
+          }
+        },
+        {
+          "name": "Add Format - Hardcover/Paperback (to existing variant)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants/{{variantId}}/formats", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "{{variantId}}", "formats"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "formats", "value": "[{\"type\":\"paperback\",\"donorId\":\"{{donorId}}\",\"isbn\":\"978-0-7352-1449-9\",\"copies\":3,\"available\":true}]", "description": "REQUIRED | JSON String Array | No file upload needed for physical books", "type": "text" }
+              ]
+            },
+            "description": "Add hardcover/paperback format. No file upload needed."
+          }
+        },
+        {
+          "name": "Get All Variants for a Book",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/book-variants/book/{{bookId}}", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "book", "{{bookId}}"] },
+            "description": "Get all language variants for a book.\n\nResponse includes populated:\n- donorId: { _id, name, email }\n- formats[].donorId: { _id, name, email }"
+          },
+          "response": [
+            {
+              "name": "200 - Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"_id\": \"667var...\",\n      \"bookId\": \"667def...\",\n      \"language\": \"hindi\",\n      \"donorId\": { \"_id\": \"667user...\", \"name\": \"Kunal Gharate\", \"email\": \"kunal@example.com\" },\n      \"formats\": [\n        {\n          \"_id\": \"667fmt...\",\n          \"type\": \"ebook\",\n          \"donorId\": { \"_id\": \"667user...\", \"name\": \"Kunal Gharate\", \"email\": \"kunal@example.com\" },\n          \"fileUrl\": \"https://res.cloudinary.com/.../book.pdf\",\n          \"fileUrls\": [\"https://res.cloudinary.com/.../book.pdf\"]\n        }\n      ],\n      \"createdAt\": \"2026-06-21T16:05:00.000Z\",\n      \"updatedAt\": \"2026-06-21T16:05:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Single Variant by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/book-variants/{{variantId}}", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "{{variantId}}"] },
+            "description": "Get a single variant with all formats and populated donor info."
+          }
+        },
+        {
+          "name": "Update Variant",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants/{{variantId}}", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "{{variantId}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "language", "value": "marathi", "description": "OPTIONAL | String | Change language", "type": "text" },
+                { "key": "formats", "value": "[{\"type\":\"ebook\",\"donorId\":\"{{donorId}}\"}]", "description": "OPTIONAL | JSON String Array | REPLACES entire formats array", "type": "text" },
+                { "key": "ebookFiles", "description": "OPTIONAL | New ebook files if updating formats", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Update variant fields.\n\nOnly the variant owner (donorId) can update.\nReturns 403 if not owner.\n\nWARNING: Sending 'formats' REPLACES the entire array.\nTo add a format without losing existing ones, use POST /:id/formats instead."
+          }
+        },
+        {
+          "name": "Delete Variant",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants/{{variantId}}", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "{{variantId}}"] },
+            "description": "Delete entire variant (all formats removed).\nOnly owner can delete. Returns 403 otherwise."
+          },
+          "response": [
+            {
+              "name": "200 - Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Variant deleted successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remove Single Format from Variant",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/book-variants/{{variantId}}/formats/{{formatId}}", "host": ["{{baseUrl}}"], "path": ["api", "book-variants", "{{variantId}}", "formats", "{{formatId}}"] },
+            "description": "Remove one specific format from a variant.\n\nGet formatId from the response: variant.formats[]._id\n\nOnly owner can remove. Returns 403 otherwise."
+          }
+        }
+      ]
+    }
+  ]
+}

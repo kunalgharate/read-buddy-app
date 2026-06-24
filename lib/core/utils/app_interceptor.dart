@@ -29,6 +29,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:read_buddy_app/core/network/api_constants.dart';
+import 'package:read_buddy_app/core/services/session_event_bus.dart';
 
 class AppInterceptor extends Interceptor {
   final FlutterSecureStorage _secureStorage;
@@ -80,6 +81,14 @@ class AppInterceptor extends Interceptor {
         path.contains('/login') ||
         path.contains('/register');
     if (isAuthRoute) return false;
+
+    // Check if session was replaced (another device logged in)
+    final responseData = err.response?.data;
+    if (status == 401 && responseData is Map && responseData['code'] == 'SESSION_REPLACED') {
+      SessionEventBus.instance.fire(SessionEvent.sessionReplaced);
+      return false; // Don't retry — session is permanently invalidated
+    }
+
     // Refresh on 401, or 404 on bookrequests action routes (server quirk)
     if (status == ApiConstants.unauthorized) return true;
     if (status == ApiConstants.notFound &&

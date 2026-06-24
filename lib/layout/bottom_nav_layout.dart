@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/features/books/presentation/pages/book_page.dart';
 import 'package:read_buddy_app/features/home/presentation/pages/home_page.dart';
+import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_bloc.dart';
+import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_event.dart';
 import 'package:read_buddy_app/features/mybook/presentation/mybook.dart';
 
 import '../features/donate/presentation/pages/book_donation_page.dart';
@@ -24,6 +27,15 @@ class _BottomNavLayoutState extends State<BottomNavLayout> {
   ];
 
   final List<String> labels = ["Home", "Category", "MyBook", "Donate"];
+
+  void _onTabChanged(int index) {
+    setState(() => currentIndex = index);
+
+    // Refresh Home data when switching back to Home tab
+    if (index == 0) {
+      context.read<HomeBloc>().add(LoadHomeData());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +63,7 @@ class _BottomNavLayoutState extends State<BottomNavLayout> {
               color: const Color.fromARGB(255, 3, 62, 91),
               buttonBackgroundColor: Colors.green,
               animationDuration: const Duration(milliseconds: 300),
-              onTap: (index) {
-                setState(() {
-                  currentIndex = index;
-                });
-              },
+              onTap: _onTabChanged,
               items: const [
                 Icon(Icons.home, size: 28, color: Colors.white),
                 Icon(Icons.category, size: 28, color: Colors.white),
@@ -68,7 +76,7 @@ class _BottomNavLayoutState extends State<BottomNavLayout> {
           // Label aligned below selected icon
           Positioned(
             bottom: 0,
-            left: labelPosition - 20, // Adjust to center the label
+            left: labelPosition - 20,
             child: Text(
               labels[currentIndex],
               style: const TextStyle(

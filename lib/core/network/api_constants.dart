@@ -6,13 +6,14 @@ class ApiConstants {
   static const String login = '$baseUrl/users/login';
   static const String register = '$baseUrl/users/register';
   static const String verifyEmail = '$baseUrl/users/verify-email';
-  static const String refreshToken = '$baseUrl/auth/refresh';
-  static const String loginWithGoogle = '$baseUrl/googleauth/google-auth';
+  static const String refreshToken = '$baseUrl/users/refresh-token';
+  static const String loginWithGoogle = '$baseUrl/users/google-auth';
   static const String resendResetOtp = '$baseUrl/users/resend-reset-otp';
   static const String changePassword = '$baseUrl/users/reset-password';
   static const String verifyOtp = '$baseUrl/users/verify-reset-otp';
   // User endpoints
   static const String users = '$baseUrl/users';
+  static const String searchUsers = '$baseUrl/searchuser/search';
 
 // Profile endpoints
   static const String getProfile = '$baseUrl/users/profile';
@@ -35,7 +36,8 @@ class ApiConstants {
   static const String adminDonations = '$baseUrl/admin/donations';
   static String donationById(String id) => '$baseUrl/donations/$id';
   static String updateDonationStatus(String id) => '$baseUrl/donations/$id';
-  static String updateAdminDonationStatus(String id) => '$baseUrl/admin/donations/$id';
+  static String updateAdminDonationStatus(String id) =>
+      '$baseUrl/admin/donations/$id';
   static const String myImpact = '$baseUrl/v1/donations/my-impact';
   static const String createBookDonation =
       '$baseUrl/v1/donations/createBookDonation';
@@ -95,4 +97,28 @@ class ApiConstants {
   static const String setOnboardingStatus = '$baseUrl/users/onboarding-status';
 
   static const String nearestAgent = '$baseUrl/v1/libraries/details';
+
+  // TTS (Text-to-Speech) endpoints
+  static const String ttsSynthesize = '$baseUrl/tts/synthesize';
+  static const String ttsVoices = '$baseUrl/tts/voices';
+
+  // Money Donation (Razorpay)
+  static const String donateMoneyInitiate = '$baseUrl/donations/money/initiate';
+  static const String donateMoneyVerify = '$baseUrl/donations/money/verify';
+  static const String myMoneyDonations = '$baseUrl/DonateMoney/my';
+
+  // Address CRUD
+  static const String addresses = '$baseUrl/addresses';
+
+  // Wishlist
+  static const String wishlist = '$baseUrl/wishlist';
+
+  // FCM Token
+  static const String fcmToken = '$baseUrl/users/fcm-token';
+
+  // Libraries (multi-library)
+  static const String libraries = '$baseUrl/v1/libraries';
+
+  // Admin User Management
+  static const String adminUsers = '$baseUrl/admin/users';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:read_buddy_app/core/utils/ui_utils.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/features/donate/data/datasources/donate_remote_datasource.dart';
 
 class DonateMoneyPage extends StatefulWidget {
   const DonateMoneyPage({super.key});
@@ -11,219 +12,189 @@ class DonateMoneyPage extends StatefulWidget {
 
 class _DonateMoneyPageState extends State<DonateMoneyPage> {
   int? _selectedAmount;
-  final _customAmountController = TextEditingController();
+  final _customCtrl = TextEditingController();
+  late final Razorpay _razorpay;
+  bool _processing = false;
+  String? _currentOrderId;
+  int _currentAmount = 0;
 
-  static const _primaryGreen = Color(0xFF2CE07F);
-  static const _textDark = Color(0xFF052E44);
-  static const _background = Color(0xFFFDFDFD);
+  static const _presetAmounts = [100, 200, 500, 1000];
 
-  static const _presetAmounts = [50, 100, 200, 500];
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onPaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onPaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _onExternalWallet);
+  }
 
   @override
   void dispose() {
-    _customAmountController.dispose();
+    _razorpay.clear();
+    _customCtrl.dispose();
     super.dispose();
   }
 
-  void _onDonate() {
-    final custom = _customAmountController.text.trim();
-    final hasAmount = _selectedAmount != null || custom.isNotEmpty;
+  int get _amount {
+    if (_selectedAmount != null) return _selectedAmount!;
+    final custom = int.tryParse(_customCtrl.text.trim());
+    return custom ?? 0;
+  }
 
-    if (!hasAmount) {
-      UiUtils.showErrorSnackBar(
-        context,
-        message: 'Please select or enter an amount.',
+  Future<void> _initiatePayment() async {
+    final amount = _amount;
+    if (amount < 100) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Minimum donation is ₹100 for Prime membership')),
       );
       return;
     }
 
-    UiUtils.showSuccessSnackBar(
-      context,
-      message: 'Thank you for your generous donation!',
+    setState(() => _processing = true);
+
+    try {
+      final datasource = getIt<DonateRemoteDataSource>();
+      final result = await datasource.initiateMoneyDonation(amount);
+
+      _currentOrderId = result['orderId'] as String;
+      _currentAmount = amount;
+      final razorpayKey = result['razorpayKey'] as String;
+
+      final options = {
+        'key': razorpayKey,
+        'amount': (amount * 100).toString(),
+        'currency': 'INR',
+        'order_id': _currentOrderId,
+        'name': 'ReadBuddy',
+        'description': 'Donation for Prime Membership',
+        'prefill': {},
+        'theme': {'color': '#2CE07F'},
+      };
+
+      _razorpay.open(options);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to initiate payment: $e')),
+      );
+    } finally {
+      setState(() => _processing = false);
+    }
+  }
+
+  Future<void> _onPaymentSuccess(PaymentSuccessResponse response) async {
+    try {
+      final datasource = getIt<DonateRemoteDataSource>();
+      await datasource.verifyMoneyDonation(
+        razorpayOrderId: response.orderId ?? _currentOrderId ?? '',
+        razorpayPaymentId: response.paymentId ?? '',
+        razorpaySignature: response.signature ?? '',
+        amount: _currentAmount,
+      );
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Row(
+              children: [Icon(Icons.check_circle, color: Colors.green), SizedBox(width: 8), Text('Thank You!')],
+            ),
+            content: Text('Your donation of ₹$_currentAmount was successful.\nYou are now a Prime member for 1 year! 🎉'),
+            actions: [
+              FilledButton(
+                onPressed: () { Navigator.pop(ctx); Navigator.pop(context); },
+                child: const Text('Continue'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment verification failed: $e')),
+        );
+      }
+    }
+  }
+
+  void _onPaymentError(PaymentFailureResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Payment failed: ${response.message ?? 'Unknown error'}')),
     );
-    Navigator.pop(context);
+  }
+
+  void _onExternalWallet(ExternalWalletResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('External wallet selected: ${response.walletName}')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final paddingH = size.width * 0.05;
-
     return Scaffold(
-      backgroundColor: _background,
-      appBar: AppBar(
-        backgroundColor: _background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _textDark),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Donate Money',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: _textDark,
-          ),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Donate Money'), centerTitle: true),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: paddingH,
-          vertical: 16,
-        ),
+        padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Illustration placeholder
-            Container(
-              width: double.infinity,
-              height: size.height * 0.2,
-              decoration: BoxDecoration(
-                color: _primaryGreen.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                Icons.volunteer_activism,
-                size: size.height * 0.08,
-                color: _primaryGreen,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            Text(
-              "Support ReadBuddy's Mission",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: _textDark,
-              ),
-              textAlign: TextAlign.center,
+            const Text(
+              'Support ReadBuddy',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Your donation helps us deliver books to '
-              'students who need them most.',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: const Color(0xFF666666),
-              ),
-              textAlign: TextAlign.center,
+            const Text(
+              'Donate ₹100 or more to become a Prime member for 1 year and unlock full access to all books.',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
-            const SizedBox(height: 28),
-
-            // Preset amount chips
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: _presetAmounts.map((amount) {
-                final isSelected = _selectedAmount == amount;
+            const SizedBox(height: 24),
+            const Text('Select Amount', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: _presetAmounts.map((amt) {
+                final selected = _selectedAmount == amt;
                 return ChoiceChip(
-                  label: Text(
-                    '₹$amount',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: isSelected ? Colors.white : _textDark,
-                    ),
-                  ),
-                  selected: isSelected,
-                  selectedColor: _primaryGreen,
-                  backgroundColor: Colors.white,
-                  side: BorderSide(
-                    color: isSelected ? _primaryGreen : const Color(0xFFE0E0E0),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  onSelected: (_) {
-                    setState(() {
-                      _selectedAmount = isSelected ? null : amount;
-                      if (!isSelected) {
-                        _customAmountController.clear();
-                      }
-                    });
-                  },
+                  label: Text('₹$amt', style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: selected ? Colors.white : Colors.black87,
+                  )),
+                  selected: selected,
+                  selectedColor: const Color(0xFF2CE07F),
+                  onSelected: (_) => setState(() {
+                    _selectedAmount = amt;
+                    _customCtrl.clear();
+                  }),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 24),
-
-            // Custom amount field
+            const SizedBox(height: 20),
             TextField(
-              controller: _customAmountController,
+              controller: _customCtrl,
               keyboardType: TextInputType.number,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: _textDark,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Enter custom amount',
-                hintStyle: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: const Color(0xFF999999),
-                ),
+              decoration: const InputDecoration(
+                labelText: 'Or enter custom amount',
                 prefixText: '₹ ',
-                prefixStyle: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: _textDark,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFE0E0E0),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFE0E0E0),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: _primaryGreen,
-                    width: 2,
-                  ),
-                ),
+                border: OutlineInputBorder(),
               ),
-              onChanged: (_) {
-                if (_selectedAmount != null) {
-                  setState(() => _selectedAmount = null);
-                }
-              },
+              onChanged: (_) => setState(() => _selectedAmount = null),
             ),
+            const SizedBox(height: 8),
+            const Text('Minimum ₹100 required for Prime membership', style: TextStyle(fontSize: 12, color: Colors.grey)),
             const SizedBox(height: 32),
-
-            // Donate Now button
             SizedBox(
               width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _onDonate,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _primaryGreen,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Donate Now',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              height: 52,
+              child: FilledButton(
+                onPressed: _processing ? null : _initiatePayment,
+                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2CE07F)),
+                child: _processing
+                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : Text('Donate ₹${_amount > 0 ? _amount : '---'}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
-            const SizedBox(height: 24),
           ],
         ),
       ),

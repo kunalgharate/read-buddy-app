@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/features/bookcrud/data/model/book_variant_model.dart';
 import '../../domain/entities/book_detail_entity.dart';
 
 class BookDetailModel extends BookDetailEntity {
@@ -20,9 +21,19 @@ class BookDetailModel extends BookDetailEntity {
     required super.description,
     required super.owner,
     required super.address,
+    super.variants,
   });
 
   factory BookDetailModel.fromJson(Map<String, dynamic> json) {
+    // Handle owner — can be populated object or string
+    final ownerData = json['ownerId'];
+    BookOwnerModel owner;
+    if (ownerData is Map<String, dynamic>) {
+      owner = BookOwnerModel.fromJson(ownerData);
+    } else {
+      owner = const BookOwnerModel(id: '', name: '', email: '');
+    }
+
     return BookDetailModel(
       id: json['_id'] ?? '',
       title: json['title'] ?? '',
@@ -40,8 +51,12 @@ class BookDetailModel extends BookDetailEntity {
       coverImageUrl: json['coverImageUrl'] ?? '',
       additionalImages: List<String>.from(json['additional_images'] ?? []),
       description: json['description'] ?? '',
-      owner: BookOwnerModel.fromJson(json['ownerId'] ?? {}),
+      owner: owner,
       address: BookAddressModel.fromJson(json['address'] ?? {}),
+      variants: (json['variants'] as List?)
+              ?.map((v) => BookVariantModel.fromJson(v))
+              .toList() ??
+          const [],
     );
   }
 }

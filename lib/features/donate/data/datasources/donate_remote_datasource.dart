@@ -10,6 +10,13 @@ abstract class DonateRemoteDataSource {
   Future<void> createBookDonation(BookDonationRequestModel request);
   Future<void> uploadReceipt(String donationId, FormData formData);
   Future<List<AgentModel>> getNearestAgents();
+  Future<Map<String, dynamic>> initiateMoneyDonation(int amount);
+  Future<Map<String, dynamic>> verifyMoneyDonation({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    required int amount,
+  });
 }
 
 class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
@@ -89,13 +96,11 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
         if (responseData is List) {
           return responseData.map((json) => AgentModel.fromJson(json)).toList();
         } else if (responseData is Map<String, dynamic>) {
-          // Check if it's wrapped in a 'data' field or 'libraries' field
           if (responseData.containsKey('data') && responseData['data'] is List) {
             return (responseData['data'] as List).map((json) => AgentModel.fromJson(json)).toList();
           } else if (responseData.containsKey('success') && responseData['success'] == true && responseData.containsKey('data')) {
              return (responseData['data'] as List).map((json) => AgentModel.fromJson(json)).toList();
           } else {
-            // It might be a single object returned directly
             return [AgentModel.fromJson(responseData)];
           }
         }
@@ -104,5 +109,39 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
     } catch (e) {
       throw Exception('Error fetching nearest agents: $e');
     }
+  }
+
+  @override
+  Future<Map<String, dynamic>> initiateMoneyDonation(int amount) async {
+    final response = await dio.post(
+      ApiConstants.donateMoneyInitiate,
+      data: {'amount': amount},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(response.data?['error'] ?? 'Failed to initiate donation');
+    }
+    return response.data as Map<String, dynamic>;
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyMoneyDonation({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    required int amount,
+  }) async {
+    final response = await dio.post(
+      ApiConstants.donateMoneyVerify,
+      data: {
+        'razorpay_order_id': razorpayOrderId,
+        'razorpay_payment_id': razorpayPaymentId,
+        'razorpay_signature': razorpaySignature,
+        'amount': amount,
+      },
+    );
+    if (response.statusCode != 200) {
+      throw Exception(response.data?['error'] ?? 'Payment verification failed');
+    }
+    return response.data as Map<String, dynamic>;
   }
 }

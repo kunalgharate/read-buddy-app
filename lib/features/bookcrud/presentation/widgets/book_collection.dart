@@ -13,18 +13,33 @@ class BooksCollection extends StatelessWidget {
   final BookCrudEntity bookcollection;
   const BooksCollection({super.key, required this.bookcollection});
 
-  /// Resolves category ID to name using loaded CategoryBloc state.
-  /// Falls back to the raw value if no match is found.
+  /// Resolves category to display name.
+  /// Backend now returns populated category objects, so this usually works directly.
+  /// Falls back to CategoryBloc lookup if only an ID is available.
   String _resolveCategoryName(BuildContext context) {
     final categoryValue = bookcollection.category;
-    final categoryState = context.read<CategoryBloc>().state;
+    final categoryId = bookcollection.categoryId;
+
+    // If category is already a readable name (not a MongoDB ObjectId), show it
+    if (categoryValue.isNotEmpty) {
+      final isObjectId = RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(categoryValue);
+      if (!isObjectId) return categoryValue;
+    }
+
+    // Fallback: resolve from CategoryBloc using the ID
+    final idToLookup = (categoryId != null && categoryId.isNotEmpty)
+        ? categoryId
+        : categoryValue;
+    if (idToLookup.isEmpty) return '';
+
+    final categoryState = context.watch<CategoryBloc>().state;
     if (categoryState is CategoryLoaded) {
       final match = categoryState.categories.where(
-        (cat) => cat.id == categoryValue || cat.id == bookcollection.categoryId,
+        (cat) => cat.id == idToLookup,
       );
       if (match.isNotEmpty) return match.first.title;
     }
-    return categoryValue;
+    return '';
   }
 
   @override
@@ -48,15 +63,24 @@ class BooksCollection extends StatelessWidget {
             ),
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: CachedNetworkImage(
-                imageUrl: bookcollection.coverImageUrl,
-                height: 120,
-                width: 100,
-                placeholder: (context, url) =>
-                    const Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-                fit: BoxFit.cover,
-              ),
+              child: bookcollection.coverImageUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: bookcollection.coverImageUrl,
+                      height: 120,
+                      width: 100,
+                      placeholder: (context, url) =>
+                          const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.error),
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      height: 120,
+                      width: 100,
+                      color: const Color(0xFF042153),
+                      child: const Icon(Icons.menu_book_rounded,
+                          size: 32, color: Colors.white30),
+                    ),
             ),
             const SizedBox(width: 8),
             Expanded(

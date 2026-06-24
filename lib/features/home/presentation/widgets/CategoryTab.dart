@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/features/book_request/presentation/pages/book_detail_page.dart'
+    as request_detail;
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
@@ -64,7 +66,8 @@ class _CategoryTabState extends State<CategoryTab> {
                       }
 
                       // ─── Error State ───────────────────────────────────
-                      if (categoryState is CategoryError || bookState is BookError) {
+                      if (categoryState is CategoryError ||
+                          bookState is BookError) {
                         final errMsg = categoryState is CategoryError
                             ? (categoryState).message
                             : (bookState as BookError).message;
@@ -72,7 +75,8 @@ class _CategoryTabState extends State<CategoryTab> {
                       }
 
                       // ─── Loaded State ──────────────────────────────────
-                      if (categoryState is CategoryLoaded && bookState is BookLoaded) {
+                      if (categoryState is CategoryLoaded &&
+                          bookState is BookLoaded) {
                         final categories = categoryState.categories;
                         final books = bookState.books;
 
@@ -80,18 +84,19 @@ class _CategoryTabState extends State<CategoryTab> {
                         final parents = categories
                             .where((c) => c.parentCategoryName == null)
                             .toList();
-                        
+
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // ─── Pill Chips Navigation Row ───────────────
                             _buildCategoryNavigationRow(parents),
-                            
+
                             // ─── Main Content Toggler ─────────────────────
                             Expanded(
                               child: _selectedCategory == null
                                   ? _buildDefaultAllView(categories, books)
-                                  : _buildExploreView(_selectedCategory!, books),
+                                  : _buildExploreView(
+                                      _selectedCategory!, books),
                             ),
                           ],
                         );
@@ -137,7 +142,8 @@ class _CategoryTabState extends State<CategoryTab> {
                 },
                 decoration: InputDecoration(
                   hintText: 'Search any Books',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                  hintStyle:
+                      TextStyle(color: Colors.grey.shade400, fontSize: 14),
                   prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 15),
@@ -224,7 +230,8 @@ class _CategoryTabState extends State<CategoryTab> {
   }
 
   // ─── Default All View (Figma Screen 3 - Default category page) ──────────────
-  Widget _buildDefaultAllView(List<CategoryEntity> allCategories, List<Book> allBooks) {
+  Widget _buildDefaultAllView(
+      List<CategoryEntity> allCategories, List<Book> allBooks) {
     // Show 'Popular Genres' using all categories (limit to 6 for premium design)
     final popularGenres = allCategories.take(8).toList();
 
@@ -260,12 +267,14 @@ class _CategoryTabState extends State<CategoryTab> {
               itemBuilder: (context, index) {
                 final category = popularGenres[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                   child: InkWell(
                     onTap: () => _onCategorySelected(category),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -292,7 +301,9 @@ class _CategoryTabState extends State<CategoryTab> {
 
           // ─── Category Sections with Horizontal Books Lists ──────────────
           ...allCategories.map((category) {
-            final categoryBooks = filteredBooks.where((book) => _isBookInCategory(book, category)).toList();
+            final categoryBooks = filteredBooks
+                .where((book) => _isBookInCategory(book, category))
+                .toList();
 
             // Only display the category section if it has books matching the search query
             if (categoryBooks.isEmpty) {
@@ -429,6 +440,7 @@ class _CategoryTabState extends State<CategoryTab> {
 
     return false;
   }
+
   // ─── Horizontal Book Card Widget ───────────────────────────────────────────
   Widget _buildHorizontalBookCard(Book book) {
     return GestureDetector(
@@ -452,7 +464,8 @@ class _CategoryTabState extends State<CategoryTab> {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(14)),
                 child: book.bookimage.isNotEmpty
                     ? Image.network(
                         book.bookimage,
@@ -484,7 +497,8 @@ class _CategoryTabState extends State<CategoryTab> {
                     children: [
                       // Formatted Badge
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: _green.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4),
@@ -537,15 +551,17 @@ class _CategoryTabState extends State<CategoryTab> {
           children: [
             // Fixed height image — no more Expanded stretching
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(14)),
               child: book.bookimage.isNotEmpty
                   ? Image.network(
-                book.bookimage,
-                height: 160, // fixed
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _imgPlaceholder(height: 160),
-              )
+                      book.bookimage,
+                      height: 160, // fixed
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          _imgPlaceholder(height: 160),
+                    )
                   : _imgPlaceholder(height: 160),
             ),
             Padding(
@@ -577,7 +593,8 @@ class _CategoryTabState extends State<CategoryTab> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 3),
                         decoration: BoxDecoration(
                           color: _green.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(4),
@@ -593,7 +610,8 @@ class _CategoryTabState extends State<CategoryTab> {
                       ),
                       Text(
                         '3 Days',
-                        style: TextStyle(fontSize: 9, color: Colors.grey.shade400),
+                        style:
+                            TextStyle(fontSize: 9, color: Colors.grey.shade400),
                       ),
                     ],
                   ),
@@ -605,221 +623,24 @@ class _CategoryTabState extends State<CategoryTab> {
       ),
     );
   }
-  // ─── Premium Book Info Dialog Popup ────────────────────────────────────────
-  void _showBookDetailsPopup(Book book) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.6),
-      builder: (dialogContext) {
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          backgroundColor: Colors.white,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(dialogContext).size.height * 0.75, // max 75% screen
-            ),
-            child: SingleChildScrollView( // scrollable if content overflows
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ── Cover Image ──────────────────────────────────────────
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                        child: book.bookimage.isNotEmpty
-                            ? Image.network(
-                          book.bookimage,
-                          height: 200,           // fixed height
-                          width: double.infinity,
-                          fit: BoxFit.cover,     // contained, no overflow
-                          errorBuilder: (_, __, ___) => _imgPlaceholder(height: 200),
-                        )
-                            : _imgPlaceholder(height: 200),
-                      ),
-                      // Close Button
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(dialogContext),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.45),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close, color: Colors.white, size: 18),
-                          ),
-                        ),
-                      ),
-                      // Category Badge
-                      Positioned(
-                        bottom: 12,
-                        left: 12,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _green.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            book.genre.isNotEmpty
-                                ? _capitalize(book.genre)
-                                : _capitalize(book.book_category.category_name),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
 
-                  // ── Content ───────────────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          book.title,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: _primary,
-                            height: 1.3,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            _infoChip(Icons.menu_book_outlined, "eBook"),
-                            const SizedBox(width: 8),
-                            _infoChip(Icons.check_circle_outline, "Available"),
-                            const SizedBox(width: 8),
-                            _infoChip(Icons.access_time, "Flexible"),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF2F4F7),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            "Explore this book on Read Buddy. Borrow, read, and discover new worlds — available digitally for all members.",
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.pop(dialogContext),
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.grey.shade300),
-                                  padding: const EdgeInsets.symmetric(vertical: 13),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Close",
-                                  style: TextStyle(
-                                    color: Colors.grey.shade700,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(dialogContext);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Reading '${book.title}'"),
-                                      backgroundColor: _green,
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _green,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 13),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                child: const Text(
-                                  "Read Now",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-// ── Info Chip Helper ─────────────────────────────────────────────────────────
-  Widget _infoChip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF2F4F7),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: _primary),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: _primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
+  // ─── Navigate to Book Detail Page (user-facing) ─────────────────────────
+  void _showBookDetailsPopup(Book book) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (_) => request_detail.BookDetailPage(bookId: book.id)),
     );
   }
 
   // ─── Generic Placeholders & Helpers ────────────────────────────────────────
   Widget _imgPlaceholder({double height = 160}) => Container(
-    height: height,
-    color: const Color(0xFFE8EDF2),
-    child: const Center(
-      child: Icon(Icons.book, size: 40, color: Color(0xFFB0BEC5)),
-    ),
-  );
+        height: height,
+        color: const Color(0xFFE8EDF2),
+        child: const Center(
+          child: Icon(Icons.book, size: 40, color: Color(0xFFB0BEC5)),
+        ),
+      );
   Widget _buildNoBooksFound() {
     return Center(
       child: Column(
@@ -829,7 +650,8 @@ class _CategoryTabState extends State<CategoryTab> {
           const SizedBox(height: 12),
           Text(
             'No books found',
-            style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w500),
+            style: TextStyle(
+                color: Colors.grey.shade500, fontWeight: FontWeight.w500),
           ),
         ],
       ),

@@ -20,7 +20,15 @@ abstract class BookRequestRemoteDataSource {
   Future<BookRequestModel> schedulePickup(PickupDetailsEntity details);
   Future<BookRequestModel> getRequestDetails(String id);
   Future<void> updateRequestStatus(String id, String status);
-  Future<void> scheduleDelivery(String id, String name, String phone, String address, String pincode, String preferredDate, String preferredTime);
+  Future<void> scheduleDelivery(
+      String id,
+      String name,
+      String phone,
+      String address,
+      String pincode,
+      String preferredDate,
+      String preferredTime);
+  Future<void> initiateReturn(String id, String returnMethod, {String? returnBranchId});
 }
 
 class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
@@ -39,7 +47,13 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load book details');
       }
-      return BookDetailModel.fromJson(response.data);
+      // Unwrap { "data": {...} } envelope if present
+      final rawData = response.data;
+      final json =
+          (rawData is Map<String, dynamic> && rawData.containsKey('data'))
+              ? rawData['data']
+              : rawData;
+      return BookDetailModel.fromJson(json);
     } catch (e) {
       rethrow;
     }
@@ -73,7 +87,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       }
       final List list = response.data is List
           ? response.data as List
-          : (response.data['data'] is List ? response.data['data'] as List : []);
+          : (response.data['data'] is List
+              ? response.data['data'] as List
+              : []);
       return list
           .map((e) => BookRequestModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -91,7 +107,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       }
       final List list = response.data is List
           ? response.data as List
-          : (response.data['data'] is List ? response.data['data'] as List : []);
+          : (response.data['data'] is List
+              ? response.data['data'] as List
+              : []);
       return list
           .map((e) => BookRequestModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -108,9 +126,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load upcoming pickups');
       }
-      final List list = response.data['data'] is List
-          ? response.data['data'] as List
-          : [];
+      final List list =
+          response.data['data'] is List ? response.data['data'] as List : [];
       return list
           .map((e) => BookRequestModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -155,7 +172,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<void> declineBookRequest(String id, {String reason = 'Request declined'}) async {
+  Future<void> declineBookRequest(String id,
+      {String reason = 'Request declined'}) async {
     try {
       final response = await dio.patch(
         '${ApiConstants.v1BookRequests}/$id/reject',
@@ -186,8 +204,7 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   @override
   Future<BookRequestModel> getRequestDetails(String id) async {
     try {
-      final response =
-          await dio.get('${ApiConstants.v1BookRequests}/$id');
+      final response = await dio.get('${ApiConstants.v1BookRequests}/$id');
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load request details');
       }
@@ -216,7 +233,13 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
 
   @override
   Future<void> scheduleDelivery(
-      String id, String name, String phone, String address, String pincode, String preferredDate, String preferredTime) async {
+      String id,
+      String name,
+      String phone,
+      String address,
+      String pincode,
+      String preferredDate,
+      String preferredTime) async {
     try {
       final response = await dio.post(
         '${ApiConstants.v1BookRequests}/$id/deliver-to-me',
@@ -235,9 +258,11 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       }
     } on DioException catch (e) {
       final serverMsg = e.response?.data is Map
-          ? (e.response!.data['message'] ?? e.response!.data['error']) as String?
+          ? (e.response!.data['message'] ?? e.response!.data['error'])
+              as String?
           : null;
-      throw Exception(serverMsg ?? 'Failed to schedule delivery. Please try again.');
+      throw Exception(
+          serverMsg ?? 'Failed to schedule delivery. Please try again.');
     } catch (e) {
       rethrow;
     }
@@ -259,8 +284,7 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
           : hour24 > 12
               ? hour24 - 12
               : hour24;
-      final timeStr12 =
-          '${hour12.toString().padLeft(2, '0')}:$minute $period';
+      final timeStr12 = '${hour12.toString().padLeft(2, '0')}:$minute $period';
 
       final response = await dio.post(
         '${ApiConstants.v1BookRequests}/${details.requestId}/schedule-pickup',
@@ -297,6 +321,25 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       }
       throw Exception(
           serverMsg ?? 'Failed to schedule pickup. Please try again.');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> initiateReturn(String id, String returnMethod, {String? returnBranchId}) async {
+    try {
+      final response = await dio.post(
+        '${ApiConstants.v1BookRequests}/$id/initiate-return',
+        data: {
+          'returnMethod': returnMethod,
+          if (returnBranchId != null) 'returnBranchId': returnBranchId,
+        },
+      );
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw Exception('Failed to initiate return');
+      }
     } catch (e) {
       rethrow;
     }

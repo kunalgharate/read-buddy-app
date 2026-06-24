@@ -66,6 +66,7 @@ class BookVariantEntity extends Equatable {
   final String bookId;
   final String language;
   final String? donorId;
+  final String? donorName;
   final List<BookFormatEntity> formats;
 
   const BookVariantEntity({
@@ -73,9 +74,11 @@ class BookVariantEntity extends Equatable {
     required this.bookId,
     required this.language,
     this.donorId,
+    this.donorName,
     required this.formats,
   });
 
   @override
-  List<Object?> get props => [id, bookId, language, donorId, formats];
+  List<Object?> get props =>
+      [id, bookId, language, donorId, donorName, formats];
 }

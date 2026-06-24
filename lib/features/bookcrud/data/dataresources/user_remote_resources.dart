@@ -8,6 +8,7 @@ import 'package:read_buddy_app/features/bookcrud/domain/entities/user_entity.dar
 
 abstract class UserRemoteResources {
   Future<List<UserEntity>> getusersList();
+  Future<List<UserEntity>> searchUsers(String query);
 }
 
 class UserRemoteResourcesImpl extends UserRemoteResources {
@@ -46,6 +47,45 @@ class UserRemoteResourcesImpl extends UserRemoteResources {
       print("❌ Error fetching usrslist: $e");
       print("🔍 StackTrace: $stackTrace");
       rethrow; // rethrowing allows the error to be handled further up the chain (e.g., in Bloc)
+    }
+  }
+
+  @override
+  Future<List<UserEntity>> searchUsers(String query) async {
+    try {
+      final token = await getIt<SecureStorageUtil>().getAccessToken();
+      print('🔍 Searching users with query: "$query"');
+      print('🔍 URL: ${ApiConstants.searchUsers}/$query');
+
+      final response = await dio.get(
+        '${ApiConstants.searchUsers}/$query',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      print('🔍 Search response status: ${response.statusCode}');
+      print('🔍 Search response data: ${response.data}');
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to search users. Status: ${response.statusCode}');
+      }
+
+      final data = response.data;
+      List<dynamic> list;
+      if (data is List) {
+        list = data;
+      } else if (data is Map<String, dynamic>) {
+        list = data['data'] ?? data['users'] ?? data['results'] ?? [];
+      } else {
+        list = [];
+      }
+
+      print('🔍 Parsed ${list.length} users from response');
+      return list.map((json) => UserModel.fromJson(json)).toList();
+    } catch (e, stackTrace) {
+      print("❌ Error searching users: $e");
+      print("🔍 StackTrace: $stackTrace");
+      rethrow;
     }
   }
 }

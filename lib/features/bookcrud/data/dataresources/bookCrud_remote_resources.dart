@@ -67,7 +67,13 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
       print("✅ Book by id  fetched successfully");
       print(response.data);
 
-      return BookCrudModel.fromJson(response.data);
+      // Unwrap { "data": {...} } envelope if present
+      final json = response.data is Map<String, dynamic> &&
+              response.data.containsKey('data')
+          ? response.data['data']
+          : response.data;
+
+      return BookCrudModel.fromJson(json);
     } catch (e, stackTrace) {
       print("❌ Error fetching book by ID: $e");
       print("🔍 StackTrace: $stackTrace");
@@ -80,66 +86,40 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
     try {
       print("📦 Adding book...");
       final token = await getIt<SecureStorageUtil>().getAccessToken();
-      final formData = FormData.fromMap({
-        "title": book.title,
-        "subtitle": "a book",
-        "author": book.author,
-        "publisher": book.publisher,
-        "publication_year": book.publicationYear.toString(),
-        "isbn": book.isbn,
-        "edition": "1st",
-        "condition": book.condition,
-        "format": book.format,
-        "language": book.language,
-        "genre": book.genre,
-        "tags": book.tags.join(","),
-        "category": book.category,
-        "ownerId": book.ownerId,
-        "description": book.description,
-        "coverImage": await MultipartFile.fromFile(book.coversingleImage!.path),
-        "city": "chandigarh",
-        "state": "chandigarh",
-        "country": "india",
-        "pincode": "123467",
-        "latitude": "26.77",
-        "longitude": "77.88",
-        "number_of_copies": book.numberOfCopies.toString(),
-        "additionalImages": await Future.wait(
-          book.additionalImages.map((file) async {
-            return await MultipartFile.fromFile(
-              file.path,
-              filename: file.path.split('/').last,
-            );
-          }),
-        )
-      });
 
-      print("formmmmm data");
-      print("title: ${book.title}");
-      print("subtitle: a book"); // hardcoded
-      print("author: ${book.author}");
-      print("publisher: ${book.publisher}");
-      print("publication_year: ${book.publicationYear}");
-      print("isbn: ${book.isbn}");
-      print("edition: 1st"); // hardcoded
-      print("condition: ${book.condition}");
-      print("format: ${book.format}");
-      print("language: ${book.language}");
-      print("genre: ${book.genre}");
-      print("tags: ${book.tags.join(",")}");
-      print("category: ${book.category}");
-      print("ownerId: ${book.ownerId}");
-      print("description: ${book.description}");
-      print("coverImage: ${book.coversingleImage}");
-      print("city: chandigarh"); // hardcoded
-      print("state: chandigarh"); // hardcoded
-      print("country: india"); // hardcoded
-      print("pincode: 123467"); // hardcoded
-      print("latitude: 26.77"); // hardcoded
-      print("longitude: 77.88"); // hardcoded
-      print("number_of_copies: ${book.numberOfCopies}");
-      print(
-          "additionalImages: ${book.additionalImages.map((f) => f.path.split('/').last).toList()}");
+      // Build form data matching new API: title, author, publisher, description, categories, tags, coverImage
+      final Map<String, dynamic> formMap = {
+        "title": book.title,
+        "author": book.author,
+      };
+
+      if (book.publisher.isNotEmpty) {
+        formMap["publisher"] = book.publisher;
+      }
+      if (book.description.isNotEmpty) {
+        formMap["description"] = book.description;
+      }
+
+      // Categories as JSON array of ObjectIds
+      final categoryId = book.categoryId ?? book.category;
+      if (categoryId.isNotEmpty) {
+        formMap["categories"] = '["$categoryId"]';
+      }
+
+      // Tags as JSON array
+      if (book.tags.isNotEmpty) {
+        formMap["tags"] = '[${book.tags.map((t) => '"$t"').join(",")}]';
+      }
+
+      // Cover image
+      if (book.coversingleImage != null) {
+        formMap["coverImage"] =
+            await MultipartFile.fromFile(book.coversingleImage!.path);
+      }
+
+      final formData = FormData.fromMap(formMap);
+
+      print("📦 Sending: title=${book.title}, author=${book.author}");
 
       final response = await dio.post(
         ApiConstants.books,
@@ -169,11 +149,52 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
   @override
   Future<void> updateBook(String id, BookCrudModel book) async {
-    final response =
-        await dio.put('${ApiConstants.books}/$id', data: book.toJson());
+    try {
+      final token = await getIt<SecureStorageUtil>().getAccessToken();
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update book');
+      final Map<String, dynamic> formMap = {};
+
+      if (book.title.isNotEmpty) formMap['title'] = book.title;
+      if (book.author.isNotEmpty) formMap['author'] = book.author;
+      if (book.publisher.isNotEmpty) formMap['publisher'] = book.publisher;
+      if (book.description.isNotEmpty) {
+        formMap['description'] = book.description;
+      }
+
+      final categoryId = book.categoryId ?? book.category;
+      if (categoryId.isNotEmpty) {
+        formMap['categories'] = '["$categoryId"]';
+      }
+
+      if (book.tags.isNotEmpty) {
+        formMap['tags'] = '[${book.tags.map((t) => '"$t"').join(",")}]';
+      }
+
+      if (book.coversingleImage != null) {
+        formMap['coverImage'] =
+            await MultipartFile.fromFile(book.coversingleImage!.path);
+      }
+
+      final formData = FormData.fromMap(formMap);
+
+      final response = await dio.put(
+        '${ApiConstants.books}/$id',
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to update book. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("❌ Error updating book: $e");
+      rethrow;
     }
   }
 

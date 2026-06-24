@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../entities/book_variant_entity.dart';
 
 abstract class VariantRepository {
@@ -9,9 +11,14 @@ abstract class VariantRepository {
   /// GET /api/book-variants/:variantId
   Future<BookVariantEntity> getVariantById(String variantId);
 
-  /// Creates a new variant with formats.
-  /// POST /api/book-variants
-  Future<BookVariantEntity> createVariant(BookVariantEntity variant);
+  /// Creates a new variant with formats and file uploads.
+  /// POST /api/book-variants (multipart form data)
+  Future<BookVariantEntity> createVariant(
+    BookVariantEntity variant, {
+    List<File> ebookFiles,
+    List<File> audioParts,
+    List<File> videoParts,
+  });
 
   /// Updates variant-level fields (language, etc.).
   /// PUT /api/book-variants/:variantId
@@ -22,10 +29,15 @@ abstract class VariantRepository {
   /// DELETE /api/book-variants/:variantId
   Future<void> deleteVariant(String variantId);
 
-  /// Adds one or more formats to an existing variant.
+  /// Adds one or more formats to an existing variant with file uploads.
   /// POST /api/book-variants/:variantId/formats
   Future<BookVariantEntity> addFormatsToVariant(
-      String variantId, List<BookFormatEntity> formats);
+    String variantId,
+    List<BookFormatEntity> formats, {
+    List<File> ebookFiles,
+    List<File> audioParts,
+    List<File> videoParts,
+  });
 
   /// Removes a single format from a variant.
   /// DELETE /api/book-variants/:variantId/formats/:formatId

@@ -12,4 +12,9 @@ class UserRepositoryImpl implements UserRepository {
   Future<List<UserEntity>> getUserList() async {
     return await remoteDataSource.getusersList();
   }
+
+  @override
+  Future<List<UserEntity>> searchUsers(String query) async {
+    return await remoteDataSource.searchUsers(query);
+  }
 }

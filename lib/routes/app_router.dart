@@ -37,6 +37,8 @@ import 'package:read_buddy_app/features/mybook/presentation/mybook.dart';
 import 'package:read_buddy_app/features/notification/presentation/pages/notification_page.dart';
 import 'package:read_buddy_app/features/rewards/presentation/pages/rewards_page.dart';
 import 'package:read_buddy_app/features/search/presentation/screens/search_screen.dart';
+import 'package:read_buddy_app/features/settings/settings_screen.dart';
+import 'package:read_buddy_app/features/settings/address_management_screen.dart';
 import 'package:read_buddy_app/features/splash/splash_screen.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/Add/manage_book_variants_page.dart';
@@ -110,6 +112,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SearchScreen());
       case '/notification':
         return MaterialPageRoute(builder: (_) => const NotificationPage());
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
+      case '/addresses':
+        return MaterialPageRoute(builder: (_) => const AddressManagementScreen());
       case '/mybooks':
         return MaterialPageRoute(builder: (_) => const Mybook());
       case '/onboarding-page':

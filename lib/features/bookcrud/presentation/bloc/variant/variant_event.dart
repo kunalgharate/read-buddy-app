@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import '../../../domain/entities/book_variant_entity.dart';
 
@@ -19,11 +21,19 @@ class LoadVariants extends VariantEvent {
 
 class CreateVariantEvent extends VariantEvent {
   final BookVariantEntity variant;
+  final List<File> ebookFiles;
+  final List<File> audioParts;
+  final List<File> videoParts;
 
-  const CreateVariantEvent(this.variant);
+  const CreateVariantEvent(
+    this.variant, {
+    this.ebookFiles = const [],
+    this.audioParts = const [],
+    this.videoParts = const [],
+  });
 
   @override
-  List<Object?> get props => [variant];
+  List<Object?> get props => [variant, ebookFiles, audioParts, videoParts];
 }
 
 class UpdateVariantEvent extends VariantEvent {
@@ -50,11 +60,22 @@ class AddFormatEvent extends VariantEvent {
   final String variantId;
   final String bookId;
   final List<BookFormatEntity> formats;
+  final List<File> ebookFiles;
+  final List<File> audioParts;
+  final List<File> videoParts;
 
-  const AddFormatEvent(this.variantId, this.bookId, this.formats);
+  const AddFormatEvent(
+    this.variantId,
+    this.bookId,
+    this.formats, {
+    this.ebookFiles = const [],
+    this.audioParts = const [],
+    this.videoParts = const [],
+  });
 
   @override
-  List<Object?> get props => [variantId, bookId, formats];
+  List<Object?> get props =>
+      [variantId, bookId, formats, ebookFiles, audioParts, videoParts];
 }
 
 class RemoveFormatEvent extends VariantEvent {

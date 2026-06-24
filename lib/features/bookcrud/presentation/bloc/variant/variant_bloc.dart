@@ -47,7 +47,12 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
       CreateVariantEvent event, Emitter<VariantState> emit) async {
     emit(VariantLoading());
     try {
-      final variant = await createVariant(event.variant);
+      final variant = await createVariant(
+        event.variant,
+        ebookFiles: event.ebookFiles,
+        audioParts: event.audioParts,
+        videoParts: event.videoParts,
+      );
       emit(VariantCreated(variant));
     } catch (e) {
       emit(VariantError('Failed to create variant: $e'));
@@ -83,7 +88,13 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
       AddFormatEvent event, Emitter<VariantState> emit) async {
     emit(VariantLoading());
     try {
-      final variant = await addFormat(event.variantId, event.formats);
+      final variant = await addFormat(
+        event.variantId,
+        event.formats,
+        ebookFiles: event.ebookFiles,
+        audioParts: event.audioParts,
+        videoParts: event.videoParts,
+      );
       emit(FormatAdded(variant));
     } catch (e) {
       emit(VariantError('Failed to add format: $e'));

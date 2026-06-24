@@ -20,22 +20,23 @@ class UserModel extends UserEntity {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      userRole: json['userRole'],
-      isEmailVerified: json['isEmailVerified'],
-      id: json['_id'],
-      name: json['name'],
-      email: json['email'] ?? "",
-      authType: json['authType'] ?? "",
-      socialId: json['socialId'] ?? "",
-      phone: json['phone'] ?? "",
-      pincode: json['pincode'] ?? "",
-      city: json['city'] ?? "",
-      isPrime: json['isPrime'] ?? "",
+      userRole: json['userRole'] ?? 'user',
+      isEmailVerified: json['isEmailVerified'] ?? false,
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      authType: json['authType'] ?? '',
+      socialId: json['socialId'] ?? '',
+      phone: json['phone'] ?? '',
+      pincode: json['pincode'] ?? '',
+      city: json['city'] ?? '',
+      isPrime: json['isPrime'] ?? false,
       membershipExpires: json['membershipExpires'] != null
-          ? DateTime.tryParse(json['membershipExpires'])
+          ? DateTime.tryParse(json['membershipExpires'].toString())
           : null,
-      finesDue: json['finesDue'],
-      badges: List<String>.from(json['badges']),
+      finesDue: json['finesDue'] ?? 0,
+      badges:
+          json['badges'] != null ? List<String>.from(json['badges']) : const [],
     );
   }
 

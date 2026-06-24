@@ -11,26 +11,62 @@ class BookModel extends Book {
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
-    final categoryJson = json['category'];
+    // Handle multiple category formats from the API:
+    // 1. "categories": [{ _id, name }] — new populated array
+    // 2. "category": { _id, name } — old populated object
+    // 3. "category": "687671ae..." — old string ID
+    // 4. "category": ["id1", "id2"] — old array of string IDs
+    String categoryId = '';
+    String categoryName = '';
+
+    final categoriesData = json['categories'];
+    final categoryData = json['category'];
+
+    if (categoriesData is List && categoriesData.isNotEmpty) {
+      final first = categoriesData.first;
+      if (first is Map<String, dynamic>) {
+        categoryId = (first['_id'] ?? '').toString();
+        categoryName = (first['name'] ?? '').toString();
+      } else if (first is String) {
+        categoryId = first;
+      }
+    } else if (categoryData is Map<String, dynamic>) {
+      categoryId = (categoryData['_id'] ?? '').toString();
+      categoryName = (categoryData['name'] ?? '').toString();
+    } else if (categoryData is List && categoryData.isNotEmpty) {
+      final first = categoryData.first;
+      if (first is Map<String, dynamic>) {
+        categoryId = (first['_id'] ?? '').toString();
+        categoryName = (first['name'] ?? '').toString();
+      } else if (first is String) {
+        categoryId = first;
+      }
+    } else if (categoryData is String && categoryData.isNotEmpty) {
+      categoryId = categoryData;
+    }
 
     return BookModel(
       id: (json['_id'] ?? '').toString(),
       title: (json['title'] ?? 'Unknown Title').toString(),
       bookimage: (json['coverImageUrl'] ?? '').toString(),
       genre: (json['genre'] ?? '').toString(),
-      book_category: categoryJson is Map<String, dynamic>
-          ? BookCategoryModel.fromJson(categoryJson)
-          : const BookCategory(id: '', category_name: ''),
+      book_category: BookCategoryModel(
+        id: categoryId,
+        category_name: categoryName,
+      ),
     );
   }
 
   Map<String, dynamic> toJson() => {
-    '_id': id,
-    'title': title,
-    'coverImageUrl': bookimage,
-    'genre': genre,
-    'category': BookCategoryModel(id: book_category.id, category_name: book_category.category_name).toJson(),
-  };
+        '_id': id,
+        'title': title,
+        'coverImageUrl': bookimage,
+        'genre': genre,
+        'category': BookCategoryModel(
+                id: book_category.id,
+                category_name: book_category.category_name)
+            .toJson(),
+      };
 }
 
 class BookCategoryModel extends BookCategory {
@@ -47,7 +83,7 @@ class BookCategoryModel extends BookCategory {
   }
 
   Map<String, dynamic> toJson() => {
-    '_id': id,
-    'name': category_name,
-  };
+        '_id': id,
+        'name': category_name,
+      };
 }

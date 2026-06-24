@@ -2,11 +2,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/entities/book_variant_entity.dart';
 
 class BookCrudDetailPage extends StatelessWidget {
   final BookCrudEntity book;
 
   const BookCrudDetailPage({super.key, required this.book});
+
+  List<BookVariantEntity> get _variants {
+    if (book is BookCrudModel) return (book as BookCrudModel).variants;
+    return [];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +30,6 @@ class BookCrudDetailPage extends StatelessWidget {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Cover image
                   book.coverImageUrl.isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: book.coverImageUrl,
@@ -32,13 +37,13 @@ class BookCrudDetailPage extends StatelessWidget {
                           placeholder: (_, __) => Container(
                             color: const Color(0xFF042153),
                             child: const Center(
-                              child: CircularProgressIndicator(color: Colors.white),
+                              child: CircularProgressIndicator(
+                                  color: Colors.white),
                             ),
                           ),
                           errorWidget: (_, __, ___) => _placeholderCover(),
                         )
                       : _placeholderCover(),
-                  // Dark gradient overlay
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -51,7 +56,6 @@ class BookCrudDetailPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Title & Author at bottom
                   Positioned(
                     bottom: 20,
                     left: 16,
@@ -74,9 +78,8 @@ class BookCrudDetailPage extends StatelessWidget {
                           Text(
                             'by ${book.author}',
                             style: TextStyle(
-                              color: Colors.white.withAlpha(210),
-                              fontSize: 14,
-                            ),
+                                color: Colors.white.withAlpha(210),
+                                fontSize: 14),
                           ),
                         ]
                       ],
@@ -94,27 +97,7 @@ class BookCrudDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Status Chips ──────────────────────────────────────
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: [
-                      _chip(book.format, Icons.menu_book_rounded, Colors.indigo),
-                      _chip(book.condition, Icons.verified_rounded, Colors.teal),
-                      if (book.category.isNotEmpty)
-                        _chip(book.category, Icons.category_rounded, Colors.orange),
-                      if (book.language.isNotEmpty)
-                        _chip(book.language, Icons.language_rounded, Colors.purple),
-                      _chip(
-                        book.isAvailable ? 'Available' : 'Unavailable',
-                        book.isAvailable ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                        book.isAvailable ? Colors.green : Colors.red,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // ── Add Variant Button ────────────────────────────────
+                  // ── Manage Variants Button ────────────────────────────
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -129,42 +112,31 @@ class BookCrudDetailPage extends StatelessWidget {
                       label: const Text(
                         'Add / Manage Variants',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF042153),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 3,
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
 
-                  // ── Book Details Section ──────────────────────────────
+                  // ── Book Details ──────────────────────────────────────
                   _sectionTitle('Book Details'),
                   _detailCard([
-                    if (book.subtitle.isNotEmpty)
-                      _row(Icons.title_rounded, 'Subtitle', book.subtitle),
                     _row(Icons.person_rounded, 'Author', book.author),
                     if (book.publisher.isNotEmpty)
                       _row(Icons.business_rounded, 'Publisher', book.publisher),
-                    if (book.edition.isNotEmpty)
-                      _row(Icons.layers_rounded, 'Edition', book.edition),
-                    if (book.isbn.isNotEmpty)
-                      _row(Icons.qr_code_rounded, 'ISBN', book.isbn),
-                    if (book.publicationYear > 0)
-                      _row(Icons.calendar_today_rounded, 'Publication Year',
-                          book.publicationYear.toString()),
+                    if (book.category.isNotEmpty)
+                      _row(Icons.category_rounded, 'Category', book.category),
                     if (book.genre.isNotEmpty)
                       _row(Icons.local_library_rounded, 'Genre', book.genre),
-                    _row(Icons.menu_book_rounded, 'Format', book.format),
-                    _row(Icons.language_rounded, 'Language', book.language),
                   ]),
                   const SizedBox(height: 16),
 
@@ -188,47 +160,11 @@ class BookCrudDetailPage extends StatelessWidget {
                       child: Text(
                         book.description,
                         style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[800],
-                          height: 1.6,
-                        ),
+                            fontSize: 14, color: Colors.grey[800], height: 1.6),
                       ),
                     ),
                     const SizedBox(height: 16),
                   ],
-
-                  // ── Availability & Condition ──────────────────────────
-                  _sectionTitle('Availability & Condition'),
-                  _detailCard([
-                    _row(Icons.verified_rounded, 'Condition', book.condition),
-                    _row(
-                      book.isAvailable
-                          ? Icons.check_circle_rounded
-                          : Icons.cancel_rounded,
-                      'Available',
-                      book.isAvailable ? 'Yes' : 'No',
-                      valueColor:
-                          book.isAvailable ? Colors.green : Colors.red,
-                    ),
-                    _row(Icons.info_rounded, 'Status', book.status),
-                    if (book.numberOfCopies > 0)
-                      _row(Icons.copy_rounded, 'Number of Copies',
-                          book.numberOfCopies.toString()),
-                  ]),
-                  const SizedBox(height: 16),
-
-                  // ── Owner & Location ──────────────────────────────────
-                  _sectionTitle('Source Information'),
-                  _detailCard([
-                    if ((book.ownerName ?? '').isNotEmpty)
-                      _row(Icons.person_pin_rounded, 'Owner',
-                          book.ownerName ?? ''),
-                    if (book.location.isNotEmpty)
-                      _row(Icons.location_on_rounded, 'Location', book.location),
-                    if (book.notes.isNotEmpty)
-                      _row(Icons.notes_rounded, 'Notes', book.notes),
-                  ]),
-                  const SizedBox(height: 16),
 
                   // ── Tags ──────────────────────────────────────────────
                   if (book.tags.isNotEmpty) ...[
@@ -251,30 +187,31 @@ class BookCrudDetailPage extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 6,
                         children: book.tags
-                            .map(
-                              (tag) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEEF2FF),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                      color: const Color(0xFF6366F1),
-                                      width: 1),
-                                ),
-                                child: Text(
-                                  tag,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF4338CA),
-                                    fontWeight: FontWeight.w500,
+                            .map((tag) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEEF2FF),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                        color: const Color(0xFF6366F1)),
                                   ),
-                                ),
-                              ),
-                            )
+                                  child: Text(tag,
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF4338CA),
+                                          fontWeight: FontWeight.w500)),
+                                ))
                             .toList(),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // ── Variants Section ──────────────────────────────────
+                  if (_variants.isNotEmpty) ...[
+                    _sectionTitle('Language Variants (${_variants.length})'),
+                    ..._variants.map(_buildVariantCard),
                     const SizedBox(height: 16),
                   ],
 
@@ -288,7 +225,154 @@ class BookCrudDetailPage extends StatelessWidget {
     );
   }
 
-  // ── Helper Widgets ───────────────────────────────────────────────────
+  // ── Variant Card ─────────────────────────────────────────────────────
+
+  Widget _buildVariantCard(BookVariantEntity variant) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF042153).withAlpha(12),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.language_rounded,
+                    color: Color(0xFF042153), size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  variant.language.toUpperCase(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFF042153)),
+                ),
+                const Spacer(),
+                Text(
+                  '${variant.formats.length} format(s)',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ),
+          // Formats
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children:
+                  variant.formats.map((f) => _buildFormatTile(f)).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormatTile(BookFormatEntity format) {
+    final color = _formatColor(format.type);
+    final icon = _formatIcon(format.type);
+
+    String subtitle = '';
+    if (format.type == 'hardcover' || format.type == 'paperback') {
+      final parts = <String>[];
+      if (format.isbn != null) parts.add('ISBN: ${format.isbn}');
+      if (format.copies != null) parts.add('Copies: ${format.copies}');
+      if (format.available == true) parts.add('Available');
+      subtitle = parts.join(' • ');
+    } else if (format.type == 'ebook') {
+      subtitle = format.fileUrl != null ? 'File uploaded ✓' : 'No file';
+    } else if (format.type == 'audiobook' || format.type == 'videobook') {
+      final partCount = format.parts.length;
+      final duration = format.totalDuration ?? 0;
+      final mins = (duration / 60).round();
+      subtitle = '$partCount part(s)${mins > 0 ? ' • ${mins}min' : ''}';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: color.withAlpha(15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withAlpha(50)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  format.type.toUpperCase(),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 11, color: color),
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style:
+                          TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _formatColor(String type) {
+    switch (type) {
+      case 'hardcover':
+      case 'paperback':
+        return const Color(0xFF4F46E5);
+      case 'ebook':
+        return const Color(0xFF0D9488);
+      case 'audiobook':
+        return const Color(0xFFD97706);
+      case 'videobook':
+        return const Color(0xFF7C3AED);
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _formatIcon(String type) {
+    switch (type) {
+      case 'hardcover':
+      case 'paperback':
+        return Icons.menu_book_rounded;
+      case 'ebook':
+        return Icons.book_online_rounded;
+      case 'audiobook':
+        return Icons.headphones_rounded;
+      case 'videobook':
+        return Icons.videocam_rounded;
+      default:
+        return Icons.description_rounded;
+    }
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────
 
   Widget _placeholderCover() {
     return Container(
@@ -302,19 +386,15 @@ class BookCrudDetailPage extends StatelessWidget {
   Widget _sectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF042153),
-        ),
-      ),
+      child: Text(title,
+          style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF042153))),
     );
   }
 
   Widget _detailCard(List<Widget> rows) {
-    // Remove empty rows
     final filtered = rows.whereType<Widget>().toList();
     if (filtered.isEmpty) return const SizedBox.shrink();
     return Container(
@@ -341,12 +421,7 @@ class BookCrudDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _row(
-    IconData icon,
-    String label,
-    String value, {
-    Color? valueColor,
-  }) {
+  Widget _row(IconData icon, String label, String value, {Color? valueColor}) {
     if (value.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -359,51 +434,18 @@ class BookCrudDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey[500],
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.4,
-                  ),
-                ),
+                Text(label,
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w500)),
                 const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: valueColor ?? Colors.grey[850],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text(value,
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: valueColor ?? Colors.grey[850],
+                        fontWeight: FontWeight.w500)),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _chip(String label, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withAlpha(25),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withAlpha(80), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],

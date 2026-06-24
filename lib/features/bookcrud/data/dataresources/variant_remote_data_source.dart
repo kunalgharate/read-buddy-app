@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
@@ -11,8 +14,13 @@ abstract class VariantRemoteDataSource {
   /// GET /api/book-variants/:variantId
   Future<BookVariantModel> getVariantById(String variantId);
 
-  /// POST /api/book-variants
-  Future<BookVariantModel> createVariant(BookVariantModel variant);
+  /// POST /api/book-variants (multipart form data with files)
+  Future<BookVariantModel> createVariant(
+    BookVariantModel variant, {
+    List<File> ebookFiles,
+    List<File> audioParts,
+    List<File> videoParts,
+  });
 
   /// PUT /api/book-variants/:variantId
   Future<BookVariantModel> updateVariant(
@@ -21,9 +29,14 @@ abstract class VariantRemoteDataSource {
   /// DELETE /api/book-variants/:variantId
   Future<void> deleteVariant(String variantId);
 
-  /// POST /api/book-variants/:variantId/formats
+  /// POST /api/book-variants/:variantId/formats (multipart with files)
   Future<BookVariantModel> addFormatsToVariant(
-      String variantId, List<BookFormatModel> formats);
+    String variantId,
+    List<BookFormatModel> formats, {
+    List<File> ebookFiles,
+    List<File> audioParts,
+    List<File> videoParts,
+  });
 
   /// DELETE /api/book-variants/:variantId/formats/:formatId
   Future<void> removeFormatFromVariant(String variantId, String formatId);
@@ -34,9 +47,12 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
 
   VariantRemoteDataSourceImpl({required this.dio});
 
-  Future<Options> _authOptions() async {
+  Future<Options> _authOptions({String? contentType}) async {
     final token = await getIt<SecureStorageUtil>().getAccessToken();
-    return Options(headers: {'Authorization': 'Bearer $token'});
+    return Options(headers: {
+      'Authorization': 'Bearer $token',
+      if (contentType != null) 'Content-Type': contentType,
+    });
   }
 
   @override
@@ -46,7 +62,14 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
       throw Exception(
           'Failed to load variants. Status: ${response.statusCode}');
     }
-    final data = response.data;
+    // Unwrap { "data": [...] } envelope if present
+    final rawData = response.data;
+    dynamic data;
+    if (rawData is Map<String, dynamic> && rawData.containsKey('data')) {
+      data = rawData['data'];
+    } else {
+      data = rawData;
+    }
     if (data is List) {
       return data.map((json) => BookVariantModel.fromJson(json)).toList();
     }
@@ -59,21 +82,94 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
     if (response.statusCode != 200) {
       throw Exception('Failed to load variant. Status: ${response.statusCode}');
     }
-    return BookVariantModel.fromJson(response.data);
+    // Unwrap { "data": {...} } envelope if present
+    final rawData = response.data;
+    final json =
+        (rawData is Map<String, dynamic> && rawData.containsKey('data'))
+            ? rawData['data']
+            : rawData;
+    return BookVariantModel.fromJson(json);
   }
 
   @override
-  Future<BookVariantModel> createVariant(BookVariantModel variant) async {
-    final response = await dio.post(
-      ApiConstants.bookVariants,
-      options: await _authOptions(),
-      data: variant.toJson(),
-    );
+  Future<BookVariantModel> createVariant(
+    BookVariantModel variant, {
+    List<File> ebookFiles = const [],
+    List<File> audioParts = const [],
+    List<File> videoParts = const [],
+  }) async {
+    final formatsList = variant.formats
+        .map((item) => BookFormatModel.fromEntity(item).toJson())
+        .toList();
+
+    final bool hasFiles =
+        ebookFiles.isNotEmpty || audioParts.isNotEmpty || videoParts.isNotEmpty;
+
+    Response response;
+
+    if (!hasFiles) {
+      // No files — send as JSON body (express-validator can validate arrays directly)
+      final jsonBody = {
+        'bookId': variant.bookId,
+        'language': variant.language,
+        if (variant.donorId != null) 'donorId': variant.donorId,
+        'formats': formatsList,
+      };
+
+      response = await dio.post(
+        ApiConstants.bookVariants,
+        options: await _authOptions(),
+        data: jsonBody,
+      );
+    } else {
+      // Has files — use multipart form data
+      final formData = FormData();
+      formData.fields.add(MapEntry('bookId', variant.bookId));
+      formData.fields.add(MapEntry('language', variant.language));
+      if (variant.donorId != null) {
+        formData.fields.add(MapEntry('donorId', variant.donorId!));
+      }
+      formData.fields.add(MapEntry('formats', jsonEncode(formatsList)));
+
+      for (final file in ebookFiles) {
+        formData.files.add(MapEntry(
+          'ebookFiles',
+          await MultipartFile.fromFile(file.path,
+              filename: file.path.split('/').last),
+        ));
+      }
+      for (final file in audioParts) {
+        formData.files.add(MapEntry(
+          'audioParts',
+          await MultipartFile.fromFile(file.path,
+              filename: file.path.split('/').last),
+        ));
+      }
+      for (final file in videoParts) {
+        formData.files.add(MapEntry(
+          'videoParts',
+          await MultipartFile.fromFile(file.path,
+              filename: file.path.split('/').last),
+        ));
+      }
+
+      response = await dio.post(
+        ApiConstants.bookVariants,
+        options: await _authOptions(contentType: 'multipart/form-data'),
+        data: formData,
+      );
+    }
+
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw Exception(
           'Failed to create variant. Status: ${response.statusCode}');
     }
-    return BookVariantModel.fromJson(response.data);
+    final rawData = response.data;
+    final json =
+        (rawData is Map<String, dynamic> && rawData.containsKey('data'))
+            ? rawData['data']
+            : rawData;
+    return BookVariantModel.fromJson(json);
   }
 
   @override
@@ -88,7 +184,12 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
       throw Exception(
           'Failed to update variant. Status: ${response.statusCode}');
     }
-    return BookVariantModel.fromJson(response.data);
+    final rawData = response.data;
+    final json =
+        (rawData is Map<String, dynamic> && rawData.containsKey('data'))
+            ? rawData['data']
+            : rawData;
+    return BookVariantModel.fromJson(json);
   }
 
   @override
@@ -105,18 +206,61 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
 
   @override
   Future<BookVariantModel> addFormatsToVariant(
-      String variantId, List<BookFormatModel> formats) async {
+    String variantId,
+    List<BookFormatModel> formats, {
+    List<File> ebookFiles = const [],
+    List<File> audioParts = const [],
+    List<File> videoParts = const [],
+  }) async {
+    final formatsJson = jsonEncode(
+      formats.map((f) => f.toJson()).toList(),
+    );
+
+    final formData = FormData();
+    formData.fields.add(MapEntry('formats', formatsJson));
+
+    // Attach ebook files
+    for (final file in ebookFiles) {
+      formData.files.add(MapEntry(
+        'ebookFiles',
+        await MultipartFile.fromFile(file.path,
+            filename: file.path.split('/').last),
+      ));
+    }
+
+    // Attach audio parts
+    for (final file in audioParts) {
+      formData.files.add(MapEntry(
+        'audioParts',
+        await MultipartFile.fromFile(file.path,
+            filename: file.path.split('/').last),
+      ));
+    }
+
+    // Attach video parts
+    for (final file in videoParts) {
+      formData.files.add(MapEntry(
+        'videoParts',
+        await MultipartFile.fromFile(file.path,
+            filename: file.path.split('/').last),
+      ));
+    }
+
     final response = await dio.post(
       '${ApiConstants.bookVariants}/$variantId/formats',
-      options: await _authOptions(),
-      data: {
-        'formats': formats.map((f) => f.toJson()).toList(),
-      },
+      options: await _authOptions(contentType: 'multipart/form-data'),
+      data: formData,
     );
+
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to add formats. Status: ${response.statusCode}');
     }
-    return BookVariantModel.fromJson(response.data);
+    final rawData = response.data;
+    final json =
+        (rawData is Map<String, dynamic> && rawData.containsKey('data'))
+            ? rawData['data']
+            : rawData;
+    return BookVariantModel.fromJson(json);
   }
 
   @override

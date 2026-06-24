@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../domain/entities/book_variant_entity.dart';
 import '../../domain/respository/variant_repository.dart';
 import '../model/book_variant_model.dart';
@@ -19,9 +21,19 @@ class VariantRepositoryImpl implements VariantRepository {
   }
 
   @override
-  Future<BookVariantEntity> createVariant(BookVariantEntity variant) async {
+  Future<BookVariantEntity> createVariant(
+    BookVariantEntity variant, {
+    List<File> ebookFiles = const [],
+    List<File> audioParts = const [],
+    List<File> videoParts = const [],
+  }) async {
     final model = BookVariantModel.fromEntity(variant);
-    return await remoteDataSource.createVariant(model);
+    return await remoteDataSource.createVariant(
+      model,
+      ebookFiles: ebookFiles,
+      audioParts: audioParts,
+      videoParts: videoParts,
+    );
   }
 
   @override
@@ -37,10 +49,21 @@ class VariantRepositoryImpl implements VariantRepository {
 
   @override
   Future<BookVariantEntity> addFormatsToVariant(
-      String variantId, List<BookFormatEntity> formats) async {
+    String variantId,
+    List<BookFormatEntity> formats, {
+    List<File> ebookFiles = const [],
+    List<File> audioParts = const [],
+    List<File> videoParts = const [],
+  }) async {
     final formatModels =
         formats.map((f) => BookFormatModel.fromEntity(f)).toList();
-    return await remoteDataSource.addFormatsToVariant(variantId, formatModels);
+    return await remoteDataSource.addFormatsToVariant(
+      variantId,
+      formatModels,
+      ebookFiles: ebookFiles,
+      audioParts: audioParts,
+      videoParts: videoParts,
+    );
   }
 
   @override

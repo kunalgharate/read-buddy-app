@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/entities/book_variant_entity.dart';
 
 class BookDetailEntity extends Equatable {
   final String id;
@@ -19,6 +20,7 @@ class BookDetailEntity extends Equatable {
   final String description;
   final BookOwnerEntity owner;
   final BookAddressEntity address;
+  final List<BookVariantEntity> variants;
 
   const BookDetailEntity({
     required this.id,
@@ -39,6 +41,7 @@ class BookDetailEntity extends Equatable {
     required this.description,
     required this.owner,
     required this.address,
+    this.variants = const [],
   });
 
   @override
@@ -61,6 +64,7 @@ class BookDetailEntity extends Equatable {
         description,
         owner,
         address,
+        variants,
       ];
 }
 

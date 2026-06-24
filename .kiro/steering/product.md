@@ -2,25 +2,41 @@
 inclusion: always
 ---
 
-# ReadBuddy — Product Overview
+# ReadBuddy Mobile — Product Overview
 
-ReadBuddy is a donation-based book sharing platform. Users donate physical books, eBooks, audiobooks, and video books to the system. These books get circulated to other users who join the app.
+ReadBuddy is a donation-based book sharing platform. This is the Flutter mobile app serving end users, librarians, and admins.
 
-## Key Features
-- **Book Donation**: Users donate books (physical, eBook, audiobook, video) to the platform
-- **Book Circulation**: Donated books are shared with other users
-- **Prime Membership**: Premium users can access multiple books simultaneously
-- **Multi-Format Reading**: Physical books, PDF/EPUB eBooks, audiobooks, video books
-- **Multi-Language**: English, Hindi, Marathi support
-- **Admin Dashboard**: Content management for books, categories, banners, questions
-- **Onboarding**: Questionnaire-based user preference collection
+## Membership Model
+- **Non-Prime**: Can browse, donate. Cannot borrow or access content (eBook/audio/video).
+- **Becoming Prime**: Donate ₹100+ (instant) OR donate a book (admin approves).
+- **Prime**: Full access to borrow, read, listen, watch.
+- **Non-Prime Content Access**: Show `showPrimeRequiredDialog()` → redirect to donation page.
 
-## Target Users
-- Book readers who want free access to books
-- Book donors who want to share their collection
-- Admins who manage the book library
+## User Roles
+- **End User**: Browse, donate, borrow (if Prime), read/listen/watch, manage profile
+- **Librarian**: Accept/reject book requests, deliver books, add books
+- **Super Admin**: Manage everything — users, libraries, books, categories, banners
+
+## Core Features
+1. **Auth**: Sign in, sign up, Google sign in, email verification, forgot password
+2. **Onboarding**: Preference questionnaire after first registration
+3. **Home**: Latest, recommended, trending books + category browse
+4. **Book Formats**: Physical request, eBook reader (PDF/EPUB), Audiobook player, Videobook player
+5. **Donation**: Book donation (pickup/drop-off) + Money donation (Razorpay)
+6. **Book Request**: Create request → admin approves → schedule pickup/delivery → receive → return
+7. **Settings**: Dark/Light theme, notifications toggle, address management
+8. **Single-Device Session**: Only 1 device active. Show `showSessionExpiredDialog()` if kicked out.
+9. **Notifications**: Firebase FCM for request updates, delivery alerts
+10. **Admin Dashboard**: Book requests, donation management, user management (librarian app features)
+
+## Business Rules
+- Non-prime users CANNOT access read/listen/watch — always show donation prompt
+- One BookVariant per book+language — UI sends formats to existing variant via merge
+- Librarians see only their library's requests
+- Session replaced → force logout → show dialog → redirect to sign in
 
 ## Backend
-- Node.js on Render.com (free tier — cold starts expected)
-- Base URL: `https://readbuddy-server.onrender.com/api`
-- API endpoints: #[[file:lib/core/network/api_constants.dart]]
+- Base URL: configured in `api_constants.dart`
+- All API calls via Dio with auth interceptor
+- `SESSION_REPLACED` code → don't retry, show dialog
+- `NOT_PRIME` code → show donation prompt

@@ -15,14 +15,32 @@ class BookFormatModel extends BookFormatEntity {
   });
 
   factory BookFormatModel.fromJson(Map<String, dynamic> json) {
+    // donorId can be a populated object { _id, name, email } or a plain string
+    final donorData = json['donorId'];
+    String? donorId;
+    if (donorData is Map<String, dynamic>) {
+      donorId = donorData['_id'];
+    } else if (donorData is String) {
+      donorId = donorData;
+    }
+
+    // fileUrl: use first of fileUrls[] if fileUrl is missing
+    String? fileUrl = json['fileUrl'];
+    if (fileUrl == null || fileUrl.isEmpty) {
+      final fileUrls = json['fileUrls'];
+      if (fileUrls is List && fileUrls.isNotEmpty) {
+        fileUrl = fileUrls.first.toString();
+      }
+    }
+
     return BookFormatModel(
       id: json['_id'],
       type: json['type'] ?? '',
-      donorId: json['donorId'],
+      donorId: donorId,
       isbn: json['isbn'],
       copies: json['copies'],
       available: json['available'],
-      fileUrl: json['fileUrl'],
+      fileUrl: fileUrl,
       totalDuration: json['totalDuration'],
       parts: (json['parts'] as List?)
               ?.map((p) => MediaPartModel.fromJson(p))
@@ -69,17 +87,30 @@ class BookVariantModel extends BookVariantEntity {
     required super.bookId,
     required super.language,
     super.donorId,
+    super.donorName,
     required super.formats,
   });
 
   factory BookVariantModel.fromJson(Map<String, dynamic> json) {
+    // donorId can be a populated object { _id, name, email } or a plain string
+    final donorData = json['donorId'];
+    String? donorId;
+    String? donorName;
+    if (donorData is Map<String, dynamic>) {
+      donorId = donorData['_id'];
+      donorName = donorData['name'];
+    } else if (donorData is String) {
+      donorId = donorData;
+    }
+
     return BookVariantModel(
       id: json['_id'] ?? json['id'] ?? '',
       bookId: json['bookId'] is Map
           ? (json['bookId']['_id'] ?? '')
           : (json['bookId'] ?? ''),
       language: json['language'] ?? '',
-      donorId: json['donorId'],
+      donorId: donorId,
+      donorName: donorName,
       formats: (json['formats'] as List? ?? [])
           .map((item) => BookFormatModel.fromJson(item))
           .toList(),
@@ -104,6 +135,7 @@ class BookVariantModel extends BookVariantEntity {
       bookId: entity.bookId,
       language: entity.language,
       donorId: entity.donorId,
+      donorName: entity.donorName,
       formats: entity.formats,
     );
   }
