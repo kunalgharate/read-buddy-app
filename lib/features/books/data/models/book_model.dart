@@ -6,7 +6,7 @@ class BookModel extends Book {
     required super.id,
     required super.title,
     required super.bookimage,
-    required super.book_category,
+    required super.bookCategory,
     required super.genre,
   });
 
@@ -50,9 +50,9 @@ class BookModel extends Book {
       title: (json['title'] ?? 'Unknown Title').toString(),
       bookimage: (json['coverImageUrl'] ?? '').toString(),
       genre: (json['genre'] ?? '').toString(),
-      book_category: BookCategoryModel(
+      bookCategory: BookCategoryModel(
         id: categoryId,
-        category_name: categoryName,
+        categoryName: categoryName,
       ),
     );
   }
@@ -63,8 +63,7 @@ class BookModel extends Book {
         'coverImageUrl': bookimage,
         'genre': genre,
         'category': BookCategoryModel(
-                id: book_category.id,
-                category_name: book_category.category_name)
+                id: bookCategory.id, categoryName: bookCategory.categoryName)
             .toJson(),
       };
 }
@@ -72,18 +71,18 @@ class BookModel extends Book {
 class BookCategoryModel extends BookCategory {
   const BookCategoryModel({
     required super.id,
-    required super.category_name,
+    required super.categoryName,
   });
 
   factory BookCategoryModel.fromJson(Map<String, dynamic> json) {
     return BookCategoryModel(
       id: (json['_id'] ?? '').toString(),
-      category_name: (json['name'] ?? '').toString(),
+      categoryName: (json['name'] ?? '').toString(),
     );
   }
 
   Map<String, dynamic> toJson() => {
         '_id': id,
-        'name': category_name,
+        'name': categoryName,
       };
 }

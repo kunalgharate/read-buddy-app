@@ -423,12 +423,12 @@ class _CategoryTabState extends State<CategoryTab> {
     final catName = category.title.toLowerCase().trim();
 
     // Primary: category object match (when DB has proper category data)
-    if (book.book_category.id.isNotEmpty &&
-        book.book_category.id == category.id) {
+    if (book.bookCategory.id.isNotEmpty &&
+        book.bookCategory.id == category.id) {
       return true;
     }
-    if (book.book_category.category_name.isNotEmpty &&
-        book.book_category.category_name.toLowerCase() == catName) {
+    if (book.bookCategory.categoryName.isNotEmpty &&
+        book.bookCategory.categoryName.toLowerCase() == catName) {
       return true;
     }
 
@@ -587,7 +587,7 @@ class _CategoryTabState extends State<CategoryTab> {
                   Text(
                     book.genre.isNotEmpty
                         ? _capitalize(book.genre)
-                        : _capitalize(book.book_category.category_name),
+                        : _capitalize(book.bookCategory.categoryName),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 10, color: Colors.grey.shade400),

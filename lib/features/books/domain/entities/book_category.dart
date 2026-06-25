@@ -2,13 +2,13 @@ import 'package:equatable/equatable.dart';
 
 class BookCategory extends Equatable {
   final String id;
-  final String category_name;
+  final String categoryName;
 
   const BookCategory({
     required this.id,
-    required this.category_name,
+    required this.categoryName,
   });
 
   @override
-  List<Object> get props => [id, category_name];
+  List<Object> get props => [id, categoryName];
 }

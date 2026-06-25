@@ -205,12 +205,14 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
               ),
               MyTextField(
                 controller: isbnController,
-                validator: selectedFormat == 'eBook' || selectedFormat == 'audioBook'
-                    ? BookFormValidator.validateISBNOptional
-                    : BookFormValidator.validateISBN,
-                hintText: selectedFormat == 'eBook' || selectedFormat == 'audioBook'
-                    ? " Enter ISBN (leave blank if unavailable)"
-                    : " Enter ISBN",
+                validator:
+                    selectedFormat == 'eBook' || selectedFormat == 'audioBook'
+                        ? BookFormValidator.validateISBNOptional
+                        : BookFormValidator.validateISBN,
+                hintText:
+                    selectedFormat == 'eBook' || selectedFormat == 'audioBook'
+                        ? " Enter ISBN (leave blank if unavailable)"
+                        : " Enter ISBN",
                 obscureText: false,
                 keyboardType: TextInputType.text,
               ),
@@ -282,7 +284,9 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                       children: [
                         Radio<String>(
                           value: format,
+                          // ignore: deprecated_member_use
                           groupValue: selectedFormat,
+                          // ignore: deprecated_member_use
                           onChanged: (value) {
                             setState(() {
                               selectedFormat = value!;

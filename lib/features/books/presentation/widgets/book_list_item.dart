@@ -80,7 +80,7 @@ class BookListItem extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
-                  book.book_category.category_name,
+                  book.bookCategory.categoryName,
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ),

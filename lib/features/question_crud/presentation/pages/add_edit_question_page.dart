@@ -237,8 +237,10 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                             children: [
                               Radio<String>(
                                 value: 'single',
+                                // ignore: deprecated_member_use
                                 groupValue: selectedType,
                                 activeColor: Colors.green,
+                                // ignore: deprecated_member_use
                                 onChanged: (value) {
                                   setState(() {
                                     selectedType = value.toString();
@@ -276,8 +278,10 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                             children: [
                               Radio<String>(
                                 value: 'multiple',
+                                // ignore: deprecated_member_use
                                 groupValue: selectedType,
                                 activeColor: Colors.green,
+                                // ignore: deprecated_member_use
                                 onChanged: (value) {
                                   setState(() {
                                     selectedType = value.toString();
