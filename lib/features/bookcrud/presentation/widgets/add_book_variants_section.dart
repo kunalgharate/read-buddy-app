@@ -124,6 +124,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
   bool _hasAudiobook = false;
   bool _hasVideobook = false;
 
+  // Track formats already on server (don't require re-uploading files)
+  bool _ebookExistsOnServer = false;
+
   // Hardcover sub-fields
   final TextEditingController _isbnController = TextEditingController();
   final TextEditingController _copiesController =
@@ -181,6 +184,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       _hasEbook = false;
       _hasAudiobook = false;
       _hasVideobook = false;
+      _ebookExistsOnServer = false;
       _isbnController.clear();
       _copiesController.text = "1";
       _hardcoverAvailable = true;
@@ -205,6 +209,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       _hasEbook = false;
       _hasAudiobook = false;
       _hasVideobook = false;
+      _ebookExistsOnServer = false;
       _ebookFiles = [];
       _audioParts = [];
       _videoParts = [];
@@ -218,6 +223,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
         } else if (format.type == 'ebook') {
           _hasEbook = true;
           _ebookFiles = List.from(format.ebookFiles);
+          // If loaded from server, ebookFiles will be empty — mark as existing
+          if (format.ebookFiles.isEmpty && variant.existingVariantId != null) {
+            _ebookExistsOnServer = true;
+          }
         } else if (format.type == 'audiobook') {
           _hasAudiobook = true;
           _audioParts = List.from(format.audioParts);
@@ -378,7 +387,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       return;
     }
 
-    if (_hasEbook && _ebookFiles.isEmpty) {
+    if (_hasEbook && _ebookFiles.isEmpty && !_ebookExistsOnServer) {
       _showSnackBar('Please select at least one E-Book file (PDF/EPUB)',
           Colors.orangeAccent);
       return;
@@ -535,6 +544,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             }
           } else if (f.type == 'audiobook') {
             for (final p in f.audioParts) {
+              // Skip parts already uploaded on server — they have no local file
+              if (p.isFromServer) continue;
               if (p.file != null && !p.file!.file.existsSync()) {
                 filesValid = false;
                 _showSnackBar(
@@ -545,6 +556,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             }
           } else if (f.type == 'videobook') {
             for (final p in f.videoParts) {
+              // Skip parts already uploaded on server — they have no local file
+              if (p.isFromServer) continue;
               if (p.file != null && !p.file!.file.existsSync()) {
                 filesValid = false;
                 _showSnackBar(
@@ -1220,7 +1233,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           decoration: BoxDecoration(
             color: const Color(0xFF0D9488).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.2)),
+            border: Border.all(
+                color: const Color(0xFF0D9488).withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -1281,7 +1295,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           decoration: BoxDecoration(
             color: const Color(0xFFD97706).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFD97706).withValues(alpha: 0.2)),
+            border: Border.all(
+                color: const Color(0xFFD97706).withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1411,7 +1426,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           decoration: BoxDecoration(
             color: const Color(0xFF7C3AED).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.2)),
+            border: Border.all(
+                color: const Color(0xFF7C3AED).withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1592,7 +1608,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           decoration: BoxDecoration(
-            color: selected ? activeColor.withValues(alpha: 0.05) : Colors.white,
+            color:
+                selected ? activeColor.withValues(alpha: 0.05) : Colors.white,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: selected ? activeColor : Colors.grey.shade200,
@@ -1832,8 +1849,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       decoration: BoxDecoration(
                         color: accentColor.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(10),
-                        border:
-                            Border.all(color: accentColor.withValues(alpha: 0.12)),
+                        border: Border.all(
+                            color: accentColor.withValues(alpha: 0.12)),
                       ),
                       child: Row(
                         children: [
@@ -2014,7 +2031,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     dense: true,
                     leading: CircleAvatar(
                       radius: 16,
-                      backgroundColor: const Color(0xFF042153).withValues(alpha: 0.1),
+                      backgroundColor:
+                          const Color(0xFF042153).withValues(alpha: 0.1),
                       child: Text(
                         user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                         style: const TextStyle(
