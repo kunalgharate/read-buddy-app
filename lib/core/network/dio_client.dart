@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/app_interceptor.dart';
@@ -8,6 +11,18 @@ class DioClient {
     final dio = Dio();
     final authDio = Dio();
     dio.interceptors.add(AppInterceptor(const FlutterSecureStorage(), authDio));
+
+    // Configure HTTP client adapter to handle TLS issues with large uploads
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        // Allow longer idle timeouts for large file uploads
+        client.idleTimeout = const Duration(seconds: 120);
+        // Disable session cache to prevent TLS MAC errors on chunked uploads
+        client.maxConnectionsPerHost = 5;
+        return client;
+      },
+    );
 
     // Add interceptors
     dio.interceptors.add(LogInterceptor(
@@ -57,13 +72,9 @@ class DioClient {
     ));
 
     // Set longer timeout for slow servers (like Render.com free tier)
-    // Increased timeouts for release builds and cold server starts
-    dio.options.connectTimeout =
-        const Duration(seconds: 120); // Increased from 60s
-    dio.options.receiveTimeout =
-        const Duration(seconds: 180); // Increased from 90s
-    dio.options.sendTimeout =
-        const Duration(seconds: 120); // Increased from 60s
+    dio.options.connectTimeout = const Duration(seconds: 120);
+    dio.options.receiveTimeout = const Duration(seconds: 180);
+    dio.options.sendTimeout = const Duration(seconds: 120);
 
     // Set default headers
     dio.options.headers = {
@@ -72,31 +83,32 @@ class DioClient {
       'User-Agent': 'ReadBuddyApp/1.0.0',
     };
 
-    // Add retry interceptor for better reliability
+    // Retry interceptor for timeout and TLS errors
     dio.interceptors.add(InterceptorsWrapper(
       onError: (error, handler) async {
-        if (error.type == DioExceptionType.connectionTimeout ||
-            error.type == DioExceptionType.receiveTimeout) {
-          if (kDebugMode) {
-            print('🔄 Retrying request due to timeout...');
-          }
+        final shouldRetry = error.type == DioExceptionType.connectionTimeout ||
+            error.type == DioExceptionType.receiveTimeout ||
+            error.type == DioExceptionType.sendTimeout ||
+            _isTlsError(error);
 
-          // Retry once for timeout errors
-          try {
-            final response = await dio.request(
-              error.requestOptions.path,
-              data: error.requestOptions.data,
-              queryParameters: error.requestOptions.queryParameters,
-              options: Options(
-                method: error.requestOptions.method,
-                headers: error.requestOptions.headers,
-              ),
-            );
-            handler.resolve(response);
-            return;
-          } catch (retryError) {
+        if (shouldRetry) {
+          // Only retry once — check if we already retried
+          final retryCount = error.requestOptions.extra['_retryCount'] ?? 0;
+          if (retryCount < 1) {
             if (kDebugMode) {
-              print('🔄 Retry failed: $retryError');
+              print(
+                  '🔄 Retrying request due to ${_isTlsError(error) ? "TLS error" : "timeout"}...');
+            }
+
+            try {
+              error.requestOptions.extra['_retryCount'] = retryCount + 1;
+              final response = await dio.fetch(error.requestOptions);
+              handler.resolve(response);
+              return;
+            } catch (retryError) {
+              if (kDebugMode) {
+                print('🔄 Retry failed: $retryError');
+              }
             }
           }
         }
@@ -105,5 +117,15 @@ class DioClient {
     ));
 
     return dio;
+  }
+
+  /// Check if error is a TLS/SSL handshake error
+  static bool _isTlsError(DioException error) {
+    if (error.type != DioExceptionType.unknown) return false;
+    final errorStr = error.error?.toString() ?? '';
+    return errorStr.contains('TlsException') ||
+        errorStr.contains('SSLV3_ALERT') ||
+        errorStr.contains('BAD_RECORD_MAC') ||
+        errorStr.contains('HandshakeException');
   }
 }
