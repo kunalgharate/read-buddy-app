@@ -132,24 +132,24 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
       formData.fields.add(MapEntry('formats', jsonEncode(formatsList)));
 
       for (final file in ebookFiles) {
+        final bytes = await file.readAsBytes();
         formData.files.add(MapEntry(
           'ebookFiles',
-          await MultipartFile.fromFile(file.path,
-              filename: file.path.split('/').last),
+          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
         ));
       }
       for (final file in audioParts) {
+        final bytes = await file.readAsBytes();
         formData.files.add(MapEntry(
           'audioParts',
-          await MultipartFile.fromFile(file.path,
-              filename: file.path.split('/').last),
+          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
         ));
       }
       for (final file in videoParts) {
+        final bytes = await file.readAsBytes();
         formData.files.add(MapEntry(
           'videoParts',
-          await MultipartFile.fromFile(file.path,
-              filename: file.path.split('/').last),
+          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
         ));
       }
 
@@ -221,28 +221,28 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
 
     // Attach ebook files
     for (final file in ebookFiles) {
+      final bytes = await file.readAsBytes();
       formData.files.add(MapEntry(
         'ebookFiles',
-        await MultipartFile.fromFile(file.path,
-            filename: file.path.split('/').last),
+        MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
       ));
     }
 
     // Attach audio parts
     for (final file in audioParts) {
+      final bytes = await file.readAsBytes();
       formData.files.add(MapEntry(
         'audioParts',
-        await MultipartFile.fromFile(file.path,
-            filename: file.path.split('/').last),
+        MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
       ));
     }
 
     // Attach video parts
     for (final file in videoParts) {
+      final bytes = await file.readAsBytes();
       formData.files.add(MapEntry(
         'videoParts',
-        await MultipartFile.fromFile(file.path,
-            filename: file.path.split('/').last),
+        MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
       ));
     }
 
