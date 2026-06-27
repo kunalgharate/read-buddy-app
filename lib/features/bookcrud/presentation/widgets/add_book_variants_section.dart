@@ -25,6 +25,7 @@ class PickedFileItem {
 
 class LocalBookFormat {
   final String type; // 'hardcover', 'ebook', 'audiobook', 'videobook'
+  final String? id; // MongoDB _id if loaded from server
   final String? isbn;
   final int? copies;
   final bool? available;
@@ -36,6 +37,7 @@ class LocalBookFormat {
 
   LocalBookFormat({
     required this.type,
+    this.id,
     this.isbn,
     this.copies,
     this.available,
@@ -630,7 +632,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               donorId: localVariant.donatorInfo,
               isbn: f.isbn,
               copies: f.copies,
-              available: f.available,
+              availableCopies: (f.available == true) ? (f.copies ?? 1) : 0,
             ));
           }
         }
@@ -640,27 +642,129 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
         if (localVariant.existingVariantId != null &&
             localVariant.existingVariantId!.isNotEmpty) {
-          // Existing variant — only send formats with NEW files
-          // Skip hardcover/paperback entirely (they don't need file uploads
-          // and are already on server if they existed before editing)
-          final newFormats = formats.where((f) {
-            // Only send ebook/audiobook/videobook that have actual files
-            if (f.type == 'ebook') return ebookFiles.isNotEmpty;
-            if (f.type == 'audiobook') return audioParts.isNotEmpty;
-            if (f.type == 'videobook') return videoParts.isNotEmpty;
-            // Skip hardcover for existing variants (already exists)
-            return false;
-          }).toList();
+          // Existing variant — decide whether to add new format types
+          // or add parts to existing formats.
 
-          if (newFormats.isNotEmpty) {
-            variantBloc.add(AddFormatEvent(
-              localVariant.existingVariantId!,
-              bookId,
-              newFormats,
-              ebookFiles: ebookFiles,
-              audioParts: audioParts,
-              videoParts: videoParts,
-            ));
+          // Separate formats into: new types (no server ID) vs existing (has server ID)
+          for (final f in localVariant.formats) {
+            final hasServerFormatId = f.id != null && f.id!.isNotEmpty;
+
+            if (f.type == 'ebook' && f.ebookFiles.isNotEmpty) {
+              if (hasServerFormatId) {
+                // Add ebook files to existing format
+                variantBloc.add(AddPartsToFormatEvent(
+                  variantId: localVariant.existingVariantId!,
+                  formatId: f.id!,
+                  bookId: bookId,
+                  ebookFiles: f.ebookFiles.map((pf) => pf.file).toList(),
+                ));
+              } else {
+                // New ebook format — use AddFormatEvent
+                variantBloc.add(AddFormatEvent(
+                  localVariant.existingVariantId!,
+                  bookId,
+                  [
+                    BookFormatEntity(
+                        type: 'ebook', donorId: localVariant.donatorInfo)
+                  ],
+                  ebookFiles: f.ebookFiles.map((pf) => pf.file).toList(),
+                ));
+              }
+            } else if (f.type == 'audiobook') {
+              final newParts = f.audioParts
+                  .where((p) => !p.isFromServer && p.file != null)
+                  .toList();
+              if (newParts.isEmpty) continue;
+
+              final audioFiles = newParts.map((p) => p.file!.file).toList();
+              final parts = newParts
+                  .map((p) => MediaPartEntity(
+                        partNumber: p.partNumber,
+                        title: p.title,
+                        duration: 0,
+                      ))
+                  .toList();
+
+              if (hasServerFormatId) {
+                // Add parts to existing audiobook format
+                variantBloc.add(AddPartsToFormatEvent(
+                  variantId: localVariant.existingVariantId!,
+                  formatId: f.id!,
+                  bookId: bookId,
+                  parts: parts,
+                  audioParts: audioFiles,
+                ));
+              } else {
+                // New audiobook format
+                variantBloc.add(AddFormatEvent(
+                  localVariant.existingVariantId!,
+                  bookId,
+                  [
+                    BookFormatEntity(
+                        type: 'audiobook',
+                        donorId: localVariant.donatorInfo,
+                        parts: parts)
+                  ],
+                  audioParts: audioFiles,
+                ));
+              }
+            } else if (f.type == 'videobook') {
+              final newParts = f.videoParts
+                  .where((p) => !p.isFromServer && p.file != null)
+                  .toList();
+              if (newParts.isEmpty) continue;
+
+              final videoFiles = newParts.map((p) => p.file!.file).toList();
+              final parts = newParts
+                  .map((p) => MediaPartEntity(
+                        partNumber: p.partNumber,
+                        title: p.title,
+                        duration: 0,
+                      ))
+                  .toList();
+
+              if (hasServerFormatId) {
+                // Add parts to existing videobook format
+                variantBloc.add(AddPartsToFormatEvent(
+                  variantId: localVariant.existingVariantId!,
+                  formatId: f.id!,
+                  bookId: bookId,
+                  parts: parts,
+                  videoParts: videoFiles,
+                ));
+              } else {
+                // New videobook format
+                variantBloc.add(AddFormatEvent(
+                  localVariant.existingVariantId!,
+                  bookId,
+                  [
+                    BookFormatEntity(
+                        type: 'videobook',
+                        donorId: localVariant.donatorInfo,
+                        parts: parts)
+                  ],
+                  videoParts: videoFiles,
+                ));
+              }
+            } else if (f.type == 'hardcover' || f.type == 'paperback') {
+              // Physical format — only add if new (not already on server)
+              if (!hasServerFormatId) {
+                variantBloc.add(AddFormatEvent(
+                  localVariant.existingVariantId!,
+                  bookId,
+                  [
+                    BookFormatEntity(
+                      type: f.type,
+                      donorId: localVariant.donatorInfo,
+                      isbn: f.isbn,
+                      copies: f.copies,
+                      availableCopies:
+                          (f.available == true) ? (f.copies ?? 1) : 0,
+                    )
+                  ],
+                ));
+              }
+            }
           }
         } else {
           // New variant — create it with all formats
@@ -752,7 +856,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             for (final entity in state.variants) {
               final formats = entity.formats.map((f) {
                 if (f.type == 'ebook') {
-                  return LocalBookFormat(type: f.type, ebookFiles: []);
+                  return LocalBookFormat(
+                      type: f.type, id: f.id, ebookFiles: []);
                 } else if (f.type == 'audiobook') {
                   final parts = f.parts
                       .map((p) => AudioPartMeta(
@@ -761,13 +866,25 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                             isFromServer: true,
                           ))
                       .toList();
-                  return LocalBookFormat(type: f.type, audioParts: parts);
+                  return LocalBookFormat(
+                      type: f.type, id: f.id, audioParts: parts);
+                } else if (f.type == 'videobook') {
+                  final parts = f.parts
+                      .map((p) => AudioPartMeta(
+                            partNumber: p.partNumber,
+                            title: p.title,
+                            isFromServer: true,
+                          ))
+                      .toList();
+                  return LocalBookFormat(
+                      type: f.type, id: f.id, videoParts: parts);
                 } else {
                   return LocalBookFormat(
                     type: f.type,
+                    id: f.id,
                     isbn: f.isbn,
                     copies: f.copies,
-                    available: f.available,
+                    available: (f.availableCopies ?? 0) > 0,
                   );
                 }
               }).toList();
@@ -1836,6 +1953,11 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       final names =
                           format.ebookFiles.map((f) => f.fileName).join(', ');
                       details = '${format.ebookFiles.length} file(s): $names';
+                    } else if (format.type == 'videobook') {
+                      accentColor = const Color(0xFF7C3AED);
+                      formatIcon = Icons.videocam_rounded;
+                      details =
+                          '${format.videoParts.length} part(s): ${format.videoParts.map((p) => p.title).join(', ')}';
                     } else {
                       accentColor = const Color(0xFFD97706);
                       formatIcon = Icons.headphones_rounded;

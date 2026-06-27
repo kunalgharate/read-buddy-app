@@ -1,15 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/widgets/prime_required_dialog.dart';
-import '../../../bookcrud/data/model/book_crud_model.dart';
+import '../../../audiobook/domain/entities/audiobook.dart';
 import '../../../bookcrud/domain/entities/book_variant_entity.dart';
 import '../../../bookcrud/domain/respository/variant_repository.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
+import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
+import '../cubit/book_detail_variant_cubit.dart';
 import '../../domain/entities/book_detail_entity.dart';
 import 'book_request_form_page.dart';
 
@@ -20,38 +24,26 @@ class BookDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<BookRequestBloc>()..add(LoadBookDetail(bookId)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+            create: (_) =>
+                getIt<BookRequestBloc>()..add(LoadBookDetail(bookId))),
+        BlocProvider(
+            create: (_) => BookDetailVariantCubit(
+                  getIt<VariantRepository>(),
+                  getIt<BookRequestRemoteDataSource>(),
+                  getIt<Dio>(),
+                  const FlutterSecureStorage(),
+                )),
+      ],
       child: const _BookDetailView(),
     );
   }
 }
 
-class _BookDetailView extends StatefulWidget {
+class _BookDetailView extends StatelessWidget {
   const _BookDetailView();
-
-  @override
-  State<_BookDetailView> createState() => _BookDetailViewState();
-}
-
-class _BookDetailViewState extends State<_BookDetailView> {
-  BookDetailEntity? _cachedBook;
-  List<BookVariantEntity> _variants = [];
-
-  void _updateVariants(List<BookVariantEntity> variants) {
-    setState(() => _variants = variants);
-  }
-
-  bool get _hasPhysicalCopy {
-    for (final variant in _variants) {
-      for (final format in variant.formats) {
-        if (format.type == 'hardcover' || format.type == 'paperback') {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,13 +60,7 @@ class _BookDetailViewState extends State<_BookDetailView> {
         },
         builder: (context, state) {
           if (state is BookDetailLoaded) {
-            _cachedBook = state.book;
-            return _BookDetailContent(
-                book: state.book, onVariantsLoaded: _updateVariants);
-          }
-          if (state is BookRequestCreating && _cachedBook != null) {
-            return _BookDetailContent(
-                book: _cachedBook!, onVariantsLoaded: _updateVariants);
+            return _BookDetailContent(book: state.book);
           }
           if (state is BookRequestLoading || state is BookRequestInitial) {
             return const Center(
@@ -105,179 +91,68 @@ class _BookDetailViewState extends State<_BookDetailView> {
           return const SizedBox.shrink();
         },
       ),
-      bottomNavigationBar: BlocBuilder<BookRequestBloc, BookRequestState>(
-        builder: (context, state) {
-          if (state is BookDetailLoaded) {
-            return _BottomActionBar(
-                book: state.book, hasPhysicalCopy: _hasPhysicalCopy);
-          }
-          if (state is BookRequestCreating && _cachedBook != null) {
-            return _BottomActionBar(
-                book: _cachedBook!, hasPhysicalCopy: _hasPhysicalCopy);
-          }
-          if (state is BookRequestError && _cachedBook != null) {
-            return _BottomActionBar(
-                book: _cachedBook!, hasPhysicalCopy: _hasPhysicalCopy);
-          }
-          return const SizedBox.shrink();
-        },
-      ),
     );
   }
 }
 
-class _BottomActionBar extends StatelessWidget {
+class _BookDetailContent extends StatelessWidget {
   final BookDetailEntity book;
-  final bool hasPhysicalCopy;
 
-  const _BottomActionBar({required this.book, this.hasPhysicalCopy = false});
+  const _BookDetailContent({required this.book});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        12,
-        16,
-        12 + MediaQuery.of(context).padding.bottom,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
-      ),
-      child: Row(
+    // Trigger variant loading when this widget builds
+    final cubit = context.read<BookDetailVariantCubit>();
+    if (cubit.state.isLoading) {
+      final profileState = context.read<ProfileBloc>().state;
+      final wishlist =
+          profileState is ProfileLoaded ? profileState.user.wishlist : [];
+      cubit.loadVariants(
+        bookId: book.id,
+        inlineVariants: book.variants,
+        userWishlist: wishlist,
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF1E2939),
-                side: const BorderSide(color: Color(0xFFDDDDDD)),
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                'Add to Wishlist',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
+          _CoverImageSection(book: book),
+          _TitleSection(book: book),
+          const SizedBox(height: 12),
+          BlocBuilder<BookDetailVariantCubit, BookDetailVariantState>(
+            builder: (context, state) {
+              if (state.isLoading) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                      child:
+                          CircularProgressIndicator(color: Color(0xFF2CE07F))),
+                );
+              }
+              if (state.variants.isEmpty) return const SizedBox.shrink();
+              return _LanguageAndActions(book: book);
+            },
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: hasPhysicalCopy
-                  ? () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BookRequestFormPage(
-                            bookId: book.id,
-                            bookTitle: book.title,
-                            coverImageUrl: book.coverImageUrl,
-                          ),
-                        ),
-                      )
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2CE07F),
-                disabledBackgroundColor: Colors.grey.shade300,
-                disabledForegroundColor: Colors.grey.shade500,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                'Request to Book',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: hasPhysicalCopy ? Colors.white : Colors.grey.shade500,
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(height: 12),
+          _AboutSection(book: book),
+          const SizedBox(height: 12),
+          _HighlightSection(book: book),
+          const SizedBox(height: 24),
         ],
       ),
     );
   }
 }
 
-class _BookDetailContent extends StatefulWidget {
+// ─── Language Tabs + Action Buttons ────────────────────────────────────────
+
+class _LanguageAndActions extends StatelessWidget {
   final BookDetailEntity book;
-  final void Function(List<BookVariantEntity>)? onVariantsLoaded;
+  const _LanguageAndActions({required this.book});
 
-  const _BookDetailContent({required this.book, this.onVariantsLoaded});
-
-  @override
-  State<_BookDetailContent> createState() => _BookDetailContentState();
-}
-
-class _BookDetailContentState extends State<_BookDetailContent> {
-  List<BookVariantEntity> _variants = [];
-  bool _isLoadingVariants = true;
-  String? _selectedLanguage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadVariants();
-  }
-
-  Future<void> _loadVariants() async {
-    // First try using inline variants from book response
-    if (widget.book.variants.isNotEmpty) {
-      setState(() {
-        _variants = widget.book.variants;
-        _isLoadingVariants = false;
-        _selectedLanguage = _variants.first.language;
-      });
-      widget.onVariantsLoaded?.call(_variants);
-      return;
-    }
-
-    // Fallback: fetch separately if not inline
-    try {
-      final repository = getIt<VariantRepository>();
-      final variants = await repository.getVariantsForBook(widget.book.id);
-      if (mounted) {
-        setState(() {
-          _variants = variants;
-          _isLoadingVariants = false;
-          if (variants.isNotEmpty) {
-            _selectedLanguage = variants.first.language;
-          }
-        });
-        widget.onVariantsLoaded?.call(variants);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoadingVariants = false);
-      }
-    }
-  }
-
-  BookVariantEntity? get _selectedVariant {
-    if (_selectedLanguage == null || _variants.isEmpty) return null;
-    final matches = _variants.where((v) => v.language == _selectedLanguage);
-    return matches.isNotEmpty ? matches.first : null;
-  }
-
-  bool _hasFormat(String type) {
-    return _selectedVariant?.formats.any((f) => f.type == type) ?? false;
-  }
-
-  BookFormatEntity? _getFormat(String type) {
-    final matches = _selectedVariant?.formats.where((f) => f.type == type);
-    return (matches != null && matches.isNotEmpty) ? matches.first : null;
-  }
-
-  /// Checks if user is Prime. If not, shows donation dialog. Returns true if Prime.
   bool _checkPrimeOrPrompt(BuildContext context) {
     final profileState = context.read<ProfileBloc>().state;
     if (profileState is ProfileLoaded && profileState.user.isPrime) {
@@ -287,130 +162,93 @@ class _BookDetailContentState extends State<_BookDetailContent> {
     return false;
   }
 
-  BookCrudModel _toBookCrudModel(BookDetailEntity detail) {
-    return BookCrudModel(
-      id: detail.id,
-      title: detail.title,
-      author: detail.author,
-      publisher: detail.publisher,
-      publicationYear: detail.publicationYear,
-      isbn: detail.isbn,
-      edition: '',
-      condition: detail.condition,
-      isAvailable: detail.isAvailable,
-      status: detail.status,
-      numberOfCopies: detail.numberOfCopies,
-      format: detail.format,
-      language: detail.language,
-      genre: '',
-      tags: detail.tags,
-      category: '',
-      ownerId: detail.owner.id,
-      location: detail.address.city,
-      coverImageUrl: detail.coverImageUrl,
-      additionalImages: [],
-      description: detail.description,
-      notes: '',
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _CoverImageSection(book: widget.book),
-          _TitleSection(book: widget.book),
-          const SizedBox(height: 12),
-          // ── Language Tabs + Action Buttons ────────────────────────────
-          if (!_isLoadingVariants && _variants.isNotEmpty)
-            _buildLanguageAndActions(),
-          if (_isLoadingVariants)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                  child: CircularProgressIndicator(color: Color(0xFF2CE07F))),
-            ),
-          const SizedBox(height: 12),
-          _AboutSection(book: widget.book),
-          const SizedBox(height: 12),
-          _buildVariantsSection(),
-          const SizedBox(height: 12),
-          _HighlightSection(book: widget.book),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
+    return BlocBuilder<BookDetailVariantCubit, BookDetailVariantState>(
+      builder: (context, state) {
+        final variants = state.variants;
+        final selectedLanguage = state.selectedLanguage;
+        final selectedVariant = selectedLanguage != null
+            ? variants.where((v) => v.language == selectedLanguage).firstOrNull
+            : null;
 
-  // ── Language Tabs + Read/Listen/Watch Buttons ──────────────────────────
-
-  Widget _buildLanguageAndActions() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Available in',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF042153))),
-          const SizedBox(height: 10),
-          // Language chips
-          SizedBox(
-            height: 36,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: _variants.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final lang = _variants[index].language;
-                final isSelected = lang == _selectedLanguage;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedLanguage = lang),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected ? const Color(0xFF042153) : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF042153)
-                            : Colors.grey.shade300,
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Available in',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF042153))),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 36,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: variants.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (_, index) {
+                    final lang = variants[index].language;
+                    final isSelected = lang == selectedLanguage;
+                    return GestureDetector(
+                      onTap: () => context
+                          .read<BookDetailVariantCubit>()
+                          .selectLanguage(lang),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFF042153)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isSelected
+                                ? const Color(0xFF042153)
+                                : Colors.grey.shade300,
+                          ),
+                        ),
+                        child: Text(
+                          lang[0].toUpperCase() + lang.substring(1),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF042153),
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      lang[0].toUpperCase() + lang.substring(1),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            isSelected ? Colors.white : const Color(0xFF042153),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildActionButtons(context, selectedVariant),
+            ],
           ),
-          const SizedBox(height: 16),
-          // Action buttons based on selected variant's formats
-          _buildActionButtons(),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(
+      BuildContext context, BookVariantEntity? selectedVariant) {
+    if (selectedVariant == null) return const SizedBox.shrink();
+    final cubitState = context.read<BookDetailVariantCubit>().state;
     final buttons = <Widget>[];
 
-    // Read (ebook)
-    if (_hasFormat('ebook')) {
-      final format = _getFormat('ebook');
+    bool hasFormat(String type) =>
+        selectedVariant.formats.any((f) => f.type == type);
+    BookFormatEntity? getFormat(String type) {
+      final m = selectedVariant.formats.where((f) => f.type == type);
+      return m.isNotEmpty ? m.first : null;
+    }
+
+    if (hasFormat('ebook')) {
+      final format = getFormat('ebook');
       buttons.add(_actionBtn(
         icon: Icons.chrome_reader_mode_rounded,
         label: 'Read',
@@ -426,8 +264,8 @@ class _BookDetailContentState extends State<_BookDetailContent> {
                   : '/pdf-reader',
               arguments: {
                 'url': url,
-                'title': widget.book.title,
-                'language': _selectedLanguage ?? 'en',
+                'title': book.title,
+                'language': cubitState.selectedLanguage ?? 'en',
               },
             );
           }
@@ -435,47 +273,73 @@ class _BookDetailContentState extends State<_BookDetailContent> {
       ));
     }
 
-    // Request (hardcover/paperback)
-    if (_hasFormat('hardcover') || _hasFormat('paperback')) {
+    if (hasFormat('hardcover') || hasFormat('paperback')) {
+      final hasActiveRequest =
+          context.read<BookDetailVariantCubit>().state.hasActiveRequest;
       buttons.add(_actionBtn(
-        icon: Icons.menu_book_rounded,
-        label: 'Request',
-        color: const Color(0xFF4F46E5),
-        onTap: () {
-          if (!_checkPrimeOrPrompt(context)) return;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BookRequestFormPage(
-                bookId: widget.book.id,
-                bookTitle: widget.book.title,
-                coverImageUrl: widget.book.coverImageUrl,
-              ),
-            ),
-          );
-        },
+        icon: hasActiveRequest
+            ? Icons.check_circle_rounded
+            : Icons.menu_book_rounded,
+        label: hasActiveRequest ? 'Requested' : 'Request',
+        color: hasActiveRequest ? Colors.grey : const Color(0xFF4F46E5),
+        onTap: hasActiveRequest
+            ? () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('You have already requested this book'),
+                      behavior: SnackBarBehavior.floating),
+                );
+              }
+            : () {
+                if (!_checkPrimeOrPrompt(context)) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BookRequestFormPage(
+                      bookId: book.id,
+                      bookTitle: book.title,
+                      coverImageUrl: book.coverImageUrl,
+                    ),
+                  ),
+                );
+              },
       ));
     }
 
-    // Listen (audiobook)
-    if (_hasFormat('audiobook')) {
+    if (hasFormat('audiobook')) {
+      final format = getFormat('audiobook');
       buttons.add(_actionBtn(
         icon: Icons.headphones_rounded,
         label: 'Listen',
         color: const Color(0xFFD97706),
         onTap: () {
           if (!_checkPrimeOrPrompt(context)) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Audiobook player coming soon!'),
-                behavior: SnackBarBehavior.floating),
-          );
+          if (format != null && format.parts.isNotEmpty) {
+            final audioBook = AudioBook(
+              id: book.id,
+              title: book.title,
+              author: book.author,
+              coverUrl: book.coverImageUrl,
+              tracks: format.parts
+                  .where((p) => p.audioUrl != null && p.audioUrl!.isNotEmpty)
+                  .map((p) => AudioBookTrack(
+                        id: '${book.id}_${p.partNumber}',
+                        title: p.title,
+                        trackNumber: p.partNumber,
+                        url: p.audioUrl!,
+                        duration: Duration(seconds: p.duration),
+                      ))
+                  .toList(),
+              totalDuration: Duration(seconds: format.totalDuration ?? 0),
+            );
+            Navigator.pushNamed(context, '/audiobook-player',
+                arguments: audioBook);
+          }
         },
       ));
     }
 
-    // Watch (videobook)
-    if (_hasFormat('videobook')) {
+    if (hasFormat('videobook')) {
       buttons.add(_actionBtn(
         icon: Icons.play_circle_rounded,
         label: 'Watch',
@@ -491,10 +355,7 @@ class _BookDetailContentState extends State<_BookDetailContent> {
       ));
     }
 
-    if (buttons.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
+    if (buttons.isEmpty) return const SizedBox.shrink();
     return Row(
       children: buttons
           .expand((btn) => [Expanded(child: btn), const SizedBox(width: 10)])
@@ -529,177 +390,6 @@ class _BookDetailContentState extends State<_BookDetailContent> {
                     fontSize: 13)),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildVariantsSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Variants',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A237E),
-                ),
-              ),
-              BlocBuilder<ProfileBloc, ProfileState>(
-                builder: (context, profileState) {
-                  bool canManage = false;
-                  if (profileState is ProfileLoaded) {
-                    final currentUser = profileState.user;
-                    if (currentUser.role == 'admin' ||
-                        currentUser.id == widget.book.owner.id) {
-                      canManage = true;
-                    }
-                  }
-                  if (!canManage) return const SizedBox.shrink();
-
-                  return ElevatedButton.icon(
-                    onPressed: () async {
-                      await Navigator.pushNamed(
-                        context,
-                        '/book-variants',
-                        arguments: _toBookCrudModel(widget.book),
-                      );
-                      _loadVariants();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    icon: const Icon(Icons.add, size: 16, color: Colors.white),
-                    label: const Text(
-                      'Add Variant',
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (_isLoadingVariants)
-            const Center(child: CircularProgressIndicator(color: Colors.green))
-          else if (_variants.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                'No variants added yet',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            )
-          else
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _variants.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final variant = _variants[index];
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        variant.language.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E2939),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: variant.formats.map((format) {
-                          IconData icon;
-                          Color color;
-                          String text = format.type.toUpperCase();
-
-                          switch (format.type) {
-                            case 'hardcover':
-                              icon = Icons.menu_book_rounded;
-                              color = const Color(0xFF4F46E5);
-                              if (format.copies != null) {
-                                text += ' (${format.copies} copies)';
-                              }
-                              break;
-                            case 'ebook':
-                              icon = Icons.book_online_rounded;
-                              color = const Color(0xFF0D9488);
-                              if (format.fileUrl != null) {
-                                text += ' (${format.fileUrl!.split('/').last})';
-                              }
-                              break;
-                            case 'audiobook':
-                              icon = Icons.headphones_rounded;
-                              color = const Color(0xFFD97706);
-                              if (format.totalDuration != null) {
-                                final mins = format.totalDuration! ~/ 60;
-                                text += ' ($mins min)';
-                              }
-                              break;
-                            default:
-                              icon = Icons.bookmark_border_rounded;
-                              color = Colors.grey;
-                          }
-
-                          return Chip(
-                            avatar: Icon(icon, size: 14, color: color),
-                            label: Text(
-                              text,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: color,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            backgroundColor: color.withValues(alpha: 0.08),
-                            side:
-                                BorderSide(color: color.withValues(alpha: 0.2)),
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-        ],
       ),
     );
   }
@@ -793,9 +483,17 @@ class _CoverImageSection extends StatelessWidget {
           right: 8,
           child: Row(
             children: [
-              _IconCircleButton(
-                icon: Icons.bookmark_border_rounded,
-                onTap: () {},
+              BlocBuilder<BookDetailVariantCubit, BookDetailVariantState>(
+                builder: (context, state) {
+                  return _IconCircleButton(
+                    icon: state.isInWishlist
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    onTap: () => context
+                        .read<BookDetailVariantCubit>()
+                        .toggleWishlist(book.id),
+                  );
+                },
               ),
               const SizedBox(width: 8),
               _IconCircleButton(

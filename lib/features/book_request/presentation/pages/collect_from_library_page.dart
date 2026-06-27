@@ -304,170 +304,173 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         child: _showingConfirmation
             ? _buildConfirmationView()
             : Column(
-        children: [
-          // ── Tab row ──────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: _PickupTabRow(
-              selected: _selectedTab,
-              initialTab: widget.initialTab,
-              onChanged: (i) => setState(() => _selectedTab = i),
-            ),
-          ),
-
-          // ── Scrollable body ──────────────────────────────────────────
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Book info card ─────────────────────────────────
-                  _BookCard(request: widget.request),
-
-                  const SizedBox(height: 20),
-
-                  // ── Section header ─────────────────────────────────
-                  Text(
-                    _selectedTab == 0
-                        ? 'Pickup Location & Details'
-                        : 'Drop Off Location & Details',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E2939),
+                  // ── Tab row ──────────────────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: _PickupTabRow(
+                      selected: _selectedTab,
+                      initialTab: widget.initialTab,
+                      onChanged: (i) => setState(() => _selectedTab = i),
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  // ── Scrollable body ──────────────────────────────────────────
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ── Book info card ─────────────────────────────────
+                          _BookCard(request: widget.request),
 
-                  // ── Library card ───────────────────────────────────
-                  BlocBuilder<BookRequestBloc, BookRequestState>(
-                    builder: (context, state) {
-                      if (state is LibraryDetailsLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(
-                              color: Color(0xFF2CE07F)),
-                        );
-                      }
-                      if (state is LibraryDetailsLoaded) {
-                        return _LibraryCard(library: state.library);
-                      }
-                      if (state is LibraryDetailsError) {
-                        return Center(
-                          child: Text(state.message,
-                              style: const TextStyle(color: Colors.grey)),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
+                          const SizedBox(height: 20),
 
-                  const SizedBox(height: 28),
-
-                  // ── User Details header ────────────────────────────
-                  const Text(
-                    'User Details',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E2939),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  const _FieldLabel(label: 'User Name'),
-                  const SizedBox(height: 8),
-                  _InputField(
-                    controller: _nameController,
-                    hint: 'Enter Name',
-                    keyboardType: TextInputType.name,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  const _FieldLabel(label: 'Phone Number'),
-                  const SizedBox(height: 8),
-                  _InputField(
-                    controller: _phoneController,
-                    hint: 'Enter phone number',
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(10),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  const _FieldLabel(label: 'Address'),
-                  const SizedBox(height: 8),
-                  _InputField(
-                    controller: _addressController,
-                    hint: 'e.g. Flat 12, Sunrise Apts, MG Road, Mumbai',
-                    keyboardType: TextInputType.streetAddress,
-                    prefixIcon: const Icon(
-                      Icons.location_on_outlined,
-                      color: Color(0xFF888888),
-                      size: 20,
-                    ),
-                    maxLines: 3,
-                    minLines: 3,
-                    helperText: 'Include flat/house no., street, area  •  min 10 characters',
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // ── Date + Time row ────────────────────────────────
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const _FieldLabel(label: 'Select Date'),
-                            const SizedBox(height: 8),
-                            _DateTimePickerButton(
-                              icon: Icons.calendar_month_outlined,
-                              label: _formatDate(_selectedDate),
-                              isPlaceholder: _selectedDate == null,
-                              onTap: _pickDate,
+                          // ── Section header ─────────────────────────────────
+                          Text(
+                            _selectedTab == 0
+                                ? 'Pickup Location & Details'
+                                : 'Drop Off Location & Details',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E2939),
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const _FieldLabel(label: 'Time'),
-                            const SizedBox(height: 8),
-                            _DateTimePickerButton(
-                              icon: Icons.access_time_outlined,
-                              label: _formatTime(_selectedTime),
-                              isPlaceholder: _selectedTime == null,
-                              onTap: _pickTime,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                          ),
 
-                  const SizedBox(height: 32),
+                          const SizedBox(height: 12),
+
+                          // ── Library card ───────────────────────────────────
+                          BlocBuilder<BookRequestBloc, BookRequestState>(
+                            builder: (context, state) {
+                              if (state is LibraryDetailsLoading) {
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                      color: Color(0xFF2CE07F)),
+                                );
+                              }
+                              if (state is LibraryDetailsLoaded) {
+                                return _LibraryCard(library: state.library);
+                              }
+                              if (state is LibraryDetailsError) {
+                                return Center(
+                                  child: Text(state.message,
+                                      style:
+                                          const TextStyle(color: Colors.grey)),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+
+                          const SizedBox(height: 28),
+
+                          // ── User Details header ────────────────────────────
+                          const Text(
+                            'User Details',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E2939),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          const _FieldLabel(label: 'User Name'),
+                          const SizedBox(height: 8),
+                          _InputField(
+                            controller: _nameController,
+                            hint: 'Enter Name',
+                            keyboardType: TextInputType.name,
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          const _FieldLabel(label: 'Phone Number'),
+                          const SizedBox(height: 8),
+                          _InputField(
+                            controller: _phoneController,
+                            hint: 'Enter phone number',
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          const _FieldLabel(label: 'Address'),
+                          const SizedBox(height: 8),
+                          _InputField(
+                            controller: _addressController,
+                            hint: 'e.g. Flat 12, Sunrise Apts, MG Road, Mumbai',
+                            keyboardType: TextInputType.streetAddress,
+                            prefixIcon: const Icon(
+                              Icons.location_on_outlined,
+                              color: Color(0xFF888888),
+                              size: 20,
+                            ),
+                            maxLines: 3,
+                            minLines: 3,
+                            helperText:
+                                'Include flat/house no., street, area  •  min 10 characters',
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // ── Date + Time row ────────────────────────────────
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(label: 'Select Date'),
+                                    const SizedBox(height: 8),
+                                    _DateTimePickerButton(
+                                      icon: Icons.calendar_month_outlined,
+                                      label: _formatDate(_selectedDate),
+                                      isPlaceholder: _selectedDate == null,
+                                      onTap: _pickDate,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(label: 'Time'),
+                                    const SizedBox(height: 8),
+                                    _DateTimePickerButton(
+                                      icon: Icons.access_time_outlined,
+                                      label: _formatTime(_selectedTime),
+                                      isPlaceholder: _selectedTime == null,
+                                      onTap: _pickTime,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
-              ),
-            ),
-          ),
-        ],
-      ), // end Column (BlocListener child)
+              ), // end Column (BlocListener child)
       ), // end BlocListener
       bottomNavigationBar: _showingConfirmation
           ? Padding(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
+              padding: EdgeInsets.fromLTRB(
+                  16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -481,7 +484,8 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                           onPressed: isLoading ? null : _onActualConfirm,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2CE07F),
-                            disabledBackgroundColor: const Color(0xFF2CE07F).withValues(alpha: 0.6),
+                            disabledBackgroundColor:
+                                const Color(0xFF2CE07F).withValues(alpha: 0.6),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -513,10 +517,12 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                     width: double.infinity,
                     height: 44,
                     child: OutlinedButton(
-                      onPressed: () => setState(() => _showingConfirmation = false),
+                      onPressed: () =>
+                          setState(() => _showingConfirmation = false),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF1E2939),
-                        side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
+                        side: const BorderSide(
+                            color: Color(0xFFCCCCCC), width: 1.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -534,30 +540,31 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
               ),
             )
           : Padding(
-        padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
-        child: SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
-            onPressed: _onConfirm,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2CE07F),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              padding: EdgeInsets.fromLTRB(
+                  16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _onConfirm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2CE07F),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1E2939),
+                    ),
+                  ),
+                ),
               ),
             ),
-            child: const Text(
-              'Next',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1E2939),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -691,16 +698,17 @@ class _BookCard extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: request.bookCoverUrl != null && request.bookCoverUrl!.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: request.bookCoverUrl!,
-                  width: 90,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => _placeholder(),
-                  errorWidget: (_, __, ___) => _placeholder(),
-                )
-              : _placeholder(),
+          child:
+              request.bookCoverUrl != null && request.bookCoverUrl!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: request.bookCoverUrl!,
+                      width: 90,
+                      height: 120,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => _placeholder(),
+                      errorWidget: (_, __, ___) => _placeholder(),
+                    )
+                  : _placeholder(),
         ),
         const SizedBox(width: 14),
         Expanded(
@@ -830,8 +838,7 @@ class _LibraryCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 library.contactNumber,
-                style:
-                    const TextStyle(fontSize: 13, color: Color(0xFF555555)),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF555555)),
               ),
             ],
           ),
@@ -846,8 +853,7 @@ class _LibraryCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 library.openHours,
-                style:
-                    const TextStyle(fontSize: 13, color: Color(0xFF555555)),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF555555)),
               ),
             ],
           ),

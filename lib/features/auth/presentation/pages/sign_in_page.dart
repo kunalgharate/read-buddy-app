@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
 import '../blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../blocs/sign_in/sign_in_bloc.dart';
-import '../widgets/custom_button_widget.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -30,12 +30,12 @@ class _SignInScreenState extends State<SignInScreen> {
   static const _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
 
   // Colors
-  static const _primaryColor = Color(0xFF3182CE);
-  static const _textColor = Color(0xFF1E2939);
-  static const _labelColor = Color(0xFF5B6675);
-  static const _hintColor = Color(0xFF8895A7);
-  static const _borderColor = Color(0xFFE2E8F0);
-  static const _errorColor = Color(0xFFE53E3E);
+  static const _primaryColor = AppColors.primary;
+  static const _textColor = AppColors.textPrimary;
+  static const _labelColor = AppColors.textSecondary;
+  static const _hintColor = AppColors.textHint;
+  static const _borderColor = AppColors.border;
+  static const _errorColor = AppColors.error;
 
   @override
   void dispose() {
@@ -193,8 +193,6 @@ class _SignInScreenState extends State<SignInScreen> {
                         _buildForgotPasswordLink(),
                         const SizedBox(height: 32.0),
                         _buildSignInButton(),
-                        const SizedBox(height: 20.0),
-                        _buildGoogleSignInButton(),
                         const Spacer(),
                         _buildSignUpPrompt(),
                         const Spacer(),
@@ -356,47 +354,6 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildGoogleSignInButton() {
-    return BlocBuilder<GoogleSignInBloc, GoogleSignInState>(
-      builder: (context, state) {
-        if (state is GoogleSignInLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return CustomButton(
-          text: 'Sign In with Google',
-          width: double.infinity,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w500,
-          backgroundColor: Colors.grey.shade200,
-          textColor: _textColor,
-          icon: _buildGoogleIcon(),
-          onPressed: () => context
-              .read<GoogleSignInBloc>()
-              .add(const GoogleSignInRequested()),
-        );
-      },
-    );
-  }
-
-  Widget _buildGoogleIcon() {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration:
-          const BoxDecoration(shape: BoxShape.circle, color: Colors.black),
-      alignment: Alignment.center,
-      child: const Text(
-        'G',
-        style: TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-        ),
-      ),
     );
   }
 

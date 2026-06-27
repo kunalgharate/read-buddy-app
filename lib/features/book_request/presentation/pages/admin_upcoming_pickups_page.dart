@@ -71,8 +71,7 @@ class _AdminUpcomingPickupsView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline,
-                      size: 48, color: Colors.grey),
+                  const Icon(Icons.error_outline, size: 48, color: Colors.grey),
                   const SizedBox(height: 12),
                   Text(
                     state.message,
@@ -147,17 +146,17 @@ class _PickupCard extends StatelessWidget {
           // Book cover
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: pickup.bookCoverUrl != null &&
-                    pickup.bookCoverUrl!.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: pickup.bookCoverUrl!,
-                    width: 80,
-                    height: 110,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => _coverPlaceholder(),
-                    errorWidget: (_, __, ___) => _coverPlaceholder(),
-                  )
-                : _coverPlaceholder(),
+            child:
+                pickup.bookCoverUrl != null && pickup.bookCoverUrl!.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: pickup.bookCoverUrl!,
+                        width: 80,
+                        height: 110,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => _coverPlaceholder(),
+                        errorWidget: (_, __, ___) => _coverPlaceholder(),
+                      )
+                    : _coverPlaceholder(),
           ),
           const SizedBox(width: 12),
 

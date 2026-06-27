@@ -77,8 +77,8 @@ class _DonatedBooksPageState extends State<DonatedBooksPage> {
                     return const Center(child: Text('No donated books found.'));
                   }
                   return ListView.separated(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     itemCount: state.donatedBooks.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) =>

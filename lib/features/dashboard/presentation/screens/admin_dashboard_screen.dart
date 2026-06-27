@@ -117,7 +117,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   DashboardBoxWidget(
                     title: 'Users',
                     count: 12,
-                    icon: Icons.  people,
+                    icon: Icons.people,
                     onPressed: () {},
                   ),
                   DashboardBoxWidget(

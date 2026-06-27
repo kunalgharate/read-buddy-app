@@ -1,6 +1,55 @@
 import '../../domain/entities/book_variant_entity.dart';
 import 'media_part_model.dart';
 
+class DonationEntryModel extends DonationEntry {
+  const DonationEntryModel({
+    required super.donorId,
+    required super.donorName,
+    required super.copiesDonated,
+    super.date,
+  });
+
+  factory DonationEntryModel.fromJson(Map<String, dynamic> json) {
+    // donorId can be a populated object { _id, name, email } or a plain string
+    final donorData = json['donorId'];
+    String donorId = '';
+    String donorName = '';
+    if (donorData is Map<String, dynamic>) {
+      donorId = donorData['_id'] ?? '';
+      donorName = donorData['name'] ?? '';
+    } else if (donorData is String) {
+      donorId = donorData;
+      donorName = json['donorName'] ?? '';
+    }
+
+    return DonationEntryModel(
+      donorId: donorId,
+      donorName: donorName,
+      copiesDonated: json['copiesDonated'] ?? 1,
+      date: json['donatedOn'] ?? json['date'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{
+      'donorId': donorId,
+      'donorName': donorName,
+      'copiesDonated': copiesDonated,
+    };
+    if (date != null) map['date'] = date;
+    return map;
+  }
+
+  factory DonationEntryModel.fromEntity(DonationEntry entity) {
+    return DonationEntryModel(
+      donorId: entity.donorId,
+      donorName: entity.donorName,
+      copiesDonated: entity.copiesDonated,
+      date: entity.date,
+    );
+  }
+}
+
 class BookFormatModel extends BookFormatEntity {
   const BookFormatModel({
     super.id,
@@ -8,10 +57,12 @@ class BookFormatModel extends BookFormatEntity {
     super.donorId,
     super.isbn,
     super.copies,
-    super.available,
+    super.availableCopies,
+    super.fileUrls,
     super.fileUrl,
     super.totalDuration,
     super.parts,
+    super.donations,
   });
 
   factory BookFormatModel.fromJson(Map<String, dynamic> json) {
@@ -24,13 +75,24 @@ class BookFormatModel extends BookFormatEntity {
       donorId = donorData;
     }
 
-    // fileUrl: use first of fileUrls[] if fileUrl is missing
+    // Parse fileUrls array
+    List<String> fileUrls = [];
+    if (json['fileUrls'] is List) {
+      fileUrls = (json['fileUrls'] as List).map((e) => e.toString()).toList();
+    }
+
+    // Legacy single fileUrl fallback
     String? fileUrl = json['fileUrl'];
-    if (fileUrl == null || fileUrl.isEmpty) {
-      final fileUrls = json['fileUrls'];
-      if (fileUrls is List && fileUrls.isNotEmpty) {
-        fileUrl = fileUrls.first.toString();
-      }
+    if ((fileUrl == null || fileUrl.isEmpty) && fileUrls.isNotEmpty) {
+      fileUrl = fileUrls.first;
+    }
+
+    // Parse donations array
+    List<DonationEntryModel> donations = [];
+    if (json['donations'] is List) {
+      donations = (json['donations'] as List)
+          .map((d) => DonationEntryModel.fromJson(d))
+          .toList();
     }
 
     return BookFormatModel(
@@ -39,13 +101,15 @@ class BookFormatModel extends BookFormatEntity {
       donorId: donorId,
       isbn: json['isbn'],
       copies: json['copies'],
-      available: json['available'],
+      availableCopies: json['availableCopies'],
+      fileUrls: fileUrls,
       fileUrl: fileUrl,
       totalDuration: json['totalDuration'],
       parts: (json['parts'] as List?)
               ?.map((p) => MediaPartModel.fromJson(p))
               .toList() ??
           const [],
+      donations: donations,
     );
   }
 
@@ -56,12 +120,18 @@ class BookFormatModel extends BookFormatEntity {
     if (donorId != null) map['donorId'] = donorId;
     if (isbn != null) map['isbn'] = isbn;
     if (copies != null) map['copies'] = copies;
-    if (available != null) map['available'] = available;
+    if (availableCopies != null) map['availableCopies'] = availableCopies;
+    if (fileUrls.isNotEmpty) map['fileUrls'] = fileUrls;
     if (fileUrl != null) map['fileUrl'] = fileUrl;
     if (totalDuration != null) map['totalDuration'] = totalDuration;
     if (parts.isNotEmpty) {
       map['parts'] =
           parts.map((p) => MediaPartModel.fromEntity(p).toJson()).toList();
+    }
+    if (donations.isNotEmpty) {
+      map['donations'] = donations
+          .map((d) => DonationEntryModel.fromEntity(d).toJson())
+          .toList();
     }
     return map;
   }
@@ -73,10 +143,12 @@ class BookFormatModel extends BookFormatEntity {
       donorId: entity.donorId,
       isbn: entity.isbn,
       copies: entity.copies,
-      available: entity.available,
+      availableCopies: entity.availableCopies,
+      fileUrls: entity.fileUrls,
       fileUrl: entity.fileUrl,
       totalDuration: entity.totalDuration,
       parts: entity.parts,
+      donations: entity.donations,
     );
   }
 }

@@ -115,7 +115,8 @@ class AppRouter {
       case '/settings':
         return MaterialPageRoute(builder: (_) => const SettingsScreen());
       case '/addresses':
-        return MaterialPageRoute(builder: (_) => const AddressManagementScreen());
+        return MaterialPageRoute(
+            builder: (_) => const AddressManagementScreen());
       case '/mybooks':
         return MaterialPageRoute(builder: (_) => const Mybook());
       case '/onboarding-page':

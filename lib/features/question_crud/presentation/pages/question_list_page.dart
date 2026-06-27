@@ -22,7 +22,8 @@ class _QuestionListPageState extends State<QuestionListPage> {
   @override
   void initState() {
     super.initState();
-    _getQuestionsUseCase = GetIt.instance<question_crud_usecases.GetQuestions>();
+    _getQuestionsUseCase =
+        GetIt.instance<question_crud_usecases.GetQuestions>();
     _deleteQuestionUseCase =
         GetIt.instance<question_crud_usecases.DeleteQuestion>();
     loadQuestions();

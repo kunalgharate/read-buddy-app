@@ -3,7 +3,6 @@ import 'package:read_buddy_app/features/donate/domain/entities/agent.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/donation_stats.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/user_book_status.dart';
 
-
 import 'package:read_buddy_app/features/donate/domain/entities/book_donation_request.dart';
 import 'package:read_buddy_app/features/donate/data/models/book_donation_request_model.dart';
 import 'package:read_buddy_app/features/donate/domain/repositories/donate_repository.dart';
@@ -56,9 +55,9 @@ class DonateRepositoryImpl implements DonateRepository {
     throw UnimplementedError('getUserLocation API endpoint not yet available');
   }
 
-
   @override
   Future<UserBookStatus> getUserBookStatus() async {
-    throw UnimplementedError('getUserBookStatus API endpoint not yet available');
+    throw UnimplementedError(
+        'getUserBookStatus API endpoint not yet available');
   }
 }

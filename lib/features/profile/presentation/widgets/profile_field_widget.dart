@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class ProfileFieldWidget extends StatelessWidget {
   final IconData icon;
@@ -47,7 +48,7 @@ class ProfileFieldWidget extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                color: const Color(0xFF3182CE),
+                color: AppColors.primary,
                 size: 20,
               ),
             ),

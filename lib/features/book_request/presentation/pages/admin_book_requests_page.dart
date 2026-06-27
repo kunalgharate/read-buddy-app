@@ -253,8 +253,7 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child:
-                const Text('Decline', style: TextStyle(color: Colors.white)),
+            child: const Text('Decline', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -384,8 +383,8 @@ class _RequestCard extends StatelessWidget {
                   // Book title
                   Text(
                     request.bookTitle ?? 'Unknown Book',
-                    style: const TextStyle(
-                        fontSize: 13, color: Color(0xFF444444)),
+                    style:
+                        const TextStyle(fontSize: 13, color: Color(0xFF444444)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -403,8 +402,7 @@ class _RequestCard extends StatelessWidget {
                             height: 28,
                             width: 28,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Color(0xFF2CE07F)),
+                                strokeWidth: 2.5, color: Color(0xFF2CE07F)),
                           )
                         : Row(
                             children: [
@@ -539,8 +537,7 @@ class _DetailSheet extends StatelessWidget {
                 color: Color(0xFF052E44))),
         const SizedBox(height: 10),
         _DetailTile(
-            label: 'Name',
-            value: request.userName ?? request.userId ?? '—'),
+            label: 'Name', value: request.userName ?? request.userId ?? '—'),
         if (request.userEmail != null)
           _DetailTile(label: 'Email', value: request.userEmail!),
 
@@ -569,7 +566,8 @@ class _DetailSheet extends StatelessWidget {
 
         // Delivery details — only after approved
         if (request.status.toLowerCase() != 'requested' &&
-            (request.deliveryName != null || request.deliveryAddress != null)) ...[
+            (request.deliveryName != null ||
+                request.deliveryAddress != null)) ...[
           const SizedBox(height: 8),
           const Text('Delivery Details',
               style: TextStyle(
@@ -586,14 +584,18 @@ class _DetailSheet extends StatelessWidget {
           if (request.deliveryPincode != null)
             _DetailTile(label: 'Pincode', value: request.deliveryPincode!),
           if (request.deliveryPreferredDate != null)
-            _DetailTile(label: 'Preferred Date', value: _fmtDate(request.deliveryPreferredDate)),
+            _DetailTile(
+                label: 'Preferred Date',
+                value: _fmtDate(request.deliveryPreferredDate)),
           if (request.deliveryPreferredTime != null)
-            _DetailTile(label: 'Preferred Time', value: request.deliveryPreferredTime!),
+            _DetailTile(
+                label: 'Preferred Time', value: request.deliveryPreferredTime!),
         ],
 
         // Pickup details — only after approved
         if (request.status.toLowerCase() != 'requested' &&
-            (request.pickupUserName != null || request.pickupPhone != null)) ...[
+            (request.pickupUserName != null ||
+                request.pickupPhone != null)) ...[
           const SizedBox(height: 8),
           const Text('Pickup Details',
               style: TextStyle(
@@ -696,8 +698,7 @@ class _StatusUpdateButton extends StatelessWidget {
             Text('Update',
                 style: TextStyle(fontSize: 12, color: Color(0xFF444444))),
             SizedBox(width: 4),
-            Icon(Icons.keyboard_arrow_down,
-                size: 16, color: Color(0xFF444444)),
+            Icon(Icons.keyboard_arrow_down, size: 16, color: Color(0xFF444444)),
           ],
         ),
       ),
@@ -720,8 +721,7 @@ class _DetailTile extends StatelessWidget {
           SizedBox(
             width: 130,
             child: Text(label,
-                style: const TextStyle(
-                    fontSize: 13, color: Color(0xFF888888))),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF888888))),
           ),
           Expanded(
             child: Text(value,
@@ -933,8 +933,8 @@ class _ErrorView extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Retry',
-                style: TextStyle(color: Color(0xFF052E44))),
+            child:
+                const Text('Retry', style: TextStyle(color: Color(0xFF052E44))),
           ),
         ],
       ),
@@ -947,8 +947,18 @@ String _fmtDate(String? s) {
   try {
     final dt = DateTime.parse(s);
     const m = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return '${dt.day} ${m[dt.month - 1]} ${dt.year}';
   } catch (_) {

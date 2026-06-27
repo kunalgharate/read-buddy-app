@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:read_buddy_app/features/audiobook/presentation/widgets/mini_audio_player.dart';
 import 'package:read_buddy_app/features/splash/splash_screen.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/sign_in/sign_in_bloc.dart';
@@ -136,6 +137,24 @@ class _MyAppState extends State<MyApp> {
             child: SplashScreen(),
           ),
           onGenerateRoute: AppRouter.generateRoute,
+          builder: (context, child) {
+            return Material(
+              child: Stack(
+                children: [
+                  Positioned.fill(child: child ?? const SizedBox.shrink()),
+                  const Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: SafeArea(
+                      top: false,
+                      child: MiniAudioPlayer(),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

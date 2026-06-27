@@ -19,13 +19,13 @@ class BookDonationRequest extends Equatable {
 
   @override
   List<Object?> get props => [
-    fulfillmentType,
-    bookDetails,
-    pickupDetails,
-    dropoffDetails,
-    bookImagePath,
-    receiptImagePath,
-  ];
+        fulfillmentType,
+        bookDetails,
+        pickupDetails,
+        dropoffDetails,
+        bookImagePath,
+        receiptImagePath,
+      ];
 }
 
 class BookDetails extends Equatable {
@@ -47,13 +47,13 @@ class BookDetails extends Equatable {
 
   @override
   List<Object?> get props => [
-    bookName,
-    category,
-    condition,
-    description,
-    language,
-    format,
-  ];
+        bookName,
+        category,
+        condition,
+        description,
+        language,
+        format,
+      ];
 }
 
 class PickupDetails extends Equatable {
@@ -79,15 +79,15 @@ class PickupDetails extends Equatable {
 
   @override
   List<Object?> get props => [
-    name,
-    address,
-    pincode,
-    mobile,
-    preferredDate,
-    preferredTime,
-    latitude,
-    longitude,
-  ];
+        name,
+        address,
+        pincode,
+        mobile,
+        preferredDate,
+        preferredTime,
+        latitude,
+        longitude,
+      ];
 }
 
 class DropoffDetails extends Equatable {

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/audiobook.dart';
 import '../data/dummy_audiobooks.dart';
 
 class AudioBookListPage extends StatelessWidget {
   const AudioBookListPage({super.key});
-
-  static const _textDark = Color(0xFF052E44);
-  static const _bg = Color(0xFFFDFDFD);
 
   String _formatDuration(Duration d) {
     final h = d.inHours;
@@ -20,17 +18,17 @@ class AudioBookListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: _bg,
+        backgroundColor: AppColors.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: _textDark),
+        iconTheme: const IconThemeData(color: AppColors.textDark),
         title: Text(
           'Audiobooks',
           style: GoogleFonts.poppins(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: _textDark,
+            color: AppColors.textDark,
           ),
         ),
       ),
@@ -79,7 +77,7 @@ class _AudioBookCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFEAEAEA)),
+          border: Border.all(color: AppColors.borderLight),
         ),
         child: Row(
           children: [
@@ -87,12 +85,12 @@ class _AudioBookCard extends StatelessWidget {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: const Color(0xFF2CE07F).withValues(alpha: 0.15),
+                color: AppColors.accent.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.headphones_rounded,
-                color: Color(0xFF2CE07F),
+                color: AppColors.accent,
                 size: 28,
               ),
             ),
@@ -146,7 +144,7 @@ class _AudioBookCard extends StatelessWidget {
                         trackLabel,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
-                          color: const Color(0xFF2CE07F),
+                          color: AppColors.accent,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -157,7 +155,7 @@ class _AudioBookCard extends StatelessWidget {
             ),
             const Icon(
               Icons.play_circle_filled,
-              color: Color(0xFF2CE07F),
+              color: AppColors.accent,
               size: 36,
             ),
           ],

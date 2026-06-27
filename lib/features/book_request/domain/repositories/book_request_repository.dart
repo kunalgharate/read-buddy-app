@@ -16,6 +16,14 @@ abstract class BookRequestRepository {
   Future<BookRequestEntity> schedulePickup(PickupDetailsEntity details);
   Future<BookRequestEntity> getRequestDetails(String id);
   Future<void> updateRequestStatus(String id, String status);
-  Future<void> scheduleDelivery(String id, String name, String phone, String address, String pincode, String preferredDate, String preferredTime);
-  Future<void> initiateReturn(String id, String returnMethod, {String? returnBranchId});
+  Future<void> scheduleDelivery(
+      String id,
+      String name,
+      String phone,
+      String address,
+      String pincode,
+      String preferredDate,
+      String preferredTime);
+  Future<void> initiateReturn(String id, String returnMethod,
+      {String? returnBranchId});
 }

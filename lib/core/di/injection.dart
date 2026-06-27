@@ -77,6 +77,7 @@ import 'package:read_buddy_app/features/bookcrud/domain/usecases/delete_variant.
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/add_format.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/remove_format.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_variants_for_book.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/add_parts_to_format.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/variant/variant_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
@@ -443,6 +444,8 @@ void _registerUseCases() {
       () => RemoveFormatUsecase(getIt<VariantRepository>()));
   getIt.registerLazySingleton(
       () => GetVariantsForBookUsecase(getIt<VariantRepository>()));
+  getIt.registerLazySingleton(
+      () => AddPartsToFormatUsecase(getIt<VariantRepository>()));
 
   // User
   getIt
@@ -599,6 +602,7 @@ void _registerBlocs() {
         deleteVariant: getIt<DeleteVariantUsecase>(),
         addFormat: getIt<AddFormatUsecase>(),
         removeFormat: getIt<RemoveFormatUsecase>(),
+        addPartsToFormat: getIt<AddPartsToFormatUsecase>(),
       ));
 
   // Category CRUD

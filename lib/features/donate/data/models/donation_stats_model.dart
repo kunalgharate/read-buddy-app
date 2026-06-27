@@ -21,10 +21,12 @@ class BookStatusItemModel extends BookStatusItem {
     } else if (categoryData != null) {
       categoryName = categoryData.toString();
     }
-    
+
     return BookStatusItemModel(
-      id:     (json['id'] ?? json['_id'])?.toString() ?? '',
-      title:  (json['title'] ?? json['bookTitle'] ?? json['bookName'])?.toString() ?? '',
+      id: (json['id'] ?? json['_id'])?.toString() ?? '',
+      title: (json['title'] ?? json['bookTitle'] ?? json['bookName'])
+              ?.toString() ??
+          '',
       format: json['format']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       condition: json['condition']?.toString(),
@@ -48,21 +50,24 @@ class DonationStatsModel extends DonationStats {
     final impact = json['impact'] as Map<String, dynamic>? ?? json;
 
     final booksDonated = int.tryParse(
-      impact['booksDonated']?.toString() ?? '0',
-    ) ?? 0;
+          impact['booksDonated']?.toString() ?? '0',
+        ) ??
+        0;
 
     final studentsHelped = int.tryParse(
-      impact['studentsHelped']?.toString() ?? '0',
-    ) ?? 0;
+          impact['studentsHelped']?.toString() ?? '0',
+        ) ??
+        0;
 
-    final rawList = json['bookStatusList'] as List<dynamic>? ?? 
-                    json['donatedBooksList'] as List<dynamic>? ?? [];
+    final rawList = json['bookStatusList'] as List<dynamic>? ??
+        json['donatedBooksList'] as List<dynamic>? ??
+        [];
     final bookStatusList = rawList
         .map((e) => BookStatusItemModel.fromJson(e as Map<String, dynamic>))
         .toList();
 
     return DonationStatsModel(
-      booksDonated:  booksDonated,
+      booksDonated: booksDonated,
       studentsHelped: studentsHelped,
       bookStatusList: bookStatusList,
     );

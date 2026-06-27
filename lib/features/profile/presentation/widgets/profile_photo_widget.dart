@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class ProfilePhotoWidget extends StatelessWidget {
   final String? imageUrl;
@@ -51,7 +52,7 @@ class ProfilePhotoWidget extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF3182CE),
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: Colors.white,
@@ -86,12 +87,12 @@ class ProfilePhotoWidget extends StatelessWidget {
             icon: const Icon(
               Icons.camera_alt,
               size: 16,
-              color: Color(0xFF3182CE),
+              color: AppColors.primary,
             ),
             label: const Text(
               'Change Photo',
               style: TextStyle(
-                color: Color(0xFF3182CE),
+                color: AppColors.primary,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
