@@ -204,8 +204,9 @@ class _PlayerBody extends StatelessWidget {
                       return ListTile(
                         leading: CircleAvatar(
                           radius: 16,
-                          backgroundColor:
-                              isActive ? AppColors.accent : AppColors.borderLight,
+                          backgroundColor: isActive
+                              ? AppColors.accent
+                              : AppColors.borderLight,
                           child: Text('${track.trackNumber}',
                               style: GoogleFonts.poppins(
                                   fontSize: 12,
@@ -220,13 +221,15 @@ class _PlayerBody extends StatelessWidget {
                                 fontWeight: isActive
                                     ? FontWeight.w600
                                     : FontWeight.w400,
-                                color: isActive ? AppColors.accent : AppColors.textDark)),
+                                color: isActive
+                                    ? AppColors.accent
+                                    : AppColors.textDark)),
                         subtitle: Text(_fmt(track.duration),
                             style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: AppColors.textSubtitle)),
+                                fontSize: 12, color: AppColors.textSubtitle)),
                         trailing: isActive
-                            ? const Icon(Icons.equalizer, color: AppColors.accent)
+                            ? const Icon(Icons.equalizer,
+                                color: AppColors.accent)
                             : const Icon(Icons.play_circle_outline,
                                 color: AppColors.textMuted),
                         onTap: () {
@@ -251,7 +254,6 @@ class _PlayerBody extends StatelessWidget {
 class _CoverImage extends StatelessWidget {
   final String coverUrl;
   const _CoverImage({required this.coverUrl});
-
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +285,8 @@ class _CoverImage extends StatelessWidget {
 
   Widget _placeholder() => Container(
         color: AppColors.accent.withValues(alpha: 0.1),
-        child: const Icon(Icons.headphones_rounded, size: 80, color: AppColors.accent),
+        child: const Icon(Icons.headphones_rounded,
+            size: 80, color: AppColors.accent),
       );
 }
 
@@ -292,7 +295,6 @@ class _CoverImage extends StatelessWidget {
 class _SeekBar extends StatelessWidget {
   final AudioPlayerService service;
   const _SeekBar({required this.service});
-
 
   @override
   Widget build(BuildContext context) {
@@ -325,8 +327,7 @@ class _SeekBar extends StatelessWidget {
                   value: progress.clamp(0.0, 1.0),
                   onChanged: (v) {
                     service.seekTo(Duration(
-                        milliseconds:
-                            (v * duration.inMilliseconds).round()));
+                        milliseconds: (v * duration.inMilliseconds).round()));
                   },
                 ),
               ),
@@ -337,12 +338,10 @@ class _SeekBar extends StatelessWidget {
                   children: [
                     Text(_fmt(position),
                         style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppColors.textSubtitle)),
+                            fontSize: 12, color: AppColors.textSubtitle)),
                     Text(_fmt(duration),
                         style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppColors.textSubtitle)),
+                            fontSize: 12, color: AppColors.textSubtitle)),
                   ],
                 ),
               ),
@@ -361,7 +360,6 @@ class _Controls extends StatelessWidget {
   final AudioBook book;
   const _Controls({required this.service, required this.book});
 
-
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
@@ -372,8 +370,7 @@ class _Controls extends StatelessWidget {
           builder: (context, snapshot) {
             final state = snapshot.data;
             final isPlaying = state?.playing ?? false;
-            final processing =
-                state?.processingState ?? ProcessingState.idle;
+            final processing = state?.processingState ?? ProcessingState.idle;
             final isBuffering = processing == ProcessingState.loading ||
                 processing == ProcessingState.buffering;
 
@@ -452,7 +449,6 @@ class _Controls extends StatelessWidget {
 class _SpeedSlider extends StatelessWidget {
   final AudioPlayerService service;
   const _SpeedSlider({required this.service});
-
 
   @override
   Widget build(BuildContext context) {

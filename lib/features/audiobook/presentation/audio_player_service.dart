@@ -119,7 +119,8 @@ class AudioPlayerService {
     // Lazy init audio service on first play
     if (_audioHandler == null) await init();
 
-    debugPrint('🎵 AudioPlayerService.play: ${book.title}, tracks: ${book.tracks.length}');
+    debugPrint(
+        '🎵 AudioPlayerService.play: ${book.title}, tracks: ${book.tracks.length}');
     _currentBook = book;
 
     // Defer notifier update to avoid triggering rebuild during build phase

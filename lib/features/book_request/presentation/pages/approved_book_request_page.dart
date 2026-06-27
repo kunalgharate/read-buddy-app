@@ -34,8 +34,19 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     final dt = DateTime.tryParse(dateStr);
     if (dt == null) return dateStr;
     const months = [
-      '', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
     return '${dt.day} ${months[dt.month]} ${dt.year}';
   }

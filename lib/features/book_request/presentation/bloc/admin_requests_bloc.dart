@@ -69,8 +69,7 @@ class AdminRequestActionError extends AdminRequestsState {
 
 // ─── Bloc ──────────────────────────────────────────────────────────────────
 
-class AdminRequestsBloc
-    extends Bloc<AdminRequestsEvent, AdminRequestsState> {
+class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
   final GetAllBookRequestsUsecase getAllBookRequests;
   final AcceptBookRequestUsecase acceptBookRequest;
   final DeclineBookRequestUsecase declineBookRequest;
@@ -111,9 +110,8 @@ class AdminRequestsBloc
       // BUG 5 FIX: Dispatch an in-app notification to the user whose request
       // was just approved. We look up the userId from the current list before
       // the reload so we have it even after the list is refreshed.
-      final approvedRequest = currentList
-          .where((r) => r.id == event.requestId)
-          .firstOrNull;
+      final approvedRequest =
+          currentList.where((r) => r.id == event.requestId).firstOrNull;
       final userId = approvedRequest?.userId;
       final bookTitle = approvedRequest?.bookTitle ?? 'your book';
 
@@ -151,7 +149,8 @@ class AdminRequestsBloc
       if (userId != null && userId.isNotEmpty) {
         await sendNotification(
           userId: userId,
-          message: 'Your request for "$bookTitle" was declined. Reason: ${event.reason}',
+          message:
+              'Your request for "$bookTitle" was declined. Reason: ${event.reason}',
           type: 'book_request',
         );
       }
@@ -172,8 +171,7 @@ class AdminRequestsBloc
       emit(AdminRequestActionSuccess(
           updated, 'Status updated to ${event.status}'));
     } catch (e) {
-      emit(AdminRequestActionError(
-          currentList, 'Failed to update status: $e'));
+      emit(AdminRequestActionError(currentList, 'Failed to update status: $e'));
     }
   }
 

@@ -68,7 +68,8 @@ class BookDonationRequestModel extends BookDonationRequest {
     // ── Dropoff details (key: 'dropoff') ──────────────────────
     if (fulfillmentType == 'DROP_OFF' && dropoffDetails != null) {
       data['dropoff'] = {
-        'libraryId': dropoffDetails!.libraryId, // ✅ server expects 'dropoff' not 'dropoffDetails'
+        'libraryId': dropoffDetails!
+            .libraryId, // ✅ server expects 'dropoff' not 'dropoffDetails'
       };
     }
 

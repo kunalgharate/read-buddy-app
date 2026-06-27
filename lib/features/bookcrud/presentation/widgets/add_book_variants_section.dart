@@ -663,12 +663,17 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 variantBloc.add(AddFormatEvent(
                   localVariant.existingVariantId!,
                   bookId,
-                  [BookFormatEntity(type: 'ebook', donorId: localVariant.donatorInfo)],
+                  [
+                    BookFormatEntity(
+                        type: 'ebook', donorId: localVariant.donatorInfo)
+                  ],
                   ebookFiles: f.ebookFiles.map((pf) => pf.file).toList(),
                 ));
               }
             } else if (f.type == 'audiobook') {
-              final newParts = f.audioParts.where((p) => !p.isFromServer && p.file != null).toList();
+              final newParts = f.audioParts
+                  .where((p) => !p.isFromServer && p.file != null)
+                  .toList();
               if (newParts.isEmpty) continue;
 
               final audioFiles = newParts.map((p) => p.file!.file).toList();
@@ -694,12 +699,19 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 variantBloc.add(AddFormatEvent(
                   localVariant.existingVariantId!,
                   bookId,
-                  [BookFormatEntity(type: 'audiobook', donorId: localVariant.donatorInfo, parts: parts)],
+                  [
+                    BookFormatEntity(
+                        type: 'audiobook',
+                        donorId: localVariant.donatorInfo,
+                        parts: parts)
+                  ],
                   audioParts: audioFiles,
                 ));
               }
             } else if (f.type == 'videobook') {
-              final newParts = f.videoParts.where((p) => !p.isFromServer && p.file != null).toList();
+              final newParts = f.videoParts
+                  .where((p) => !p.isFromServer && p.file != null)
+                  .toList();
               if (newParts.isEmpty) continue;
 
               final videoFiles = newParts.map((p) => p.file!.file).toList();
@@ -725,7 +737,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 variantBloc.add(AddFormatEvent(
                   localVariant.existingVariantId!,
                   bookId,
-                  [BookFormatEntity(type: 'videobook', donorId: localVariant.donatorInfo, parts: parts)],
+                  [
+                    BookFormatEntity(
+                        type: 'videobook',
+                        donorId: localVariant.donatorInfo,
+                        parts: parts)
+                  ],
                   videoParts: videoFiles,
                 ));
               }
@@ -735,13 +752,16 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 variantBloc.add(AddFormatEvent(
                   localVariant.existingVariantId!,
                   bookId,
-                  [BookFormatEntity(
-                    type: f.type,
-                    donorId: localVariant.donatorInfo,
-                    isbn: f.isbn,
-                    copies: f.copies,
-                    availableCopies: (f.available == true) ? (f.copies ?? 1) : 0,
-                  )],
+                  [
+                    BookFormatEntity(
+                      type: f.type,
+                      donorId: localVariant.donatorInfo,
+                      isbn: f.isbn,
+                      copies: f.copies,
+                      availableCopies:
+                          (f.available == true) ? (f.copies ?? 1) : 0,
+                    )
+                  ],
                 ));
               }
             }
@@ -836,7 +856,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             for (final entity in state.variants) {
               final formats = entity.formats.map((f) {
                 if (f.type == 'ebook') {
-                  return LocalBookFormat(type: f.type, id: f.id, ebookFiles: []);
+                  return LocalBookFormat(
+                      type: f.type, id: f.id, ebookFiles: []);
                 } else if (f.type == 'audiobook') {
                   final parts = f.parts
                       .map((p) => AudioPartMeta(
@@ -845,7 +866,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                             isFromServer: true,
                           ))
                       .toList();
-                  return LocalBookFormat(type: f.type, id: f.id, audioParts: parts);
+                  return LocalBookFormat(
+                      type: f.type, id: f.id, audioParts: parts);
                 } else if (f.type == 'videobook') {
                   final parts = f.parts
                       .map((p) => AudioPartMeta(
@@ -854,7 +876,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                             isFromServer: true,
                           ))
                       .toList();
-                  return LocalBookFormat(type: f.type, id: f.id, videoParts: parts);
+                  return LocalBookFormat(
+                      type: f.type, id: f.id, videoParts: parts);
                 } else {
                   return LocalBookFormat(
                     type: f.type,

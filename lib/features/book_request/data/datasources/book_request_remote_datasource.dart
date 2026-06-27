@@ -28,7 +28,8 @@ abstract class BookRequestRemoteDataSource {
       String pincode,
       String preferredDate,
       String preferredTime);
-  Future<void> initiateReturn(String id, String returnMethod, {String? returnBranchId});
+  Future<void> initiateReturn(String id, String returnMethod,
+      {String? returnBranchId});
 }
 
 class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
@@ -327,7 +328,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<void> initiateReturn(String id, String returnMethod, {String? returnBranchId}) async {
+  Future<void> initiateReturn(String id, String returnMethod,
+      {String? returnBranchId}) async {
     try {
       final response = await dio.post(
         '${ApiConstants.v1BookRequests}/$id/initiate-return',

@@ -28,8 +28,10 @@ class AgentModel extends Agent {
       isAvailable: json['isAvailable'] ?? true,
       distanceKm: (json['distanceKm'] ?? 0.0).toDouble(),
       estimatedPickupTimeMin: json['estimatedPickupTimeMin'],
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 

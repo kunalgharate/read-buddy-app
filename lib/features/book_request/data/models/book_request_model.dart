@@ -63,7 +63,8 @@ class BookRequestModel extends BookRequestEntity {
 
     return BookRequestModel(
       id: json['_id'] ?? '',
-      userId: userObj?['_id'] ?? (json['userId'] is String ? json['userId'] : null),
+      userId:
+          userObj?['_id'] ?? (json['userId'] is String ? json['userId'] : null),
       status: json['status'] ?? '',
       fulfillmentMethod: json['fulfillmentMethod'] ?? '',
       paymentStatus: json['paymentStatus'] ?? '',
@@ -74,7 +75,8 @@ class BookRequestModel extends BookRequestEntity {
       returnPaymentStatus: json['returnPaymentStatus'],
       returnCondition: json['returnCondition'],
       // book fields — only populated when bookId is a full object
-      bookId: book?['_id'] ?? (json['bookId'] is String ? json['bookId'] : null),
+      bookId:
+          book?['_id'] ?? (json['bookId'] is String ? json['bookId'] : null),
       bookTitle: book?['title'],
       bookAuthor: book?['author'],
       bookCoverUrl: book?['coverImageUrl'],
@@ -83,7 +85,8 @@ class BookRequestModel extends BookRequestEntity {
       donorName: donorObj?['name'],
       userName: userObj?['name'],
       userEmail: userObj?['email'],
-      deliveryAddress: json['address'] is String ? json['address'] as String : null,
+      deliveryAddress:
+          json['address'] is String ? json['address'] as String : null,
       deliveryName: deliveryDetails?['name'],
       deliveryPhone: deliveryDetails?['phone'],
       deliveryPincode: deliveryDetails?['pincode'],

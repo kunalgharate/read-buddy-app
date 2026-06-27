@@ -25,8 +25,7 @@ class MiniAudioPlayer extends StatelessWidget {
           onTap: () {
             Navigator.of(context, rootNavigator: true).push(
               MaterialPageRoute(
-                builder: (_) => AudioBookPlayerPage(
-                    audioBook: book),
+                builder: (_) => AudioBookPlayerPage(audioBook: book),
               ),
             );
           },

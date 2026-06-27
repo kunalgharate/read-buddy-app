@@ -28,7 +28,8 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
 
       if (rawData is Map<String, dynamic> && rawData.containsKey('books')) {
         list = rawData['books'] as List<dynamic>;
-      } else if (rawData is Map<String, dynamic> && rawData.containsKey('data')) {
+      } else if (rawData is Map<String, dynamic> &&
+          rawData.containsKey('data')) {
         list = rawData['data'] as List<dynamic>;
       } else if (rawData is List) {
         list = rawData;
@@ -36,9 +37,7 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
         throw Exception('Unexpected response format for books');
       }
 
-      return list
-          .map((json) => BookModel.fromJson(json))
-          .toList();
+      return list.map((json) => BookModel.fromJson(json)).toList();
     } catch (e) {
       print('Error occurred while fetching books: $e');
       return []; // Return an empty list on error to avoid crashes

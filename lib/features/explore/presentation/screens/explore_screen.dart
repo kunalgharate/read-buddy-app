@@ -50,14 +50,16 @@ class _ExploreView extends StatelessWidget {
                     child: FilterChips(),
                   ),
                   const SizedBox(height: 24),
-                  
                   if (state.selectedCategoryId != null) ...[
                     // Selected Category View
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () => context.read<ExploreBloc>().add(const SelectCategory(null)),
-                          icon: const Icon(Icons.arrow_back, color: Color(0xFF03405B)),
+                          onPressed: () => context
+                              .read<ExploreBloc>()
+                              .add(const SelectCategory(null)),
+                          icon: const Icon(Icons.arrow_back,
+                              color: Color(0xFF03405B)),
                         ),
                         const Text(
                           'Explore',
@@ -73,15 +75,21 @@ class _ExploreView extends StatelessWidget {
                     Expanded(
                       child: GridView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           childAspectRatio: 0.65,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
                         ),
-                        itemCount: state.sections.firstWhere((s) => s.category.id == state.selectedCategoryId).books.length,
+                        itemCount: state.sections
+                            .firstWhere((s) =>
+                                s.category.id == state.selectedCategoryId)
+                            .books
+                            .length,
                         itemBuilder: (context, index) {
-                          final section = state.sections.firstWhere((s) => s.category.id == state.selectedCategoryId);
+                          final section = state.sections.firstWhere(
+                              (s) => s.category.id == state.selectedCategoryId);
                           return ExploreBookCard(book: section.books[index]);
                         },
                       ),
@@ -108,19 +116,25 @@ class _ExploreView extends StatelessWidget {
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: state.parentCategories.length,
-                                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(width: 8),
                                 itemBuilder: (context, index) {
-                                  final category = state.parentCategories[index];
+                                  final category =
+                                      state.parentCategories[index];
                                   return Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.grey.shade200),
+                                      border: Border.all(
+                                          color: Colors.grey.shade200),
                                     ),
                                     child: Text(
                                       category.title,
-                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500),
                                     ),
                                   );
                                 },
@@ -128,26 +142,30 @@ class _ExploreView extends StatelessWidget {
                             ),
                             const SizedBox(height: 24),
                             ...state.sections.map((section) => Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SectionHeader(
-                                  title: section.category.title,
-                                  onSeeAll: () {
-                                    context.read<ExploreBloc>().add(SelectCategory(section.category.id));
-                                  },
-                                ),
-                                const SizedBox(height: 12),
-                                SizedBox(
-                                  height: 200,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: section.books.length,
-                                    itemBuilder: (context, index) => ExploreBookCard(book: section.books[index]),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            )),
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SectionHeader(
+                                      title: section.category.title,
+                                      onSeeAll: () {
+                                        context.read<ExploreBloc>().add(
+                                            SelectCategory(
+                                                section.category.id));
+                                      },
+                                    ),
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      height: 200,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: section.books.length,
+                                        itemBuilder: (context, index) =>
+                                            ExploreBookCard(
+                                                book: section.books[index]),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                  ],
+                                )),
                             const SizedBox(height: 80),
                           ],
                         ),

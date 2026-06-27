@@ -121,14 +121,12 @@ class BookDetailVariantCubit extends Cubit<BookDetailVariantState> {
       if (adding) {
         await _dio.post(
           '${ApiConstants.wishlist}/$bookId',
-          options: Options(
-              headers: {'Authorization': 'Bearer $token'}),
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
         );
       } else {
         await _dio.delete(
           '${ApiConstants.wishlist}/$bookId',
-          options: Options(
-              headers: {'Authorization': 'Bearer $token'}),
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
         );
       }
     } catch (_) {

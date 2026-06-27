@@ -67,8 +67,18 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
   String _formatDate(DateTime? date) {
     if (date == null) return 'Select date';
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
@@ -186,8 +196,12 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             ),
             body: SafeArea(
               child: state is BookRequestCreating
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF2CE07F)))
-                  : _currentStep == 0 ? _buildStep1() : _buildStep2(context),
+                  ? const Center(
+                      child:
+                          CircularProgressIndicator(color: Color(0xFF2CE07F)))
+                  : _currentStep == 0
+                      ? _buildStep1()
+                      : _buildStep2(context),
             ),
           );
         },
@@ -247,7 +261,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
           // Contact Info
           const _SectionLabel('Contact Information'),
           const SizedBox(height: 12),
-          _textField(_nameController, 'Full Name', prefixIcon: Icons.person_outline),
+          _textField(_nameController, 'Full Name',
+              prefixIcon: Icons.person_outline),
           const SizedBox(height: 12),
           _textField(
             _phoneController,
@@ -333,23 +348,32 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2CE07F).withValues(alpha: 0.1) : Colors.white,
+          color: isSelected
+              ? const Color(0xFF2CE07F).withValues(alpha: 0.1)
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2CE07F) : const Color(0xFFE0E0E0),
+            color:
+                isSelected ? const Color(0xFF2CE07F) : const Color(0xFFE0E0E0),
             width: 1.5,
           ),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: isSelected ? const Color(0xFF2CE07F) : const Color(0xFF999999)),
+            Icon(icon,
+                size: 32,
+                color: isSelected
+                    ? const Color(0xFF2CE07F)
+                    : const Color(0xFF999999)),
             const SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? const Color(0xFF1E2939) : const Color(0xFF999999),
+                color: isSelected
+                    ? const Color(0xFF1E2939)
+                    : const Color(0xFF999999),
               ),
             ),
             const SizedBox(height: 4),
@@ -357,7 +381,9 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               subtitle,
               style: TextStyle(
                 fontSize: 11,
-                color: isSelected ? const Color(0xFF1E2939) : const Color(0xFFBBBBBB),
+                color: isSelected
+                    ? const Color(0xFF1E2939)
+                    : const Color(0xFFBBBBBB),
               ),
               textAlign: TextAlign.center,
             ),
@@ -385,7 +411,6 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             ),
           ),
           const SizedBox(height: 20),
-
           _confirmCard([
             _confirmRow('Book', widget.bookTitle),
             _confirmRow('Name', _nameController.text.trim()),
@@ -399,7 +424,6 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             if (!isDropoff)
               _confirmRow('Collection', 'I will collect from library'),
           ]),
-
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
@@ -518,14 +542,17 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Color(0xFF999999)),
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20, color: const Color(0xFF999999)) : null,
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, size: 20, color: const Color(0xFF999999))
+            : null,
         filled: true,
         fillColor: const Color(0xFFF5F5F5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }
@@ -553,7 +580,9 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: isPlaceholder ? const Color(0xFF999999) : const Color(0xFF1E2939),
+                color: isPlaceholder
+                    ? const Color(0xFF999999)
+                    : const Color(0xFF1E2939),
                 fontWeight: isPlaceholder ? FontWeight.normal : FontWeight.w500,
               ),
             ),

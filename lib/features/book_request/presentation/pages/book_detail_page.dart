@@ -106,9 +106,8 @@ class _BookDetailContent extends StatelessWidget {
     final cubit = context.read<BookDetailVariantCubit>();
     if (cubit.state.isLoading) {
       final profileState = context.read<ProfileBloc>().state;
-      final wishlist = profileState is ProfileLoaded
-          ? profileState.user.wishlist
-          : [];
+      final wishlist =
+          profileState is ProfileLoaded ? profileState.user.wishlist : [];
       cubit.loadVariants(
         bookId: book.id,
         inlineVariants: book.variants,
@@ -282,9 +281,7 @@ class _LanguageAndActions extends StatelessWidget {
             ? Icons.check_circle_rounded
             : Icons.menu_book_rounded,
         label: hasActiveRequest ? 'Requested' : 'Request',
-        color: hasActiveRequest
-            ? Colors.grey
-            : const Color(0xFF4F46E5),
+        color: hasActiveRequest ? Colors.grey : const Color(0xFF4F46E5),
         onTap: hasActiveRequest
             ? () {
                 ScaffoldMessenger.of(context).showSnackBar(

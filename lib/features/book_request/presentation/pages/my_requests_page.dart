@@ -45,13 +45,11 @@ class _MyRequestsViewState extends State<_MyRequestsView>
     super.dispose();
   }
 
-  List<BookRequestEntity> _pending(List<BookRequestEntity> all) => all
-      .where((r) => r.status.toLowerCase() != 'delivered')
-      .toList();
+  List<BookRequestEntity> _pending(List<BookRequestEntity> all) =>
+      all.where((r) => r.status.toLowerCase() != 'delivered').toList();
 
-  List<BookRequestEntity> _completed(List<BookRequestEntity> all) => all
-      .where((r) => r.status.toLowerCase() == 'delivered')
-      .toList();
+  List<BookRequestEntity> _completed(List<BookRequestEntity> all) =>
+      all.where((r) => r.status.toLowerCase() == 'delivered').toList();
 
   @override
   Widget build(BuildContext context) {
@@ -212,8 +210,7 @@ class _RequestList extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(emptyMessage,
-                style:
-                    const TextStyle(color: Colors.grey, fontSize: 16)),
+                style: const TextStyle(color: Colors.grey, fontSize: 16)),
           ],
         ),
       );
@@ -247,8 +244,7 @@ class _RequestCard extends StatelessWidget {
     final statusLower = request.status.toLowerCase();
     final isPendingOrRequested =
         statusLower == 'requested' || statusLower == 'pending';
-    final isApproved =
-        statusLower == 'approved' || statusLower == 'accepted';
+    final isApproved = statusLower == 'approved' || statusLower == 'accepted';
     final canCancel = isPendingOrRequested;
     final canMarkDelivered =
         statusLower == 'pickup_scheduled' || statusLower == 'shipping';
@@ -314,192 +310,195 @@ class _RequestCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
-      ),
-      child: Column(
-        children: [
-          // Main content row
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Book cover
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: request.bookCoverUrl != null &&
-                          request.bookCoverUrl!.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: request.bookCoverUrl!,
-                          width: 90,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => _placeholder(),
-                          errorWidget: (_, __, ___) => _placeholder(),
-                        )
-                      : _placeholder(),
-                ),
-                const SizedBox(width: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        ),
+        child: Column(
+          children: [
+            // Main content row
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Book cover
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: request.bookCoverUrl != null &&
+                            request.bookCoverUrl!.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: request.bookCoverUrl!,
+                            width: 90,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => _placeholder(),
+                            errorWidget: (_, __, ___) => _placeholder(),
+                          )
+                        : _placeholder(),
+                  ),
+                  const SizedBox(width: 12),
 
-                // Details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title + status chip + cancel button
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              request.bookTitle ?? 'Unknown Book',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF052E44),
+                  // Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title + status chip + cancel button
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                request.bookTitle ?? 'Unknown Book',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF052E44),
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(width: 6),
+                            _statusChip(request.status),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+
+                        // Book type (format) as plain text
+                        if (request.bookFormat != null &&
+                            request.bookFormat!.isNotEmpty)
+                          Text(
+                            _capitalize(request.bookFormat!),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF555555),
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          _statusChip(request.status),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
+                        // const SizedBox(height: 8),
 
-                      // Book type (format) as plain text
-                      if (request.bookFormat != null &&
-                          request.bookFormat!.isNotEmpty)
+                        // Donated by
                         Text(
-                          _capitalize(request.bookFormat!),
+                          request.donorName != null
+                              ? 'Donated by - ${request.donorName}'
+                              : 'Donated by - Unknown',
                           style: const TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF555555),
+                            color: Color(0xFF262626),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                      // const SizedBox(height: 8),
-
-                      // Donated by
-                      Text(
-                        request.donorName != null
-                            ? 'Donated by - ${request.donorName}'
-                            : 'Donated by - Unknown',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF262626),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      if (canCancel) ...[
-                        const SizedBox(height: 8),
-                        isCancelling
-                            ? const SizedBox(
-                                height: 18,
-                                width: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Color(0xFFFF5252),
-                                ),
-                              )
-                            : GestureDetector(
-                                onTap: () => _confirmCancel(context),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFFEBEB),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                        color: const Color(0xFFFF5252)
-                                            .withValues(alpha: 0.4)),
+                        if (canCancel) ...[
+                          const SizedBox(height: 8),
+                          isCancelling
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Color(0xFFFF5252),
                                   ),
-                                  child: const Text(
-                                    'Cancel Request',
-                                    style: TextStyle(
+                                )
+                              : GestureDetector(
+                                  onTap: () => _confirmCancel(context),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFEBEB),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                          color: const Color(0xFFFF5252)
+                                              .withValues(alpha: 0.4)),
+                                    ),
+                                    child: const Text(
+                                      'Cancel Request',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFFFF5252),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        ],
+                        if (canMarkDelivered) ...[
+                          const SizedBox(height: 8),
+                          isCancelling
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Color(0xFF2CE07F),
+                                  ),
+                                )
+                              : SizedBox(
+                                  width: double.infinity,
+                                  height: 36,
+                                  child: ElevatedButton(
+                                    onPressed: () => _confirmDelivered(context),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF2CE07F),
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Mark as Delivered',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF052E44),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        ],
+                        if ((statusLower == 'declined' ||
+                            statusLower == 'rejected')) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF8E1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.info_outline,
+                                    size: 13, color: Color(0xFFB07D00)),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    request.rejectionReason ??
+                                        'Request not approved. Contact support.',
+                                    style: const TextStyle(
                                       fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFFFF5252),
+                                      color: Color(0xFF7A5800),
                                     ),
                                   ),
                                 ),
-                              ),
-                      ],
-                      if (canMarkDelivered) ...[
+                              ],
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 8),
-                        isCancelling
-                            ? const SizedBox(
-                                height: 18,
-                                width: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Color(0xFF2CE07F),
-                                ),
-                              )
-                            : SizedBox(
-                                width: double.infinity,
-                                height: 36,
-                                child: ElevatedButton(
-                                  onPressed: () => _confirmDelivered(context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2CE07F),
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Mark as Delivered',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF052E44),
-                                    ),
-                                  ),
-                                ),
-                              ),
                       ],
-                      if ((statusLower == 'declined' || statusLower == 'rejected')) ...[
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFF8E1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.info_outline, size: 13, color: Color(0xFFB07D00)),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  request.rejectionReason ?? 'Request not approved. Contact support.',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF7A5800),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -553,9 +552,11 @@ class _RequestCard extends StatelessWidget {
               maxLines: 2,
               decoration: InputDecoration(
                 hintText: 'Reason for cancellation...',
-                hintStyle: const TextStyle(fontSize: 13, color: Color(0xFFAAAAAA)),
+                hintStyle:
+                    const TextStyle(fontSize: 13, color: Color(0xFFAAAAAA)),
                 contentPadding: const EdgeInsets.all(10),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Color(0xFF052E44)),
@@ -567,8 +568,7 @@ class _RequestCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('No',
-                style: TextStyle(color: Color(0xFF888888))),
+            child: const Text('No', style: TextStyle(color: Color(0xFF888888))),
           ),
           TextButton(
             onPressed: () {

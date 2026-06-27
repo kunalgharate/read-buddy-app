@@ -24,7 +24,8 @@ final class UploadDonationReceiptEvent extends DonateBookEvent {
   final String donationId;
   final FormData formData;
 
-  const UploadDonationReceiptEvent({required this.donationId, required this.formData});
+  const UploadDonationReceiptEvent(
+      {required this.donationId, required this.formData});
 
   @override
   List<Object> get props => [donationId, formData];

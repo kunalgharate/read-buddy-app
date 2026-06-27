@@ -37,9 +37,9 @@ class DonateBookBloc extends Bloc<DonateBookEvent, DonateBookState> {
   }
 
   Future<void> _onLoadDonationStats(
-      LoadDonationStats event,
-      Emitter<DonateBookState> emit,
-      ) async {
+    LoadDonationStats event,
+    Emitter<DonateBookState> emit,
+  ) async {
     if (state is DonateBookLoading) return;
     emit(DonateBookLoading());
     try {
@@ -51,9 +51,9 @@ class DonateBookBloc extends Bloc<DonateBookEvent, DonateBookState> {
   }
 
   Future<void> _onLoadNearestAgents(
-      LoadNearestAgents event,
-      Emitter<DonateBookState> emit,
-      ) async {
+    LoadNearestAgents event,
+    Emitter<DonateBookState> emit,
+  ) async {
     emit(DonateBookLoading());
     try {
       final agents = await _getNearestAgents();
@@ -64,9 +64,9 @@ class DonateBookBloc extends Bloc<DonateBookEvent, DonateBookState> {
   }
 
   Future<void> _onSubmitBookDonation(
-      SubmitBookDonationEvent event,
-      Emitter<DonateBookState> emit,
-      ) async {
+    SubmitBookDonationEvent event,
+    Emitter<DonateBookState> emit,
+  ) async {
     if (kDebugMode) {
       print('📤 [DonateBookBloc] Submitting Book Donation...');
       print('   Type: ${event.request.fulfillmentType}');
@@ -83,9 +83,9 @@ class DonateBookBloc extends Bloc<DonateBookEvent, DonateBookState> {
   }
 
   Future<void> _onUploadReceipt(
-      UploadDonationReceiptEvent event,
-      Emitter<DonateBookState> emit,
-      ) async {
+    UploadDonationReceiptEvent event,
+    Emitter<DonateBookState> emit,
+  ) async {
     emit(DonateBookLoading());
     try {
       await _uploadReceipt(event.donationId, event.formData);

@@ -159,7 +159,9 @@ class _BookOrderViewState extends State<_BookOrderView> {
       ),
       bottomNavigationBar: Padding(
         padding: EdgeInsets.fromLTRB(
-          16, 12, 16,
+          16,
+          12,
+          16,
           MediaQuery.of(context).padding.bottom + 16,
         ),
         child: SizedBox(
@@ -178,25 +180,34 @@ class _BookOrderViewState extends State<_BookOrderView> {
                           final phone = _phoneController.text.trim();
                           final address = _addressController.text.trim();
                           final pincode = _pincodeController.text.trim();
-                          if (name.isEmpty || phone.isEmpty || address.isEmpty || pincode.isEmpty) {
+                          if (name.isEmpty ||
+                              phone.isEmpty ||
+                              address.isEmpty ||
+                              pincode.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please fill in all fields')),
+                              const SnackBar(
+                                  content: Text('Please fill in all fields')),
                             );
                             return;
                           }
                           if (phone.length != 10) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Phone number must be exactly 10 digits')),
+                              const SnackBar(
+                                  content: Text(
+                                      'Phone number must be exactly 10 digits')),
                             );
                             return;
                           }
                           if (address.length < 10) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please enter a valid address')),
+                              const SnackBar(
+                                  content:
+                                      Text('Please enter a valid address')),
                             );
                             return;
                           }
-                          final hasLetter = address.contains(RegExp(r'[a-zA-Z]'));
+                          final hasLetter =
+                              address.contains(RegExp(r'[a-zA-Z]'));
                           final hasDigit = address.contains(RegExp(r'[0-9]'));
                           if (!hasLetter || !hasDigit) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -210,19 +221,25 @@ class _BookOrderViewState extends State<_BookOrderView> {
                           }
                           if (pincode.length != 6 || pincode[0] == '0') {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please enter a valid 6-digit pincode')),
+                              const SnackBar(
+                                  content: Text(
+                                      'Please enter a valid 6-digit pincode')),
                             );
                             return;
                           }
                           if (_selectedDate == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please select a preferred date')),
+                              const SnackBar(
+                                  content:
+                                      Text('Please select a preferred date')),
                             );
                             return;
                           }
                           if (_selectedTime == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please select a preferred time')),
+                              const SnackBar(
+                                  content:
+                                      Text('Please select a preferred time')),
                             );
                             return;
                           }
@@ -496,7 +513,8 @@ class _BookOrderTab extends StatelessWidget {
             hint: 'e.g. Flat 12, Sunrise Apartments, MG Road, Mumbai',
             keyboardType: TextInputType.streetAddress,
             maxLines: 3,
-            helperText: 'Include flat/house no., street, area  •  min 10 characters  •  must include letters and numbers',
+            helperText:
+                'Include flat/house no., street, area  •  min 10 characters  •  must include letters and numbers',
           ),
           const SizedBox(height: 16),
           const _FieldLabel(label: 'Pincode'),
@@ -762,17 +780,17 @@ class _BookCard extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: request.bookCoverUrl != null &&
-                  request.bookCoverUrl!.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: request.bookCoverUrl!,
-                  width: 90,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => _placeholder(),
-                  errorWidget: (_, __, ___) => _placeholder(),
-                )
-              : _placeholder(),
+          child:
+              request.bookCoverUrl != null && request.bookCoverUrl!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: request.bookCoverUrl!,
+                      width: 90,
+                      height: 120,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => _placeholder(),
+                      errorWidget: (_, __, ___) => _placeholder(),
+                    )
+                  : _placeholder(),
         ),
         const SizedBox(width: 14),
         Expanded(

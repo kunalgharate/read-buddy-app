@@ -45,9 +45,10 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
     try {
       final data = await request.toMap();
       final formData = FormData.fromMap(data);
-      
+
       if (kDebugMode) {
-        print('🌐 [DonateRemoteDataSource] Sending POST to: ${ApiConstants.createBookDonation}');
+        print(
+            '🌐 [DonateRemoteDataSource] Sending POST to: ${ApiConstants.createBookDonation}');
         print('📦 [DonateRemoteDataSource] Payload Data: $data');
       }
 
@@ -57,12 +58,15 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('📡 [DonateRemoteDataSource] Response Status: ${response.statusCode}');
+        print(
+            '📡 [DonateRemoteDataSource] Response Status: ${response.statusCode}');
         print('📡 [DonateRemoteDataSource] Response Data: ${response.data}');
       }
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(response.data['error'] ?? response.data['message'] ?? 'Failed to create donation');
+        throw Exception(response.data['error'] ??
+            response.data['message'] ??
+            'Failed to create donation');
       }
     } catch (e) {
       if (kDebugMode) print('🔥 [DonateRemoteDataSource] Error: $e');
@@ -92,20 +96,28 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
       final response = await dio.get(ApiConstants.nearestAgent);
       if (response.statusCode == 200) {
         final dynamic responseData = response.data;
-        
+
         if (responseData is List) {
           return responseData.map((json) => AgentModel.fromJson(json)).toList();
         } else if (responseData is Map<String, dynamic>) {
-          if (responseData.containsKey('data') && responseData['data'] is List) {
-            return (responseData['data'] as List).map((json) => AgentModel.fromJson(json)).toList();
-          } else if (responseData.containsKey('success') && responseData['success'] == true && responseData.containsKey('data')) {
-             return (responseData['data'] as List).map((json) => AgentModel.fromJson(json)).toList();
+          if (responseData.containsKey('data') &&
+              responseData['data'] is List) {
+            return (responseData['data'] as List)
+                .map((json) => AgentModel.fromJson(json))
+                .toList();
+          } else if (responseData.containsKey('success') &&
+              responseData['success'] == true &&
+              responseData.containsKey('data')) {
+            return (responseData['data'] as List)
+                .map((json) => AgentModel.fromJson(json))
+                .toList();
           } else {
             return [AgentModel.fromJson(responseData)];
           }
         }
       }
-      throw Exception(response.data?['message'] ?? 'Failed to load nearest agents');
+      throw Exception(
+          response.data?['message'] ?? 'Failed to load nearest agents');
     } catch (e) {
       throw Exception('Error fetching nearest agents: $e');
     }

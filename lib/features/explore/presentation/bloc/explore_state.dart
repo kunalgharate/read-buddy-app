@@ -17,7 +17,7 @@ class ExploreLoaded extends ExploreState {
   final List<CategoryEntity> parentCategories;
   final List<ExploreCategory> sections;
   final String? selectedCategoryId;
-  
+
   const ExploreLoaded({
     required this.parentCategories,
     required this.sections,

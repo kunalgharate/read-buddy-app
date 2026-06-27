@@ -30,7 +30,6 @@ class _BookPageState extends State<BookPage> {
 
   @override
   Widget build(BuildContext context) {
-
     context.read<BookBloc>().add(LoadBooks());
     return Scaffold(
       appBar: AppBar(
