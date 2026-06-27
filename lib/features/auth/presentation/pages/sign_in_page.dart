@@ -9,7 +9,6 @@ import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
 import '../blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../blocs/sign_in/sign_in_bloc.dart';
-import '../widgets/custom_button_widget.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -194,8 +193,6 @@ class _SignInScreenState extends State<SignInScreen> {
                         _buildForgotPasswordLink(),
                         const SizedBox(height: 32.0),
                         _buildSignInButton(),
-                        const SizedBox(height: 20.0),
-                        _buildGoogleSignInButton(),
                         const Spacer(),
                         _buildSignUpPrompt(),
                         const Spacer(),
@@ -357,47 +354,6 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildGoogleSignInButton() {
-    return BlocBuilder<GoogleSignInBloc, GoogleSignInState>(
-      builder: (context, state) {
-        if (state is GoogleSignInLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return CustomButton(
-          text: 'Sign In with Google',
-          width: double.infinity,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w500,
-          backgroundColor: Colors.grey.shade200,
-          textColor: _textColor,
-          icon: _buildGoogleIcon(),
-          onPressed: () => context
-              .read<GoogleSignInBloc>()
-              .add(const GoogleSignInRequested()),
-        );
-      },
-    );
-  }
-
-  Widget _buildGoogleIcon() {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration:
-          const BoxDecoration(shape: BoxShape.circle, color: Colors.black),
-      alignment: Alignment.center,
-      child: const Text(
-        'G',
-        style: TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-        ),
-      ),
     );
   }
 
