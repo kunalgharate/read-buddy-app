@@ -20,6 +20,24 @@ class MediaPartEntity extends Equatable {
   List<Object?> get props => [partNumber, title, audioUrl, videoUrl, duration];
 }
 
+/// Represents a donation entry for physical book formats.
+class DonationEntry extends Equatable {
+  final String donorId;
+  final String donorName;
+  final int copiesDonated;
+  final String? date;
+
+  const DonationEntry({
+    required this.donorId,
+    required this.donorName,
+    required this.copiesDonated,
+    this.date,
+  });
+
+  @override
+  List<Object?> get props => [donorId, donorName, copiesDonated, date];
+}
+
 /// A single format entry within a BookVariant.
 /// Types: hardcover, paperback, ebook, audiobook, videobook
 class BookFormatEntity extends Equatable {
@@ -28,10 +46,12 @@ class BookFormatEntity extends Equatable {
   final String? donorId;
   final String? isbn;
   final int? copies;
-  final bool? available;
-  final String? fileUrl;
+  final int? availableCopies;
+  final List<String> fileUrls; // multiple file URLs for ebook
+  final String? fileUrl; // legacy single file URL
   final int? totalDuration; // seconds — for audiobook/videobook
   final List<MediaPartEntity> parts; // audiobook/videobook parts
+  final List<DonationEntry> donations; // physical format donations
 
   const BookFormatEntity({
     this.id,
@@ -39,10 +59,12 @@ class BookFormatEntity extends Equatable {
     this.donorId,
     this.isbn,
     this.copies,
-    this.available,
+    this.availableCopies,
+    this.fileUrls = const [],
     this.fileUrl,
     this.totalDuration,
     this.parts = const [],
+    this.donations = const [],
   });
 
   @override
@@ -52,10 +74,12 @@ class BookFormatEntity extends Equatable {
         donorId,
         isbn,
         copies,
-        available,
+        availableCopies,
+        fileUrls,
         fileUrl,
         totalDuration,
         parts,
+        donations,
       ];
 }
 

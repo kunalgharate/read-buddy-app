@@ -88,3 +88,30 @@ class RemoveFormatEvent extends VariantEvent {
   @override
   List<Object?> get props => [variantId, bookId, formatId];
 }
+
+/// Adds parts/files to an existing format incrementally.
+/// Used when adding new audio/video chapters to an existing audiobook/videobook,
+/// or adding ebook files to an existing ebook format.
+class AddPartsToFormatEvent extends VariantEvent {
+  final String variantId;
+  final String formatId;
+  final String bookId;
+  final List<MediaPartEntity> parts;
+  final List<File> ebookFiles;
+  final List<File> audioParts;
+  final List<File> videoParts;
+
+  const AddPartsToFormatEvent({
+    required this.variantId,
+    required this.formatId,
+    required this.bookId,
+    this.parts = const [],
+    this.ebookFiles = const [],
+    this.audioParts = const [],
+    this.videoParts = const [],
+  });
+
+  @override
+  List<Object?> get props =>
+      [variantId, formatId, bookId, parts, ebookFiles, audioParts, videoParts];
+}

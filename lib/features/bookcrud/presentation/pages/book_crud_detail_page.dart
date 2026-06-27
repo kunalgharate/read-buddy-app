@@ -294,7 +294,7 @@ class BookCrudDetailPage extends StatelessWidget {
       final parts = <String>[];
       if (format.isbn != null) parts.add('ISBN: ${format.isbn}');
       if (format.copies != null) parts.add('Copies: ${format.copies}');
-      if (format.available == true) parts.add('Available');
+      if ((format.availableCopies ?? 0) > 0) parts.add('Available');
       subtitle = parts.join(' • ');
     } else if (format.type == 'ebook') {
       subtitle = format.fileUrl != null ? 'File uploaded ✓' : 'No file';

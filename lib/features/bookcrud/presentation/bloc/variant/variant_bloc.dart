@@ -5,6 +5,7 @@ import '../../../domain/usecases/delete_variant.dart';
 import '../../../domain/usecases/add_format.dart';
 import '../../../domain/usecases/remove_format.dart';
 import '../../../domain/usecases/get_variants_for_book.dart';
+import '../../../domain/usecases/add_parts_to_format.dart';
 import 'variant_event.dart';
 import 'variant_state.dart';
 
@@ -15,6 +16,7 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
   final DeleteVariantUsecase deleteVariant;
   final AddFormatUsecase addFormat;
   final RemoveFormatUsecase removeFormat;
+  final AddPartsToFormatUsecase addPartsToFormat;
 
   VariantBloc({
     required this.getVariantsForBook,
@@ -23,6 +25,7 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
     required this.deleteVariant,
     required this.addFormat,
     required this.removeFormat,
+    required this.addPartsToFormat,
   }) : super(VariantInitial()) {
     on<LoadVariants>(_onLoadVariants);
     on<CreateVariantEvent>(_onCreateVariant);
@@ -30,6 +33,7 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
     on<DeleteVariantEvent>(_onDeleteVariant);
     on<AddFormatEvent>(_onAddFormat);
     on<RemoveFormatEvent>(_onRemoveFormat);
+    on<AddPartsToFormatEvent>(_onAddPartsToFormat);
   }
 
   Future<void> _onLoadVariants(
@@ -112,6 +116,24 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
       emit(VariantsLoaded(variants));
     } catch (e) {
       emit(VariantError('Failed to remove format: $e'));
+    }
+  }
+
+  Future<void> _onAddPartsToFormat(
+      AddPartsToFormatEvent event, Emitter<VariantState> emit) async {
+    emit(VariantLoading());
+    try {
+      final variant = await addPartsToFormat(
+        event.variantId,
+        event.formatId,
+        parts: event.parts,
+        ebookFiles: event.ebookFiles,
+        audioParts: event.audioParts,
+        videoParts: event.videoParts,
+      );
+      emit(FormatAdded(variant));
+    } catch (e) {
+      emit(VariantError('Failed to add parts: $e'));
     }
   }
 }

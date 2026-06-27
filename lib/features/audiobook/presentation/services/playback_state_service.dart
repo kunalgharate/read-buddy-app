@@ -20,14 +20,14 @@ class PlaybackStateService {
   }
 
   /// Load saved playback state. Returns null if no saved state.
-  static Future<PlaybackState?> load(String bookId) async {
+  static Future<SavedPlaybackState?> load(String bookId) async {
     final prefs = await SharedPreferences.getInstance();
     final track = prefs.getInt('$_prefix${bookId}_track');
     final posMs = prefs.getInt('$_prefix${bookId}_position');
 
     if (track == null || posMs == null) return null;
 
-    return PlaybackState(
+    return SavedPlaybackState(
       trackIndex: track,
       position: Duration(milliseconds: posMs),
     );
@@ -41,11 +41,11 @@ class PlaybackStateService {
   }
 }
 
-class PlaybackState {
+class SavedPlaybackState {
   final int trackIndex;
   final Duration position;
 
-  const PlaybackState({
+  const SavedPlaybackState({
     required this.trackIndex,
     required this.position,
   });
