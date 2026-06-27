@@ -45,7 +45,9 @@ class AppInterceptor extends Interceptor {
 
   @override
   void onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     try {
       final accessToken = await _secureStorage.read(key: 'accessToken');
       if (accessToken != null && accessToken.isNotEmpty) {
@@ -162,7 +164,9 @@ class AppInterceptor extends Interceptor {
   }
 
   Future<Response> _retryRequest(
-      RequestOptions options, String newAccessToken) async {
+    RequestOptions options,
+    String newAccessToken,
+  ) async {
     options.headers['Authorization'] = 'Bearer $newAccessToken';
     return await _authDio.fetch(options);
   }
