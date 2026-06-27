@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
-    if (user == null) {
+    if (user == null || user.accessToken.isEmpty) {
       // Corrupted state — reset
       await AppPreferences.clear();
       if (!mounted) return;

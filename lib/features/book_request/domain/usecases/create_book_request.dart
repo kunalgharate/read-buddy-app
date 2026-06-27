@@ -5,5 +5,22 @@ class CreateBookRequestUsecase {
 
   CreateBookRequestUsecase(this.repository);
 
-  Future<void> call(String bookId) => repository.createBookRequest(bookId);
+  Future<String> call(
+    String bookId,
+    String fulfillmentMethod, {
+    String? deliveryName,
+    String? deliveryPhone,
+    String? deliveryAddress,
+    String? deliveryPincode,
+    String? deliveryPreferredDate,
+  }) =>
+      repository.createBookRequest(
+        bookId,
+        fulfillmentMethod,
+        deliveryName: deliveryName,
+        deliveryPhone: deliveryPhone,
+        deliveryAddress: deliveryAddress,
+        deliveryPincode: deliveryPincode,
+        deliveryPreferredDate: deliveryPreferredDate,
+      );
 }

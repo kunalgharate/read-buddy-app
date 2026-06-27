@@ -9,7 +9,15 @@ import '../../domain/entities/pickup_details_entity.dart';
 
 abstract class BookRequestRemoteDataSource {
   Future<BookDetailModel> getBookById(String id);
-  Future<void> createBookRequest(String bookId);
+  Future<String> createBookRequest(
+    String bookId,
+    String fulfillmentMethod, {
+    String? deliveryName,
+    String? deliveryPhone,
+    String? deliveryAddress,
+    String? deliveryPincode,
+    String? deliveryPreferredDate,
+  });
   Future<List<BookRequestModel>> getMyBookRequests();
   Future<List<BookRequestModel>> getAllBookRequests();
   Future<List<BookRequestModel>> getUpcomingPickups();
@@ -48,32 +56,52 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load book details');
       }
-      // Unwrap { "data": {...} } envelope if present
-      final rawData = response.data;
-      final json =
-          (rawData is Map<String, dynamic> && rawData.containsKey('data'))
-              ? rawData['data']
-              : rawData;
-      return BookDetailModel.fromJson(json);
+      final decoded = response.data;
+      final bookData = decoded is Map
+          ? (decoded['data'] is Map
+              ? Map<String, dynamic>.from(decoded['data'])
+              : Map<String, dynamic>.from(decoded))
+          : <String, dynamic>{};
+      return BookDetailModel.fromJson(bookData);
     } catch (e) {
       rethrow;
     }
   }
 
   @override
-  Future<void> createBookRequest(String bookId) async {
+  Future<String> createBookRequest(
+    String bookId,
+    String fulfillmentMethod, {
+    String? deliveryName,
+    String? deliveryPhone,
+    String? deliveryAddress,
+    String? deliveryPincode,
+    String? deliveryPreferredDate,
+  }) async {
     try {
+      final body = <String, dynamic>{
+        'bookId': bookId,
+        'fulfillmentMethod': 'PICKUP',
+      };
+      if (deliveryName != null) body['deliveryName'] = deliveryName;
+      if (deliveryPhone != null) body['deliveryPhone'] = deliveryPhone;
+      if (deliveryAddress != null) body['deliveryAddress'] = deliveryAddress;
+      if (deliveryPincode != null) body['deliveryPincode'] = deliveryPincode;
+      if (deliveryPreferredDate != null) body['deliveryPreferredDate'] = deliveryPreferredDate;
+
       final response = await dio.post(
         ApiConstants.userBookRequests,
-        data: {
-          'bookId': bookId,
-          'fulfillmentMethod': 'PICKUP',
-        },
+        data: body,
       );
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {
         throw Exception('Failed to create book request');
       }
+      final decoded = response.data;
+      final data = decoded is Map && decoded['data'] is Map
+          ? Map<String, dynamic>.from(decoded['data'])
+          : decoded is Map ? Map<String, dynamic>.from(decoded) : <String, dynamic>{};
+      return data['_id'] as String? ?? '';
     } catch (e) {
       rethrow;
     }
@@ -127,8 +155,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load upcoming pickups');
       }
-      final List list =
-          response.data['data'] is List ? response.data['data'] as List : [];
+      final List list = response.data is List
+          ? response.data as List
+          : (response.data['data'] is List ? response.data['data'] as List : []);
       return list
           .map((e) => BookRequestModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -158,15 +187,16 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
     try {
       final response = await dio.patch(
         '${ApiConstants.v1BookRequests}/$id/approve',
-        data: {
-          'status': 'approved',
-          'notes': notes ?? 'Request approved',
-        },
       );
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {
         throw Exception('Failed to approve book request');
       }
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error']) as String?
+          : null;
+      throw Exception(serverMsg ?? 'Failed to approve request. Please try again.');
     } catch (e) {
       rethrow;
     }
@@ -196,7 +226,13 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load library details');
       }
-      return LibraryModel.fromJson(response.data);
+      final decoded = response.data;
+      final libraryData = decoded is Map
+          ? (decoded['data'] is Map
+              ? Map<String, dynamic>.from(decoded['data'])
+              : Map<String, dynamic>.from(decoded))
+          : <String, dynamic>{};
+      return LibraryModel.fromJson(libraryData);
     } catch (e) {
       rethrow;
     }
@@ -209,7 +245,10 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load request details');
       }
-      final data = response.data['data'] as Map<String, dynamic>;
+      final decoded = response.data;
+      final data = decoded is Map && decoded['data'] is Map
+          ? Map<String, dynamic>.from(decoded['data'])
+          : decoded is Map ? Map<String, dynamic>.from(decoded) : <String, dynamic>{};
       return BookRequestModel.fromJson(data);
     } catch (e) {
       rethrow;
@@ -304,7 +343,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       }
 
       final responseData = response.data;
-      final data = responseData['data'] as Map<String, dynamic>;
+      final data = responseData is Map && responseData['data'] is Map
+          ? Map<String, dynamic>.from(responseData['data'])
+          : responseData is Map ? Map<String, dynamic>.from(responseData) : <String, dynamic>{};
       return BookRequestModel.fromJson(data);
     } on DioException catch (e) {
       final serverMsg = e.response?.data is Map

@@ -6,7 +6,9 @@ import '../../domain/entities/book_request_entity.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/my_requests_bloc.dart';
 import '../pages/approved_book_request_page.dart';
+import '../pages/book_order_page.dart';
 import '../pages/book_request_success_page.dart';
+import '../pages/collect_from_library_page.dart';
 import '../pages/delivered_request_detail_page.dart';
 import '../../../../core/di/injection.dart' as di;
 
@@ -45,11 +47,17 @@ class _MyRequestsViewState extends State<_MyRequestsView>
     super.dispose();
   }
 
-  List<BookRequestEntity> _pending(List<BookRequestEntity> all) =>
-      all.where((r) => r.status.toLowerCase() != 'delivered').toList();
+  List<BookRequestEntity> _pending(List<BookRequestEntity> all) => all
+      .where((r) =>
+          r.status.toLowerCase() != 'delivered' &&
+          r.status.toLowerCase() != 'returned')
+      .toList();
 
-  List<BookRequestEntity> _completed(List<BookRequestEntity> all) =>
-      all.where((r) => r.status.toLowerCase() == 'delivered').toList();
+  List<BookRequestEntity> _completed(List<BookRequestEntity> all) => all
+      .where((r) =>
+          r.status.toLowerCase() == 'delivered' ||
+          r.status.toLowerCase() == 'returned')
+      .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -268,6 +276,13 @@ class _RequestCard extends StatelessWidget {
               ),
             ),
           );
+    } else if (statusLower == 'returning') {
+      onTap = () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DeliveredRequestDetailPage(request: request),
+            ),
+          );
     } else if (isApproved) {
       onTap = () async {
         BookRequestEntity enriched = request;
@@ -294,15 +309,35 @@ class _RequestCard extends StatelessWidget {
           } catch (_) {}
         }
         if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ApprovedBookRequestPage(
-                request: enriched,
-                initialTab: 0,
+          final method = enriched.fulfillmentMethod.toLowerCase();
+          if (method == 'pickup') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CollectFromLibraryPage(
+                  request: enriched,
+                  initialTab: 0,
+                ),
               ),
-            ),
-          );
+            );
+          } else if (method == 'dropoff' || method == 'drop_off' || method == 'delivery' || method == 'shipping') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BookOrderPage(request: enriched),
+              ),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ApprovedBookRequestPage(
+                  request: enriched,
+                  initialTab: 0,
+                ),
+              ),
+            );
+          }
         }
       };
     }
@@ -629,6 +664,11 @@ class _RequestCard extends StatelessWidget {
         bg = const Color(0xFFE3F2FD);
         textColor = Colors.blue;
         icon = Icons.replay_outlined;
+        break;
+      case 'returned':
+        bg = const Color(0xFFE8F5E9);
+        textColor = const Color(0xFF4CAF50);
+        icon = Icons.check_circle_outline;
         break;
       default:
         bg = const Color(0xFFFFF8E1);

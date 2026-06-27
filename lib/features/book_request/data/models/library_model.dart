@@ -10,13 +10,22 @@ class LibraryModel extends LibraryEntity {
   });
 
   factory LibraryModel.fromJson(Map<String, dynamic> json) {
-    final addr = json['address'] as Map<String, dynamic>;
     return LibraryModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
       contactNumber: json['contactNumber'] ?? '',
       openHours: json['openHours'] ?? '',
-      address: LibraryAddressModel.fromJson(addr),
+      address: json['address'] is Map
+          ? LibraryAddressModel.fromJson(json['address'] as Map<String, dynamic>)
+          : const LibraryAddressModel(
+              street: '',
+              city: '',
+              state: '',
+              country: '',
+              pincode: '',
+              latitude: 0.0,
+              longitude: 0.0,
+            ),
     );
   }
 }

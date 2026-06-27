@@ -211,7 +211,18 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
   }
 
   void _submit(BuildContext blocContext) {
-    blocContext.read<BookRequestBloc>().add(CreateBookRequest(widget.bookId));
+    final isDropoff = _fulfillmentMethod == 'dropoff';
+    blocContext.read<BookRequestBloc>().add(
+      CreateBookRequest(
+        widget.bookId,
+        fulfillmentMethod: _fulfillmentMethod,
+        deliveryName: isDropoff ? _nameController.text.trim() : null,
+        deliveryPhone: isDropoff ? _phoneController.text.trim() : null,
+        deliveryAddress: isDropoff ? _addressController.text.trim() : null,
+        deliveryPincode: isDropoff ? _pincodeController.text.trim() : null,
+        deliveryPreferredDate: isDropoff ? _formatDate(_preferredDate) : null,
+      ),
+    );
   }
 
   void _showSnack(String message) {

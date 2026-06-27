@@ -40,6 +40,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.notifications_outlined),
                   tooltip: 'Notifications',
                 ),
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/mybooks'),
+                  icon: const Icon(Icons.menu_book_outlined),
+                  tooltip: 'My Books',
+                ),
+                IconButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const MyRequestsPage()),
+                  ),
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  tooltip: 'My Requests',
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/rewards'),
+                  icon:
+                      const Icon(Icons.emoji_events, color: Color(0xFF2CE07F)),
+                  tooltip: 'Rewards',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: _showLogoutDialog,
+                ),
               ],
             )
           : null,

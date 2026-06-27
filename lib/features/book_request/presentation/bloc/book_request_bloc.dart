@@ -4,6 +4,7 @@ import '../../domain/usecases/create_book_request.dart';
 import '../../domain/usecases/get_library_details.dart';
 import '../../domain/usecases/schedule_pickup.dart';
 import '../../domain/usecases/schedule_delivery.dart';
+import '../../domain/usecases/update_request_status.dart';
 import 'book_request_event.dart';
 import 'book_request_state.dart';
 
@@ -13,6 +14,7 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   final GetLibraryDetailsUsecase getLibraryDetails;
   final SchedulePickupUsecase schedulePickup;
   final ScheduleDeliveryUsecase scheduleDelivery;
+  final UpdateRequestStatusUsecase updateRequestStatus;
 
   BookRequestBloc({
     required this.getBookDetail,
@@ -20,6 +22,7 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
     required this.getLibraryDetails,
     required this.schedulePickup,
     required this.scheduleDelivery,
+    required this.updateRequestStatus,
   }) : super(BookRequestInitial()) {
     on<LoadBookDetail>(_onLoadBookDetail);
     on<CreateBookRequest>(_onCreateBookRequest);
@@ -48,8 +51,16 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   ) async {
     emit(BookRequestCreating());
     try {
-      await createBookRequest(event.bookId);
-      emit(BookRequestCreated());
+      final requestId = await createBookRequest(
+        event.bookId,
+        event.fulfillmentMethod,
+        deliveryName: event.deliveryName,
+        deliveryPhone: event.deliveryPhone,
+        deliveryAddress: event.deliveryAddress,
+        deliveryPincode: event.deliveryPincode,
+        deliveryPreferredDate: event.deliveryPreferredDate,
+      );
+      emit(BookRequestCreated(requestId: requestId));
     } catch (e) {
       emit(BookRequestError('Failed to create book request: $e'));
     }
@@ -75,6 +86,9 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
     emit(PickupScheduling());
     try {
       final updated = await schedulePickup(event.details);
+      if (event.isReturn) {
+        await updateRequestStatus(event.details.requestId, 'returning');
+      }
       emit(PickupScheduled(updated));
     } catch (e) {
       emit(PickupScheduleError(e.toString().replaceFirst('Exception: ', '')));

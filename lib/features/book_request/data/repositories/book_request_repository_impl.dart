@@ -16,8 +16,24 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   }
 
   @override
-  Future<void> createBookRequest(String bookId) async {
-    return await remoteDataSource.createBookRequest(bookId);
+  Future<String> createBookRequest(
+    String bookId,
+    String fulfillmentMethod, {
+    String? deliveryName,
+    String? deliveryPhone,
+    String? deliveryAddress,
+    String? deliveryPincode,
+    String? deliveryPreferredDate,
+  }) async {
+    return await remoteDataSource.createBookRequest(
+      bookId,
+      fulfillmentMethod,
+      deliveryName: deliveryName,
+      deliveryPhone: deliveryPhone,
+      deliveryAddress: deliveryAddress,
+      deliveryPincode: deliveryPincode,
+      deliveryPreferredDate: deliveryPreferredDate,
+    );
   }
 
   @override

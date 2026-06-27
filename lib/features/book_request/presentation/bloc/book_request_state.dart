@@ -15,7 +15,10 @@ class BookDetailLoaded extends BookRequestState {
 
 class BookRequestCreating extends BookRequestState {}
 
-class BookRequestCreated extends BookRequestState {}
+class BookRequestCreated extends BookRequestState {
+  final String? requestId;
+  BookRequestCreated({this.requestId});
+}
 
 class BookRequestError extends BookRequestState {
   final String message;

@@ -664,6 +664,7 @@ void _registerBlocs() {
         getLibraryDetails: getIt<GetLibraryDetailsUsecase>(),
         schedulePickup: getIt<SchedulePickupUsecase>(),
         scheduleDelivery: getIt<ScheduleDeliveryUsecase>(),
+        updateRequestStatus: getIt<UpdateRequestStatusUsecase>(),
       ));
   getIt.registerFactory(() => MyRequestsBloc(
         getMyBookRequests: getIt<GetMyBookRequestsUsecase>(),

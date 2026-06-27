@@ -32,7 +32,7 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -82,6 +82,7 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
             Tab(text: 'Pickups'),
             Tab(text: 'Deliveries'),
             Tab(text: 'Delivered'),
+            Tab(text: 'Returns'),
             Tab(text: 'All'),
           ],
         ),
@@ -162,6 +163,13 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
                 emptyMessage: 'No delivered requests',
                 emptyIcon: Icons.check_circle_outline,
                 onTap: (r) => _showDetailSheet(context, r, 'Delivered'),
+              ),
+              _GenericList(
+                requests: _filter(all, 'returning'),
+                actionId: actionId,
+                emptyMessage: 'No return requests',
+                emptyIcon: Icons.replay_outlined,
+                onTap: (r) => _showDetailSheet(context, r, 'Return'),
               ),
               _GenericList(
                 requests: all,
@@ -629,9 +637,10 @@ class _DetailSheet extends StatelessWidget {
           _DetailTile(label: 'Pickup Time', value: request.pickupTime!),
         if (request.dueDate != null)
           _DetailTile(label: 'Due Date', value: _fmtDate(request.dueDate)),
-        // Return info — only relevant after delivery
+        // Return info — shown for delivered, returning, and returned
         if (request.status.toLowerCase() == 'delivered' ||
-            request.status.toLowerCase() == 'returning') ...[
+            request.status.toLowerCase() == 'returning' ||
+            request.status.toLowerCase() == 'returned') ...[
           if (request.returnDate != null)
             _DetailTile(
                 label: 'Return Date', value: _fmtDate(request.returnDate)),
@@ -661,10 +670,15 @@ class _StatusUpdateButton extends StatelessWidget {
 
   List<(String, String)> get _options {
     switch (currentStatus.toLowerCase()) {
+      case 'approved':
+      case 'accepted':
+        return [('delivered', 'Mark as Delivered')];
       case 'pickup_scheduled':
         return [('delivered', 'Mark as Delivered')];
       case 'shipping':
         return [('delivered', 'Mark as Delivered')];
+      case 'returning':
+        return [('returned', 'Mark as Returned')];
       default:
         return [];
     }
@@ -788,6 +802,7 @@ class _StatusChip extends StatelessWidget {
     'requested': Color(0xFFFF9800),
     'pending': Color(0xFFFF9800),
     'returning': Color(0xFF9C27B0),
+    'returned': Color(0xFF4CAF50),
   };
 
   @override
