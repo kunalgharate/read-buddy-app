@@ -125,7 +125,6 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
       } catch (_) {
         // Notification endpoint may not exist on server — ignore.
       }
-      }
 
       // Reload the list after action
       final updated = await getAllBookRequests();
@@ -157,7 +156,6 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
         }
       } catch (_) {
         // Notification endpoint may not exist on server — ignore.
-      }
       }
 
       final updated = await getAllBookRequests();

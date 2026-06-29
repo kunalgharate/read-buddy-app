@@ -92,6 +92,15 @@ class _BookDetailView extends StatelessWidget {
           return const SizedBox.shrink();
         },
       ),
+      bottomNavigationBar:
+          BlocBuilder<BookRequestBloc, BookRequestState>(
+        builder: (context, state) {
+          if (state is BookDetailLoaded) {
+            return _BottomRequestBar(book: state.book);
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }
@@ -133,7 +142,6 @@ class _BookDetailContent extends StatelessWidget {
                           CircularProgressIndicator(color: Color(0xFF2CE07F))),
                 );
               }
-              if (state.variants.isEmpty) return const SizedBox.shrink();
               return _LanguageAndActions(book: book);
             },
           ),
@@ -168,6 +176,7 @@ class _LanguageAndActions extends StatelessWidget {
     return BlocBuilder<BookDetailVariantCubit, BookDetailVariantState>(
       builder: (context, state) {
         final variants = state.variants;
+        if (variants.isEmpty) return const SizedBox.shrink();
         final selectedLanguage = state.selectedLanguage;
         final selectedVariant = selectedLanguage != null
             ? variants.where((v) => v.language == selectedLanguage).firstOrNull
@@ -271,39 +280,6 @@ class _LanguageAndActions extends StatelessWidget {
             );
           }
         },
-      ));
-    }
-
-    if (hasFormat('hardcover') || hasFormat('paperback')) {
-      final hasActiveRequest =
-          context.read<BookDetailVariantCubit>().state.hasActiveRequest;
-      buttons.add(_actionBtn(
-        icon: hasActiveRequest
-            ? Icons.check_circle_rounded
-            : Icons.menu_book_rounded,
-        label: hasActiveRequest ? 'Requested' : 'Request',
-        color: hasActiveRequest ? Colors.grey : const Color(0xFF4F46E5),
-        onTap: hasActiveRequest
-            ? () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('You have already requested this book'),
-                      behavior: SnackBarBehavior.floating),
-                );
-              }
-            : () {
-                if (!_checkPrimeOrPrompt(context)) return;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BookRequestFormPage(
-                      bookId: book.id,
-                      bookTitle: book.title,
-                      coverImageUrl: book.coverImageUrl,
-                    ),
-                  ),
-                );
-              },
       ));
     }
 
@@ -750,6 +726,71 @@ class _SectionCard extends StatelessWidget {
           const SizedBox(height: 10),
           child,
         ],
+      ),
+    );
+  }
+}
+
+// ─── Bottom Request Bar ─────────────────────────────────────────────────────
+
+class _BottomRequestBar extends StatelessWidget {
+  final BookDetailEntity book;
+
+  const _BottomRequestBar({required this.book});
+
+  @override
+  Widget build(BuildContext context) {
+    final variantState = context.watch<BookDetailVariantCubit>().state;
+    final profileState = context.watch<ProfileBloc>().state;
+    final isPrime = profileState is ProfileLoaded && profileState.user.isPrime;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: variantState.hasActiveRequest
+                  ? Colors.grey
+                  : const Color(0xFF2CE07F),
+              foregroundColor: Colors.black87,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: variantState.hasActiveRequest
+                ? () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('You have already requested this book'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                : () {
+                    if (!isPrime) {
+                      showPrimeRequiredDialog(context);
+                      return;
+                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BookRequestFormPage(
+                          bookId: book.id,
+                          bookTitle: book.title,
+                          coverImageUrl: book.coverImageUrl,
+                        ),
+                      ),
+                    );
+                  },
+            child: Text(
+              variantState.hasActiveRequest ? 'Already Requested' : 'Request Book',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ),
+        ),
       ),
     );
   }

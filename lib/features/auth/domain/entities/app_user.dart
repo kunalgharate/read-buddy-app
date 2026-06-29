@@ -108,7 +108,7 @@ class AppUser {
         'password': password,
         'phno': phno ?? '',
         'userRole': role,
-        'picture': picture ?? 'https://example.com/profile.jpg',
+        'picture': picture ?? '',
         'deviceInfo': {
           'deviceModel': 'Mobile Device',
           'deviceOS': 'Mobile OS',

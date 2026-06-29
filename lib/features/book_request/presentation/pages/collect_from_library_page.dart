@@ -347,7 +347,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(message),
-                backgroundColor: Color(0xFF2CE07F),
+                backgroundColor: const Color(0xFF2CE07F),
               ),
             );
             Navigator.of(context).popUntil((route) => route.isFirst);
@@ -492,7 +492,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                               isPlaceholder: _selectedDate == null,
                               onTap: _pickDate,
                             ),
-                          ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 12),

@@ -81,7 +81,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         "password": _passwordController.text,
         "phno": _phoneController.text.trim(),
         "userRole": "user",
-        "picture": "https://example.com/profile.jpg",
+        "picture": "",
         "deviceInfo": {
           "deviceModel": "Mobile Device",
           "deviceOS": "Mobile OS",
