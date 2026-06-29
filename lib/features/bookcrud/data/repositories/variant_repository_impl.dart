@@ -49,12 +49,25 @@ class VariantRepositoryImpl implements VariantRepository {
     // to get bookId and language, then call createVariant which triggers the
     // server-side merge logic.
     final existing = await remoteDataSource.getVariantById(variantId);
+
+    // Filter out formats that already exist on the variant to avoid 409 Conflict
+    final existingTypes =
+        existing.formats.map((f) => f.type.toLowerCase()).toSet();
+    final newFormats = formats
+        .where((f) => !existingTypes.contains(f.type.toLowerCase()))
+        .toList();
+
+    if (newFormats.isEmpty) {
+      // No new formats to add — return existing variant
+      return existing;
+    }
+
     final model = BookVariantModel(
       id: '',
       bookId: existing.bookId,
       language: existing.language,
       donorId: existing.donorId,
-      formats: formats,
+      formats: newFormats,
     );
     return await remoteDataSource.createVariant(
       model,

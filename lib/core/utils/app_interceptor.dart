@@ -33,15 +33,18 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:read_buddy_app/core/network/api_constants.dart';
 import 'package:read_buddy_app/core/services/session_event_bus.dart';
 
-class AppInterceptor extends Interceptor {
+class AppInterceptor extends QueuedInterceptor {
   final FlutterSecureStorage _secureStorage;
   final Dio _authDio;
 
-  // Prevents multiple concurrent refresh attempts
-  bool _isRefreshing = false;
-  Completer<String?>? _refreshCompleter;
-
-  AppInterceptor(this._secureStorage, this._authDio);
+  AppInterceptor(this._secureStorage, this._authDio) {
+    _authDio.options.connectTimeout = const Duration(seconds: 30);
+    _authDio.options.receiveTimeout = const Duration(seconds: 30);
+    _authDio.options.headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
 
   @override
   void onRequest(
@@ -68,41 +71,26 @@ class AppInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (_shouldAttemptTokenRefresh(err)) {
       try {
-        debugPrint('🔄 Token expired. Attempting refresh...');
-        final newAccessToken = await _getOrRefreshToken();
+        if (kDebugMode) {
+          print('🔄 Token expired. Attempting refresh...');
+        }
+        final newAccessToken = await _refreshAccessToken();
         if (newAccessToken != null) {
-          debugPrint('✅ Token refreshed successfully');
+          if (kDebugMode) {
+            print('✅ Token refreshed successfully');
+          }
           final retryResponse =
               await _retryRequest(err.requestOptions, newAccessToken);
           return handler.resolve(retryResponse);
         }
       } catch (refreshError) {
-        debugPrint('❌ Token refresh failed: $refreshError');
+        if (kDebugMode) {
+          print('❌ Token refresh failed: $refreshError');
+        }
         await _handleRefreshFailure();
       }
     }
     handler.next(err);
-  }
-
-  /// Ensures only one refresh happens at a time. Concurrent 401s wait for
-  /// the same refresh result instead of firing multiple refresh calls.
-  Future<String?> _getOrRefreshToken() async {
-    if (_isRefreshing) {
-      debugPrint('🔄 Refresh already in progress, waiting...');
-      return _refreshCompleter!.future;
-    }
-    _isRefreshing = true;
-    _refreshCompleter = Completer<String?>();
-    try {
-      final token = await _refreshAccessToken();
-      _refreshCompleter!.complete(token);
-      return token;
-    } catch (e) {
-      _refreshCompleter!.completeError(e);
-      rethrow;
-    } finally {
-      _isRefreshing = false;
-    }
   }
 
   bool _shouldAttemptTokenRefresh(DioException err) {
@@ -120,43 +108,43 @@ class AppInterceptor extends Interceptor {
         SessionEventBus.instance.fire(SessionEvent.sessionReplaced);
         return false;
       }
-      // TOKEN_EXPIRED or any other 401 → attempt refresh
       return true;
     }
 
-    if (status == ApiConstants.unauthorized) {
-      return true;
-    }
-    if (status == ApiConstants.notFound &&
-        (path.contains('/accept') || path.contains('/decline'))) {
-      return true;
-    }
+    if (status == 401) return true;
+
     return false;
   }
 
   Future<String?> _refreshAccessToken() async {
     final refreshToken = await _secureStorage.read(key: 'refreshToken');
     if (refreshToken == null || refreshToken.isEmpty) {
-      debugPrint('❌ No refresh token in storage');
+      if (kDebugMode) {
+        print('❌ No refresh token in storage');
+      }
       throw Exception('No refresh token available');
     }
 
-    debugPrint('🔄 Calling refresh endpoint: ${ApiConstants.refreshToken}');
+    if (kDebugMode) {
+      print('🔄 Calling refresh endpoint: ${ApiConstants.refreshToken}');
+    }
 
     final response = await _authDio.post(
       ApiConstants.refreshToken,
       data: {'token': refreshToken},
-      options: Options(
-        headers: {'Content-Type': 'application/json'},
-      ),
     );
 
-    debugPrint('🔄 Refresh response status: ${response.statusCode}');
-    debugPrint('🔄 Refresh response data: ${response.data}');
+    if (kDebugMode) {
+      print('🔄 Refresh response status: ${response.statusCode}');
+    }
 
-    if (response.statusCode == ApiConstants.success) {
+    if (response.statusCode == 200) {
       final newAccessToken = response.data['accessToken'];
+      final newRefreshToken = response.data['refreshToken'];
       await _secureStorage.write(key: 'accessToken', value: newAccessToken);
+      if (newRefreshToken != null) {
+        await _secureStorage.write(key: 'refreshToken', value: newRefreshToken);
+      }
       return newAccessToken;
     }
 
@@ -172,7 +160,7 @@ class AppInterceptor extends Interceptor {
   }
 
   Future<void> _handleRefreshFailure() async {
-    await _secureStorage.deleteAll();
-    // Note: Navigation should be handled at the UI level through BLoC events
+    await _secureStorage.delete(key: 'accessToken');
+    SessionEventBus.instance.fire(SessionEvent.sessionReplaced);
   }
 }
