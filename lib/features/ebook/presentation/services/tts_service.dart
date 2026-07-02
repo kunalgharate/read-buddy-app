@@ -6,9 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/core/network/api_constants.dart';
-import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 
 /// TTS service that uses:
 /// - flutter_tts for English (device TTS)
@@ -196,28 +193,33 @@ class TtsService {
     return result.where((c) => c.trim().isNotEmpty).toList();
   }
 
-  /// Fetch audio from Gnani AI backend for a single chunk
+  /// Fetch audio from Gnani/Vachana AI directly
   Future<File?> _fetchGnaniAudio(String chunk) async {
     try {
       final voice = _gnaniVoiceMap[_languageCode] ?? 'sia';
-      final token = await getIt<SecureStorageUtil>().getAccessToken();
 
       _httpClient = HttpClient();
-      final uri = Uri.parse(ApiConstants.ttsSynthesize);
+      final uri = Uri.parse('https://api.vachana.ai/api/v1/tts/inference');
       final request = await _httpClient!.postUrl(uri);
 
       final body = jsonEncode({
         'text': chunk,
         'voice': voice,
-        'container': 'mp3',
+        'model': 'vachana-voice-v2',
+        'audio_config': {
+          'sample_rate': 44100,
+          'num_channels': 1,
+          'sample_width': 2,
+          'encoding': 'linear_pcm',
+          'container': 'wav',
+        },
       });
       final bodyBytes = utf8.encode(body);
 
       request.headers.set('Content-Type', 'application/json; charset=utf-8');
       request.headers.set('Content-Length', bodyBytes.length.toString());
-      if (token != null) {
-        request.headers.set('Authorization', 'Bearer $token');
-      }
+      request.headers.set('X-API-Key-ID',
+          'vach_1ytE2CY5X2OrSqddsJvAvu3O4wNoWFIjyldHw67WjXqEK25XwvpaxAfJLV2491K9cnYPB6bMdulN5N56eaRxQCrnvsO1agNC_784090b017d414bbe6dd034cd399f0c8');
 
       request.add(bodyBytes);
       final response = await request.close();
@@ -231,7 +233,7 @@ class TtsService {
 
         final dir = await getTemporaryDirectory();
         final file = File(
-          '${dir.path}/gnani_tts_${DateTime.now().millisecondsSinceEpoch}.mp3',
+          '${dir.path}/gnani_tts_${DateTime.now().millisecondsSinceEpoch}.wav',
         );
         await file.writeAsBytes(bytes);
         return file;
