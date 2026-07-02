@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/ui_utils.dart';
@@ -151,7 +152,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E2939),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 30),

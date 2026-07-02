@@ -3,13 +3,11 @@ import 'package:dio/dio.dart';
 import 'package:read_buddy_app/core/network/api_constants.dart';
 import 'package:read_buddy_app/features/donate/data/models/donation_stats_model.dart';
 import 'package:read_buddy_app/features/donate/data/models/book_donation_request_model.dart';
-import 'package:read_buddy_app/features/donate/data/models/agent_model.dart';
 
 abstract class DonateRemoteDataSource {
   Future<DonationStatsModel> getDonationStats();
   Future<void> createBookDonation(BookDonationRequestModel request);
   Future<void> uploadReceipt(String donationId, FormData formData);
-  Future<List<AgentModel>> getNearestAgents();
   Future<Map<String, dynamic>> initiateMoneyDonation(int amount);
   Future<Map<String, dynamic>> verifyMoneyDonation({
     required String razorpayOrderId,
@@ -87,39 +85,6 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
       }
     } catch (e) {
       throw Exception('Error uploading receipt: $e');
-    }
-  }
-
-  @override
-  Future<List<AgentModel>> getNearestAgents() async {
-    try {
-      final response = await dio.get(ApiConstants.nearestAgent);
-      if (response.statusCode == 200) {
-        final dynamic responseData = response.data;
-
-        if (responseData is List) {
-          return responseData.map((json) => AgentModel.fromJson(json)).toList();
-        } else if (responseData is Map<String, dynamic>) {
-          if (responseData.containsKey('data') &&
-              responseData['data'] is List) {
-            return (responseData['data'] as List)
-                .map((json) => AgentModel.fromJson(json))
-                .toList();
-          } else if (responseData.containsKey('success') &&
-              responseData['success'] == true &&
-              responseData.containsKey('data')) {
-            return (responseData['data'] as List)
-                .map((json) => AgentModel.fromJson(json))
-                .toList();
-          } else {
-            return [AgentModel.fromJson(responseData)];
-          }
-        }
-      }
-      throw Exception(
-          response.data?['message'] ?? 'Failed to load nearest agents');
-    } catch (e) {
-      throw Exception('Error fetching nearest agents: $e');
     }
   }
 

@@ -1,11 +1,51 @@
 import 'package:flutter/material.dart';
-import '../../../../core/di/injection.dart';
-import '../../../../core/services/app_preferences.dart';
-import '../../../../core/utils/secure_storage_utils.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/profile/presentation/pages/screen/profile_screen.dart';
 import '../widgets/dashboard_box_widget.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: const [
+          _AdminDashboardBody(),
+          ProfileScreen(),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) => setState(() => _currentIndex = index),
+        indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard, color: AppColors.primary),
+            label: 'Dashboard',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person, color: AppColors.primary),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminDashboardBody extends StatelessWidget {
+  const _AdminDashboardBody();
 
   @override
   Widget build(BuildContext context) {
@@ -14,16 +54,10 @@ class AdminDashboardScreen extends StatelessWidget {
         title: const Text('Admin Panel'),
         centerTitle: true,
         actions: [
-          //logout action
           IconButton(
-            onPressed: () async {
-              final secureStorage = getIt<SecureStorageUtil>();
-              await secureStorage.clearAll();
-              await AppPreferences.clear();
-              if (!context.mounted) return;
-              Navigator.pushReplacementNamed(context, '/signin');
-            },
-            icon: const Icon(Icons.logout),
+            onPressed: () => Navigator.pushNamed(context, '/settings'),
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
           ),
         ],
       ),
@@ -32,11 +66,6 @@ class AdminDashboardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // const Text(
-            //   'Manage books, categories and users',
-            //   style: TextStyle(fontSize: 16, color: Colors.grey),
-            // ),
-            // const SizedBox(height: 16),
             const TextField(
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.search),
@@ -70,7 +99,9 @@ class AdminDashboardScreen extends StatelessWidget {
                     title: 'New Users',
                     count: 5,
                     color: Colors.lightBlue,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-users');
+                    },
                   ),
                 ],
               ),
@@ -79,7 +110,7 @@ class AdminDashboardScreen extends StatelessWidget {
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
-                childAspectRatio: 0.85, // Adjust this to give enough height
+                childAspectRatio: 0.85,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 children: [
@@ -92,12 +123,13 @@ class AdminDashboardScreen extends StatelessWidget {
                     },
                   ),
                   DashboardBoxWidget(
-                      title: 'Books',
-                      count: 236,
-                      icon: Icons.book,
-                      onPressed: () {
-                        Navigator.of(context).pushNamed('/books');
-                      }),
+                    title: 'Books',
+                    count: 236,
+                    icon: Icons.book,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/books');
+                    },
+                  ),
                   DashboardBoxWidget(
                     title: 'Donations',
                     count: 318,
@@ -118,12 +150,14 @@ class AdminDashboardScreen extends StatelessWidget {
                     title: 'Users',
                     count: 12,
                     icon: Icons.people,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-users');
+                    },
                   ),
                   DashboardBoxWidget(
                     title: 'Banner',
                     count: 12,
-                    icon: Icons.people,
+                    icon: Icons.image,
                     onPressed: () {
                       Navigator.of(context).pushNamed('/banner');
                     },
@@ -142,6 +176,14 @@ class AdminDashboardScreen extends StatelessWidget {
                     icon: Icons.local_shipping_outlined,
                     onPressed: () {
                       Navigator.of(context).pushNamed('/admin-book-requests');
+                    },
+                  ),
+                  DashboardBoxWidget(
+                    title: 'Libraries',
+                    count: 0,
+                    icon: Icons.local_library,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/libraries');
                     },
                   ),
                 ],

@@ -170,10 +170,27 @@ import 'package:read_buddy_app/features/donate/data/repositories/donate_reposito
 import 'package:read_buddy_app/features/donate/domain/repositories/donate_repository.dart';
 import 'package:read_buddy_app/features/donate/domain/usecases/get_donation_stats.dart'
     as donate_use_cases;
-import 'package:read_buddy_app/features/donate/domain/usecases/get_nearest_agents.dart';
 import 'package:read_buddy_app/features/donate/domain/usecases/create_book_donation.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/explore/presentation/bloc/explore_bloc.dart';
+
+// Library
+import 'package:read_buddy_app/features/library/data/datasources/library_remote_datasource.dart';
+import 'package:read_buddy_app/features/library/data/repositories/library_repository_impl.dart';
+import 'package:read_buddy_app/features/library/domain/repositories/library_repository.dart';
+import 'package:read_buddy_app/features/library/domain/usecases/library_usecases.dart';
+import 'package:read_buddy_app/features/library/presentation/bloc/library_bloc.dart';
+
+// Address
+import 'package:read_buddy_app/features/address/data/datasources/address_remote_datasource.dart';
+import 'package:read_buddy_app/features/address/data/repositories/address_repository_impl.dart';
+import 'package:read_buddy_app/features/address/domain/repositories/address_repository.dart';
+import 'package:read_buddy_app/features/address/domain/usecases/address_usecases.dart';
+import 'package:read_buddy_app/features/address/presentation/bloc/address_bloc.dart';
+
+// Librarian
+import 'package:read_buddy_app/features/librarian/data/datasources/librarian_remote_datasource.dart';
+import 'package:read_buddy_app/features/librarian/presentation/bloc/librarian_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -185,6 +202,9 @@ Future<void> configureDependencies() async {
   _registerUseCases();
   _registerBlocs();
   _registerCubits();
+  _registerLibraryFeature();
+  _registerAddressFeature();
+  _registerLibrarianFeature();
 }
 
 // ========================================
@@ -531,8 +551,6 @@ void _registerUseCases() {
   getIt.registerLazySingleton(() =>
       donate_use_cases.GetDonationStats(repository: getIt<DonateRepository>()));
   getIt.registerLazySingleton(
-      () => GetNearestAgents(repository: getIt<DonateRepository>()));
-  getIt.registerLazySingleton(
       () => CreateBookDonation(repository: getIt<DonateRepository>()));
   getIt.registerLazySingleton(
       () => UploadReceipt(repository: getIt<DonateRepository>()));
@@ -614,7 +632,7 @@ void _registerBlocs() {
       ));
 
   // Banner
-  getIt.registerLazySingleton(() => BannerBloc(
+  getIt.registerFactory(() => BannerBloc(
         getBannerUsecase: getIt<GetBannerUsecase>(),
         createBannerUsecase: getIt<CreateBannerUsecase>(),
         updateBannerUsecase: getIt<UpdateBannerUsecase>(),
@@ -633,7 +651,8 @@ void _registerBlocs() {
   // Donate
   getIt.registerFactory(() => DonateBookBloc(
         getDonationStats: getIt<donate_use_cases.GetDonationStats>(),
-        getNearestAgents: getIt<GetNearestAgents>(),
+        getLibraryDetails: getIt<GetLibraryDetails>(),
+        getSuperLibraries: getIt<GetSuperLibraries>(),
         createBookDonation: getIt<CreateBookDonation>(),
         uploadReceipt: getIt<UploadReceipt>(),
       ));
@@ -682,4 +701,92 @@ void _registerCubits() {
   getIt.registerLazySingleton(() => UserCubit(getIt<GetUserListUseCase>()));
   getIt.registerLazySingleton(
       () => LocationCubit(getIt<SearchLocationUsecase>()));
+}
+
+// ========================================
+// LIBRARY FEATURE
+// ========================================
+void _registerLibraryFeature() {
+  // DataSource
+  getIt.registerLazySingleton<LibraryRemoteDataSource>(
+    () => LibraryRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<LibraryRepository>(
+    () => LibraryRepositoryImpl(getIt<LibraryRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetLibraries(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(
+      () => GetSuperLibraries(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(
+      () => GetLibraryDetails(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(() => GetLibraryById(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(() => CreateLibrary(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(() => UpdateLibrary(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(() => DeleteLibrary(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(
+      () => ToggleSuperLibrary(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(
+      () => AssignLibrarian(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(
+      () => UnassignLibrarian(getIt<LibraryRepository>()));
+  getIt
+      .registerLazySingleton(() => GetLibrarians(getIt<LibraryRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => LibraryBloc(
+        getLibraries: getIt<GetLibraries>(),
+        getSuperLibraries: getIt<GetSuperLibraries>(),
+        getLibraryDetails: getIt<GetLibraryDetails>(),
+        createLibrary: getIt<CreateLibrary>(),
+        updateLibrary: getIt<UpdateLibrary>(),
+        deleteLibrary: getIt<DeleteLibrary>(),
+        toggleSuperLibrary: getIt<ToggleSuperLibrary>(),
+        assignLibrarian: getIt<AssignLibrarian>(),
+        unassignLibrarian: getIt<UnassignLibrarian>(),
+        getLibrarians: getIt<GetLibrarians>(),
+      ));
+}
+
+// ========================================
+// ADDRESS FEATURE
+// ========================================
+void _registerAddressFeature() {
+  // DataSource
+  getIt.registerLazySingleton<AddressRemoteDataSource>(
+    () => AddressRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<AddressRepository>(
+    () => AddressRepositoryImpl(getIt<AddressRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetAddresses(getIt<AddressRepository>()));
+  getIt.registerLazySingleton(() => CreateAddress(getIt<AddressRepository>()));
+  getIt.registerLazySingleton(() => UpdateAddress(getIt<AddressRepository>()));
+  getIt.registerLazySingleton(() => DeleteAddress(getIt<AddressRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => AddressBloc(
+        getAddresses: getIt<GetAddresses>(),
+        createAddress: getIt<CreateAddress>(),
+        updateAddress: getIt<UpdateAddress>(),
+        deleteAddress: getIt<DeleteAddress>(),
+      ));
+}
+
+// ========================================
+// LIBRARIAN FEATURE
+// ========================================
+void _registerLibrarianFeature() {
+  getIt.registerLazySingleton<LibrarianRemoteDataSource>(
+    () => LibrarianRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  getIt.registerFactory(() => LibrarianBloc(getIt<LibrarianRemoteDataSource>()));
 }

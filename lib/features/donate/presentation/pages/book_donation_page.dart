@@ -4,25 +4,38 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/extensions/string_extensions.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_event.dart';
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/book_donation_request.dart';
-import 'package:read_buddy_app/features/donate/domain/entities/agent.dart';
+import 'package:read_buddy_app/features/library/domain/entities/library_entity.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_events.dart';
 
-class DonationPage extends StatefulWidget {
+class DonationPage extends StatelessWidget {
   const DonationPage({super.key});
 
   @override
-  State<DonationPage> createState() => _DonationPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<DonateBookBloc>(),
+      child: const _DonationPageContent(),
+    );
+  }
 }
 
-class _DonationPageState extends State<DonationPage> {
+class _DonationPageContent extends StatefulWidget {
+  const _DonationPageContent();
+
+  @override
+  State<_DonationPageContent> createState() => _DonationPageState();
+}
+
+class _DonationPageState extends State<_DonationPageContent> {
   int _currentStep = 0;
 
   // Step 1 controllers
@@ -42,7 +55,7 @@ class _DonationPageState extends State<DonationPage> {
   final _pinController = TextEditingController();
   final _contractController = TextEditingController();
   DateTime? _preferredDate;
-  Agent? _selectedAgent;
+  LibraryEntity? _selectedLibrary;
   File? _receiptImage;
 
   final ImagePicker _picker = ImagePicker();
@@ -98,7 +111,7 @@ class _DonationPageState extends State<DonationPage> {
   void initState() {
     super.initState();
     context.read<CategoryBloc>().add(LoadCategories());
-    context.read<DonateBookBloc>().add(LoadNearestAgents());
+    context.read<DonateBookBloc>().add(LoadNearestLibraries());
   }
 
   @override
@@ -203,7 +216,7 @@ class _DonationPageState extends State<DonationPage> {
         return;
       }
     }
-    if (_deliveryType == 'dropoff' && _selectedAgent == null) {
+    if (_deliveryType == 'dropoff' && _selectedLibrary == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a library for drop-off')),
       );
@@ -235,8 +248,8 @@ class _DonationPageState extends State<DonationPage> {
                   : null,
             )
           : null,
-      dropoffDetails: _deliveryType == 'dropoff' && _selectedAgent != null
-          ? DropoffDetails(libraryId: _selectedAgent!.id)
+      dropoffDetails: _deliveryType == 'dropoff' && _selectedLibrary != null
+          ? DropoffDetails(libraryId: _selectedLibrary!.id)
           : null,
     );
     context.read<DonateBookBloc>().add(SubmitBookDonationEvent(request));
@@ -792,8 +805,8 @@ class _DonationPageState extends State<DonationPage> {
                 );
               }
 
-              if (state is NearestAgentsLoaded) {
-                if (state.agents.isEmpty) {
+              if (state is NearestLibrariesLoaded) {
+                if (state.libraries.isEmpty) {
                   return const Center(
                     child: Padding(
                       padding: EdgeInsets.all(20.0),
@@ -802,23 +815,23 @@ class _DonationPageState extends State<DonationPage> {
                   );
                 }
 
-                if (_selectedAgent == null && state.agents.isNotEmpty) {
+                if (_selectedLibrary == null && state.libraries.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted && _selectedAgent == null) {
-                      setState(() => _selectedAgent = state.agents.first);
+                    if (mounted && _selectedLibrary == null) {
+                      setState(() => _selectedLibrary = state.libraries.first);
                     }
                   });
                 }
 
                 return Column(
-                  children: state.agents.map((agent) {
-                    final isSelected = _selectedAgent?.id == agent.id;
+                  children: state.libraries.map((library) {
+                    final isSelected = _selectedLibrary?.id == library.id;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: GestureDetector(
-                        onTap: () => setState(() => _selectedAgent = agent),
+                        onTap: () => setState(() => _selectedLibrary = library),
                         child: _LibraryCard(
-                          agent: agent,
+                          library: library,
                           isSelected: isSelected,
                           onUploadReceipt: () => _pickImage(false),
                           hasReceipt: _receiptImage != null,
@@ -889,7 +902,7 @@ class _DonationPageState extends State<DonationPage> {
         return false;
       }
     }
-    if (_deliveryType == 'dropoff' && _selectedAgent == null) {
+    if (_deliveryType == 'dropoff' && _selectedLibrary == null) {
       _showSnack('Please select a library for drop-off');
       return false;
     }
@@ -945,8 +958,8 @@ class _DonationPageState extends State<DonationPage> {
             _confirmRow('Phone', _contractController.text.trim()),
             _confirmRow('Preferred Date', _formatDate(_preferredDate)),
           ],
-          if (!isPickup && _selectedAgent != null)
-            _confirmRow('Library', _selectedAgent!.name),
+          if (!isPickup && _selectedLibrary != null)
+            _confirmRow('Library', _selectedLibrary!.name),
         ]),
         const SizedBox(height: 16),
 
@@ -1420,13 +1433,13 @@ class _StepLine extends StatelessWidget {
 // ─── Library Card (Drop off) ──────────────────────────────────
 
 class _LibraryCard extends StatelessWidget {
-  final Agent agent;
+  final LibraryEntity library;
   final bool isSelected;
   final VoidCallback onUploadReceipt;
   final bool hasReceipt;
 
   const _LibraryCard({
-    required this.agent,
+    required this.library,
     this.isSelected = false,
     required this.onUploadReceipt,
     this.hasReceipt = false,
@@ -1463,7 +1476,7 @@ class _LibraryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  agent.name,
+                  library.name,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -1471,7 +1484,7 @@ class _LibraryCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  agent.location.address,
+                  library.address.fullAddress,
                   style: GoogleFonts.poppins(
                       fontSize: 11, color: const Color(0xFF7A9BB5)),
                 ),
@@ -1480,14 +1493,14 @@ class _LibraryCard extends StatelessWidget {
                   spacing: 12,
                   runSpacing: 4,
                   children: [
-                    _infoRow(Icons.phone_outlined, agent.contactNumber),
-                    _infoRow(Icons.access_time, agent.openHours),
+                    _infoRow(Icons.phone_outlined, library.contactNumber),
+                    _infoRow(Icons.access_time, library.openHours),
                     _infoRow(Icons.location_on_outlined,
-                        '${agent.distanceKm.toStringAsFixed(1)} km'),
+                        '${''} km'),
                     _infoRow(
-                        Icons.star_outline, agent.rating.toStringAsFixed(1)),
+                        Icons.star_outline, ''),
                     _infoRow(Icons.local_shipping_outlined,
-                        '${agent.totalDeliveries} deliveries'),
+                        ''),
                   ],
                 ),
                 const SizedBox(height: 8),

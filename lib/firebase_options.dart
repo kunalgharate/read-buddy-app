@@ -52,21 +52,19 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCchLUV-x7yAAqtZh-ugekmrR06Mflj8Oc',
-    appId: '1:773878374124:android:7cfa5c7f6526c5d580cfc9',
+    appId: '1:773878374124:android:d0d4fa78cbac35c880cfc9',
     messagingSenderId: '773878374124',
     projectId: 'readbuddycommunity',
     storageBucket: 'readbuddycommunity.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDbRXvGHJzFUaVJZs_3dL526YV6Dtz7iA4',
-    appId: '1:773878374124:ios:e67995b8797e430c80cfc9',
+    appId: '1:773878374124:ios:63f236fe2063d65a80cfc9',
     messagingSenderId: '773878374124',
     projectId: 'readbuddycommunity',
     storageBucket: 'readbuddycommunity.firebasestorage.app',
-    iosBundleId: 'com.readbuddy.app',
+    iosBundleId: 'in.thecodershub.readbuddy',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyDbRXvGHJzFUaVJZs_3dL526YV6Dtz7iA4',
     appId: '1:773878374124:ios:0c9d401186f5236f80cfc9',

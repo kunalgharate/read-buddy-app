@@ -1,7 +1,11 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/location_service.dart';
+import '../../../library/domain/entities/library_entity.dart';
+import '../../../library/domain/usecases/library_usecases.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
@@ -26,13 +30,75 @@ class BookRequestFormPage extends StatefulWidget {
 class _BookRequestFormPageState extends State<BookRequestFormPage> {
   int _currentStep = 0;
 
-  String _fulfillmentMethod = 'dropoff';
+  String _fulfillmentMethod = 'pickup'; // default to pickup
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _pincodeController = TextEditingController();
   DateTime? _preferredDate;
+
+  // Library selection for pickup
+  List<LibraryEntity> _libraries = [];
+  LibraryEntity? _selectedLibrary;
+  bool _loadingLibraries = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLibraries();
+  }
+
+  Future<void> _fetchLibraries() async {
+    setState(() => _loadingLibraries = true);
+    try {
+      final getLibraryDetails = getIt<GetLibraryDetails>();
+      var libraries = await getLibraryDetails();
+
+      // Filter and sort by distance if location available
+      final position = await LocationService.instance.getCurrentLocation();
+      if (position != null && libraries.isNotEmpty) {
+        // Only show libraries within 25 km
+        libraries = libraries.where((lib) {
+          if (lib.address.latitude == 0 && lib.address.longitude == 0) {
+            return false;
+          }
+          final km = LocationService.instance.calculateDistanceKm(
+            position.latitude, position.longitude,
+            lib.address.latitude, lib.address.longitude,
+          );
+          return km <= 25;
+        }).toList();
+
+        // Sort nearest first
+        libraries.sort((a, b) {
+          final distA = LocationService.instance.calculateDistanceKm(
+            position.latitude, position.longitude,
+            a.address.latitude, a.address.longitude,
+          );
+          final distB = LocationService.instance.calculateDistanceKm(
+            position.latitude, position.longitude,
+            b.address.latitude, b.address.longitude,
+          );
+          return distA.compareTo(distB);
+        });
+      }
+
+      // If no nearby libraries, fallback to super libraries
+      if (libraries.isEmpty) {
+        final getSuperLibraries = getIt<GetSuperLibraries>();
+        libraries = await getSuperLibraries();
+      }
+
+      setState(() {
+        _libraries = libraries;
+        _loadingLibraries = false;
+        if (libraries.isNotEmpty) _selectedLibrary = libraries.first;
+      });
+    } catch (e) {
+      setState(() => _loadingLibraries = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -54,8 +120,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
         data: Theme.of(context).copyWith(
           colorScheme: const ColorScheme.light(
             primary: Color(0xFF2CE07F),
-            onPrimary: Color(0xFF1E2939),
-            onSurface: Color(0xFF1E2939),
+            onPrimary: AppColors.textPrimary,
+            onSurface: AppColors.textPrimary,
           ),
         ),
         child: child!,
@@ -129,6 +195,12 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
         return false;
       }
     }
+
+    if (_fulfillmentMethod == 'pickup' && _selectedLibrary == null) {
+      _showSnack('Please select a library for pickup');
+      return false;
+    }
+
     return true;
   }
 
@@ -182,7 +254,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Color(0xFF1E2939)),
+                icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Text(
@@ -190,7 +262,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -307,6 +379,54 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             ),
           ],
 
+          if (_fulfillmentMethod == 'pickup') ...[
+            const SizedBox(height: 20),
+            const _SectionLabel('Select Library for Pickup'),
+            const SizedBox(height: 12),
+            if (_loadingLibraries)
+              const Center(child: CircularProgressIndicator(strokeWidth: 2))
+            else if (_libraries.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF8E1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade200),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.location_off, color: Colors.amber, size: 32),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'No libraries nearby or in your city',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Please choose the Drop-off (delivery) option instead.',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () =>
+                          setState(() => _fulfillmentMethod = 'dropoff'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF2CE07F),
+                        side: const BorderSide(color: Color(0xFF2CE07F)),
+                      ),
+                      child: const Text('Switch to Delivery'),
+                    ),
+                  ],
+                ),
+              )
+            else
+              ..._libraries.map((lib) => _libraryTile(lib)),
+          ],
+
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
@@ -325,7 +445,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -372,7 +492,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: isSelected
-                    ? const Color(0xFF1E2939)
+                    ? AppColors.textPrimary
                     : const Color(0xFF999999),
               ),
             ),
@@ -382,7 +502,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               style: TextStyle(
                 fontSize: 11,
                 color: isSelected
-                    ? const Color(0xFF1E2939)
+                    ? AppColors.textPrimary
                     : const Color(0xFFBBBBBB),
               ),
               textAlign: TextAlign.center,
@@ -415,14 +535,18 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             _confirmRow('Book', widget.bookTitle),
             _confirmRow('Name', _nameController.text.trim()),
             _confirmRow('Phone', _phoneController.text.trim()),
-            _confirmRow('Method', isDropoff ? 'Drop-off' : 'Pickup'),
+            _confirmRow('Method', isDropoff ? 'Delivery' : 'Pickup from Library'),
             if (isDropoff) ...[
               _confirmRow('Address', _addressController.text.trim()),
               _confirmRow('PIN Code', _pincodeController.text.trim()),
               _confirmRow('Preferred Date', _formatDate(_preferredDate)),
             ],
-            if (!isDropoff)
-              _confirmRow('Collection', 'I will collect from library'),
+            if (!isDropoff && _selectedLibrary != null) ...[
+              _confirmRow('Library', _selectedLibrary!.name),
+              _confirmRow('Location', _selectedLibrary!.address.fullAddress),
+              if (_selectedLibrary!.openHours.isNotEmpty)
+                _confirmRow('Hours', _selectedLibrary!.openHours),
+            ],
           ]),
           const SizedBox(height: 32),
           SizedBox(
@@ -442,7 +566,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -454,7 +578,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             child: OutlinedButton(
               onPressed: () => setState(() => _currentStep = 0),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF1E2939),
+                foregroundColor: AppColors.textPrimary,
                 side: const BorderSide(color: Color(0xFFDDDDDD)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -513,7 +637,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1E2939),
+                color: AppColors.textPrimary,
               ),
               textAlign: TextAlign.right,
             ),
@@ -538,7 +662,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
       maxLines: maxLines,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF1E2939)),
+      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Color(0xFF999999)),
@@ -582,11 +706,120 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 fontSize: 14,
                 color: isPlaceholder
                     ? const Color(0xFF999999)
-                    : const Color(0xFF1E2939),
+                    : AppColors.textPrimary,
                 fontWeight: isPlaceholder ? FontWeight.normal : FontWeight.w500,
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+  Widget _libraryTile(LibraryEntity lib) {
+    final isSelected = _selectedLibrary?.id == lib.id;
+    final position = LocationService.instance.lastPosition;
+    String? distanceText;
+    if (position != null && lib.address.latitude != 0) {
+      final km = LocationService.instance.calculateDistanceKm(
+        position.latitude, position.longitude,
+        lib.address.latitude, lib.address.longitude,
+      );
+      distanceText = LocationService.instance.formatDistance(km);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedLibrary = lib),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFF2CE07F)
+                  : const Color(0xFFE0E0E0),
+              width: isSelected ? 2 : 1,
+            ),
+            color: isSelected
+                ? const Color(0xFF2CE07F).withValues(alpha: 0.05)
+                : Colors.white,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: lib.isSuperLibrary
+                      ? Colors.amber.withValues(alpha: 0.15)
+                      : const Color(0xFF2CE07F).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  lib.isSuperLibrary ? Icons.star : Icons.local_library,
+                  size: 20,
+                  color: lib.isSuperLibrary
+                      ? Colors.amber
+                      : const Color(0xFF2CE07F),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lib.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      lib.address.fullAddress,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF999999),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (lib.openHours.isNotEmpty)
+                      Text(
+                        lib.openHours,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFFBBBBBB),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (distanceText != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2CE07F).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    distanceText,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2CE07F),
+                    ),
+                  ),
+                ),
+              if (isSelected) ...[
+                const SizedBox(width: 8),
+                const Icon(Icons.check_circle, color: Color(0xFF2CE07F), size: 22),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -604,7 +837,7 @@ class _SectionLabel extends StatelessWidget {
       style: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: Color(0xFF1E2939),
+        color: AppColors.textPrimary,
       ),
     );
   }

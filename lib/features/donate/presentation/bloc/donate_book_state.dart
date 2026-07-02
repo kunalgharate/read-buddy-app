@@ -20,13 +20,13 @@ final class DonationStatsLoaded extends DonateBookState {
   List<Object> get props => [stats];
 }
 
-final class NearestAgentsLoaded extends DonateBookState {
-  final List<Agent> agents;
+final class NearestLibrariesLoaded extends DonateBookState {
+  final List<LibraryEntity> libraries;
 
-  const NearestAgentsLoaded(this.agents);
+  const NearestLibrariesLoaded(this.libraries);
 
   @override
-  List<Object> get props => [agents];
+  List<Object> get props => [libraries];
 }
 
 final class BookDonationCreated extends DonateBookState {}

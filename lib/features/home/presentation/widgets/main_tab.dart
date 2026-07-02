@@ -10,6 +10,7 @@ import 'package:read_buddy_app/features/homebooks/domain/entities/book_entity.da
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_bloc.dart';
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_event.dart';
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_state.dart';
+import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 
 const _primary = Color(0xFF03405B);
 
@@ -17,18 +18,37 @@ const _primary = Color(0xFF03405B);
 // MainTab — always provide both blocs
 // ─────────────────────────────────────────────
 
-class MainTab extends StatelessWidget {
+class MainTab extends StatefulWidget {
   final VoidCallback? onDonatePressed;
   const MainTab({super.key, this.onDonatePressed});
+
+  @override
+  State<MainTab> createState() => _MainTabState();
+}
+
+class _MainTabState extends State<MainTab> {
+  late final HomeBloc _homeBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeBloc = getIt<HomeBloc>()..add(LoadHomeData());
+  }
+
+  @override
+  void dispose() {
+    _homeBloc.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => getIt<HomeBloc>()..add(LoadHomeData())),
+        BlocProvider.value(value: _homeBloc),
         BlocProvider(create: (_) => getIt<BannerBloc>()),
       ],
-      child: _MainTabView(onDonatePressed: onDonatePressed),
+      child: _MainTabView(onDonatePressed: widget.onDonatePressed),
     );
   }
 }
@@ -44,10 +64,16 @@ class _MainTabView extends StatelessWidget {
       body: BlocConsumer<HomeBloc, HomeState>(
         listenWhen: (prev, curr) => curr is HomeLoaded && prev is! HomeLoaded,
         listener: (context, state) {
-          if (state is HomeLoaded && state.isPrime) {
-            context
-                .read<BannerBloc>()
-                .add(const GetBannerListEvent(typeFilter: 'homepage'));
+          if (state is HomeLoaded) {
+            final profileState = context.read<ProfileBloc>().state;
+            final isPrime = profileState is ProfileLoaded
+                ? profileState.user.isPrime
+                : false;
+            if (isPrime) {
+              context
+                  .read<BannerBloc>()
+                  .add(const GetBannerListEvent(typeFilter: 'homepage'));
+            }
           }
         },
         builder: (context, state) {
@@ -69,6 +95,12 @@ class _MainTabView extends StatelessWidget {
           }
 
           if (state is HomeLoaded) {
+            // Use fresh isPrime from ProfileBloc — default to false if not loaded
+            final profileState = context.watch<ProfileBloc>().state;
+            final isPrime = profileState is ProfileLoaded
+                ? profileState.user.isPrime
+                : false;
+
             return SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(0, 20, 0, 80),
@@ -78,7 +110,7 @@ class _MainTabView extends StatelessWidget {
                     _BannerSection(
                       trendingCover:
                           state.trendingBooks.firstOrNull?.coverImageUrl,
-                      isPrime: state.isPrime,
+                      isPrime: isPrime,
                       onDonatePressed: onDonatePressed,
                     ),
                     const SizedBox(height: 32),
@@ -180,7 +212,7 @@ class _BannerSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Support a Reader',
+                    const Text('Get Prime Membership',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -189,7 +221,7 @@ class _BannerSection extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           height: 1.35,
                         )),
-                    const Text('Donate a book and make a difference.',
+                    const Text('Donate a book or buy membership to unlock all features.',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -204,7 +236,7 @@ class _BannerSection extends StatelessWidget {
                         color: const Color(0xFF3DAA6E),
                         borderRadius: BorderRadius.circular(24),
                       ),
-                      child: const Text('Donate',
+                      child: const Text('Get Prime',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 12,

@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -97,7 +98,7 @@ class _BookOrderViewState extends State<_BookOrderView> {
         title: Text(
           _appBarTitle,
           style: const TextStyle(
-            color: Color(0xFF1E2939),
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 17,
           ),
@@ -282,7 +283,7 @@ class _BookOrderViewState extends State<_BookOrderView> {
                         height: 22,
                         width: 22,
                         child: CircularProgressIndicator(
-                          color: Color(0xFF1E2939),
+                          color: AppColors.textPrimary,
                           strokeWidth: 2.5,
                         ),
                       )
@@ -291,7 +292,7 @@ class _BookOrderViewState extends State<_BookOrderView> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E2939),
+                          color: AppColors.textPrimary,
                         ),
                       ),
               );
@@ -425,8 +426,8 @@ class _BookOrderTab extends StatelessWidget {
         data: Theme.of(context).copyWith(
           colorScheme: const ColorScheme.light(
             primary: Color(0xFF2CE07F),
-            onPrimary: Color(0xFF1E2939),
-            onSurface: Color(0xFF1E2939),
+            onPrimary: AppColors.textPrimary,
+            onSurface: AppColors.textPrimary,
           ),
         ),
         child: child!,
@@ -443,8 +444,8 @@ class _BookOrderTab extends StatelessWidget {
         data: Theme.of(context).copyWith(
           colorScheme: const ColorScheme.light(
             primary: Color(0xFF2CE07F),
-            onPrimary: Color(0xFF1E2939),
-            onSurface: Color(0xFF1E2939),
+            onPrimary: AppColors.textPrimary,
+            onSurface: AppColors.textPrimary,
           ),
         ),
         child: child!,
@@ -482,7 +483,7 @@ class _BookOrderTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1E2939),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -678,7 +679,7 @@ class _TimelineCircle extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1E2939),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -731,7 +732,7 @@ class _TimelineCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 22, color: const Color(0xFF1E2939)),
+          Icon(icon, size: 22, color: AppColors.textPrimary),
           const SizedBox(height: 10),
           Text(
             description,
@@ -750,7 +751,7 @@ class _TimelineCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E2939),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -803,7 +804,7 @@ class _BookCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                   height: 1.3,
                 ),
               ),
@@ -859,7 +860,7 @@ class _FieldLabel extends StatelessWidget {
       style: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Color(0xFF1E2939),
+        color: AppColors.textPrimary,
       ),
     );
   }
@@ -903,7 +904,7 @@ class _DateTimePickerButton extends StatelessWidget {
                   fontSize: 13,
                   color: isPlaceholder
                       ? const Color(0xFFAAAAAA)
-                      : const Color(0xFF1E2939),
+                      : AppColors.textPrimary,
                   fontWeight:
                       isPlaceholder ? FontWeight.normal : FontWeight.w500,
                 ),
@@ -942,7 +943,7 @@ class _InputField extends StatelessWidget {
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       maxLines: maxLines,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF1E2939)),
+      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(fontSize: 14, color: Color(0xFFAAAAAA)),

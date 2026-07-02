@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
@@ -173,7 +174,7 @@ class _SplashScreenState extends State<SplashScreen>
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                   letterSpacing: -0.5,
                 ),
               ),

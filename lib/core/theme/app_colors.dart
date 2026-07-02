@@ -4,12 +4,13 @@ class AppColors {
   AppColors._();
 
   // Primary / Accent
-  static const Color primary = Color(0xFF4CAF50);
-  static const Color accent = Color(0xFF2CE07F);
+  static const Color primary = Color(0xFF2CE07F);
+  static const Color accent = primary;
+  static const Color secondary = Color(0xFF1AAF5C);
 
   // Backgrounds
-  static const Color background = Color(0xFFFDFDFD);
-  static const Color surface = Color(0xFFF5F5F5);
+  static const Color background = Color(0xFFF9FAFB);
+  static const Color surface = Color(0xFFFFFFFF);
 
   // Text
   static const Color textDark = Color(0xFF052E44);

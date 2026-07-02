@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/category_tab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/donation_tab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/main_tab.dart';
+import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
-import 'package:read_buddy_app/core/services/app_preferences.dart';
-import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 
 import 'package:read_buddy_app/features/profile/presentation/pages/screen/profile_screen.dart';
 
@@ -19,86 +21,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  Future<void> _logout() async {
-    try {
-      await getIt<SecureStorageUtil>().clearAll();
-      await AppPreferences.clear();
-    } catch (_) {
-      // Navigate regardless of clearing errors
-    } finally {
-      if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil('/signin', (_) => false);
-      }
-    }
-  }
-
-  void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: Colors.white,
-        title: const Row(
-          children: [
-            Icon(Icons.logout, color: Color(0xFF00C853), size: 22),
-            SizedBox(width: 8),
-            Text(
-              'Logout',
-              style: TextStyle(
-                color: Color(0xFF1E3A5F),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'Are you sure you want to logout?',
-          style: TextStyle(color: Color(0xFF666666)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF666666),
-            ),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              _logout();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00C853),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _buildLibrarianDrawer(context),
       appBar: _currentIndex == 0
           ? AppBar(
-              // title: const Text('Read Buddy'),
+              title: const Text('ReadBuddy'),
               actions: [
-                IconButton(
-                  onPressed: () => Navigator.pushNamed(context, '/ebooks'),
-                  icon: const Icon(Icons.chrome_reader_mode),
-                  tooltip: 'eBooks',
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pushNamed(context, '/audiobooks'),
-                  icon: const Icon(Icons.headphones_rounded),
-                  tooltip: 'Audiobooks',
-                ),
                 IconButton(
                   onPressed: () => Navigator.pushNamed(context, '/search'),
                   icon: const Icon(Icons.search),
@@ -110,36 +40,109 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.notifications_outlined),
                   tooltip: 'Notifications',
                 ),
-                IconButton(
-                  onPressed: () => Navigator.pushNamed(context, '/mybooks'),
-                  icon: const Icon(Icons.menu_book_outlined),
-                  tooltip: 'My Books',
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pushNamed(context, '/rewards'),
-                  icon:
-                      const Icon(Icons.emoji_events, color: Color(0xFF2CE07F)),
-                  tooltip: 'Rewards',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: _showLogoutDialog,
-                ),
               ],
             )
           : null,
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          MainTab(onDonatePressed: () => setState(() => _currentIndex = 2)),
+          MainTab(onDonatePressed: () => Navigator.pushNamed(context, '/donate-money')),
           const CategoryTab(),
-          const DonationTab(),
+          BlocProvider(
+            create: (_) => getIt<DonateBookBloc>(),
+            child: const DonationTab(),
+          ),
           const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavWidget(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
+      ),
+    );
+  }
+
+  /// Returns a drawer only if the user is a librarian, otherwise null.
+  Widget? _buildLibrarianDrawer(BuildContext context) {
+    final profileState = context.watch<ProfileBloc>().state;
+    if (profileState is! ProfileLoaded) return null;
+
+    final role = profileState.user.role;
+    if (role != 'librarian') return null;
+
+    return Drawer(
+      child: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const CircleAvatar(
+                    radius: 30,
+                    backgroundColor: AppColors.primary,
+                    child: Icon(Icons.local_library,
+                        color: Colors.white, size: 28),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    profileState.user.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const Text(
+                    'Librarian',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.dashboard, color: AppColors.primary),
+              title: const Text('Librarian Dashboard'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/librarian/dashboard');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.list_alt, color: AppColors.primary),
+              title: const Text('Book Requests'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/librarian/requests');
+              },
+            ),
+            ListTile(
+              leading:
+                  const Icon(Icons.inventory_2, color: AppColors.primary),
+              title: const Text('Donations'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/librarian/donations');
+              },
+            ),
+            const Spacer(),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.home_outlined),
+              title: const Text('Back to Home'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
       ),
     );
   }

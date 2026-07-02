@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -340,17 +341,36 @@ class _LanguageAndActions extends StatelessWidget {
     }
 
     if (hasFormat('videobook')) {
+      final format = getFormat('videobook');
       buttons.add(_actionBtn(
         icon: Icons.play_circle_rounded,
         label: 'Watch',
         color: const Color(0xFF7C3AED),
         onTap: () {
           if (!_checkPrimeOrPrompt(context)) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Video player coming soon!'),
-                behavior: SnackBarBehavior.floating),
-          );
+          if (format != null && format.parts.isNotEmpty) {
+            final videoParts = format.parts
+                .where((p) => p.videoUrl != null && p.videoUrl!.isNotEmpty)
+                .toList();
+            if (videoParts.isNotEmpty) {
+              Navigator.pushNamed(context, '/videobook-player', arguments: {
+                'bookTitle': book.title,
+                'parts': videoParts,
+              });
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('No video chapters available'),
+                    behavior: SnackBarBehavior.floating),
+              );
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('No video content available'),
+                  behavior: SnackBarBehavior.floating),
+            );
+          }
         },
       ));
     }
@@ -525,7 +545,7 @@ class _IconCircleButton extends StatelessWidget {
           color: Colors.white.withValues(alpha: 0.9),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 20, color: const Color(0xFF1E2939)),
+        child: Icon(icon, size: 20, color: AppColors.textPrimary),
       ),
     );
   }
@@ -560,7 +580,7 @@ class _TitleSection extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF1E2939),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),

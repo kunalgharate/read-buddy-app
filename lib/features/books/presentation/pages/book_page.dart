@@ -1,6 +1,10 @@
 // lib/features/books/presentation/pages/book_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
+import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/widgets/addbook_stepper.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/add_category.dart';
@@ -29,8 +33,13 @@ class _BookPageState extends State<BookPage> {
   final Set<String> selectedCategories = {'All'};
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     context.read<BookBloc>().add(LoadBooks());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ready Buddy '),
@@ -64,10 +73,17 @@ class _BookPageState extends State<BookPage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-
-                            //CategoryListPage()
-                            const BooksListPage()));
+                        builder: (context) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                    create: (_) => getIt<BookCrudBloc>()),
+                                BlocProvider(
+                                    create: (_) => getIt<UserCubit>()),
+                                BlocProvider(
+                                    create: (_) => getIt<LocationCubit>()),
+                              ],
+                              child: const BooksListPage(),
+                            )));
               },
               icon: const Icon(Icons.book, size: 18, color: Colors.white),
               label:

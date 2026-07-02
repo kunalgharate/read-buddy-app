@@ -28,7 +28,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     return Options(headers: {'Authorization': 'Bearer $token'});
   }
 
-  void _checkInternet(String path) async {
+  Future<void> _checkInternet(String path) async {
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
       throw DioException(
@@ -46,7 +46,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       print('🌐 URL: ${ApiConstants.getProfile}');
     }
 
-    _checkInternet(ApiConstants.getProfile);
+    await _checkInternet(ApiConstants.getProfile);
 
     try {
       final response = await _dio.get(
@@ -84,7 +84,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       print('🌐 URL: ${ApiConstants.updateAvatar}');
     }
 
-    _checkInternet(ApiConstants.updateAvatar);
+    await _checkInternet(ApiConstants.updateAvatar);
 
     try {
       final response = await _dio.patch(
@@ -123,7 +123,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       print('🌐 URL: ${ApiConstants.updateUserInfo}');
     }
 
-    _checkInternet(ApiConstants.updateUserInfo);
+    await _checkInternet(ApiConstants.updateUserInfo);
 
     try {
       final response = await _dio.put(

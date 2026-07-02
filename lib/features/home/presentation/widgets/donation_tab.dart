@@ -51,7 +51,7 @@ class _DonationTabContent extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
         title: Text(
-          'Donate',
+          'Get Prime',
           style: GoogleFonts.poppins(
             fontSize: size.width * 0.055,
             fontWeight: FontWeight.w600,
@@ -142,24 +142,6 @@ class _DonationTabContent extends StatelessWidget {
                   builder: (_) => const BookFormatBottomSheet(),
                 ),
               ),
-              SizedBox(height: size.height * 0.015),
-
-              // --- Donate Money Button ---
-              _DonationButton(
-                icon: Icons.add,
-                label: 'Donate Money',
-                onPressed: () => showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.white,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(24)),
-                  ),
-                  builder: (_) => const RazorpayBottomSheet(),
-                ),
-              ),
-
               SizedBox(height: size.height * 0.03),
             ],
           ),

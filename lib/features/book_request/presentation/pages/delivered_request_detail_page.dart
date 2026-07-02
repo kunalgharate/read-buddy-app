@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/book_request_entity.dart';
@@ -278,7 +279,7 @@ class _InfoRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                 )),
           ),
         ],

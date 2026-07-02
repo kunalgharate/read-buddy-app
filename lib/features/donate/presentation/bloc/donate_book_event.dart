@@ -9,7 +9,7 @@ sealed class DonateBookEvent extends Equatable {
 
 final class LoadDonationStats extends DonateBookEvent {}
 
-final class LoadNearestAgents extends DonateBookEvent {}
+final class LoadNearestLibraries extends DonateBookEvent {}
 
 final class SubmitBookDonationEvent extends DonateBookEvent {
   final BookDonationRequest request;

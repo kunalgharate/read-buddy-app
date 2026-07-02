@@ -69,6 +69,46 @@ class _ProfileView extends StatelessWidget {
     );
   }
 
+  void _showEditDialog(
+      BuildContext context, String field, String label, String currentValue) {
+    final controller = TextEditingController(text: currentValue);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Edit $label', style: const TextStyle(color: _navy)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: label,
+            border:
+                OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: _grey)),
+          ),
+          FilledButton(
+            onPressed: () {
+              final newValue = controller.text.trim();
+              if (newValue.isNotEmpty && newValue != currentValue) {
+                context.read<ProfileBloc>().add(
+                      UpdateProfileFieldEvent(field: field, value: newValue),
+                    );
+              }
+              Navigator.pop(ctx);
+            },
+            style: FilledButton.styleFrom(backgroundColor: _green),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAvatarCircle(ProfileUser user, bool isUpdating) {
     final avatarAsset = AppAvatars.assetFor(user.userAvatar);
 
@@ -215,13 +255,16 @@ class _ProfileView extends StatelessWidget {
           Icon(icon, color: _grey, size: 20),
           const SizedBox(width: 12),
           Text(label, style: const TextStyle(fontSize: 14, color: _grey)),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              color: valueColor ?? _navy,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: valueColor ?? _navy,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
             ),
           ),
         ],
@@ -232,14 +275,16 @@ class _ProfileView extends StatelessWidget {
   Widget _buildDivider() =>
       const Divider(height: 1, indent: 16, color: Color(0xFFF0F0F0));
 
-  Widget _buildInfoSection(ProfileUser user) {
+  Widget _buildInfoSection(BuildContext context, ProfileUser user) {
     return _buildSection(
       title: 'Personal Information',
       children: [
-        _buildTile(
+        _buildEditableTile(
+          context,
           icon: Icons.person_outline,
           label: 'Full Name',
           value: user.name,
+          field: 'name',
         ),
         _buildDivider(),
         _buildTile(
@@ -248,12 +293,47 @@ class _ProfileView extends StatelessWidget {
           value: user.email,
         ),
         _buildDivider(),
-        _buildTile(
+        _buildEditableTile(
+          context,
           icon: Icons.phone_outlined,
           label: 'Phone',
           value: user.phno?.isNotEmpty == true ? user.phno! : 'Not set',
+          field: 'phno',
         ),
       ],
+    );
+  }
+
+  Widget _buildEditableTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required String field,
+  }) {
+    return InkWell(
+      onTap: () => _showEditDialog(context, field, label, value == 'Not set' ? '' : value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(icon, color: _grey, size: 20),
+            const SizedBox(width: 12),
+            Text(label, style: const TextStyle(fontSize: 14, color: _grey)),
+            const Spacer(),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                color: _navy,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.edit, size: 14, color: _green),
+          ],
+        ),
+      ),
     );
   }
 
@@ -289,6 +369,71 @@ class _ProfileView extends StatelessWidget {
               : '${user.badges.length} badge(s)',
         ),
       ],
+    );
+  }
+
+  Widget _buildQuickLinksSection(BuildContext context) {
+    return _buildSection(
+      title: 'Quick Links',
+      children: [
+        _buildNavTile(
+          context,
+          icon: Icons.list_alt_outlined,
+          label: 'My Book Requests',
+          route: '/my-requests',
+        ),
+        _buildDivider(),
+        _buildNavTile(
+          context,
+          icon: Icons.menu_book_outlined,
+          label: 'My Books',
+          route: '/mybooks',
+        ),
+        _buildDivider(),
+        _buildNavTile(
+          context,
+          icon: Icons.emoji_events_outlined,
+          label: 'Rewards',
+          route: '/rewards',
+        ),
+        _buildDivider(),
+        _buildNavTile(
+          context,
+          icon: Icons.location_on_outlined,
+          label: 'My Addresses',
+          route: '/addresses',
+        ),
+        _buildDivider(),
+        _buildNavTile(
+          context,
+          icon: Icons.settings_outlined,
+          label: 'Settings',
+          route: '/settings',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String route,
+  }) {
+    return InkWell(
+      onTap: () => Navigator.pushNamed(context, route),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(icon, color: _grey, size: 20),
+            const SizedBox(width: 12),
+            Text(label, style: const TextStyle(fontSize: 14, color: _navy)),
+            const Spacer(),
+            const Icon(Icons.chevron_right, color: _grey, size: 20),
+          ],
+        ),
+      ),
     );
   }
 
@@ -339,13 +484,23 @@ class _ProfileView extends StatelessWidget {
         children: [
           _buildAvatarSection(context, user, isUpdating),
           const SizedBox(height: 12),
-          Text(
-            user.name,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: _navy,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                user.name,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: _navy,
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _showEditDialog(context, 'name', 'Name', user.name),
+                child: const Icon(Icons.edit, size: 18, color: _green),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -355,9 +510,11 @@ class _ProfileView extends StatelessWidget {
           const SizedBox(height: 8),
           if (user.isPrime) _buildPrimeBadge(),
           const SizedBox(height: 32),
-          _buildInfoSection(user),
+          _buildInfoSection(context, user),
           const SizedBox(height: 24),
           _buildAccountSection(user),
+          const SizedBox(height: 24),
+          _buildQuickLinksSection(context),
           const SizedBox(height: 32),
           _buildLogoutButton(context),
           const SizedBox(height: 24),

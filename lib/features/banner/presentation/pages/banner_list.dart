@@ -66,24 +66,21 @@ class _BannersListState extends State<BannersList> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.large(
+      floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color.fromARGB(255, 96, 177, 228),
-        shape: const CircleBorder(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         tooltip: 'Add Banner',
         onPressed: () {
-          // Your action
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const AddBanner()));
         },
-        child: const Center(
-          child: Text(
-            'Add Banner',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14),
-          ),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Add Banner',
+          style: TextStyle(fontSize: 14, color: Colors.white),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

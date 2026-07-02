@@ -1,8 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:read_buddy_app/features/donate/domain/entities/agent.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/donation_stats.dart';
-import 'package:read_buddy_app/features/donate/domain/entities/user_book_status.dart';
-
 import 'package:read_buddy_app/features/donate/domain/entities/book_donation_request.dart';
 import 'package:read_buddy_app/features/donate/data/models/book_donation_request_model.dart';
 import 'package:read_buddy_app/features/donate/domain/repositories/donate_repository.dart';
@@ -39,25 +36,5 @@ class DonateRepositoryImpl implements DonateRepository {
     } catch (e) {
       throw Exception('Failed to upload receipt: $e');
     }
-  }
-
-  @override
-  Future<List<Agent>> getNearestAgents() async {
-    try {
-      return await remoteDataSource.getNearestAgents();
-    } catch (e) {
-      throw Exception('Failed to get nearest agents: $e');
-    }
-  }
-
-  @override
-  Future<AgentAddress> getUserLocation() async {
-    throw UnimplementedError('getUserLocation API endpoint not yet available');
-  }
-
-  @override
-  Future<UserBookStatus> getUserBookStatus() async {
-    throw UnimplementedError(
-        'getUserBookStatus API endpoint not yet available');
   }
 }

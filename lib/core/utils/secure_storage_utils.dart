@@ -21,19 +21,18 @@ class SecureStorageUtil {
       'gender': appUser.gender,
       'phno': appUser.phno,
       'picture': appUser.picture,
-      'password': appUser.password,
       'role': appUser.role,
       'isPrime': appUser.isPrime,
       'finesDue': appUser.finesDue,
       'isEmailVerified': appUser.isEmailVerified,
-      'onboardingCompleted': appUser.onboardingCompleted, // ← ADDED
+      'onboardingCompleted': appUser.onboardingCompleted,
       'badges': appUser.badges,
       'wishlist': appUser.wishlist,
       'createdAt': appUser.createdAt.toIso8601String(),
       'updatedAt': appUser.updatedAt.toIso8601String(),
       '__v': appUser.version,
-      'accessToken': appUser.accessToken, // ← ADDED
-      'refreshToken': appUser.refreshToken, // ← ADDED
+      'accessToken': appUser.accessToken,
+      'refreshToken': appUser.refreshToken,
     });
     await _storage.write(key: 'user', value: userJson);
   }
@@ -51,19 +50,19 @@ class SecureStorageUtil {
       phno: u['phno'] ?? '',
       gender: u['gender'] ?? '',
       picture: u['picture'],
-      password: u['password'] ?? '',
+      password: '',
       role: u['role'] ?? '',
       isPrime: u['isPrime'] ?? false,
       finesDue: u['finesDue'] ?? 0,
       isEmailVerified: u['isEmailVerified'] ?? false,
-      onboardingCompleted: u['onboardingCompleted'] ?? false, // ← ADDED
+      onboardingCompleted: u['onboardingCompleted'] ?? false,
       badges: u['badges'] ?? [],
       wishlist: u['wishlist'] ?? [],
       createdAt: DateTime.parse(u['createdAt']),
       updatedAt: DateTime.parse(u['updatedAt']),
       version: u['__v'] ?? 0,
-      accessToken: u['accessToken'] ?? '', // ← FIXED
-      refreshToken: u['refreshToken'] ?? '', // ← FIXED
+      accessToken: u['accessToken'] ?? '',
+      refreshToken: u['refreshToken'] ?? '',
     );
   }
 

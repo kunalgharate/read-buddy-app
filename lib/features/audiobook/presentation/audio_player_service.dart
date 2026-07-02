@@ -52,7 +52,7 @@ class AudioPlayerService {
       _audioHandler = await AudioService.init(
         builder: () => _AudioHandler(this),
         config: const AudioServiceConfig(
-          androidNotificationChannelId: 'app.thecodershub.read_buddy.audio',
+          androidNotificationChannelId: 'in.thecodershub.readbuddy.audio',
           androidNotificationChannelName: 'ReadBuddy Audio',
           androidNotificationOngoing: true,
           androidStopForegroundOnPause: true,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../donate/presentation/pages/book_donation_page.dart';
 
 const _textDark = Color(0xFF052E44);
 const _skyBg = Color(0xFFEEF6FF);
@@ -77,12 +76,7 @@ class _BookFormatBottomSheetState extends State<BookFormatBottomSheet> {
                   isSelected: selectedFormat == 'physical',
                   onTap: () {
                     Navigator.pop(context); // close bottom sheet
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DonationPage(),
-                      ),
-                    );
+                    Navigator.pushNamed(context, '/donation');
                   },
                 ),
               ),

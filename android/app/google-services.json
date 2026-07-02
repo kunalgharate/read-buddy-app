@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:773878374124:android:7cfa5c7f6526c5d580cfc9",
+        "mobilesdk_app_id": "1:773878374124:android:d0d4fa78cbac35c880cfc9",
         "android_client_info": {
-          "package_name": "app.thecodershub.read_buddy"
+          "package_name": "in.thecodershub.readbuddy"
         }
       },
       "oauth_client": [],

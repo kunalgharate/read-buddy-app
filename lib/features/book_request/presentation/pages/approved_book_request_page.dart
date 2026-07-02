@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/book_request_entity.dart';
@@ -66,13 +67,13 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E2939)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Request Book',
           style: TextStyle(
-            color: Color(0xFF1E2939),
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
             fontSize: 17,
           ),
@@ -131,7 +132,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E2939),
+                                color: AppColors.textPrimary,
                                 height: 1.3,
                               ),
                             ),
@@ -195,69 +196,71 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
 
                   const SizedBox(height: 20),
 
-                  // ── Deliver to me button ───────────────────────────────
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BookOrderPage(request: req),
+                  // Show action based on fulfillment method chosen during request
+                  if (req.fulfillmentMethod.toUpperCase() == 'PICKUP') ...[
+                    // User chose pickup — show library details
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CollectFromLibraryPage(
+                              request: req,
+                              initialTab: 0,
+                            ),
+                          ),
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2CE07F),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        icon: const Icon(Icons.local_library, color: AppColors.textPrimary),
+                        label: const Text(
+                          'View Pickup Details',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Deliver to me',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E2939),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Collect from library button ────────────────────────
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CollectFromLibraryPage(
-                            request: req,
-                            initialTab: 0,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2CE07F),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF1E2939),
-                        side: const BorderSide(
-                            color: Color(0xFFCCCCCC), width: 1.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    ),
+                  ] else ...[
+                    // User chose delivery — show delivery/order details
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BookOrderPage(request: req),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Collect from library',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E2939),
+                        icon: const Icon(Icons.local_shipping, color: AppColors.textPrimary),
+                        label: const Text(
+                          'View Delivery Details',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2CE07F),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -367,7 +370,7 @@ class _TabButton extends StatelessWidget {
               color: isDisabled
                   ? const Color(0xFFCCCCCC)
                   : isSelected
-                      ? const Color(0xFF1E2939)
+                      ? AppColors.textPrimary
                       : const Color(0xFFAAAAAA),
             ),
             const SizedBox(width: 6),
@@ -379,7 +382,7 @@ class _TabButton extends StatelessWidget {
                 color: isDisabled
                     ? const Color(0xFFCCCCCC)
                     : isSelected
-                        ? const Color(0xFF1E2939)
+                        ? AppColors.textPrimary
                         : const Color(0xFFAAAAAA),
               ),
             ),
@@ -423,7 +426,7 @@ class _InfoRow extends StatelessWidget {
                 value,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),

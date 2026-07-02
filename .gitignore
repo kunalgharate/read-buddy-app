@@ -58,3 +58,9 @@ walkthrough.md
 variants_changes.md
 implementation_plan.md
 task.md
+
+# Release signing
+android/key.properties
+*.jks
+*.keystore
+img.png

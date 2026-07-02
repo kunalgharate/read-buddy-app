@@ -96,8 +96,6 @@ class ApiConstants {
 
   static const String setOnboardingStatus = '$baseUrl/users/onboarding-status';
 
-  static const String nearestAgent = '$baseUrl/v1/libraries/details';
-
   // TTS (Text-to-Speech) endpoints
   static const String ttsSynthesize = '$baseUrl/tts/synthesize';
   static const String ttsVoices = '$baseUrl/tts/voices';
@@ -118,7 +116,27 @@ class ApiConstants {
 
   // Libraries (multi-library)
   static const String libraries = '$baseUrl/v1/libraries';
+  static const String superLibraries = '$baseUrl/v1/libraries/super';
 
   // Admin User Management
   static const String adminUsers = '$baseUrl/admin/users';
+  static const String adminLibrarians = '$baseUrl/admin/librarians';
+  static const String adminLibrariesPath = '$baseUrl/admin/libraries';
+
+  // Librarian endpoints
+  static const String librarianBase = '$baseUrl/librarian';
+  static const String librarianMyLibrary = '$librarianBase/my-library';
+  static const String librarianDashboard = '$librarianBase/dashboard';
+  static const String librarianBookRequests = '$librarianBase/book-requests';
+  static const String librarianDonations = '$librarianBase/donations';
+  static String librarianRequestAccept(String id) =>
+      '$librarianBookRequests/$id/accept';
+  static String librarianRequestReject(String id) =>
+      '$librarianBookRequests/$id/reject';
+  static String librarianRequestStatus(String id) =>
+      '$librarianBookRequests/$id/status';
+  static String librarianDonationStatus(String id) =>
+      '$librarianDonations/$id/status';
+  static String librarianDonationSchedulePickup(String id) =>
+      '$librarianDonations/$id/schedule-pickup';
 }

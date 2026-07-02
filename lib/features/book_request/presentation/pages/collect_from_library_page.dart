@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -81,8 +82,8 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         data: Theme.of(context).copyWith(
           colorScheme: const ColorScheme.light(
             primary: Color(0xFF2CE07F),
-            onPrimary: Color(0xFF1E2939),
-            onSurface: Color(0xFF1E2939),
+            onPrimary: AppColors.textPrimary,
+            onSurface: AppColors.textPrimary,
           ),
         ),
         child: child!,
@@ -99,8 +100,8 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         data: Theme.of(context).copyWith(
           colorScheme: const ColorScheme.light(
             primary: Color(0xFF2CE07F),
-            onPrimary: Color(0xFF1E2939),
-            onSurface: Color(0xFF1E2939),
+            onPrimary: AppColors.textPrimary,
+            onSurface: AppColors.textPrimary,
           ),
         ),
         child: child!,
@@ -210,7 +211,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E2939),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -251,7 +252,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1E2939),
+                color: AppColors.textPrimary,
               ),
               textAlign: TextAlign.right,
             ),
@@ -270,13 +271,13 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E2939)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Book Pick-Up & Drop',
           style: TextStyle(
-            color: Color(0xFF1E2939),
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 17,
           ),
@@ -335,7 +336,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E2939),
+                              color: AppColors.textPrimary,
                             ),
                           ),
 
@@ -372,7 +373,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E2939),
+                              color: AppColors.textPrimary,
                             ),
                           ),
 
@@ -496,7 +497,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                                   height: 22,
                                   width: 22,
                                   child: CircularProgressIndicator(
-                                    color: Color(0xFF1E2939),
+                                    color: AppColors.textPrimary,
                                     strokeWidth: 2.5,
                                   ),
                                 )
@@ -505,7 +506,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF1E2939),
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                         );
@@ -520,7 +521,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                       onPressed: () =>
                           setState(() => _showingConfirmation = false),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF1E2939),
+                        foregroundColor: AppColors.textPrimary,
                         side: const BorderSide(
                             color: Color(0xFFCCCCCC), width: 1.5),
                         shape: RoundedRectangleBorder(
@@ -559,7 +560,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E2939),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -656,7 +657,7 @@ class _PickupTabButton extends StatelessWidget {
               color: isDisabled
                   ? const Color(0xFFCCCCCC)
                   : isSelected
-                      ? const Color(0xFF1E2939)
+                      ? AppColors.textPrimary
                       : const Color(0xFFAAAAAA),
             ),
             const SizedBox(width: 6),
@@ -668,7 +669,7 @@ class _PickupTabButton extends StatelessWidget {
                 color: isDisabled
                     ? const Color(0xFFCCCCCC)
                     : isSelected
-                        ? const Color(0xFF1E2939)
+                        ? AppColors.textPrimary
                         : const Color(0xFFAAAAAA),
               ),
             ),
@@ -721,7 +722,7 @@ class _BookCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                   height: 1.3,
                 ),
               ),
@@ -802,7 +803,7 @@ class _LibraryCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E2939),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -877,7 +878,7 @@ class _FieldLabel extends StatelessWidget {
       style: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Color(0xFF1E2939),
+        color: AppColors.textPrimary,
       ),
     );
   }
@@ -914,7 +915,7 @@ class _InputField extends StatelessWidget {
       inputFormatters: inputFormatters,
       maxLines: maxLines,
       minLines: minLines,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF1E2939)),
+      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(fontSize: 14, color: Color(0xFFAAAAAA)),
@@ -983,7 +984,7 @@ class _DateTimePickerButton extends StatelessWidget {
                   fontSize: 13,
                   color: isPlaceholder
                       ? const Color(0xFFAAAAAA)
-                      : const Color(0xFF1E2939),
+                      : AppColors.textPrimary,
                   fontWeight:
                       isPlaceholder ? FontWeight.normal : FontWeight.w500,
                 ),

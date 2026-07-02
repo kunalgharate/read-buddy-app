@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 // presentation/widgets/question_card.dart
 import 'package:flutter/material.dart';
 
@@ -40,7 +41,7 @@ class QuestionCard extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected
-                      ? const Color(0xFF1E2939)
+                      ? AppColors.textPrimary
                       : const Color(0xFF5B6675),
                 ),
               ),

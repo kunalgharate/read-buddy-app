@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 // presentation/screens/onboarding_questionnaire.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -188,7 +189,7 @@ class _OnboardingQuestionnaireView extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E2939),
+                  color: AppColors.textPrimary,
                 ),
               ),
 
