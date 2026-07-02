@@ -42,6 +42,8 @@ class TtsService {
 
   Future<void> init(String languageCode) async {
     _languageCode = languageCode;
+    debugPrint('[TTS] init() called with languageCode: "$languageCode"');
+    debugPrint('[TTS] Will use Gnani AI: ${_gnaniLanguages.contains(languageCode)}');
 
     // Always init flutter_tts as fallback
     final locale = _flutterTtsLanguageMap[languageCode] ?? 'en-US';
@@ -63,14 +65,23 @@ class TtsService {
   }
 
   Future<void> speak(String text) async {
-    if (text.trim().isEmpty) return;
+    if (text.trim().isEmpty) {
+      debugPrint('[TTS] speak() called with empty text — skipping');
+      return;
+    }
+
+    debugPrint('[TTS] speak() called — language: "$_languageCode", '
+        'text length: ${text.length}, '
+        'first 100 chars: "${text.substring(0, text.length.clamp(0, 100))}"');
 
     isSpeaking = true;
     isPaused = false;
 
     if (_gnaniLanguages.contains(_languageCode)) {
+      debugPrint('[TTS] ➡️ Using GNANI AI for "$_languageCode"');
       await _speakWithGnani(text);
     } else {
+      debugPrint('[TTS] ➡️ Using FLUTTER_TTS for "$_languageCode"');
       await _flutterTts.speak(text);
     }
   }
@@ -82,8 +93,13 @@ class TtsService {
       final chunk = text.length > 5000 ? text.substring(0, 5000) : text;
       final voice = _gnaniVoiceMap[_languageCode] ?? 'sia';
 
+      debugPrint('[TTS-Gnani] Requesting TTS — voice: "$voice", '
+          'text length: ${chunk.length}');
+      debugPrint('[TTS-Gnani] API URL: ${ApiConstants.ttsSynthesize}');
+
       // Get auth token for backend proxy
       final token = await getIt<SecureStorageUtil>().getAccessToken();
+      debugPrint('[TTS-Gnani] Auth token present: ${token != null}');
 
       // Call backend TTS proxy (returns audio bytes)
       _httpClient = HttpClient();
@@ -101,13 +117,17 @@ class TtsService {
         'container': 'mp3',
       }));
 
+      debugPrint('[TTS-Gnani] Sending request...');
       final response = await request.close();
+      debugPrint('[TTS-Gnani] Response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         // Collect all bytes from the response
         final bytes = await _collectResponseBytes(response);
+        debugPrint('[TTS-Gnani] Received ${bytes.length} bytes of audio');
 
         if (bytes.isEmpty) {
+          debugPrint('[TTS-Gnani] ⚠️ Empty response — falling back to flutter_tts');
           _fallbackToFlutterTts(text);
           return;
         }
@@ -116,25 +136,34 @@ class TtsService {
         final dir = await getTemporaryDirectory();
         final file = File('${dir.path}/gnani_tts_output.mp3');
         await file.writeAsBytes(bytes);
+        debugPrint('[TTS-Gnani] ✅ Audio saved to: ${file.path}');
 
         await _audioPlayer.setFilePath(file.path);
         await _audioPlayer.setSpeed(_mapSpeedToPlaybackRate());
+        debugPrint('[TTS-Gnani] ▶️ Playing audio at speed: ${_mapSpeedToPlaybackRate()}');
         await _audioPlayer.play();
 
         // Listen for completion
         _audioPlayer.playerStateStream.listen((state) {
           if (state.processingState == ProcessingState.completed) {
+            debugPrint('[TTS-Gnani] ✅ Playback completed');
             isSpeaking = false;
             isPaused = false;
             _onComplete?.call();
           }
         });
       } else {
-        // Fallback to flutter_tts if backend fails
+        // Read error body for debugging
+        final errorBytes = await _collectResponseBytes(response);
+        final errorBody = utf8.decode(errorBytes, allowMalformed: true);
+        debugPrint('[TTS-Gnani] ❌ API error ${response.statusCode}: $errorBody');
+        debugPrint('[TTS-Gnani] Falling back to flutter_tts');
         _fallbackToFlutterTts(text);
       }
-    } catch (e) {
-      // Fallback to flutter_tts on any error
+    } catch (e, stack) {
+      debugPrint('[TTS-Gnani] ❌ Exception: $e');
+      debugPrint('[TTS-Gnani] Stack: $stack');
+      debugPrint('[TTS-Gnani] Falling back to flutter_tts');
       _fallbackToFlutterTts(text);
     }
   }
@@ -163,6 +192,7 @@ class TtsService {
 
   /// Fallback to device TTS if Gnani AI is unavailable
   Future<void> _fallbackToFlutterTts(String text) async {
+    debugPrint('[TTS-Fallback] Using flutter_tts for "$_languageCode"');
     final locale = _flutterTtsLanguageMap[_languageCode] ?? 'en-US';
     await _flutterTts.setLanguage(locale);
     await _flutterTts.speak(text);
@@ -182,6 +212,7 @@ class TtsService {
   }
 
   Future<void> stop() async {
+    debugPrint('[TTS] stop() called — language: "$_languageCode"');
     if (_gnaniLanguages.contains(_languageCode)) {
       await _audioPlayer.stop();
       _httpClient?.close(force: true);
@@ -221,6 +252,7 @@ class TtsService {
 
   Future<void> setLanguage(String languageCode) async {
     _languageCode = languageCode;
+    debugPrint('[TTS] setLanguage() called: "$languageCode"');
     final locale = _flutterTtsLanguageMap[languageCode] ?? 'en-US';
     await _flutterTts.setLanguage(locale);
   }
