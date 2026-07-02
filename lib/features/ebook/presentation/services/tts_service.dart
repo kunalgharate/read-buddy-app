@@ -26,9 +26,10 @@ class TtsService {
   static const Set<String> _gnaniLanguages = {'hi', 'mr'};
 
   /// Voice mapping for Gnani AI
+  /// Available voices: Karan (Male), Simran (Female), Nara, Riya, Viraj, Raju
   static const Map<String, String> _gnaniVoiceMap = {
-    'hi': 'sia',
-    'mr': 'sia',
+    'hi': 'Simran',
+    'mr': 'Simran',
   };
 
   static const Map<String, String> _flutterTtsLanguageMap = {
@@ -196,7 +197,7 @@ class TtsService {
   /// Fetch audio from Gnani/Vachana AI directly
   Future<File?> _fetchGnaniAudio(String chunk) async {
     try {
-      final voice = _gnaniVoiceMap[_languageCode] ?? 'sia';
+      final voice = _gnaniVoiceMap[_languageCode] ?? 'Simran';
 
       _httpClient = HttpClient();
       final uri = Uri.parse('https://api.vachana.ai/api/v1/tts/inference');
@@ -205,9 +206,9 @@ class TtsService {
       final body = jsonEncode({
         'text': chunk,
         'voice': voice,
-        'model': 'vachana-voice-v2',
+        'model': 'vachana-voice-v3',
         'audio_config': {
-          'sample_rate': 44100,
+          'sample_rate': 22050,
           'num_channels': 1,
           'sample_width': 2,
           'encoding': 'linear_pcm',
