@@ -110,22 +110,98 @@ class TtsService {
           .replaceAll(RegExp(r'\s+'), ' ')
           .trim();
 
-      // Limit text chunk size for TTS
-      final chunk = cleanText.length > 5000
-          ? cleanText.substring(0, 5000)
-          : cleanText;
+      if (cleanText.isEmpty) {
+        debugPrint('[TTS-Gnani] ⚠️ Clean text is empty — falling back');
+        _fallbackToFlutterTts(text);
+        return;
+      }
+
+      // Split into small chunks (~300 chars) at sentence boundaries
+      final chunks = _splitIntoChunks(cleanText, maxLength: 300);
+      debugPrint('[TTS-Gnani] Split into ${chunks.length} chunks');
+
+      for (int i = 0; i < chunks.length; i++) {
+        if (!isSpeaking) break; // Stop requested
+
+        final chunk = chunks[i];
+        debugPrint('[TTS-Gnani] Playing chunk ${i + 1}/${chunks.length} '
+            '(${chunk.length} chars)');
+
+        final audioFile = await _fetchGnaniAudio(chunk);
+        if (audioFile == null) {
+          debugPrint('[TTS-Gnani] ⚠️ Chunk ${i + 1} failed — falling back');
+          _fallbackToFlutterTts(chunks.sublist(i).join(' '));
+          return;
+        }
+
+        await _audioPlayer.setFilePath(audioFile.path);
+        await _audioPlayer.setSpeed(_mapSpeedToPlaybackRate());
+        await _audioPlayer.play();
+
+        // Wait for this chunk to finish playing
+        await _audioPlayer.playerStateStream.firstWhere(
+          (state) =>
+              state.processingState == ProcessingState.completed ||
+              !isSpeaking,
+        );
+      }
+
+      // All chunks done
+      debugPrint('[TTS-Gnani] ✅ All chunks completed');
+      isSpeaking = false;
+      isPaused = false;
+      _onComplete?.call();
+    } catch (e, stack) {
+      debugPrint('[TTS-Gnani] ❌ Exception: $e');
+      debugPrint('[TTS-Gnani] Stack: $stack');
+      debugPrint('[TTS-Gnani] Falling back to flutter_tts');
+      _fallbackToFlutterTts(text);
+    }
+  }
+
+  /// Split text into chunks at sentence boundaries (। , . ! ?)
+  List<String> _splitIntoChunks(String text, {int maxLength = 300}) {
+    final chunks = <String>[];
+    // Split at Hindi purna viram (।), period, comma, or other punctuation
+    final sentences = text.split(RegExp(r'(?<=[।.!?,;])\s*'));
+    var current = StringBuffer();
+
+    for (final sentence in sentences) {
+      if (current.length + sentence.length > maxLength && current.isNotEmpty) {
+        chunks.add(current.toString().trim());
+        current = StringBuffer();
+      }
+      current.write(sentence);
+      current.write(' ');
+    }
+    if (current.isNotEmpty) {
+      chunks.add(current.toString().trim());
+    }
+
+    // If any chunk is still too long, force-split it
+    final result = <String>[];
+    for (final chunk in chunks) {
+      if (chunk.length <= maxLength) {
+        result.add(chunk);
+      } else {
+        for (var i = 0; i < chunk.length; i += maxLength) {
+          result.add(chunk.substring(
+            i,
+            (i + maxLength).clamp(0, chunk.length),
+          ));
+        }
+      }
+    }
+
+    return result.where((c) => c.trim().isNotEmpty).toList();
+  }
+
+  /// Fetch audio from Gnani AI backend for a single chunk
+  Future<File?> _fetchGnaniAudio(String chunk) async {
+    try {
       final voice = _gnaniVoiceMap[_languageCode] ?? 'sia';
-
-      debugPrint('[TTS-Gnani] Requesting TTS — voice: "$voice", '
-          'text length: ${chunk.length}');
-      debugPrint('[TTS-Gnani] API URL: ${ApiConstants.ttsSynthesize}');
-      debugPrint('[TTS-Gnani] Clean text first 200: "${chunk.substring(0, chunk.length.clamp(0, 200))}"');
-
-      // Get auth token for backend proxy
       final token = await getIt<SecureStorageUtil>().getAccessToken();
-      debugPrint('[TTS-Gnani] Auth token present: ${token != null}');
 
-      // Use Dio-style approach with proper UTF-8 encoding
       _httpClient = HttpClient();
       final uri = Uri.parse(ApiConstants.ttsSynthesize);
       final request = await _httpClient!.postUrl(uri);
@@ -143,57 +219,31 @@ class TtsService {
         request.headers.set('Authorization', 'Bearer $token');
       }
 
-      // Write bytes directly instead of string to avoid Latin1 encoding issue
       request.add(bodyBytes);
-
-      debugPrint('[TTS-Gnani] Sending request...');
       final response = await request.close();
       debugPrint('[TTS-Gnani] Response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        // Collect all bytes from the response
         final bytes = await _collectResponseBytes(response);
         debugPrint('[TTS-Gnani] Received ${bytes.length} bytes of audio');
 
-        if (bytes.isEmpty) {
-          debugPrint('[TTS-Gnani] ⚠️ Empty response — falling back to flutter_tts');
-          _fallbackToFlutterTts(text);
-          return;
-        }
+        if (bytes.isEmpty) return null;
 
-        // Write to temp file and play with just_audio
         final dir = await getTemporaryDirectory();
-        final file = File('${dir.path}/gnani_tts_output.mp3');
+        final file = File(
+          '${dir.path}/gnani_tts_${DateTime.now().millisecondsSinceEpoch}.mp3',
+        );
         await file.writeAsBytes(bytes);
-        debugPrint('[TTS-Gnani] ✅ Audio saved to: ${file.path}');
-
-        await _audioPlayer.setFilePath(file.path);
-        await _audioPlayer.setSpeed(_mapSpeedToPlaybackRate());
-        debugPrint('[TTS-Gnani] ▶️ Playing audio at speed: ${_mapSpeedToPlaybackRate()}');
-        await _audioPlayer.play();
-
-        // Listen for completion
-        _audioPlayer.playerStateStream.listen((state) {
-          if (state.processingState == ProcessingState.completed) {
-            debugPrint('[TTS-Gnani] ✅ Playback completed');
-            isSpeaking = false;
-            isPaused = false;
-            _onComplete?.call();
-          }
-        });
+        return file;
       } else {
-        // Read error body for debugging
         final errorBytes = await _collectResponseBytes(response);
         final errorBody = utf8.decode(errorBytes, allowMalformed: true);
         debugPrint('[TTS-Gnani] ❌ API error ${response.statusCode}: $errorBody');
-        debugPrint('[TTS-Gnani] Falling back to flutter_tts');
-        _fallbackToFlutterTts(text);
+        return null;
       }
-    } catch (e, stack) {
-      debugPrint('[TTS-Gnani] ❌ Exception: $e');
-      debugPrint('[TTS-Gnani] Stack: $stack');
-      debugPrint('[TTS-Gnani] Falling back to flutter_tts');
-      _fallbackToFlutterTts(text);
+    } catch (e) {
+      debugPrint('[TTS-Gnani] ❌ Fetch error: $e');
+      return null;
     }
   }
 
