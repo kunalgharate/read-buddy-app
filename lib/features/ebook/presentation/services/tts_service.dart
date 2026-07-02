@@ -26,10 +26,11 @@ class TtsService {
   static const Set<String> _gnaniLanguages = {'hi', 'mr'};
 
   /// Voice mapping for Gnani AI
-  /// Available voices: Karan (Male), Simran (Female), Nara, Riya, Viraj, Raju
+  /// Available v3 voices: Pranav (Male, Bold), Kaveri (Female, Confident),
+  /// Shubhra (Female, Gentle), Deepak (Male, Grounded/Conversational)
   static const Map<String, String> _gnaniVoiceMap = {
-    'hi': 'Karan',
-    'mr': 'Karan',
+    'hi': 'Deepak',
+    'mr': 'Deepak',
   };
 
   static const Map<String, String> _flutterTtsLanguageMap = {
@@ -100,11 +101,13 @@ class TtsService {
   /// Speak using Gnani AI SSE streaming endpoint via backend proxy
   Future<void> _speakWithGnani(String text) async {
     try {
-      // Clean text: remove null characters and excessive whitespace
+      // Clean text: remove null characters, corrupted chars, and excessive whitespace
       String cleanText = text
           .replaceAll('\u0000', '')
           .replaceAll(RegExp(r'\r\n'), ' ')
           .replaceAll(RegExp(r'\n'), ' ')
+          // Remove non-Devanagari/non-ASCII garbage characters (keep Devanagari, digits, basic punctuation, spaces)
+          .replaceAll(RegExp(r'[^\u0900-\u097F\u0020-\u007E।॥]+'), '')
           .replaceAll(RegExp(r'\s+'), ' ')
           .trim();
 
@@ -197,7 +200,7 @@ class TtsService {
   /// Fetch audio from Gnani/Vachana AI directly
   Future<File?> _fetchGnaniAudio(String chunk) async {
     try {
-      final voice = _gnaniVoiceMap[_languageCode] ?? 'Karan';
+      final voice = _gnaniVoiceMap[_languageCode] ?? 'Deepak';
       debugPrint('[TTS-Gnani] 🎙️ Voice: "$voice", Language: "$_languageCode"');
 
       _httpClient = HttpClient();
@@ -209,11 +212,12 @@ class TtsService {
         'voice': voice,
         'model': 'vachana-voice-v3',
         'audio_config': {
-          'sample_rate': 22050,
+          'sample_rate': 44100,
           'num_channels': 1,
           'sample_width': 2,
+          'bitrate': '192k',
           'encoding': 'linear_pcm',
-          'container': 'wav',
+          'container': 'mp3',
         },
       });
       final bodyBytes = utf8.encode(body);
@@ -235,7 +239,7 @@ class TtsService {
 
         final dir = await getTemporaryDirectory();
         final file = File(
-          '${dir.path}/gnani_tts_${DateTime.now().millisecondsSinceEpoch}.wav',
+          '${dir.path}/gnani_tts_${DateTime.now().millisecondsSinceEpoch}.mp3',
         );
         await file.writeAsBytes(bytes);
         return file;
@@ -281,17 +285,18 @@ class TtsService {
     await _flutterTts.speak(text);
   }
 
-  /// Map our speed (0.0–1.0) to just_audio playback rate (0.5–2.0)
+  /// Map our speed (0.0–1.0) to just_audio playback rate
+  /// Default 0.5 maps to 0.85x for more natural book reading pace
   double _mapSpeedToPlaybackRate() {
     final map = <double, double>{
-      0.25: 0.5,
-      0.35: 0.75,
-      0.5: 1.0,
-      0.65: 1.25,
-      0.8: 1.5,
-      1.0: 2.0,
+      0.25: 0.6,
+      0.35: 0.7,
+      0.5: 0.85,
+      0.65: 1.0,
+      0.8: 1.25,
+      1.0: 1.5,
     };
-    return map[speed] ?? 1.0;
+    return map[speed] ?? 0.85;
   }
 
   Future<void> stop() async {
