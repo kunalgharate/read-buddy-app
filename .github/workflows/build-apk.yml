@@ -38,10 +38,77 @@ jobs:
           SHORT_SHA="${SHORT_SHA:0:7}"
           DATE=$(date +'%Y%m%d')
           echo "artifact_name=apk-${BRANCH}-${DATE}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.head_ref || github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "date=${DATE}" >> $GITHUB_OUTPUT
 
       - name: Upload APK
+        id: upload
         uses: actions/upload-artifact@v5
         with:
           name: ${{ steps.info.outputs.artifact_name }}
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 5
+
+      - name: Notify Teams Channel
+        if: success()
+        run: |
+          ARTIFACT_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          BRANCH="${{ steps.info.outputs.branch }}"
+          SHORT_SHA="${{ steps.info.outputs.short_sha }}"
+          DATE="${{ steps.info.outputs.date }}"
+
+          curl -H "Content-Type: application/json" -d '{
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.4",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "size": "Large",
+                      "weight": "Bolder",
+                      "text": "📱 ReadBuddy APK Build Ready",
+                      "wrap": true
+                    },
+                    {
+                      "type": "FactSet",
+                      "facts": [
+                        { "title": "PR:", "value": "#'"${PR_NUMBER}"' - '"${PR_TITLE}"'" },
+                        { "title": "Branch:", "value": "'"${BRANCH}"'" },
+                        { "title": "Commit:", "value": "'"${SHORT_SHA}"'" },
+                        { "title": "Author:", "value": "'"${AUTHOR}"'" },
+                        { "title": "Date:", "value": "'"${DATE}"'" }
+                      ]
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": "✅ Build successful! Download the APK from the link below.",
+                      "wrap": true,
+                      "color": "Good"
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": "Action.OpenUrl",
+                      "title": "⬇️ Download APK",
+                      "url": "'"${ARTIFACT_URL}"'"
+                    },
+                    {
+                      "type": "Action.OpenUrl",
+                      "title": "🔗 View PR",
+                      "url": "'"${PR_URL}"'"
+                    }
+                  ]
+                }
+              }
+            ]
+          }' "${{ secrets.TEAMS_WEBHOOK_URL }}"
