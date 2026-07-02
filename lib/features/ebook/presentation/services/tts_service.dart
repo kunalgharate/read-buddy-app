@@ -40,10 +40,23 @@ class TtsService {
     'mr': 'mr-IN',
   };
 
+  /// Normalize language strings from backend (e.g. "Hindi2", "Hindi", "Marathi")
+  /// to standard codes ("hi", "mr", "en")
+  static String _normalizeLanguageCode(String raw) {
+    final lower = raw.toLowerCase().trim();
+    if (lower.startsWith('hindi')) return 'hi';
+    if (lower.startsWith('marathi')) return 'mr';
+    if (lower.startsWith('english')) return 'en';
+    // Already a code like "hi", "mr", "en"
+    if (lower == 'hi' || lower == 'mr' || lower == 'en') return lower;
+    // Default to English
+    return lower;
+  }
+
   Future<void> init(String languageCode) async {
-    _languageCode = languageCode;
-    debugPrint('[TTS] init() called with languageCode: "$languageCode"');
-    debugPrint('[TTS] Will use Gnani AI: ${_gnaniLanguages.contains(languageCode)}');
+    _languageCode = _normalizeLanguageCode(languageCode);
+    debugPrint('[TTS] init() called with raw languageCode: "$languageCode" → normalized: "$_languageCode"');
+    debugPrint('[TTS] Will use Gnani AI: ${_gnaniLanguages.contains(_languageCode)}');
 
     // Always init flutter_tts as fallback
     final locale = _flutterTtsLanguageMap[languageCode] ?? 'en-US';
@@ -251,9 +264,9 @@ class TtsService {
   }
 
   Future<void> setLanguage(String languageCode) async {
-    _languageCode = languageCode;
-    debugPrint('[TTS] setLanguage() called: "$languageCode"');
-    final locale = _flutterTtsLanguageMap[languageCode] ?? 'en-US';
+    _languageCode = _normalizeLanguageCode(languageCode);
+    debugPrint('[TTS] setLanguage() called: "$languageCode" → normalized: "$_languageCode"');
+    final locale = _flutterTtsLanguageMap[_languageCode] ?? 'en-US';
     await _flutterTts.setLanguage(locale);
   }
 
