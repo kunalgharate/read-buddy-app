@@ -102,33 +102,49 @@ class TtsService {
   /// Speak using Gnani AI SSE streaming endpoint via backend proxy
   Future<void> _speakWithGnani(String text) async {
     try {
+      // Clean text: remove null characters and excessive whitespace
+      String cleanText = text
+          .replaceAll('\u0000', '')
+          .replaceAll(RegExp(r'\r\n'), ' ')
+          .replaceAll(RegExp(r'\n'), ' ')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+
       // Limit text chunk size for TTS
-      final chunk = text.length > 5000 ? text.substring(0, 5000) : text;
+      final chunk = cleanText.length > 5000
+          ? cleanText.substring(0, 5000)
+          : cleanText;
       final voice = _gnaniVoiceMap[_languageCode] ?? 'sia';
 
       debugPrint('[TTS-Gnani] Requesting TTS — voice: "$voice", '
           'text length: ${chunk.length}');
       debugPrint('[TTS-Gnani] API URL: ${ApiConstants.ttsSynthesize}');
+      debugPrint('[TTS-Gnani] Clean text first 200: "${chunk.substring(0, chunk.length.clamp(0, 200))}"');
 
       // Get auth token for backend proxy
       final token = await getIt<SecureStorageUtil>().getAccessToken();
       debugPrint('[TTS-Gnani] Auth token present: ${token != null}');
 
-      // Call backend TTS proxy (returns audio bytes)
+      // Use Dio-style approach with proper UTF-8 encoding
       _httpClient = HttpClient();
       final uri = Uri.parse(ApiConstants.ttsSynthesize);
       final request = await _httpClient!.postUrl(uri);
 
-      request.headers.set('Content-Type', 'application/json');
+      final body = jsonEncode({
+        'text': chunk,
+        'voice': voice,
+        'container': 'mp3',
+      });
+      final bodyBytes = utf8.encode(body);
+
+      request.headers.set('Content-Type', 'application/json; charset=utf-8');
+      request.headers.set('Content-Length', bodyBytes.length.toString());
       if (token != null) {
         request.headers.set('Authorization', 'Bearer $token');
       }
 
-      request.write(jsonEncode({
-        'text': chunk,
-        'voice': voice,
-        'container': 'mp3',
-      }));
+      // Write bytes directly instead of string to avoid Latin1 encoding issue
+      request.add(bodyBytes);
 
       debugPrint('[TTS-Gnani] Sending request...');
       final response = await request.close();
