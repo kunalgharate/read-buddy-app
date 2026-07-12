@@ -40,7 +40,10 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
     _chewieController?.dispose();
     _videoController?.dispose();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
     super.dispose();
   }
 
