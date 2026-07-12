@@ -145,7 +145,7 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
     final m = (seconds % 3600) ~/ 60;
     final s = seconds % 60;
     if (h > 0) return '${h}h ${m}m';
-    return '${m}:${s.toString().padLeft(2, '0')}';
+    return '$m:${s.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -177,7 +177,8 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
               aspectRatio: 16 / 9,
               child: _loading
                   ? const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary))
+                      child:
+                          CircularProgressIndicator(color: AppColors.primary))
                   : _hasError
                       ? Center(
                           child: Column(
@@ -221,7 +222,8 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
                     const SizedBox(height: 4),
                     Text(
                       _formatDuration(currentPart.duration),
-                      style: const TextStyle(color: Colors.white54, fontSize: 13),
+                      style:
+                          const TextStyle(color: Colors.white54, fontSize: 13),
                     ),
                   ],
                   const SizedBox(height: 12),
@@ -239,7 +241,8 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white12,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: Colors.white.withValues(alpha: 0.05),
+                            disabledBackgroundColor:
+                                Colors.white.withValues(alpha: 0.05),
                             disabledForegroundColor: Colors.white24,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -252,16 +255,16 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed:
-                              _currentPartIndex < widget.parts.length - 1
-                                  ? () => _playPart(_currentPartIndex + 1)
-                                  : null,
+                          onPressed: _currentPartIndex < widget.parts.length - 1
+                              ? () => _playPart(_currentPartIndex + 1)
+                              : null,
                           icon: const Icon(Icons.skip_next, size: 18),
                           label: const Text('Next'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white12,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: Colors.white.withValues(alpha: 0.05),
+                            disabledBackgroundColor:
+                                Colors.white.withValues(alpha: 0.05),
                             disabledForegroundColor: Colors.white24,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -291,9 +294,8 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
                       dense: true,
                       leading: CircleAvatar(
                         radius: 16,
-                        backgroundColor: isPlaying
-                            ? AppColors.primary
-                            : Colors.white12,
+                        backgroundColor:
+                            isPlaying ? AppColors.primary : Colors.white12,
                         child: isPlaying
                             ? const Icon(Icons.play_arrow,
                                 color: Colors.white, size: 16)
@@ -314,7 +316,8 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
                       ),
                       trailing: Text(
                         _formatDuration(part.duration),
-                        style: const TextStyle(color: Colors.white54, fontSize: 12),
+                        style: const TextStyle(
+                            color: Colors.white54, fontSize: 12),
                       ),
                       onTap: () => _playPart(index),
                     );
@@ -392,9 +395,8 @@ class _ChapterListSheet extends StatelessWidget {
                     style: TextStyle(
                       fontWeight:
                           isPlaying ? FontWeight.w600 : FontWeight.normal,
-                      color: isPlaying
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
+                      color:
+                          isPlaying ? AppColors.primary : AppColors.textPrimary,
                     ),
                   ),
                   trailing: isPlaying

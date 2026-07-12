@@ -10,7 +10,7 @@ part 'librarian_state.dart';
 class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
   final LibrarianRemoteDataSource _dataSource;
 
-  LibrarianBloc(this._dataSource) : super(LibrarianInitial()) {
+  LibrarianBloc(this._dataSource) : super(const LibrarianInitial()) {
     on<LoadLibrarianDashboard>(_onLoadDashboard);
     on<LoadLibrarianRequests>(_onLoadRequests);
     on<AcceptRequestEvent>(_onAcceptRequest);
@@ -25,7 +25,7 @@ class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
     LoadLibrarianDashboard event,
     Emitter<LibrarianState> emit,
   ) async {
-    emit(LibrarianLoading());
+    emit(const LibrarianLoading());
     try {
       final library = await _dataSource.getMyLibrary();
       final stats = await _dataSource.getDashboardStats();
@@ -39,7 +39,7 @@ class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
     LoadLibrarianRequests event,
     Emitter<LibrarianState> emit,
   ) async {
-    emit(LibrarianLoading());
+    emit(const LibrarianLoading());
     try {
       final requests = await _dataSource.getBookRequests();
       emit(LibrarianRequestsLoaded(requests));
@@ -52,10 +52,10 @@ class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
     AcceptRequestEvent event,
     Emitter<LibrarianState> emit,
   ) async {
-    emit(LibrarianLoading());
+    emit(const LibrarianLoading());
     try {
       await _dataSource.acceptRequest(event.requestId);
-      emit(LibrarianActionSuccess('Request accepted'));
+      emit(const LibrarianActionSuccess('Request accepted'));
     } catch (e) {
       emit(LibrarianError(ErrorHandler.getErrorMessage(e)));
     }
@@ -65,10 +65,10 @@ class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
     RejectRequestEvent event,
     Emitter<LibrarianState> emit,
   ) async {
-    emit(LibrarianLoading());
+    emit(const LibrarianLoading());
     try {
       await _dataSource.rejectRequest(event.requestId, event.reason);
-      emit(LibrarianActionSuccess('Request rejected'));
+      emit(const LibrarianActionSuccess('Request rejected'));
     } catch (e) {
       emit(LibrarianError(ErrorHandler.getErrorMessage(e)));
     }
@@ -78,10 +78,10 @@ class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
     UpdateRequestStatusEvent event,
     Emitter<LibrarianState> emit,
   ) async {
-    emit(LibrarianLoading());
+    emit(const LibrarianLoading());
     try {
       await _dataSource.updateRequestStatus(event.requestId, event.status);
-      emit(LibrarianActionSuccess('Status updated'));
+      emit(const LibrarianActionSuccess('Status updated'));
     } catch (e) {
       emit(LibrarianError(ErrorHandler.getErrorMessage(e)));
     }
@@ -91,7 +91,7 @@ class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
     LoadLibrarianDonations event,
     Emitter<LibrarianState> emit,
   ) async {
-    emit(LibrarianLoading());
+    emit(const LibrarianLoading());
     try {
       final donations = await _dataSource.getDonations();
       emit(LibrarianDonationsLoaded(donations));
@@ -104,10 +104,10 @@ class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
     UpdateDonationStatusEvent event,
     Emitter<LibrarianState> emit,
   ) async {
-    emit(LibrarianLoading());
+    emit(const LibrarianLoading());
     try {
       await _dataSource.updateDonationStatus(event.donationId, event.status);
-      emit(LibrarianActionSuccess('Donation status updated'));
+      emit(const LibrarianActionSuccess('Donation status updated'));
     } catch (e) {
       emit(LibrarianError(ErrorHandler.getErrorMessage(e)));
     }
@@ -117,10 +117,10 @@ class LibrarianBloc extends Bloc<LibrarianEvent, LibrarianState> {
     SchedulePickupEvent event,
     Emitter<LibrarianState> emit,
   ) async {
-    emit(LibrarianLoading());
+    emit(const LibrarianLoading());
     try {
       await _dataSource.scheduleDonationPickup(event.donationId, event.data);
-      emit(LibrarianActionSuccess('Pickup scheduled'));
+      emit(const LibrarianActionSuccess('Pickup scheduled'));
     } catch (e) {
       emit(LibrarianError(ErrorHandler.getErrorMessage(e)));
     }

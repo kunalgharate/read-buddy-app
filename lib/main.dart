@@ -53,13 +53,17 @@ class _MyAppState extends State<MyApp> {
         if (!mounted) return;
         final ctx = _navigatorKey.currentContext;
         if (ctx != null) {
-          showSessionExpiredDialog(ctx);
+          showSessionExpiredDialog(
+              ctx); // ignore: use_build_context_synchronously
         } else {
           // Fallback: navigate after a short delay if context not ready
           Future.delayed(const Duration(milliseconds: 500), () {
             if (!mounted) return;
             final delayedCtx = _navigatorKey.currentContext;
-            if (delayedCtx != null) showSessionExpiredDialog(delayedCtx);
+            if (delayedCtx != null) {
+              showSessionExpiredDialog(
+                  delayedCtx); // ignore: use_build_context_synchronously
+            }
           });
         }
       }

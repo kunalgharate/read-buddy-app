@@ -34,8 +34,7 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
       );
       final data = response.data;
       setState(() {
-        _librarians =
-            List<Map<String, dynamic>>.from(data['librarians'] ?? []);
+        _librarians = List<Map<String, dynamic>>.from(data['librarians'] ?? []);
         _loadingLibrarians = false;
       });
     } catch (e) {
@@ -138,13 +137,14 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
             icon: const Icon(Icons.edit),
             tooltip: 'Edit Library',
             onPressed: () async {
-              final result = await Navigator.pushNamed(
-                context,
+              final nav = Navigator.of(context);
+              final result = await nav.pushNamed(
                 '/library/create',
                 arguments: lib,
               );
-              if (result == true && mounted) {
-                Navigator.pop(context, true);
+              if (!mounted) return;
+              if (result == true) {
+                nav.pop(true);
               }
             },
           ),
@@ -176,9 +176,7 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                   Row(
                     children: [
                       Icon(
-                        lib.isSuperLibrary
-                            ? Icons.star
-                            : Icons.local_library,
+                        lib.isSuperLibrary ? Icons.star : Icons.local_library,
                         color: lib.isSuperLibrary
                             ? Colors.amber
                             : AppColors.primary,
@@ -257,7 +255,8 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                 ),
                 child: const Column(
                   children: [
-                    Icon(Icons.people_outline, size: 40, color: AppColors.textHint),
+                    Icon(Icons.people_outline,
+                        size: 40, color: AppColors.textHint),
                     SizedBox(height: 8),
                     Text(
                       'No librarians assigned yet',
@@ -385,9 +384,7 @@ class _UserSearchSheetState extends State<_UserSearchSheet> {
       final data = response.data;
       final users = data['users'] ?? data['data'] ?? data;
       setState(() {
-        _results = users is List
-            ? List<Map<String, dynamic>>.from(users)
-            : [];
+        _results = users is List ? List<Map<String, dynamic>>.from(users) : [];
         _loading = false;
       });
     } catch (e) {
@@ -453,8 +450,7 @@ class _UserSearchSheetState extends State<_UserSearchSheet> {
 
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor:
-                          AppColors.primary.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                       child: Text(
                         name.isNotEmpty ? name[0].toUpperCase() : '?',
                         style: const TextStyle(color: AppColors.primary),
@@ -463,8 +459,8 @@ class _UserSearchSheetState extends State<_UserSearchSheet> {
                     title: Text(name),
                     subtitle: Text('$email • $role',
                         style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(
-                        Icons.add_circle_outline, color: AppColors.primary),
+                    trailing: const Icon(Icons.add_circle_outline,
+                        color: AppColors.primary),
                     onTap: () => widget.onUserSelected(user),
                   );
                 },

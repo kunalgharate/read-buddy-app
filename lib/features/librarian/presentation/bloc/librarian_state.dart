@@ -6,9 +6,13 @@ sealed class LibrarianState extends Equatable {
   List<Object?> get props => [];
 }
 
-final class LibrarianInitial extends LibrarianState {}
+final class LibrarianInitial extends LibrarianState {
+  const LibrarianInitial();
+}
 
-final class LibrarianLoading extends LibrarianState {}
+final class LibrarianLoading extends LibrarianState {
+  const LibrarianLoading();
+}
 
 final class LibrarianDashboardLoaded extends LibrarianState {
   final LibraryEntity library;
