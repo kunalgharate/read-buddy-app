@@ -145,7 +145,10 @@ class _BooksListPageState extends State<BooksListPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const BookStepper(),
+                builder: (_) => BlocProvider.value(
+                  value: context.read<BookCrudBloc>(),
+                  child: const BookStepper(),
+                ),
               ),
             );
           },

@@ -77,8 +77,7 @@ class _BookPageState extends State<BookPage> {
                               providers: [
                                 BlocProvider(
                                     create: (_) => getIt<BookCrudBloc>()),
-                                BlocProvider(
-                                    create: (_) => getIt<UserCubit>()),
+                                BlocProvider(create: (_) => getIt<UserCubit>()),
                                 BlocProvider(
                                     create: (_) => getIt<LocationCubit>()),
                               ],
@@ -178,12 +177,10 @@ class _BookPageState extends State<BookPage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            const BookStepper()
-                                        // AddBookPage(
-                                        //   onContinue: () {},
-                                        // )
-                                        ));
+                                        builder: (_) => BlocProvider.value(
+                                              value: getIt<BookCrudBloc>(),
+                                              child: const BookStepper(),
+                                            )));
                               },
                               child: const Text("Add Book")),
                           const Center(child: Text('No books loaded.')),
