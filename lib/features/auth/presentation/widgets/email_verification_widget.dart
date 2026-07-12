@@ -18,8 +18,8 @@ class EmailVerificationScreen extends StatelessWidget {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: AspectRatio(
-          aspectRatio: 1,
+        child: SizedBox(
+          height: 56,
           child: TextField(
             controller: _controllers[index],
             focusNode: _focusNodes[index],
@@ -27,23 +27,24 @@ class EmailVerificationScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLength: 1,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.w700,
               color: Color(0xFF2C3E50),
             ),
             decoration: InputDecoration(
               counterText: "",
+              contentPadding: const EdgeInsets.symmetric(vertical: 14),
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
                   color: Color(0xFFD6D6D6),
                   width: 1,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
                   color: Color(0xFF2C3E50),
                   width: 2,
