@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
 import '../../core/services/app_preferences.dart';
+import '../../core/theme/app_colors.dart';
 import 'onboarding_widget.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -144,7 +145,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ElevatedButton(
                         onPressed: _nextPage,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2CE07F),
+                          backgroundColor: AppColors.navy,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 12),
