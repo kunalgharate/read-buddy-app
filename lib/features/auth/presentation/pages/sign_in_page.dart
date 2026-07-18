@@ -193,6 +193,8 @@ class _SignInScreenState extends State<SignInScreen> {
                         _buildForgotPasswordLink(),
                         const SizedBox(height: 32.0),
                         _buildSignInButton(),
+                        const SizedBox(height: 20.0),
+                        _buildGoogleSignInButton(),
                         const Spacer(),
                         _buildSignUpPrompt(),
                         const Spacer(),
@@ -354,6 +356,39 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildGoogleSignInButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52.0,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          context.read<GoogleSignInBloc>().add(const GoogleSignInRequested());
+        },
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: _borderColor),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+        icon: Image.asset(
+          'assets/icons/google.png',
+          height: 22,
+          width: 22,
+          errorBuilder: (_, __, ___) =>
+              const Icon(Icons.g_mobiledata, size: 24),
+        ),
+        label: const Text(
+          'Sign in with Google',
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w500,
+            color: _textColor,
+          ),
+        ),
+      ),
     );
   }
 

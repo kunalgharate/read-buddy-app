@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
+import 'package:read_buddy_app/features/settings/change_password_screen.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_bloc.dart';
@@ -13,6 +14,8 @@ import 'package:read_buddy_app/features/library/presentation/pages/assign_librar
 import 'package:read_buddy_app/features/library/domain/entities/library_entity.dart';
 import 'package:read_buddy_app/features/address/presentation/pages/address_management_page.dart';
 import 'package:read_buddy_app/features/librarian/presentation/pages/librarian_dashboard_screen.dart';
+import 'package:read_buddy_app/features/librarian/presentation/pages/librarian_requests_page.dart';
+import 'package:read_buddy_app/features/librarian/presentation/pages/librarian_donations_page.dart';
 import 'package:read_buddy_app/features/book_request/presentation/pages/my_requests_page.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:read_buddy_app/features/auth/presentation/pages/sing_up_page.dart';
@@ -88,6 +91,8 @@ class AppRouter {
         );
       case '/reset-password':
         return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
+      case '/change-password':
+        return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
       case '/admin':
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
       case '/admin-users':
@@ -174,11 +179,11 @@ class AppRouter {
         );
       case '/librarian/requests':
         return MaterialPageRoute(
-          builder: (_) => const LibrarianDashboardScreen(),
+          builder: (_) => const LibrarianRequestsPage(),
         );
       case '/librarian/donations':
         return MaterialPageRoute(
-          builder: (_) => const LibrarianDashboardScreen(),
+          builder: (_) => const LibrarianDonationsPage(),
         );
       case '/my-requests':
         return MaterialPageRoute(

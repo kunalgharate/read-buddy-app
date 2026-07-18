@@ -11,7 +11,6 @@ import 'package:read_buddy_app/features/books/domain/entities/book.dart';
 
 const _primary = Color(0xFF03405B);
 const _green = Color(0xFF00C853);
-const _background = Color(0xFFF2F4F7);
 
 class CategoryTab extends StatefulWidget {
   const CategoryTab({super.key});
@@ -41,7 +40,7 @@ class _CategoryTabState extends State<CategoryTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +123,7 @@ class _CategoryTabState extends State<CategoryTab> {
             child: Container(
               height: 52,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -156,7 +155,7 @@ class _CategoryTabState extends State<CategoryTab> {
             height: 52,
             width: 52,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -276,7 +275,7 @@ class _CategoryTabState extends State<CategoryTab> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.grey.shade200),
                       ),
@@ -453,7 +452,7 @@ class _CategoryTabState extends State<CategoryTab> {
         width: 135,
         margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -540,7 +539,7 @@ class _CategoryTabState extends State<CategoryTab> {
       onTap: () => _showBookDetailsPopup(book),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
