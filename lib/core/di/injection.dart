@@ -603,7 +603,7 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => BookBloc(getIt<GetBooks>()));
 
   // Book CRUD
-  getIt.registerLazySingleton(() => BookCrudBloc(
+  getIt.registerFactory(() => BookCrudBloc(
         searchBooks: getIt<SearchBookUsecase>(),
         addBookCrud: getIt<AddBookUsecase>(),
         getBooksCrud: getIt<GetBooksUsecase>(),
@@ -729,12 +729,11 @@ void _registerLibraryFeature() {
   getIt.registerLazySingleton(() => DeleteLibrary(getIt<LibraryRepository>()));
   getIt.registerLazySingleton(
       () => ToggleSuperLibrary(getIt<LibraryRepository>()));
-  getIt.registerLazySingleton(
-      () => AssignLibrarian(getIt<LibraryRepository>()));
+  getIt
+      .registerLazySingleton(() => AssignLibrarian(getIt<LibraryRepository>()));
   getIt.registerLazySingleton(
       () => UnassignLibrarian(getIt<LibraryRepository>()));
-  getIt
-      .registerLazySingleton(() => GetLibrarians(getIt<LibraryRepository>()));
+  getIt.registerLazySingleton(() => GetLibrarians(getIt<LibraryRepository>()));
 
   // BLoC
   getIt.registerFactory(() => LibraryBloc(
@@ -788,5 +787,6 @@ void _registerLibrarianFeature() {
     () => LibrarianRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
 
-  getIt.registerFactory(() => LibrarianBloc(getIt<LibrarianRemoteDataSource>()));
+  getIt
+      .registerFactory(() => LibrarianBloc(getIt<LibrarianRemoteDataSource>()));
 }

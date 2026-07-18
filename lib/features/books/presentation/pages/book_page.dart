@@ -177,8 +177,9 @@ class _BookPageState extends State<BookPage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (_) => BlocProvider.value(
-                                              value: getIt<BookCrudBloc>(),
+                                        builder: (_) => BlocProvider(
+                                              create: (_) =>
+                                                  getIt<BookCrudBloc>(),
                                               child: const BookStepper(),
                                             )));
                               },

@@ -106,7 +106,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     if (libraryId == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User made librarian (no library assigned)')),
+          const SnackBar(
+              content: Text('User made librarian (no library assigned)')),
         );
       }
       _fetchUsers();
@@ -135,7 +136,39 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     await _patchAction(userId, 'unassign-library', 'Librarian removed');
   }
 
-  Future<void> _patchAction(String userId, String action, String message) async {
+  void _confirmRemoveAdmin(String userId, String name) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Admin'),
+        content: Text(
+          'Are you sure you want to remove admin privileges from "$name"? '
+          'This user will be demoted to a regular user.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _removeAdmin(userId);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _removeAdmin(String userId) async {
+    await _patchAction(userId, 'remove-admin', 'Admin privileges removed');
+  }
+
+  Future<void> _patchAction(
+      String userId, String action, String message) async {
     try {
       final dio = getIt<Dio>();
       await dio.patch('${ApiConstants.adminUsers}/$userId/$action');
@@ -222,7 +255,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(name,
-                              style: const TextStyle(fontWeight: FontWeight.w600)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600)),
                           if (city.isNotEmpty)
                             Text(city,
                                 style: const TextStyle(
@@ -375,11 +409,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                           ),
                           if (isPrime) ...[
                             const SizedBox(width: 6),
-                            const Icon(Icons.star, color: Colors.amber, size: 16),
+                            const Icon(Icons.star,
+                                color: Colors.amber, size: 16),
                           ],
                           if (isBlocked) ...[
                             const SizedBox(width: 6),
-                            const Icon(Icons.block, color: Colors.red, size: 14),
+                            const Icon(Icons.block,
+                                color: Colors.red, size: 14),
                           ],
                         ],
                       ),
@@ -474,6 +510,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                     icon: Icons.person_remove,
                     color: Colors.deepOrange,
                     onTap: () => _removeLibrarian(id),
+                  ),
+                if (role == 'admin')
+                  _actionChip(
+                    label: 'Remove Admin',
+                    icon: Icons.admin_panel_settings_outlined,
+                    color: Colors.red,
+                    onTap: () => _confirmRemoveAdmin(id, name),
                   ),
               ],
             ),
