@@ -110,8 +110,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                   Navigator.pop(ctx);
                   Navigator.pop(context, true);
                 },
-                style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary),
+                style:
+                    FilledButton.styleFrom(backgroundColor: AppColors.primary),
                 child: const Text('Start Exploring'),
               ),
             ],
@@ -204,7 +204,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
               ),
             ),
             const SizedBox(height: 12),
-            _benefitRow(Icons.menu_book, 'Borrow physical books from libraries'),
+            _benefitRow(
+                Icons.menu_book, 'Borrow physical books from libraries'),
             _benefitRow(Icons.chrome_reader_mode, 'Read eBooks (PDF & EPUB)'),
             _benefitRow(Icons.headphones, 'Listen to Audiobooks'),
             _benefitRow(Icons.play_circle, 'Watch Videobooks'),
@@ -226,8 +227,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.2)),
+                border:
+                    Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,7 +243,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                   SizedBox(height: 4),
                   Text(
                     'Donate any book to our library network. Once approved by admin, you get Prime for free!',
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style:
+                        TextStyle(fontSize: 13, color: AppColors.textSecondary),
                   ),
                   SizedBox(height: 16),
                   Text(
@@ -255,7 +257,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                   SizedBox(height: 4),
                   Text(
                     'Purchase Prime Membership starting at ₹100/year and get instant access.',
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style:
+                        TextStyle(fontSize: 13, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -319,7 +322,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_outline, size: 16, color: AppColors.textHint),
+                      Icon(Icons.info_outline,
+                          size: 16, color: AppColors.textHint),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -390,9 +394,7 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
             color: selected ? Colors.amber.shade700 : AppColors.border,
             width: selected ? 2 : 1,
           ),
-          color: selected
-              ? Colors.amber.shade50
-              : Colors.white,
+          color: selected ? Colors.amber.shade50 : Colors.white,
         ),
         child: Row(
           children: [

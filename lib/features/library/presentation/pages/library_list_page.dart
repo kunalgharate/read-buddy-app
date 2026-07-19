@@ -57,9 +57,8 @@ class _LibraryListView extends StatelessWidget {
                   Text(state.message, textAlign: TextAlign.center),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () => context
-                        .read<LibraryBloc>()
-                        .add(const LoadLibraries()),
+                    onPressed: () =>
+                        context.read<LibraryBloc>().add(const LoadLibraries()),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -138,9 +137,8 @@ class _LibraryCard extends StatelessWidget {
                 ),
                 child: Icon(
                   library.isSuperLibrary ? Icons.star : Icons.local_library,
-                  color: library.isSuperLibrary
-                      ? Colors.amber
-                      : AppColors.primary,
+                  color:
+                      library.isSuperLibrary ? Colors.amber : AppColors.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -219,9 +217,8 @@ class _LibraryCard extends StatelessWidget {
                 itemBuilder: (_) => [
                   PopupMenuItem(
                     value: 'toggle_super',
-                    child: Text(library.isSuperLibrary
-                        ? 'Remove Super'
-                        : 'Make Super'),
+                    child: Text(
+                        library.isSuperLibrary ? 'Remove Super' : 'Make Super'),
                   ),
                   const PopupMenuItem(
                     value: 'delete',

@@ -1,7 +1,8 @@
 import '../entities/library_entity.dart';
 
 abstract class LibraryRepository {
-  Future<List<LibraryEntity>> getLibraries({String? city, int? page, int? limit});
+  Future<List<LibraryEntity>> getLibraries(
+      {String? city, int? page, int? limit});
   Future<List<LibraryEntity>> getLibraryDetails();
   Future<List<LibraryEntity>> getSuperLibraries();
   Future<LibraryEntity> getLibraryById(String id);

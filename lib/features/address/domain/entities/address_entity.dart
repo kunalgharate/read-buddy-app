@@ -29,14 +29,23 @@ class AddressEntity extends Equatable {
     required this.isDefault,
   });
 
-  String get fullAddress =>
-      [addressLine1, addressLine2, city, state, pincode]
-          .where((s) => s.isNotEmpty)
-          .join(', ');
+  String get fullAddress => [addressLine1, addressLine2, city, state, pincode]
+      .where((s) => s.isNotEmpty)
+      .join(', ');
 
   @override
   List<Object?> get props => [
-        id, label, name, phone, addressLine1, addressLine2,
-        city, state, pincode, latitude, longitude, isDefault,
+        id,
+        label,
+        name,
+        phone,
+        addressLine1,
+        addressLine2,
+        city,
+        state,
+        pincode,
+        latitude,
+        longitude,
+        isDefault,
       ];
 }

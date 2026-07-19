@@ -212,7 +212,8 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                             ),
                           ),
                         ),
-                        icon: const Icon(Icons.local_library, color: AppColors.textPrimary),
+                        icon: const Icon(Icons.local_library,
+                            color: AppColors.textPrimary),
                         label: const Text(
                           'View Pickup Details',
                           style: TextStyle(
@@ -242,7 +243,8 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                             builder: (_) => BookOrderPage(request: req),
                           ),
                         ),
-                        icon: const Icon(Icons.local_shipping, color: AppColors.textPrimary),
+                        icon: const Icon(Icons.local_shipping,
+                            color: AppColors.textPrimary),
                         label: const Text(
                           'View Delivery Details',
                           style: TextStyle(

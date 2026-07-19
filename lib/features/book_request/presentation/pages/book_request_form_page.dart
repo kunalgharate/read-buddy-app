@@ -64,8 +64,10 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             return false;
           }
           final km = LocationService.instance.calculateDistanceKm(
-            position.latitude, position.longitude,
-            lib.address.latitude, lib.address.longitude,
+            position.latitude,
+            position.longitude,
+            lib.address.latitude,
+            lib.address.longitude,
           );
           return km <= 25;
         }).toList();
@@ -73,12 +75,16 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
         // Sort nearest first
         libraries.sort((a, b) {
           final distA = LocationService.instance.calculateDistanceKm(
-            position.latitude, position.longitude,
-            a.address.latitude, a.address.longitude,
+            position.latitude,
+            position.longitude,
+            a.address.latitude,
+            a.address.longitude,
           );
           final distB = LocationService.instance.calculateDistanceKm(
-            position.latitude, position.longitude,
-            b.address.latitude, b.address.longitude,
+            position.latitude,
+            position.longitude,
+            b.address.latitude,
+            b.address.longitude,
           );
           return distA.compareTo(distB);
         });
@@ -254,7 +260,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                icon:
+                    const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Text(
@@ -395,7 +402,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.location_off, color: Colors.amber, size: 32),
+                    const Icon(Icons.location_off,
+                        color: Colors.amber, size: 32),
                     const SizedBox(height: 8),
                     const Text(
                       'No libraries nearby or in your city',
@@ -535,7 +543,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             _confirmRow('Book', widget.bookTitle),
             _confirmRow('Name', _nameController.text.trim()),
             _confirmRow('Phone', _phoneController.text.trim()),
-            _confirmRow('Method', isDropoff ? 'Delivery' : 'Pickup from Library'),
+            _confirmRow(
+                'Method', isDropoff ? 'Delivery' : 'Pickup from Library'),
             if (isDropoff) ...[
               _confirmRow('Address', _addressController.text.trim()),
               _confirmRow('PIN Code', _pincodeController.text.trim()),
@@ -715,14 +724,17 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
       ),
     );
   }
+
   Widget _libraryTile(LibraryEntity lib) {
     final isSelected = _selectedLibrary?.id == lib.id;
     final position = LocationService.instance.lastPosition;
     String? distanceText;
     if (position != null && lib.address.latitude != 0) {
       final km = LocationService.instance.calculateDistanceKm(
-        position.latitude, position.longitude,
-        lib.address.latitude, lib.address.longitude,
+        position.latitude,
+        position.longitude,
+        lib.address.latitude,
+        lib.address.longitude,
       );
       distanceText = LocationService.instance.formatDistance(km);
     }
@@ -800,7 +812,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               ),
               if (distanceText != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2CE07F).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -816,7 +829,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 ),
               if (isSelected) ...[
                 const SizedBox(width: 8),
-                const Icon(Icons.check_circle, color: Color(0xFF2CE07F), size: 22),
+                const Icon(Icons.check_circle,
+                    color: Color(0xFF2CE07F), size: 22),
               ],
             ],
           ),

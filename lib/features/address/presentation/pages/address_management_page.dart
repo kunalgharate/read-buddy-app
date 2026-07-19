@@ -350,8 +350,7 @@ class _AddressFormState extends State<_AddressForm> {
                 }).toList(),
               ),
               const SizedBox(height: 12),
-              _field(_nameCtrl, 'Recipient Name *',
-                  validator: _required),
+              _field(_nameCtrl, 'Recipient Name *', validator: _required),
               const SizedBox(height: 10),
               _field(_phoneCtrl, 'Phone *',
                   keyboard: TextInputType.phone, validator: _required),
@@ -363,11 +362,12 @@ class _AddressFormState extends State<_AddressForm> {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Expanded(child: _field(_cityCtrl, 'City *',
-                      validator: _required)),
+                  Expanded(
+                      child: _field(_cityCtrl, 'City *', validator: _required)),
                   const SizedBox(width: 10),
-                  Expanded(child: _field(_stateCtrl, 'State *',
-                      validator: _required)),
+                  Expanded(
+                      child:
+                          _field(_stateCtrl, 'State *', validator: _required)),
                 ],
               ),
               const SizedBox(height: 10),
@@ -384,9 +384,8 @@ class _AddressFormState extends State<_AddressForm> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.my_location, size: 18),
-                label: Text(_lat != 0
-                    ? 'Location set ✓'
-                    : 'Use Current Location'),
+                label:
+                    Text(_lat != 0 ? 'Location set ✓' : 'Use Current Location'),
               ),
               // Default toggle
               SwitchListTile(

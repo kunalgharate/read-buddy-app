@@ -12,7 +12,8 @@ class LibraryRepositoryImpl implements LibraryRepository {
     String? city,
     int? page,
     int? limit,
-  }) => _remoteDataSource.getLibraries(city: city, page: page, limit: limit);
+  }) =>
+      _remoteDataSource.getLibraries(city: city, page: page, limit: limit);
 
   @override
   Future<List<LibraryEntity>> getLibraryDetails() =>
@@ -56,5 +57,6 @@ class LibraryRepositoryImpl implements LibraryRepository {
   @override
   Future<List<Map<String, dynamic>>> getLibrariansForLibrary(
     String libraryId,
-  ) => _remoteDataSource.getLibrariansForLibrary(libraryId);
+  ) =>
+      _remoteDataSource.getLibrariansForLibrary(libraryId);
 }

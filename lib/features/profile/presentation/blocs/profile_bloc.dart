@@ -46,8 +46,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     } catch (error) {
       // Don't fallback to cache on auth errors (session replaced / token expired)
       final errorMsg = error.toString();
-      if (errorMsg.contains('SESSION_REPLACED') ||
-          errorMsg.contains('401')) {
+      if (errorMsg.contains('SESSION_REPLACED') || errorMsg.contains('401')) {
         emit(ProfileError(ErrorHandler.getErrorMessage(error)));
         return;
       }

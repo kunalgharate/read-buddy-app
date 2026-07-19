@@ -221,7 +221,8 @@ class _BannerSection extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           height: 1.35,
                         )),
-                    const Text('Donate a book or buy membership to unlock all features.',
+                    const Text(
+                        'Donate a book or buy membership to unlock all features.',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

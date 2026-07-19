@@ -22,7 +22,8 @@ class AddressModel extends AddressEntity {
       label: json['label']?.toString() ?? 'Home',
       name: json['name']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
-      addressLine1: json['addressLine1']?.toString() ?? json['address']?.toString() ?? '',
+      addressLine1:
+          json['addressLine1']?.toString() ?? json['address']?.toString() ?? '',
       addressLine2: json['addressLine2']?.toString() ?? '',
       city: json['city']?.toString() ?? '',
       state: json['state']?.toString() ?? '',

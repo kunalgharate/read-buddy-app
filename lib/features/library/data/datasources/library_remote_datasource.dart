@@ -3,7 +3,8 @@ import 'package:read_buddy_app/core/network/api_constants.dart';
 import '../models/library_model.dart';
 
 abstract class LibraryRemoteDataSource {
-  Future<List<LibraryModel>> getLibraries({String? city, int? page, int? limit});
+  Future<List<LibraryModel>> getLibraries(
+      {String? city, int? page, int? limit});
   Future<List<LibraryModel>> getLibraryDetails();
   Future<List<LibraryModel>> getSuperLibraries();
   Future<LibraryModel> getLibraryById(String id);
@@ -86,7 +87,8 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     String id,
     Map<String, dynamic> data,
   ) async {
-    final response = await _dio.put('${ApiConstants.libraries}/$id', data: data);
+    final response =
+        await _dio.put('${ApiConstants.libraries}/$id', data: data);
     final responseData = response.data;
     final json = responseData['library'] ?? responseData;
     return LibraryModel.fromJson(json as Map<String, dynamic>);

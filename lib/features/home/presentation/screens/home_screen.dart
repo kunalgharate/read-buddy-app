@@ -46,7 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          MainTab(onDonatePressed: () => Navigator.pushNamed(context, '/donate-money')),
+          MainTab(
+              onDonatePressed: () =>
+                  Navigator.pushNamed(context, '/donate-money')),
           const CategoryTab(),
           BlocProvider(
             create: (_) => getIt<DonateBookBloc>(),
@@ -126,8 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
-              leading:
-                  const Icon(Icons.inventory_2, color: AppColors.primary),
+              leading: const Icon(Icons.inventory_2, color: AppColors.primary),
               title: const Text('Donations'),
               onTap: () {
                 Navigator.pop(context);

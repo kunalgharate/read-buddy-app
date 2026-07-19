@@ -208,8 +208,7 @@ class _LibraryTile extends StatelessWidget {
             // Distance
             if (item.distanceKm != null)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -226,7 +225,8 @@ class _LibraryTile extends StatelessWidget {
             // Check mark
             if (isSelected) ...[
               const SizedBox(width: 8),
-              const Icon(Icons.check_circle, color: AppColors.primary, size: 22),
+              const Icon(Icons.check_circle,
+                  color: AppColors.primary, size: 22),
             ],
           ],
         ),

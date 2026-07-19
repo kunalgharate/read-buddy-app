@@ -1495,12 +1495,9 @@ class _LibraryCard extends StatelessWidget {
                   children: [
                     _infoRow(Icons.phone_outlined, library.contactNumber),
                     _infoRow(Icons.access_time, library.openHours),
-                    _infoRow(Icons.location_on_outlined,
-                        '${''} km'),
-                    _infoRow(
-                        Icons.star_outline, ''),
-                    _infoRow(Icons.local_shipping_outlined,
-                        ''),
+                    _infoRow(Icons.location_on_outlined, '${''} km'),
+                    _infoRow(Icons.star_outline, ''),
+                    _infoRow(Icons.local_shipping_outlined, ''),
                   ],
                 ),
                 const SizedBox(height: 8),

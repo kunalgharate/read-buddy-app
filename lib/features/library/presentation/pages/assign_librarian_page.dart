@@ -77,8 +77,7 @@ class _AssignLibrarianView extends StatelessWidget {
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor:
-                          AppColors.primary.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                       child: Text(
                         name.isNotEmpty ? name[0].toUpperCase() : '?',
                         style: const TextStyle(
@@ -97,8 +96,7 @@ class _AssignLibrarianView extends StatelessWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(email,
-                            style: const TextStyle(fontSize: 12)),
+                        Text(email, style: const TextStyle(fontSize: 12)),
                         Text(
                           '📚 $libraryName',
                           style: const TextStyle(

@@ -54,8 +54,10 @@ class TtsService {
 
   Future<void> init(String languageCode) async {
     _languageCode = _normalizeLanguageCode(languageCode);
-    debugPrint('[TTS] init() called with raw languageCode: "$languageCode" → normalized: "$_languageCode"');
-    debugPrint('[TTS] Will use Gnani AI: ${_gnaniLanguages.contains(_languageCode)}');
+    debugPrint(
+        '[TTS] init() called with raw languageCode: "$languageCode" → normalized: "$_languageCode"');
+    debugPrint(
+        '[TTS] Will use Gnani AI: ${_gnaniLanguages.contains(_languageCode)}');
 
     // Always init flutter_tts as fallback
     final locale = _flutterTtsLanguageMap[languageCode] ?? 'en-US';
@@ -142,8 +144,7 @@ class TtsService {
         // Wait for this chunk to finish playing
         await _audioPlayer.playerStateStream.firstWhere(
           (state) =>
-              state.processingState == ProcessingState.completed ||
-              !isSpeaking,
+              state.processingState == ProcessingState.completed || !isSpeaking,
         );
       }
 
@@ -246,7 +247,8 @@ class TtsService {
       } else {
         final errorBytes = await _collectResponseBytes(response);
         final errorBody = utf8.decode(errorBytes, allowMalformed: true);
-        debugPrint('[TTS-Gnani] ❌ API error ${response.statusCode}: $errorBody');
+        debugPrint(
+            '[TTS-Gnani] ❌ API error ${response.statusCode}: $errorBody');
         return null;
       }
     } catch (e) {
@@ -340,7 +342,8 @@ class TtsService {
 
   Future<void> setLanguage(String languageCode) async {
     _languageCode = _normalizeLanguageCode(languageCode);
-    debugPrint('[TTS] setLanguage() called: "$languageCode" → normalized: "$_languageCode"');
+    debugPrint(
+        '[TTS] setLanguage() called: "$languageCode" → normalized: "$_languageCode"');
     final locale = _flutterTtsLanguageMap[_languageCode] ?? 'en-US';
     await _flutterTts.setLanguage(locale);
   }

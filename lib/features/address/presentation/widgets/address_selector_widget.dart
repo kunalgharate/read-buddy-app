@@ -63,8 +63,7 @@ class _AddressSelectorView extends StatelessWidget {
                   const Text('No saved addresses'),
                   const SizedBox(height: 8),
                   TextButton.icon(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/addresses'),
+                    onPressed: () => Navigator.pushNamed(context, '/addresses'),
                     icon: const Icon(Icons.add),
                     label: const Text('Add Address'),
                   ),
@@ -75,9 +74,8 @@ class _AddressSelectorView extends StatelessWidget {
 
           // Auto-select default if nothing selected
           if (selectedAddress == null) {
-            final defaultAddr = state.addresses
-                .where((a) => a.isDefault)
-                .firstOrNull;
+            final defaultAddr =
+                state.addresses.where((a) => a.isDefault).firstOrNull;
             if (defaultAddr != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 onAddressSelected(defaultAddr);
@@ -100,8 +98,7 @@ class _AddressSelectorView extends StatelessWidget {
                   ),
                   const Spacer(),
                   TextButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/addresses'),
+                    onPressed: () => Navigator.pushNamed(context, '/addresses'),
                     child: const Text('Manage'),
                   ),
                 ],
@@ -212,7 +209,8 @@ class _AddressTile extends StatelessWidget {
                 ),
               ),
               if (isSelected)
-                const Icon(Icons.check_circle, color: AppColors.primary, size: 22),
+                const Icon(Icons.check_circle,
+                    color: AppColors.primary, size: 22),
             ],
           ),
         ),

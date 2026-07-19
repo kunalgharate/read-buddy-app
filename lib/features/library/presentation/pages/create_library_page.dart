@@ -219,8 +219,7 @@ class _CreateLibraryFormState extends State<_CreateLibraryForm> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.my_location, size: 18),
                       label: const Text('Use Current Location'),
