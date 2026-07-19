@@ -1215,7 +1215,6 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                             fontWeight: FontWeight.w500, fontSize: 13)),
                     Switch(
                       value: _hardcoverAvailable,
-                      activeThumbColor: const Color(0xFF4F46E5),
                       onChanged: (val) =>
                           setState(() => _hardcoverAvailable = val),
                     ),

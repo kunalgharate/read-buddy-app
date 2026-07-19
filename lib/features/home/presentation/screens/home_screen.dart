@@ -8,7 +8,6 @@ import 'package:read_buddy_app/features/home/presentation/widgets/donation_tab.d
 import 'package:read_buddy_app/features/home/presentation/widgets/main_tab.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
-
 import 'package:read_buddy_app/features/profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {

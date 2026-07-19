@@ -107,22 +107,23 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
     try {
       await acceptBookRequest(event.requestId);
 
-      // BUG 5 FIX: Dispatch an in-app notification to the user whose request
-      // was just approved. We look up the userId from the current list before
-      // the reload so we have it even after the list is refreshed.
-      final approvedRequest =
-          currentList.where((r) => r.id == event.requestId).firstOrNull;
-      final userId = approvedRequest?.userId;
-      final bookTitle = approvedRequest?.bookTitle ?? 'your book';
-
-      if (userId != null && userId.isNotEmpty) {
-        // Fire-and-forget — notification failure must NOT block the approval.
-        await sendNotification(
-          userId: userId,
-          message: 'Your request for "$bookTitle" has been approved! '
-              'Please schedule your pickup or delivery.',
-          type: 'book_request',
-        );
+      // Fire-and-forget — notification failure must NOT block the approval.
+      try {
+        final approvedRequest = currentList
+            .where((r) => r.id == event.requestId)
+            .firstOrNull;
+        final userId = approvedRequest?.userId;
+        final bookTitle = approvedRequest?.bookTitle ?? 'your book';
+        if (userId != null && userId.isNotEmpty) {
+          await sendNotification(
+            userId: userId,
+            message: 'Your request for "$bookTitle" has been approved! '
+                'Please schedule your pickup or delivery.',
+            type: 'book_request',
+          );
+        }
+      } catch (_) {
+        // Notification endpoint may not exist on server — ignore.
       }
 
       // Reload the list after action
@@ -140,20 +141,23 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
     try {
       await declineBookRequest(event.requestId, reason: event.reason);
 
-      // Send decline notification — fire-and-forget, same pattern as approve.
-      final declinedRequest =
-          currentList.where((r) => r.id == event.requestId).firstOrNull;
-      final userId = declinedRequest?.userId;
-      final bookTitle = declinedRequest?.bookTitle ?? 'your book';
-
-      if (userId != null && userId.isNotEmpty) {
-        await sendNotification(
-          userId: userId,
-          message:
-              'Your request for "$bookTitle" was declined. Reason: ${event.reason}',
-          type: 'book_request',
-        );
+      // Fire-and-forget — notification failure must NOT block the approval.
+      try {
+        final declinedRequest =
+            currentList.where((r) => r.id == event.requestId).firstOrNull;
+        final userId = declinedRequest?.userId;
+        final bookTitle = declinedRequest?.bookTitle ?? 'your book';
+        if (userId != null && userId.isNotEmpty) {
+          await sendNotification(
+            userId: userId,
+            message: 'Your request for "$bookTitle" was declined. Reason: ${event.reason}',
+            type: 'book_request',
+          );
+        }
+      } catch (_) {
+        // Notification endpoint may not exist on server — ignore.
       }
+
       final updated = await getAllBookRequests();
       emit(AdminRequestActionSuccess(updated, 'Request declined'));
     } catch (e) {

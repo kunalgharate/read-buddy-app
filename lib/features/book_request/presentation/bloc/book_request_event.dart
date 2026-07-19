@@ -9,14 +9,30 @@ class LoadBookDetail extends BookRequestEvent {
 
 class CreateBookRequest extends BookRequestEvent {
   final String bookId;
-  CreateBookRequest(this.bookId);
+  final String fulfillmentMethod;
+  final String? deliveryName;
+  final String? deliveryPhone;
+  final String? deliveryAddress;
+  final String? deliveryPincode;
+  final String? deliveryPreferredDate;
+
+  CreateBookRequest(
+    this.bookId, {
+    this.fulfillmentMethod = 'pickup',
+    this.deliveryName,
+    this.deliveryPhone,
+    this.deliveryAddress,
+    this.deliveryPincode,
+    this.deliveryPreferredDate,
+  });
 }
 
 class LoadLibraryDetails extends BookRequestEvent {}
 
 class SchedulePickup extends BookRequestEvent {
   final PickupDetailsEntity details;
-  SchedulePickup(this.details);
+  final bool isReturn;
+  SchedulePickup(this.details, {this.isReturn = false});
 }
 
 class ScheduleDelivery extends BookRequestEvent {

@@ -4,10 +4,19 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/book_request_entity.dart';
 import 'collect_from_library_page.dart';
 
-class DeliveredRequestDetailPage extends StatelessWidget {
+class DeliveredRequestDetailPage extends StatefulWidget {
   final BookRequestEntity request;
 
   const DeliveredRequestDetailPage({super.key, required this.request});
+
+  @override
+  State<DeliveredRequestDetailPage> createState() =>
+      _DeliveredRequestDetailPageState();
+}
+
+class _DeliveredRequestDetailPageState
+    extends State<DeliveredRequestDetailPage> {
+  bool _showReturnOptions = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +51,10 @@ class DeliveredRequestDetailPage extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: request.bookCoverUrl != null &&
-                          request.bookCoverUrl!.isNotEmpty
+                  child: widget.request.bookCoverUrl != null &&
+                          widget.request.bookCoverUrl!.isNotEmpty
                       ? CachedNetworkImage(
-                          imageUrl: request.bookCoverUrl!,
+                          imageUrl: widget.request.bookCoverUrl!,
                           width: 100,
                           height: 140,
                           fit: BoxFit.cover,
@@ -60,7 +69,7 @@ class DeliveredRequestDetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        request.bookTitle ?? 'Unknown Book',
+                        widget.request.bookTitle ?? 'Unknown Book',
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -68,24 +77,24 @@ class DeliveredRequestDetailPage extends StatelessWidget {
                           height: 1.3,
                         ),
                       ),
-                      if (request.bookAuthor != null) ...[
+                      if (widget.request.bookAuthor != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          'by ${request.bookAuthor}',
+                          'by ${widget.request.bookAuthor}',
                           style: const TextStyle(
                               fontSize: 13, color: Color(0xFF888888)),
                         ),
                       ],
-                      if (request.bookFormat != null) ...[
+                      if (widget.request.bookFormat != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          _capitalize(request.bookFormat!),
+                          _capitalize(widget.request.bookFormat!),
                           style: const TextStyle(
                               fontSize: 13, color: Color(0xFF555555)),
                         ),
                       ],
                       const SizedBox(height: 8),
-                      _StatusChip(status: request.status),
+                      _StatusChip(status: widget.request.status),
                     ],
                   ),
                 ),
@@ -99,10 +108,10 @@ class DeliveredRequestDetailPage extends StatelessWidget {
             // Book info
             const _SectionTitle('Book Info'),
             const SizedBox(height: 10),
-            if (request.donorName != null)
-              _InfoRow('Donated By', request.donorName!),
-            if (request.bookCondition != null)
-              _InfoRow('Condition', _capitalize(request.bookCondition!)),
+            if (widget.request.donorName != null)
+              _InfoRow('Donated By', widget.request.donorName!),
+            if (widget.request.bookCondition != null)
+              _InfoRow('Condition', _capitalize(widget.request.bookCondition!)),
 
             const SizedBox(height: 16),
 
@@ -111,27 +120,27 @@ class DeliveredRequestDetailPage extends StatelessWidget {
             const SizedBox(height: 10),
             _InfoRow(
               'Method',
-              request.fulfillmentMethod.isNotEmpty
-                  ? _capitalize(request.fulfillmentMethod)
+              widget.request.fulfillmentMethod.isNotEmpty
+                  ? _capitalize(widget.request.fulfillmentMethod)
                   : '—',
             ),
 
             // Pickup details
-            if (request.pickupUserName != null ||
-                request.pickupAddress != null) ...[
+            if (widget.request.pickupUserName != null ||
+                widget.request.pickupAddress != null) ...[
               const SizedBox(height: 4),
-              if (request.pickupUserName != null)
-                _InfoRow('Pickup Name', request.pickupUserName!),
-              if (request.pickupPhone != null)
-                _InfoRow('Phone', request.pickupPhone!),
-              if (request.pickupAddress != null)
-                _InfoRow('Pickup Address', request.pickupAddress!),
+              if (widget.request.pickupUserName != null)
+                _InfoRow('Pickup Name', widget.request.pickupUserName!),
+              if (widget.request.pickupPhone != null)
+                _InfoRow('Phone', widget.request.pickupPhone!),
+              if (widget.request.pickupAddress != null)
+                _InfoRow('Pickup Address', widget.request.pickupAddress!),
             ],
 
             // Delivery details
-            if (request.deliveryAddress != null) ...[
+            if (widget.request.deliveryAddress != null) ...[
               const SizedBox(height: 4),
-              _InfoRow('Delivery Address', request.deliveryAddress!),
+              _InfoRow('Delivery Address', widget.request.deliveryAddress!),
             ],
 
             const SizedBox(height: 16),
@@ -139,88 +148,118 @@ class DeliveredRequestDetailPage extends StatelessWidget {
             // Dates
             const _SectionTitle('Dates'),
             const SizedBox(height: 10),
-            _InfoRow('Requested On', _fmtDate(request.requestDate)),
-            if (request.dueDate != null)
-              _InfoRow('Due Date', _fmtDate(request.dueDate)),
-            if (request.returnDate != null)
-              _InfoRow('Return Date', _fmtDate(request.returnDate)),
+            _InfoRow('Requested On', _fmtDate(widget.request.requestDate)),
+            if (widget.request.dueDate != null)
+              _InfoRow('Due Date', _fmtDate(widget.request.dueDate)),
+            if (widget.request.returnDate != null)
+              _InfoRow('Return Date', _fmtDate(widget.request.returnDate)),
           ],
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          MediaQuery.of(context).padding.bottom + 16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CollectFromLibraryPage(
-                      request: request,
-                      initialTab: 1,
-                    ),
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2CE07F),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Text(
-                  'Drop at Library',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF052E44),
-                  ),
-                ),
+      bottomNavigationBar: widget.request.status.toLowerCase() == 'delivered'
+          ? Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                12,
+                16,
+                MediaQuery.of(context).padding.bottom + 16,
               ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CollectFromLibraryPage(
-                      request: request,
-                      initialTab: 0,
-                    ),
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF052E44),
-                  side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Text(
-                  'Schedule Home Pickup',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF052E44),
-                  ),
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _showReturnOptions
+                    ? [
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CollectFromLibraryPage(
+                                  request: widget.request,
+                                  initialTab: 1,
+                                  isReturn: true,
+                                ),
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2CE07F),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Drop at Library',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF052E44),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CollectFromLibraryPage(
+                                  request: widget.request,
+                                  initialTab: 0,
+                                  isReturn: true,
+                                ),
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF052E44),
+                              side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Schedule Home Pickup',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF052E44),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]
+                    : [
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: () =>
+                                setState(() => _showReturnOptions = true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2CE07F),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Return the Book',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF052E44),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
               ),
-            ),
-          ],
-        ),
-      ),
+            )
+          : null,
     );
   }
 
@@ -294,7 +333,21 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const color = Color(0xFF4CAF50);
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'delivered':
+      case 'returned':
+        color = const Color(0xFF4CAF50);
+        break;
+      case 'returning':
+        color = Colors.blue;
+        break;
+      default:
+        color = const Color(0xFF4CAF50);
+    }
+    final label = status.toLowerCase() == 'pickup_scheduled'
+        ? 'Pickup Scheduled'
+        : status[0].toUpperCase() + status.substring(1);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -302,10 +355,10 @@ class _StatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
-      child: const Text(
-        'Delivered',
-        style:
-            TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
+      child: Text(
+        label,
+        style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w700, color: color),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
+import '../../domain/usecases/update_request_status.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
@@ -165,139 +166,175 @@ class _BookOrderViewState extends State<_BookOrderView> {
           16,
           MediaQuery.of(context).padding.bottom + 16,
         ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: BlocBuilder<BookRequestBloc, BookRequestState>(
-            builder: (context, state) {
-              final isLoading = state is DeliveryScheduling ||
-                  state is DeliveryPaymentLoading;
-              return ElevatedButton(
-                onPressed: isLoading
-                    ? null
-                    : () {
-                        if (_currentTab == 0) {
-                          final name = _nameController.text.trim();
-                          final phone = _phoneController.text.trim();
-                          final address = _addressController.text.trim();
-                          final pincode = _pincodeController.text.trim();
-                          if (name.isEmpty ||
-                              phone.isEmpty ||
-                              address.isEmpty ||
-                              pincode.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Please fill in all fields')),
-                            );
-                            return;
-                          }
-                          if (phone.length != 10) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'Phone number must be exactly 10 digits')),
-                            );
-                            return;
-                          }
-                          if (address.length < 10) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                      Text('Please enter a valid address')),
-                            );
-                            return;
-                          }
-                          final hasLetter =
-                              address.contains(RegExp(r'[a-zA-Z]'));
-                          final hasDigit = address.contains(RegExp(r'[0-9]'));
-                          if (!hasLetter || !hasDigit) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Please enter a valid address (include street name and number)',
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          if (pincode.length != 6 || pincode[0] == '0') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'Please enter a valid 6-digit pincode')),
-                            );
-                            return;
-                          }
-                          if (_selectedDate == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                      Text('Please select a preferred date')),
-                            );
-                            return;
-                          }
-                          if (_selectedTime == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                      Text('Please select a preferred time')),
-                            );
-                            return;
-                          }
-                          context.read<BookRequestBloc>().add(
-                                ScheduleDelivery(
-                                  requestId: widget.request.id,
-                                  name: name,
-                                  phone: phone,
-                                  address: address,
-                                  pincode: pincode,
-                                  preferredDate: _formatDate(_selectedDate!),
-                                  preferredTime: _formatTime(_selectedTime!),
-                                ),
-                              );
-                        } else {
-                          context.read<BookRequestBloc>().add(
-                                ConfirmDeliveryPayment(
-                                  requestId: widget.request.id,
-                                  name: _nameController.text.trim(),
-                                  phone: _phoneController.text.trim(),
-                                  address: _addressController.text.trim(),
-                                  pincode: _pincodeController.text.trim(),
-                                  preferredDate: _formatDate(_selectedDate!),
-                                  preferredTime: _formatTime(_selectedTime!),
-                                ),
-                              );
-                        }
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2CE07F),
-                  disabledBackgroundColor:
-                      const Color(0xFF2CE07F).withValues(alpha: 0.6),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: BlocBuilder<BookRequestBloc, BookRequestState>(
+                builder: (context, state) {
+                  final isLoading = state is DeliveryScheduling ||
+                      state is DeliveryPaymentLoading;
+                  return ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () {
+                            if (_currentTab == 0) {
+                              final name = _nameController.text.trim();
+                              final phone = _phoneController.text.trim();
+                              final address = _addressController.text.trim();
+                              final pincode = _pincodeController.text.trim();
+                              if (name.isEmpty || phone.isEmpty || address.isEmpty || pincode.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please fill in all fields')),
+                                );
+                                return;
+                              }
+                              if (phone.length != 10) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Phone number must be exactly 10 digits')),
+                                );
+                                return;
+                              }
+                              if (address.length < 10) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please enter a valid address')),
+                                );
+                                return;
+                              }
+                              final hasLetter = address.contains(RegExp(r'[a-zA-Z]'));
+                              final hasDigit = address.contains(RegExp(r'[0-9]'));
+                              if (!hasLetter || !hasDigit) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please enter a valid address (include street name and number)',
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                              if (pincode.length != 6 || pincode[0] == '0') {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please enter a valid 6-digit pincode')),
+                                );
+                                return;
+                              }
+                              if (_selectedDate == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please select a preferred date')),
+                                );
+                                return;
+                              }
+                              if (_selectedTime == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please select a preferred time')),
+                                );
+                                return;
+                              }
+                              context.read<BookRequestBloc>().add(
+                                    ScheduleDelivery(
+                                      requestId: widget.request.id,
+                                      name: name,
+                                      phone: phone,
+                                      address: address,
+                                      pincode: pincode,
+                                      preferredDate: _formatDate(_selectedDate!),
+                                      preferredTime: _formatTime(_selectedTime!),
+                                    ),
+                                  );
+                            } else {
+                              context.read<BookRequestBloc>().add(
+                                    ConfirmDeliveryPayment(
+                                      requestId: widget.request.id,
+                                      name: _nameController.text.trim(),
+                                      phone: _phoneController.text.trim(),
+                                      address: _addressController.text.trim(),
+                                      pincode: _pincodeController.text.trim(),
+                                      preferredDate: _formatDate(_selectedDate!),
+                                      preferredTime: _formatTime(_selectedTime!),
+                                    ),
+                                  );
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2CE07F),
+                      disabledBackgroundColor:
+                          const Color(0xFF2CE07F).withValues(alpha: 0.6),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF1E2939),
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : Text(
+                            _currentTab == 0 ? 'Proceed' : 'Proceed to Pay',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1E2939),
+                            ),
+                          ),
+                  );
+                },
+              ),
+            ),
+            if (_currentTab == 1) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    try {
+                      await getIt<UpdateRequestStatusUsecase>()(
+                        widget.request.id,
+                        'shipping',
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Order placed! Your book is on its way 🚚'),
+                            backgroundColor: Color(0xFF2CE07F),
+                          ),
+                        );
+                        Navigator.of(context).popUntil((route) => route.isFirst);
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Test Pay failed: $e')),
+                        );
+                      }
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF052E44),
+                    side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Test Pay',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                child: isLoading
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          color: AppColors.textPrimary,
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : Text(
-                        _currentTab == 0 ? 'Proceed' : 'Proceed to Pay',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-              );
-            },
-          ),
+              ),
+            ],
+          ],
         ),
       ),
     );
