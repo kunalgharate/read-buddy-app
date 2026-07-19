@@ -46,6 +46,29 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
   List<BookRequestEntity> _filter(List<BookRequestEntity> all, String status) =>
       all.where((r) => r.status.toLowerCase() == status).toList();
 
+  List<BookRequestEntity> _filterPickups(List<BookRequestEntity> all) =>
+      all.where((r) {
+        final method = r.fulfillmentMethod.toLowerCase();
+        final status = r.status.toLowerCase();
+        return (method == 'pickup' || method == 'collect') &&
+            (status == 'approved' ||
+                status == 'accepted' ||
+                status == 'pickup_scheduled');
+      }).toList();
+
+  List<BookRequestEntity> _filterDeliveries(List<BookRequestEntity> all) =>
+      all.where((r) {
+        final method = r.fulfillmentMethod.toLowerCase();
+        final status = r.status.toLowerCase();
+        return (method == 'delivery' ||
+                method == 'shipping' ||
+                method == 'dropoff' ||
+                method == 'drop_off') &&
+            (status == 'approved' ||
+                status == 'accepted' ||
+                status == 'shipping');
+      }).toList();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,14 +166,14 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
                 onDecline: (id) => _showDeclineDialog(context, id),
               ),
               _GenericList(
-                requests: _filter(all, 'pickup_scheduled'),
+                requests: _filterPickups(all),
                 actionId: actionId,
                 emptyMessage: 'No upcoming pickups',
                 emptyIcon: Icons.event_available_outlined,
                 onTap: (r) => _showDetailSheet(context, r, 'Pickup Details'),
               ),
               _GenericList(
-                requests: _filter(all, 'shipping'),
+                requests: _filterDeliveries(all),
                 actionId: actionId,
                 emptyMessage: 'No upcoming deliveries',
                 emptyIcon: Icons.local_shipping_outlined,
@@ -565,10 +588,9 @@ class _DetailSheet extends StatelessWidget {
           ),
         ],
 
-        // Delivery details — only after approved
-        if (request.status.toLowerCase() != 'requested' &&
-            (request.deliveryName != null ||
-                request.deliveryAddress != null)) ...[
+        // Delivery details
+        if (request.deliveryName != null ||
+            request.deliveryAddress != null) ...[
           const SizedBox(height: 8),
           const Text('Delivery Details',
               style: TextStyle(

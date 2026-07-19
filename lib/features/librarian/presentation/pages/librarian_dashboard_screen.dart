@@ -80,6 +80,13 @@ class _DashboardContent extends StatelessWidget {
 
   const _DashboardContent({required this.library, required this.stats});
 
+  void _navigateAndRefresh(BuildContext context, String route) async {
+    await Navigator.pushNamed(context, route);
+    if (context.mounted) {
+      context.read<LibrarianBloc>().add(LoadLibrarianDashboard());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -233,14 +240,8 @@ class _DashboardContent extends StatelessWidget {
                 child: _ActionButton(
                   icon: Icons.list_alt,
                   label: 'Book Requests',
-                  onTap: () async {
-                    await Navigator.pushNamed(context, '/librarian/requests');
-                    if (context.mounted) {
-                      context
-                          .read<LibrarianBloc>()
-                          .add(LoadLibrarianDashboard());
-                    }
-                  },
+                  onTap: () =>
+                      _navigateAndRefresh(context, '/librarian/requests'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -248,14 +249,8 @@ class _DashboardContent extends StatelessWidget {
                 child: _ActionButton(
                   icon: Icons.inventory_2,
                   label: 'Donations',
-                  onTap: () async {
-                    await Navigator.pushNamed(context, '/librarian/donations');
-                    if (context.mounted) {
-                      context
-                          .read<LibrarianBloc>()
-                          .add(LoadLibrarianDashboard());
-                    }
-                  },
+                  onTap: () =>
+                      _navigateAndRefresh(context, '/librarian/donations'),
                 ),
               ),
             ],

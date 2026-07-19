@@ -59,6 +59,28 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   }
 
   Future<void> _blockUser(String userId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Block User'),
+        content: const Text(
+          'Are you sure you want to block this user? '
+          'They will not be able to access the platform.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Block', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     await _patchAction(userId, 'block', 'User blocked');
   }
 
@@ -79,14 +101,36 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Prime granted for $duration days')),
         );
+        _fetchUsers();
       }
-      _fetchUsers();
     } catch (e) {
       _showError(e);
     }
   }
 
   Future<void> _removePrime(String userId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Prime'),
+        content: const Text(
+          'Are you sure you want to remove Prime membership from this user? '
+          'They will lose access to premium content.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     await _patchAction(userId, 'remove-prime', 'Prime removed');
   }
 
@@ -106,10 +150,11 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     if (libraryId == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User made librarian (no library assigned)')),
+          const SnackBar(
+              content: Text('User made librarian (no library assigned)')),
         );
+        _fetchUsers();
       }
-      _fetchUsers();
       return;
     }
 
@@ -124,26 +169,79 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Librarian assigned to library')),
         );
+        _fetchUsers();
       }
-      _fetchUsers();
     } catch (e) {
       _showError(e);
     }
   }
 
   Future<void> _removeLibrarian(String userId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Librarian'),
+        content: const Text(
+          'Are you sure you want to remove librarian privileges from this user? '
+          'They will be demoted to a regular user.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
+            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     await _patchAction(userId, 'unassign-library', 'Librarian removed');
   }
 
-  Future<void> _patchAction(String userId, String action, String message) async {
+  void _confirmRemoveAdmin(String userId, String name) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Admin'),
+        content: Text(
+          'Are you sure you want to remove admin privileges from "$name"? '
+          'This user will be demoted to a regular user.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _removeAdmin(userId);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _removeAdmin(String userId) async {
+    await _patchAction(userId, 'reset-role', 'Admin privileges removed');
+  }
+
+  Future<void> _patchAction(
+      String userId, String action, String message) async {
     try {
       final dio = getIt<Dio>();
       await dio.patch('${ApiConstants.adminUsers}/$userId/$action');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
       _fetchUsers();
     } catch (e) {
       _showError(e);
@@ -222,7 +320,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(name,
-                              style: const TextStyle(fontWeight: FontWeight.w600)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600)),
                           if (city.isNotEmpty)
                             Text(city,
                                 style: const TextStyle(
@@ -375,11 +474,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                           ),
                           if (isPrime) ...[
                             const SizedBox(width: 6),
-                            const Icon(Icons.star, color: Colors.amber, size: 16),
+                            const Icon(Icons.star,
+                                color: Colors.amber, size: 16),
                           ],
                           if (isBlocked) ...[
                             const SizedBox(width: 6),
-                            const Icon(Icons.block, color: Colors.red, size: 14),
+                            const Icon(Icons.block,
+                                color: Colors.red, size: 14),
                           ],
                         ],
                       ),
@@ -474,6 +575,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                     icon: Icons.person_remove,
                     color: Colors.deepOrange,
                     onTap: () => _removeLibrarian(id),
+                  ),
+                if (role == 'admin')
+                  _actionChip(
+                    label: 'Remove Admin',
+                    icon: Icons.admin_panel_settings_outlined,
+                    color: Colors.red,
+                    onTap: () => _confirmRemoveAdmin(id, name),
                   ),
               ],
             ),
