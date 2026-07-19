@@ -1,246 +1,249 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class SearchScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_book.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
-  static const _textColor = Color(0xFF052E44);
-  static const _bgColor = Color(0xFFFDFDFD);
-  static const _chipBg = Color(0xFFE0E0E0);
-  static const _formatCardBg = Color.fromRGBO(208, 225, 253, 0.4);
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
 
-  static const _topics = <_TopicData>[
-    _TopicData('Education', Icons.school),
-    _TopicData('Money & Investments', Icons.attach_money),
-    _TopicData('Science', Icons.science),
-    _TopicData('Career & Success', Icons.trending_up),
-    _TopicData('Marketing & Sales', Icons.campaign),
-    _TopicData('Health & Nutrition', Icons.favorite),
-    _TopicData('Communication Skill', Icons.chat),
-    _TopicData('Management & Leadership', Icons.groups),
-    _TopicData('Psychology', Icons.psychology),
-    _TopicData('Fiction', Icons.auto_stories),
-    _TopicData('Politics', Icons.account_balance),
-    _TopicData('History', Icons.history_edu),
-    _TopicData('Motivation & Inspiration', Icons.lightbulb),
-    _TopicData('Biography & Memoir', Icons.person),
-  ];
+class _SearchScreenState extends State<SearchScreen> {
+  final _searchController = TextEditingController();
+  final _focusNode = FocusNode();
+  Timer? _debounce;
+  List<BookCrudEntity> _results = [];
+  bool _isLoading = false;
+  bool _hasSearched = false;
 
-  static const _formats = <_FormatData>[
-    _FormatData(
-      'Hardcover',
-      'Durable printed book with a hard binding. '
-          'Perfect for collectors and long-term reading.',
-      Icons.menu_book,
-    ),
-    _FormatData(
-      'eBook',
-      'Digital version of the book. Read anytime on '
-          'your phone, tablet or eReader',
-      Icons.tablet_mac,
-    ),
-    _FormatData(
-      'Audio Book',
-      'Listen to the book on the go. Great for '
-          'commutes or bedtime stories.',
-      Icons.headphones,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Auto-focus the search field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _focusNode.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    _debounce?.cancel();
+    if (query.trim().length < 2) {
+      setState(() {
+        _results = [];
+        _hasSearched = false;
+      });
+      return;
+    }
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      _performSearch(query.trim());
+    });
+  }
+
+  Future<void> _performSearch(String query) async {
+    setState(() => _isLoading = true);
+    try {
+      final usecase = getIt<SearchBookUsecase>();
+      final results = await usecase(query);
+      if (mounted) {
+        setState(() {
+          _results = results;
+          _isLoading = false;
+          _hasSearched = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _results = [];
+          _isLoading = false;
+          _hasSearched = true;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgColor,
       appBar: AppBar(
-        backgroundColor: _bgColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _textColor),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: const Text('Search Books'),
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSearchBar(),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Topics'),
-            const SizedBox(height: 12),
-            _buildTopicChips(),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Book Format'),
-            const SizedBox(height: 12),
-            _buildFormatCards(),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        border: Border.all(color: _textColor),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Row(
+      body: Column(
         children: [
-          SizedBox(width: 12),
-          Icon(Icons.search, color: _textColor, size: 22),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Search any Books',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                color: Color(0xFF9E9E9E),
+          // Search input
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: TextField(
+              controller: _searchController,
+              focusNode: _focusNode,
+              onChanged: _onSearchChanged,
+              decoration: InputDecoration(
+                hintText: 'Search by title, author, genre...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _results = [];
+                            _hasSearched = false;
+                          });
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: AppColors.primary, width: 2),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
             ),
           ),
-          Icon(
-            Icons.qr_code_scanner,
-            color: _textColor,
-            size: 22,
+
+          // Results
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _hasSearched && _results.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No books found for "${_searchController.text}"',
+                              style: TextStyle(
+                                  color: Colors.grey[500], fontSize: 15),
+                            ),
+                          ],
+                        ),
+                      )
+                    : !_hasSearched
+                        ? _buildSuggestions()
+                        : _buildResultsList(),
           ),
-          SizedBox(width: 12),
-          Icon(Icons.mic, color: _textColor, size: 22),
-          SizedBox(width: 12),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontFamily: 'Poppins',
-        fontWeight: FontWeight.w700,
-        fontSize: 18,
-        color: _textColor,
+  Widget _buildSuggestions() {
+    const topics = [
+      'Education',
+      'Fiction',
+      'Science',
+      'History',
+      'Psychology',
+      'Biography',
+      'Self-Help',
+      'Technology',
+    ];
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Popular Topics',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: topics.map((topic) {
+              return ActionChip(
+                label: Text(topic),
+                onPressed: () {
+                  _searchController.text = topic;
+                  _performSearch(topic);
+                },
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTopicChips() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: _topics
-          .map(
-            (t) => Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
-              decoration: BoxDecoration(
-                color: _chipBg,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(t.icon, size: 16, color: _textColor),
-                  const SizedBox(width: 6),
-                  Text(
-                    t.label,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: _textColor,
+  Widget _buildResultsList() {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: _results.length,
+      separatorBuilder: (_, __) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        final book = _results[index];
+        return ListTile(
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 50,
+              height: 70,
+              child: book.coverImageUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: book.coverImageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.book, color: Colors.grey),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.book, color: Colors.grey),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.book, color: Colors.grey),
                     ),
-                  ),
-                ],
-              ),
             ),
-          )
-          .toList(),
+          ),
+          title: Text(
+            book.title,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(
+            'by ${book.author}',
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+          onTap: () {
+            Navigator.pushNamed(context, '/book-variants', arguments: book);
+          },
+        );
+      },
     );
   }
-
-  Widget _buildFormatCards() {
-    return SizedBox(
-      height: 150,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _formats.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, index) {
-          final f = _formats[index];
-          return Container(
-            width: 240,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: _formatCardBg,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        f.title,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
-                          color: _textColor,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        f.description,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 12,
-                          color: _textColor,
-                        ),
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 60,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    f.icon,
-                    size: 32,
-                    color: _textColor,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _TopicData {
-  final String label;
-  final IconData icon;
-  const _TopicData(this.label, this.icon);
-}
-
-class _FormatData {
-  final String title;
-  final String description;
-  final IconData icon;
-  const _FormatData(this.title, this.description, this.icon);
 }

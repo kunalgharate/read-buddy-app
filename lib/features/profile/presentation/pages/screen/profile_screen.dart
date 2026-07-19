@@ -29,7 +29,7 @@ class _ProfileView extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -82,8 +82,7 @@ class _ProfileView extends StatelessWidget {
           autofocus: true,
           decoration: InputDecoration(
             labelText: label,
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           ),
         ),
         actions: [
@@ -312,7 +311,8 @@ class _ProfileView extends StatelessWidget {
     required String field,
   }) {
     return InkWell(
-      onTap: () => _showEditDialog(context, field, label, value == 'Not set' ? '' : value),
+      onTap: () => _showEditDialog(
+          context, field, label, value == 'Not set' ? '' : value),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
@@ -497,7 +497,8 @@ class _ProfileView extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               GestureDetector(
-                onTap: () => _showEditDialog(context, 'name', 'Name', user.name),
+                onTap: () =>
+                    _showEditDialog(context, 'name', 'Name', user.name),
                 child: const Icon(Icons.edit, size: 18, color: _green),
               ),
             ],
@@ -526,9 +527,9 @@ class _ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(

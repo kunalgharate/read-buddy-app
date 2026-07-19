@@ -13,19 +13,23 @@ class OnboardingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final imageHeight = isLandscape ? 120.0 : 250.0;
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           image.endsWith('.svg')
-              ? SvgPicture.asset(image, height: 250)
-              : Image.asset(image, height: 250),
-          const SizedBox(height: 40),
+              ? SvgPicture.asset(image, height: imageHeight)
+              : Image.asset(image, height: imageHeight),
+          SizedBox(height: isLandscape ? 20 : 40),
           Text(
             title,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: isLandscape ? 18 : 22,
               fontWeight: FontWeight.bold,
               color: Colors.blueGrey[900],
             ),
@@ -35,7 +39,8 @@ class OnboardingWidget extends StatelessWidget {
           Text(
             description,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.grey[800]),
+            style: TextStyle(
+                fontSize: isLandscape ? 14 : 16, color: Colors.grey[800]),
           ),
         ],
       ),

@@ -139,7 +139,8 @@ class _DashboardContent extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.location_on, color: Colors.white70, size: 14),
+                    const Icon(Icons.location_on,
+                        color: Colors.white70, size: 14),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -232,8 +233,14 @@ class _DashboardContent extends StatelessWidget {
                 child: _ActionButton(
                   icon: Icons.list_alt,
                   label: 'Book Requests',
-                  onTap: () => Navigator.pushNamed(
-                      context, '/librarian/requests'),
+                  onTap: () async {
+                    await Navigator.pushNamed(context, '/librarian/requests');
+                    if (context.mounted) {
+                      context
+                          .read<LibrarianBloc>()
+                          .add(LoadLibrarianDashboard());
+                    }
+                  },
                 ),
               ),
               const SizedBox(width: 12),
@@ -241,8 +248,14 @@ class _DashboardContent extends StatelessWidget {
                 child: _ActionButton(
                   icon: Icons.inventory_2,
                   label: 'Donations',
-                  onTap: () => Navigator.pushNamed(
-                      context, '/librarian/donations'),
+                  onTap: () async {
+                    await Navigator.pushNamed(context, '/librarian/donations');
+                    if (context.mounted) {
+                      context
+                          .read<LibrarianBloc>()
+                          .add(LoadLibrarianDashboard());
+                    }
+                  },
                 ),
               ),
             ],
