@@ -8,10 +8,10 @@
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 1 | Admin Management: No option to remove/delete admin accounts | Enhancement | ⬜ TODO |
-| 2 | Pickup Book Requests displayed in wrong section (All Requests instead of Pickups) | High | ⬜ TODO |
-| 3 | User address not visible during book request approval/rejection | High | ⬜ TODO |
-| 4 | Unable to Add or Update Books without restarting the app | High | ⬜ TODO |
+| 1 | Admin Management: No option to remove/delete admin accounts | Enhancement | ✅ DONE |
+| 2 | Pickup Book Requests displayed in wrong section (All Requests instead of Pickups) | High | ✅ DONE |
+| 3 | User address not visible during book request approval/rejection | High | ✅ DONE |
+| 4 | Unable to Add or Update Books without restarting the app | High | ✅ DONE |
 
 ---
 
@@ -90,8 +90,8 @@
 
 ## Final Checklist
 
-- [ ] All 4 tasks completed
-- [ ] `flutter analyze` → 0 issues
-- [ ] `flutter build apk --debug` → success
-- [ ] All changes committed
+- [x] All 4 tasks completed
+- [x] `flutter analyze` → 0 issues
+- [x] `flutter build apk --debug` → success
+- [x] All changes committed
 - [ ] Push to remote branch

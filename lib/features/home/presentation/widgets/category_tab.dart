@@ -9,7 +9,6 @@ import 'package:read_buddy_app/features/books/presentation/bloc/book_event.dart'
 import 'package:read_buddy_app/features/books/presentation/bloc/book_state.dart';
 import 'package:read_buddy_app/features/books/domain/entities/book.dart';
 
-const _primary = Color(0xFF03405B);
 const _green = Color(0xFF00C853);
 
 class CategoryTab extends StatefulWidget {
@@ -166,7 +165,8 @@ class _CategoryTabState extends State<CategoryTab> {
               ],
             ),
             child: IconButton(
-              icon: const Icon(Icons.tune, color: _primary),
+              icon: Icon(Icons.tune,
+                  color: Theme.of(context).colorScheme.onSurface),
               onPressed: () {
                 // Future Filter/Sorting implementation
               },
@@ -205,9 +205,15 @@ class _CategoryTabState extends State<CategoryTab> {
                 }
               },
               selectedColor: _green.withValues(alpha: 0.12),
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).chipTheme.backgroundColor ??
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
               labelStyle: TextStyle(
-                color: isSelected ? _green : Colors.grey.shade600,
+                color: isSelected
+                    ? _green
+                    : Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.7),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 13,
               ),
@@ -246,14 +252,14 @@ class _CategoryTabState extends State<CategoryTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ─── Popular Genres Section ─────────────────────────────────────
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Text(
               'Popular Genres',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: _primary,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
@@ -277,15 +283,16 @@ class _CategoryTabState extends State<CategoryTab> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border:
+                            Border.all(color: Theme.of(context).dividerColor),
                       ),
                       child: Center(
                         child: Text(
                           _capitalize(category.title),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: _primary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -321,18 +328,18 @@ class _CategoryTabState extends State<CategoryTab> {
                       children: [
                         Text(
                           _capitalize(category.title),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: _primary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         GestureDetector(
                           onTap: () => _onCategorySelected(category),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_forward_ios,
                             size: 16,
-                            color: _primary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -379,10 +386,10 @@ class _CategoryTabState extends State<CategoryTab> {
             children: [
               Text(
                 'Explore ${_capitalize(category.title)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: _primary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Text(
@@ -488,10 +495,11 @@ class _CategoryTabState extends State<CategoryTab> {
                     book.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E3A5F),
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          const Color(0xFF1E3A5F),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -576,10 +584,11 @@ class _CategoryTabState extends State<CategoryTab> {
                     book.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E3A5F),
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          const Color(0xFF1E3A5F),
                     ),
                   ),
                   const SizedBox(height: 2),

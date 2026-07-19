@@ -52,8 +52,8 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
         final status = r.status.toLowerCase();
         return (method == 'pickup' || method == 'collect') &&
             (status == 'approved' ||
-                status == 'pickup_scheduled' ||
-                status == 'requested');
+                status == 'accepted' ||
+                status == 'pickup_scheduled');
       }).toList();
 
   List<BookRequestEntity> _filterDeliveries(List<BookRequestEntity> all) =>
@@ -65,8 +65,8 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
                 method == 'dropoff' ||
                 method == 'drop_off') &&
             (status == 'approved' ||
-                status == 'shipping' ||
-                status == 'requested');
+                status == 'accepted' ||
+                status == 'shipping');
       }).toList();
 
   @override

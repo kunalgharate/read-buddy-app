@@ -21,9 +21,7 @@ class ProfileScreen extends StatelessWidget {
 class _ProfileView extends StatelessWidget {
   const _ProfileView();
 
-  static const _navy = Color(0xFF1E3A5F);
   static const _green = Color(0xFF00C853);
-  static const _grey = Color(0xFF666666);
 
   void _showAvatarSheet(BuildContext context, ProfileUser user) {
     showModalBottomSheet(
@@ -49,12 +47,18 @@ class _ProfileView extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Logout', style: TextStyle(color: _navy)),
+        title: Text('Logout',
+            style: TextStyle(
+                color: Theme.of(dialogContext).colorScheme.onSurface)),
         content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel', style: TextStyle(color: _grey)),
+            child: Text('Cancel',
+                style: TextStyle(
+                    color:
+                        Theme.of(dialogContext).textTheme.bodyMedium?.color ??
+                            Colors.grey)),
           ),
           TextButton(
             onPressed: () {
@@ -76,7 +80,8 @@ class _ProfileView extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Edit $label', style: const TextStyle(color: _navy)),
+        title: Text('Edit $label',
+            style: TextStyle(color: Theme.of(ctx).colorScheme.onSurface)),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -88,7 +93,10 @@ class _ProfileView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: _grey)),
+            child: Text('Cancel',
+                style: TextStyle(
+                    color: Theme.of(ctx).textTheme.bodyMedium?.color ??
+                        Colors.grey)),
           ),
           FilledButton(
             onPressed: () {
@@ -217,28 +225,30 @@ class _ProfileView extends StatelessWidget {
     required String title,
     required List<Widget> children,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: _grey,
-            letterSpacing: 0.8,
+    return Builder(builder: (context) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              letterSpacing: 0.8,
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE0E0E0)),
-            borderRadius: BorderRadius.circular(12),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).dividerColor),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(children: children),
           ),
-          child: Column(children: children),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 
   Widget _buildTile({
@@ -247,28 +257,35 @@ class _ProfileView extends StatelessWidget {
     required String value,
     Color? valueColor,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Icon(icon, color: _grey, size: 20),
-          const SizedBox(width: 12),
-          Text(label, style: const TextStyle(fontSize: 14, color: _grey)),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 14,
-                color: valueColor ?? _navy,
-                fontWeight: FontWeight.w600,
+    return Builder(builder: (context) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(icon,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 20),
+            const SizedBox(width: 12),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: valueColor ?? Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
               ),
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.right,
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildDivider() =>
@@ -317,15 +334,20 @@ class _ProfileView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            Icon(icon, color: _grey, size: 20),
+            Icon(icon,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 20),
             const SizedBox(width: 12),
-            Text(label, style: const TextStyle(fontSize: 14, color: _grey)),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const Spacer(),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: _navy,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -426,11 +448,18 @@ class _ProfileView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            Icon(icon, color: _grey, size: 20),
+            Icon(icon,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 20),
             const SizedBox(width: 12),
-            Text(label, style: const TextStyle(fontSize: 14, color: _navy)),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface)),
             const Spacer(),
-            const Icon(Icons.chevron_right, color: _grey, size: 20),
+            Icon(Icons.chevron_right,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 20),
           ],
         ),
       ),
@@ -463,13 +492,19 @@ class _ProfileView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 48, color: _grey),
+          Icon(Icons.error_outline,
+              size: 48,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey),
           const SizedBox(height: 12),
-          Text(message, style: const TextStyle(color: _grey)),
+          Text(message,
+              style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyMedium?.color ??
+                      Colors.grey)),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () =>
-                context.read<ProfileBloc>().add(LoadProfileEvent()), // ← fixed
+                context.read<ProfileBloc>().add(LoadProfileEvent()),
             child: const Text('Retry', style: TextStyle(color: _green)),
           ),
         ],
@@ -489,10 +524,10 @@ class _ProfileView extends StatelessWidget {
             children: [
               Text(
                 user.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: _navy,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 8),
@@ -506,7 +541,9 @@ class _ProfileView extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             user.email,
-            style: const TextStyle(fontSize: 14, color: _grey),
+            style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           if (user.isPrime) _buildPrimeBadge(),
@@ -529,20 +566,20 @@ class _ProfileView extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _navy),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const HomeScreen()),
           ),
         ),
-        title: const Text(
+        title: Text(
           'My Profile',
           style: TextStyle(
-            color: _navy,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.3,
@@ -553,19 +590,19 @@ class _ProfileView extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFE8F0FF),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
             child: IconButton(
-              icon:
-                  const Icon(Icons.settings_outlined, color: Color(0xFF1565C0)),
+              icon: Icon(Icons.settings_outlined,
+                  color: Theme.of(context).colorScheme.primary),
               onPressed: () => Navigator.pushNamed(context, '/settings'),
             ),
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: Colors.grey.shade200),
+          child: Divider(height: 1, color: Theme.of(context).dividerColor),
         ),
       ),
       body: BlocConsumer<ProfileBloc, ProfileState>(
@@ -626,9 +663,7 @@ class _AvatarBottomSheet extends StatelessWidget {
     required this.onSelected,
   });
 
-  static const _navy = Color(0xFF1E3A5F);
   static const _green = Color(0xFF00C853);
-  static const _grey = Color(0xFF666666);
 
   bool _isSelected(AvatarOption avatar) =>
       user.userAvatar?.toLowerCase() == avatar.name.toLowerCase();
@@ -686,16 +721,21 @@ class _AvatarBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 5),
-          Text(
-            avatar.name,
-            style: TextStyle(
-              fontSize: 11,
-              color: selected ? _green : _grey,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-            ),
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
+          Builder(builder: (context) {
+            return Text(
+              avatar.name,
+              style: TextStyle(
+                fontSize: 11,
+                color: selected
+                    ? _green
+                    : Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.grey,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            );
+          }),
         ],
       ),
     );
@@ -720,18 +760,21 @@ class _AvatarBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Choose Your Avatar',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: _navy,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Select an avatar that represents you',
-            style: TextStyle(fontSize: 13, color: _grey),
+            style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).textTheme.bodyMedium?.color ??
+                    Colors.grey),
           ),
           const SizedBox(height: 24),
           GridView.builder(

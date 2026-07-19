@@ -360,35 +360,45 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget _buildGoogleSignInButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 52.0,
-      child: OutlinedButton.icon(
-        onPressed: () {
-          context.read<GoogleSignInBloc>().add(const GoogleSignInRequested());
-        },
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: _borderColor),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+    return BlocBuilder<GoogleSignInBloc, GoogleSignInState>(
+      builder: (context, state) {
+        final isLoading = state is GoogleSignInLoading;
+        return SizedBox(
+          width: double.infinity,
+          height: 52.0,
+          child: OutlinedButton.icon(
+            onPressed: isLoading
+                ? null
+                : () {
+                    context
+                        .read<GoogleSignInBloc>()
+                        .add(const GoogleSignInRequested());
+                  },
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: _borderColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+            icon: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.g_mobiledata_rounded,
+                    size: 28, color: Color(0xFF4285F4)),
+            label: Text(
+              isLoading ? 'Signing in...' : 'Sign in with Google',
+              style: const TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w500,
+                color: _textColor,
+              ),
+            ),
           ),
-        ),
-        icon: Image.asset(
-          'assets/icons/google.png',
-          height: 22,
-          width: 22,
-          errorBuilder: (_, __, ___) =>
-              const Icon(Icons.g_mobiledata, size: 24),
-        ),
-        label: const Text(
-          'Sign in with Google',
-          style: TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.w500,
-            color: _textColor,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 

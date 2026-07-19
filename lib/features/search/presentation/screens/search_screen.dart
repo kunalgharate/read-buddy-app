@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_book.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -21,6 +22,8 @@ class _SearchScreenState extends State<SearchScreen> {
   List<BookCrudEntity> _results = [];
   bool _isLoading = false;
   bool _hasSearched = false;
+  String? _errorMessage;
+  int _searchGeneration = 0;
 
   @override
   void initState() {
@@ -42,9 +45,11 @@ class _SearchScreenState extends State<SearchScreen> {
   void _onSearchChanged(String query) {
     _debounce?.cancel();
     if (query.trim().length < 2) {
+      _searchGeneration++;
       setState(() {
         _results = [];
         _hasSearched = false;
+        _errorMessage = null;
       });
       return;
     }
@@ -54,10 +59,16 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _performSearch(String query) async {
-    setState(() => _isLoading = true);
+    _searchGeneration++;
+    final gen = _searchGeneration;
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
     try {
       final usecase = getIt<SearchBookUsecase>();
-      final results = await usecase(query);
+      final results = await usecase(Uri.encodeComponent(query));
+      if (_searchGeneration != gen) return;
       if (mounted) {
         setState(() {
           _results = results;
@@ -66,11 +77,13 @@ class _SearchScreenState extends State<SearchScreen> {
         });
       }
     } catch (e) {
+      if (_searchGeneration != gen) return;
       if (mounted) {
         setState(() {
           _results = [];
           _isLoading = false;
           _hasSearched = true;
+          _errorMessage = 'Search failed. Please try again.';
         });
       }
     }
@@ -99,10 +112,13 @@ class _SearchScreenState extends State<SearchScreen> {
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
+                          _debounce?.cancel();
+                          _searchGeneration++;
                           _searchController.clear();
                           setState(() {
                             _results = [];
                             _hasSearched = false;
+                            _errorMessage = null;
                           });
                         },
                       )
@@ -126,25 +142,52 @@ class _SearchScreenState extends State<SearchScreen> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _hasSearched && _results.isEmpty
+                : _errorMessage != null
                     ? Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.search_off,
-                                size: 64, color: Colors.grey[300]),
+                            Icon(Icons.error_outline,
+                                size: 64, color: Colors.red[300]),
                             const SizedBox(height: 12),
                             Text(
-                              'No books found for "${_searchController.text}"',
+                              _errorMessage!,
                               style: TextStyle(
-                                  color: Colors.grey[500], fontSize: 15),
+                                  color: Colors.grey[600], fontSize: 15),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                final query = _searchController.text.trim();
+                                if (query.length >= 2) {
+                                  _performSearch(query);
+                                }
+                              },
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Retry'),
                             ),
                           ],
                         ),
                       )
-                    : !_hasSearched
-                        ? _buildSuggestions()
-                        : _buildResultsList(),
+                    : _hasSearched && _results.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.search_off,
+                                    size: 64, color: Colors.grey[300]),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No books found for "${_searchController.text}"',
+                                  style: TextStyle(
+                                      color: Colors.grey[500], fontSize: 15),
+                                ),
+                              ],
+                            ),
+                          )
+                        : !_hasSearched
+                            ? _buildSuggestions()
+                            : _buildResultsList(),
           ),
         ],
       ),
@@ -184,6 +227,7 @@ class _SearchScreenState extends State<SearchScreen> {
               return ActionChip(
                 label: Text(topic),
                 onPressed: () {
+                  _debounce?.cancel();
                   _searchController.text = topic;
                   _performSearch(topic);
                 },
@@ -240,7 +284,8 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           trailing: const Icon(Icons.chevron_right, color: Colors.grey),
           onTap: () {
-            Navigator.pushNamed(context, '/book-variants', arguments: book);
+            final model = BookCrudModel.fromEntity(book);
+            Navigator.pushNamed(context, '/book-variants', arguments: model);
           },
         );
       },
