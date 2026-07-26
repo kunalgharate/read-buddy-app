@@ -40,10 +40,15 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
       final name = account.displayName ?? '';
       final email = account.email;
 
-      // Disconnect — we don't need ongoing Google session
-      await googleSignIn.disconnect();
-
+      // Emit success first — disconnect is best-effort cleanup
       emit(GoogleSignUpDataFetched(name: name, email: email));
+
+      // Best-effort disconnect — don't let failures override the success state
+      try {
+        await googleSignIn.disconnect();
+      } catch (_) {
+        // Ignore disconnect errors; the data is already fetched
+      }
     } on PlatformException catch (e) {
       String message;
       switch (e.code) {

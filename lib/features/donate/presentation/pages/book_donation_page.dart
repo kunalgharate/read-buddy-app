@@ -690,7 +690,8 @@ class _DonationPageState extends State<_DonationPageContent> {
           _languageController,
           'Enter language',
           inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+            FilteringTextInputFormatter.allow(
+                RegExp(r'[\p{L}\s]', unicode: true)),
           ],
         ),
         const SizedBox(height: 16),
@@ -717,15 +718,13 @@ class _DonationPageState extends State<_DonationPageContent> {
           // Validate mandatory fields before proceeding
           if (_titleController.text.trim().isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Book title is required')),
+              const SnackBar(content: Text('Book title is required')),
             );
             return;
           }
           if (_selectedCategory == null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Please select a category')),
+              const SnackBar(content: Text('Please select a category')),
             );
             return;
           }

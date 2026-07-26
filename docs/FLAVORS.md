@@ -118,14 +118,14 @@ Add to `.vscode/launch.json`:
       "request": "launch",
       "type": "dart",
       "program": "lib/main_dev.dart",
-      "args": ["--flavor", "dev"]
+      "toolArgs": ["--flavor", "dev"]
     },
     {
       "name": "Prod",
       "request": "launch",
       "type": "dart",
       "program": "lib/main_prod.dart",
-      "args": ["--flavor", "prod"]
+      "toolArgs": ["--flavor", "prod"]
     }
   ]
 }

@@ -185,26 +185,37 @@ class _BookOrderViewState extends State<_BookOrderView> {
                               final phone = _phoneController.text.trim();
                               final address = _addressController.text.trim();
                               final pincode = _pincodeController.text.trim();
-                              if (name.isEmpty || phone.isEmpty || address.isEmpty || pincode.isEmpty) {
+                              if (name.isEmpty ||
+                                  phone.isEmpty ||
+                                  address.isEmpty ||
+                                  pincode.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Please fill in all fields')),
+                                  const SnackBar(
+                                      content:
+                                          Text('Please fill in all fields')),
                                 );
                                 return;
                               }
                               if (phone.length != 10) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Phone number must be exactly 10 digits')),
+                                  const SnackBar(
+                                      content: Text(
+                                          'Phone number must be exactly 10 digits')),
                                 );
                                 return;
                               }
                               if (address.length < 10) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Please enter a valid address')),
+                                  const SnackBar(
+                                      content:
+                                          Text('Please enter a valid address')),
                                 );
                                 return;
                               }
-                              final hasLetter = address.contains(RegExp(r'[a-zA-Z]'));
-                              final hasDigit = address.contains(RegExp(r'[0-9]'));
+                              final hasLetter =
+                                  address.contains(RegExp(r'[a-zA-Z]'));
+                              final hasDigit =
+                                  address.contains(RegExp(r'[0-9]'));
                               if (!hasLetter || !hasDigit) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -217,19 +228,25 @@ class _BookOrderViewState extends State<_BookOrderView> {
                               }
                               if (pincode.length != 6 || pincode[0] == '0') {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Please enter a valid 6-digit pincode')),
+                                  const SnackBar(
+                                      content: Text(
+                                          'Please enter a valid 6-digit pincode')),
                                 );
                                 return;
                               }
                               if (_selectedDate == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Please select a preferred date')),
+                                  const SnackBar(
+                                      content: Text(
+                                          'Please select a preferred date')),
                                 );
                                 return;
                               }
                               if (_selectedTime == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Please select a preferred time')),
+                                  const SnackBar(
+                                      content: Text(
+                                          'Please select a preferred time')),
                                 );
                                 return;
                               }
@@ -240,8 +257,10 @@ class _BookOrderViewState extends State<_BookOrderView> {
                                       phone: phone,
                                       address: address,
                                       pincode: pincode,
-                                      preferredDate: _formatDate(_selectedDate!),
-                                      preferredTime: _formatTime(_selectedTime!),
+                                      preferredDate:
+                                          _formatDate(_selectedDate!),
+                                      preferredTime:
+                                          _formatTime(_selectedTime!),
                                     ),
                                   );
                             } else {
@@ -252,8 +271,10 @@ class _BookOrderViewState extends State<_BookOrderView> {
                                       phone: _phoneController.text.trim(),
                                       address: _addressController.text.trim(),
                                       pincode: _pincodeController.text.trim(),
-                                      preferredDate: _formatDate(_selectedDate!),
-                                      preferredTime: _formatTime(_selectedTime!),
+                                      preferredDate:
+                                          _formatDate(_selectedDate!),
+                                      preferredTime:
+                                          _formatTime(_selectedTime!),
                                     ),
                                   );
                             }
@@ -303,11 +324,13 @@ class _BookOrderViewState extends State<_BookOrderView> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Order placed! Your book is on its way 🚚'),
+                            content: Text(
+                                'Order placed! Your book is on its way 🚚'),
                             backgroundColor: Color(0xFF2CE07F),
                           ),
                         );
-                        Navigator.of(context).popUntil((route) => route.isFirst);
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
                       }
                     } catch (e) {
                       if (context.mounted) {
@@ -319,7 +342,8 @@ class _BookOrderViewState extends State<_BookOrderView> {
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF052E44),
-                    side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
+                    side:
+                        const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

@@ -138,6 +138,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     // Step 1: Show library picker FIRST — don't assign role until library is chosen
     if (!mounted) return;
     final libraryId = await _showLibraryPicker();
+    if (!mounted) return;
     if (libraryId == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

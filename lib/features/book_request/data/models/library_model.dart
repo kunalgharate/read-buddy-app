@@ -16,7 +16,8 @@ class LibraryModel extends LibraryEntity {
       contactNumber: json['contactNumber'] ?? '',
       openHours: json['openHours'] ?? '',
       address: json['address'] is Map
-          ? LibraryAddressModel.fromJson(json['address'] as Map<String, dynamic>)
+          ? LibraryAddressModel.fromJson(
+              json['address'] as Map<String, dynamic>)
           : const LibraryAddressModel(
               street: '',
               city: '',

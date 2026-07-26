@@ -1,42 +1,24 @@
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ImagePickerHelper {
-  /// Picks multiple images from the gallery after handling permissions.
+  /// Picks multiple images from the gallery.
+  /// On iOS 14+ and Android 13+, image_picker handles permissions internally
+  /// via PHPicker / Photo Picker — no runtime permission request needed.
   static Future<List<XFile>?> pickMultipleImages() async {
-    // On iOS 14+ and Android 13+, the image_picker plugin handles permissions
-    // internally via PHPicker / Photo Picker. Only request Permission.photos
-    // on older Android versions.
-    bool hasPermission = true;
-
-    if (Platform.isAndroid) {
-      // Android 13+ (API 33) uses READ_MEDIA_IMAGES, older uses storage
-      final status = await Permission.photos.request();
-      if (!status.isGranted) {
-        // Fallback: try storage permission for older Android
-        final storageStatus = await Permission.storage.request();
-        hasPermission = storageStatus.isGranted;
-      }
-    }
-    // On iOS, image_picker handles permissions internally
-
-    if (hasPermission) {
+    try {
+      final picker = ImagePicker();
+      final images = await picker.pickMultiImage();
+      if (images.isNotEmpty) return images;
+      return null;
+    } catch (e) {
+      // Fallback to single image if multi-pick fails
       try {
         final picker = ImagePicker();
-        return await picker.pickMultiImage();
-      } catch (e) {
-        // Fallback to single image if multi-pick fails
-        try {
-          final picker = ImagePicker();
-          final image = await picker.pickImage(source: ImageSource.gallery);
-          if (image != null) return [image];
-        } catch (_) {
-          return null;
-        }
+        final image = await picker.pickImage(source: ImageSource.gallery);
+        if (image != null) return [image];
+      } catch (_) {
         return null;
       }
-    } else {
       return null;
     }
   }

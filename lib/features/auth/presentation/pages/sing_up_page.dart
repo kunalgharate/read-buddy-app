@@ -53,7 +53,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (value.trim().length < 2) {
       return 'Name must be at least 2 characters';
     }
-    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
+    if (!RegExp(r'^[\p{L}\s]+$', unicode: true).hasMatch(value.trim())) {
       return 'Name must contain only letters and spaces';
     }
     return null;
@@ -184,12 +184,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 30),
-                      const Text(
+                      Text(
                         'Create New Account',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: AppColors.textPrimaryColor(context),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -229,7 +229,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         validator: _validateName,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
-                              RegExp(r'[a-zA-Z\s]')),
+                              RegExp(r'[\p{L}\s]', unicode: true)),
                         ],
                         decoration: InputDecoration(
                           filled: true,
@@ -258,7 +258,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: _emailFromGoogle
-                              ? Theme.of(context).disabledColor.withValues(alpha: 0.1)
+                              ? Theme.of(context)
+                                  .disabledColor
+                                  .withValues(alpha: 0.1)
                               : Theme.of(context).colorScheme.surface,
                           hintText: 'Enter Email ID',
                           border: OutlineInputBorder(

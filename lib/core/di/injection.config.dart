@@ -173,8 +173,7 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i752.VerifyResetOtpUseCase>(),
           gh<_i788.ChangePasswordUseCase>(),
         ));
-    gh.factory<_i170.GoogleSignInBloc>(
-        () => _i170.GoogleSignInBloc());
+    gh.factory<_i170.GoogleSignInBloc>(() => _i170.GoogleSignInBloc());
     gh.factory<_i747.BookCrudBloc>(() => _i747.BookCrudBloc(
           searchBooks: gh<_i194.SearchBookUsecase>(),
           getBooksCrud: gh<_i701.GetBooksUsecase>(),

@@ -3,7 +3,6 @@
 class ProdConfig {
   ProdConfig._();
 
-  static const String baseUrl =
-      'https://readbuddy-production.onrender.com/api';
+  static const String baseUrl = 'https://readbuddy-production.onrender.com/api';
   static const String appName = 'ReadBuddy';
 }

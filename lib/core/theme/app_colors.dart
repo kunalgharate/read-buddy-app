@@ -28,7 +28,7 @@ class AppColors {
   // Text - Dark Mode
   static const Color textPrimaryDark = Color(0xFFFFFFFF);
   static const Color textSecondaryDark = Color(0xFFB0B0B0);
-  static const Color textMutedDark = Color(0xFF888888);
+  static const Color textMutedDark = Color(0xFFA0A0A0);
 
   // Brand / Deep navy
   static const Color navy = Color(0xFF042153);

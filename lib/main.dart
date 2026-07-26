@@ -27,9 +27,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Default to dev if main.dart is called directly (e.g., flutter run without flavor)
-  try {
-    AppConfig.instance;
-  } catch (_) {
+  if (!AppConfig.isInitialized) {
     AppConfig.init(
       environment: Environment.dev,
       baseUrl: DevConfig.baseUrl,

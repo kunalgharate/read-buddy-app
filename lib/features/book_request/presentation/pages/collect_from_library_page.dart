@@ -82,13 +82,14 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
       _nameController.text = widget.request.pickupUserName ??
           widget.request.deliveryName ??
           widget.request.userName ??
-          user?.name ?? '';
+          user?.name ??
+          '';
       _phoneController.text = widget.request.pickupPhone ??
           widget.request.deliveryPhone ??
-          user?.phno ?? '';
-      _addressController.text = widget.request.pickupAddress ??
-          widget.request.deliveryAddress ??
+          user?.phno ??
           '';
+      _addressController.text =
+          widget.request.pickupAddress ?? widget.request.deliveryAddress ?? '';
     });
   }
 
@@ -383,163 +384,166 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
 
                           const SizedBox(height: 20),
 
-                  const SizedBox(height: 28),
+                          const SizedBox(height: 28),
 
-                  if (widget.isReturn && _selectedTab == 1)
-                    const Text(
-                      'Return Schedule',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E2939),
-                      ),
-                    ),
-
-                  if (!widget.isReturn || _selectedTab == 0) ...[
-                    // ── User Details header ────────────────────────────
-                    const Text(
-                      'User Details',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E2939),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-                  ],
-
-                  if (!widget.isReturn || _selectedTab == 0) ...[
-                    const _FieldLabel(label: 'User Name'),
-                    const SizedBox(height: 8),
-                    _InputField(
-                      controller: _nameController,
-                      hint: 'Enter Name',
-                      keyboardType: TextInputType.name,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    const _FieldLabel(label: 'Phone Number'),
-                    const SizedBox(height: 8),
-                    _InputField(
-                      controller: _phoneController,
-                      hint: 'Enter phone number',
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(10),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-                  ],
-
-                  if (!widget.isReturn || _selectedTab == 0) ...[
-                    // ── Address (read-only for return pickup) ──────
-                    Row(
-                      children: [
-                        const _FieldLabel(label: 'Address'),
-                        if (widget.isReturn && _selectedTab == 0) ...[
-                          const Spacer(),
-                          GestureDetector(
-                            onTap: () =>
-                                setState(() => _isEditingAddress = !_isEditingAddress),
-                            child: Text(
-                              _isEditingAddress ? 'Done' : 'Change Address',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF2CE07F),
+                          if (widget.isReturn && _selectedTab == 1)
+                            const Text(
+                              'Return Schedule',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E2939),
                               ),
                             ),
+
+                          if (!widget.isReturn || _selectedTab == 0) ...[
+                            // ── User Details header ────────────────────────────
+                            const Text(
+                              'User Details',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E2939),
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+                          ],
+
+                          if (!widget.isReturn || _selectedTab == 0) ...[
+                            const _FieldLabel(label: 'User Name'),
+                            const SizedBox(height: 8),
+                            _InputField(
+                              controller: _nameController,
+                              hint: 'Enter Name',
+                              keyboardType: TextInputType.name,
+                            ),
+                            const SizedBox(height: 16),
+                            const _FieldLabel(label: 'Phone Number'),
+                            const SizedBox(height: 8),
+                            _InputField(
+                              controller: _phoneController,
+                              hint: 'Enter phone number',
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(10),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+
+                          if (!widget.isReturn || _selectedTab == 0) ...[
+                            // ── Address (read-only for return pickup) ──────
+                            Row(
+                              children: [
+                                const _FieldLabel(label: 'Address'),
+                                if (widget.isReturn && _selectedTab == 0) ...[
+                                  const Spacer(),
+                                  GestureDetector(
+                                    onTap: () => setState(() =>
+                                        _isEditingAddress = !_isEditingAddress),
+                                    child: Text(
+                                      _isEditingAddress
+                                          ? 'Done'
+                                          : 'Change Address',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF2CE07F),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            _InputField(
+                              controller: _addressController,
+                              hint:
+                                  'e.g. Flat 12, Sunrise Apts, MG Road, Mumbai',
+                              keyboardType: TextInputType.streetAddress,
+                              prefixIcon: const Icon(
+                                Icons.location_on_outlined,
+                                color: Color(0xFF888888),
+                                size: 20,
+                              ),
+                              maxLines: 3,
+                              minLines: 3,
+                              readOnly: widget.isReturn &&
+                                  _selectedTab == 0 &&
+                                  !_isEditingAddress,
+                              helperText:
+                                  'Include flat/house no., street, area  •  min 10 characters',
+                            ),
+                          ],
+
+                          const SizedBox(height: 16),
+
+                          // ── Date + Time row ────────────────────────────────
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(label: 'Select Date'),
+                                    const SizedBox(height: 8),
+                                    _DateTimePickerButton(
+                                      icon: Icons.calendar_month_outlined,
+                                      label: _formatDate(_selectedDate),
+                                      isPlaceholder: _selectedDate == null,
+                                      onTap: _pickDate,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(label: 'Time'),
+                                    const SizedBox(height: 8),
+                                    _DateTimePickerButton(
+                                      icon: Icons.access_time_outlined,
+                                      label: _formatTime(_selectedTime),
+                                      isPlaceholder: _selectedTime == null,
+                                      onTap: _pickTime,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _InputField(
-                      controller: _addressController,
-                      hint: 'e.g. Flat 12, Sunrise Apts, MG Road, Mumbai',
-                      keyboardType: TextInputType.streetAddress,
-                      prefixIcon: const Icon(
-                        Icons.location_on_outlined,
-                        color: Color(0xFF888888),
-                        size: 20,
-                      ),
-                      maxLines: 3,
-                      minLines: 3,
-                      readOnly: widget.isReturn && _selectedTab == 0 && !_isEditingAddress,
-                      helperText: 'Include flat/house no., street, area  •  min 10 characters',
-                    ),
-                  ],
 
-                  const SizedBox(height: 16),
+                          const SizedBox(height: 12),
 
-                  // ── Date + Time row ────────────────────────────────
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const _FieldLabel(label: 'Select Date'),
-                            const SizedBox(height: 8),
-                            _DateTimePickerButton(
-                              icon: Icons.calendar_month_outlined,
-                              label: _formatDate(_selectedDate),
-                              isPlaceholder: _selectedDate == null,
-                              onTap: _pickDate,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const _FieldLabel(label: 'Time'),
-                            const SizedBox(height: 8),
-                            _DateTimePickerButton(
-                              icon: Icons.access_time_outlined,
-                              label: _formatTime(_selectedTime),
-                              isPlaceholder: _selectedTime == null,
-                              onTap: _pickTime,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                          // ── Library card ───────────────────────────────────
+                          BlocBuilder<BookRequestBloc, BookRequestState>(
+                            builder: (context, state) {
+                              if (state is LibraryDetailsLoading) {
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                      color: Color(0xFF2CE07F)),
+                                );
+                              }
+                              if (state is LibraryDetailsLoaded) {
+                                return _LibraryCard(library: state.library);
+                              }
+                              if (state is LibraryDetailsError) {
+                                return Center(
+                                  child: Text(state.message,
+                                      style:
+                                          const TextStyle(color: Colors.grey)),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
 
-                  const SizedBox(height: 12),
-
-                  // ── Library card ───────────────────────────────────
-                  BlocBuilder<BookRequestBloc, BookRequestState>(
-                    builder: (context, state) {
-                      if (state is LibraryDetailsLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(
-                              color: Color(0xFF2CE07F)),
-                        );
-                      }
-                      if (state is LibraryDetailsLoaded) {
-                        return _LibraryCard(library: state.library);
-                      }
-                      if (state is LibraryDetailsError) {
-                        return Center(
-                          child: Text(state.message,
-                              style:
-                                  const TextStyle(color: Colors.grey)),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-
-                  const SizedBox(height: 28),
+                          const SizedBox(height: 28),
                         ],
                       ),
                     ),

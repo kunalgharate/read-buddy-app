@@ -3,7 +3,7 @@
 enum Environment { dev, prod }
 
 class AppConfig {
-  static late AppConfig _instance;
+  static AppConfig? _instance;
 
   final Environment environment;
   final String baseUrl;
@@ -15,7 +15,15 @@ class AppConfig {
     required this.appName,
   });
 
-  static AppConfig get instance => _instance;
+  static bool get isInitialized => _instance != null;
+
+  static AppConfig get instance {
+    if (_instance == null) {
+      throw StateError(
+          'AppConfig.init() must be called before accessing instance');
+    }
+    return _instance!;
+  }
 
   static void init({
     required Environment environment,
