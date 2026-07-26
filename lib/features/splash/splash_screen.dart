@@ -129,8 +129,13 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppColors.textPrimary;
+    final subtitleColor = isDark ? Colors.white60 : Colors.grey.shade500;
+    final scaffoldBg = isDark ? const Color(0xFF121212) : AppColors.background;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: scaffoldBg,
       body: Center(
         child: AnimatedBuilder(
           animation: _animController,
@@ -169,12 +174,12 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 24),
               // App name
-              const Text(
+              Text(
                 'ReadBuddy',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: textColor,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -183,7 +188,7 @@ class _SplashScreenState extends State<SplashScreen>
                 'Your reading companion',
                 style: TextStyle(
                   fontSize: 15,
-                  color: Colors.grey.shade500,
+                  color: subtitleColor,
                   letterSpacing: 0.2,
                 ),
               ),

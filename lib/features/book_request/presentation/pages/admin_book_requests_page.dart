@@ -391,7 +391,7 @@ class _RequestCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // User name + format badge
+                  // User name + format badge + request type
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -408,6 +408,8 @@ class _RequestCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
+                      _RequestTypeBadge(status: request.status),
+                      const SizedBox(width: 4),
                       _FormatBadge(format: request.bookFormat ?? ''),
                     ],
                   ),
@@ -843,6 +845,36 @@ class _StatusChip extends StatelessWidget {
       child: Text(label,
           style: TextStyle(
               fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+    );
+  }
+}
+
+class _RequestTypeBadge extends StatelessWidget {
+  final String status;
+  const _RequestTypeBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final s = status.toLowerCase();
+    final isReturn = s.contains('return');
+    final label = isReturn ? 'Return' : 'Borrow';
+    final color = isReturn ? const Color(0xFFFF9800) : const Color(0xFF2196F3);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
     );
   }
 }

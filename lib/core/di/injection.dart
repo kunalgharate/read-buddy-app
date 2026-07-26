@@ -574,7 +574,7 @@ void _registerBlocs() {
         getIt<ChangePasswordUseCase>(),
       ));
   getIt
-      .registerLazySingleton(() => GoogleSignInBloc(getIt<SignInWithGoogle>()));
+      .registerLazySingleton(() => GoogleSignInBloc());
   getIt.registerLazySingleton(() => SignUpBloc(
         getIt<RegisterUserUseCase>(),
         getIt<VerifyEmailUseCase>(),

@@ -11,13 +11,16 @@ class GoogleSignInInitial extends GoogleSignInState {}
 
 class GoogleSignInLoading extends GoogleSignInState {}
 
-class GoogleSignInSuccess extends GoogleSignInState {
-  final AppUser user;
+/// Google account data fetched successfully — contains name and email
+/// to pre-fill the sign-up form. User still needs to set a password.
+class GoogleSignUpDataFetched extends GoogleSignInState {
+  final String name;
+  final String email;
 
-  const GoogleSignInSuccess(this.user);
+  const GoogleSignUpDataFetched({required this.name, required this.email});
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [name, email];
 }
 
 class GoogleSignInFailure extends GoogleSignInState {

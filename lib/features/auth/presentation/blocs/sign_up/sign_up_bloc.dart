@@ -34,10 +34,19 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       final errorMessage = ErrorHandler.getErrorMessage(error);
       final isUserExists = ErrorHandler.isUserAlreadyExists(error);
 
-      emit(SignUpError(
-        message: errorMessage,
-        isUserAlreadyExists: isUserExists,
-      ));
+      if (isUserExists) {
+        emit(SignUpError(
+          message: 'This email is already registered. Please sign in instead.',
+          isUserAlreadyExists: true,
+        ));
+      } else {
+        emit(SignUpError(
+          message: errorMessage.isNotEmpty
+              ? errorMessage
+              : 'Registration failed. Please try again.',
+          isUserAlreadyExists: false,
+        ));
+      }
     }
   }
 

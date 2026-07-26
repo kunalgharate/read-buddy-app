@@ -135,7 +135,21 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   }
 
   Future<void> _makeLibrarian(String userId) async {
-    // Step 1: Make librarian
+    // Step 1: Show library picker FIRST — don't assign role until library is chosen
+    if (!mounted) return;
+    final libraryId = await _showLibraryPicker();
+    if (libraryId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text(
+                  'Librarian assignment cancelled. A library must be selected.')),
+        );
+      }
+      return;
+    }
+
+    // Step 2: Make librarian only after library is selected
     try {
       final dio = getIt<Dio>();
       await dio.patch('${ApiConstants.adminUsers}/$userId/make-librarian');
@@ -144,21 +158,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
       return;
     }
 
-    // Step 2: Show library picker
-    if (!mounted) return;
-    final libraryId = await _showLibraryPicker();
-    if (libraryId == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('User made librarian (no library assigned)')),
-        );
-        _fetchUsers();
-      }
-      return;
-    }
-
-    // Step 3: Assign library
+    // Step 3: Assign the selected library
     try {
       final dio = getIt<Dio>();
       await dio.patch(
@@ -167,7 +167,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Librarian assigned to library')),
+          const SnackBar(
+              content: Text('User made librarian and assigned to library')),
         );
         _fetchUsers();
       }

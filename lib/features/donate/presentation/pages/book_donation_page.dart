@@ -587,11 +587,11 @@ class _DonationPageState extends State<_DonationPageContent> {
         const SizedBox(height: 8),
         _textField(_nameController, 'Enter your name'),
         const SizedBox(height: 16),
-        _label('Book Title'),
+        _label('Book Title *'),
         const SizedBox(height: 8),
         _textField(_titleController, 'Enter book title'),
         const SizedBox(height: 16),
-        _label('Category'),
+        _label('Category *'),
         const SizedBox(height: 8),
 
         // ✅ Improved category selector trigger (no images)
@@ -686,7 +686,13 @@ class _DonationPageState extends State<_DonationPageContent> {
         const SizedBox(height: 16),
         _label('Language'),
         const SizedBox(height: 8),
-        _textField(_languageController, 'Enter language'),
+        _textField(
+          _languageController,
+          'Enter language',
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+          ],
+        ),
         const SizedBox(height: 16),
         _label('Book Condition'),
         const SizedBox(height: 8),
@@ -707,7 +713,33 @@ class _DonationPageState extends State<_DonationPageContent> {
         const SizedBox(height: 8),
         _textField(_aboutController, 'Write about the book...', maxLines: 4),
         const SizedBox(height: 32),
-        _primaryButton('Next', () => setState(() => _currentStep = 1)),
+        _primaryButton('Next', () {
+          // Validate mandatory fields before proceeding
+          if (_titleController.text.trim().isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Book title is required')),
+            );
+            return;
+          }
+          if (_selectedCategory == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Please select a category')),
+            );
+            return;
+          }
+          if (_languageController.text.trim().isNotEmpty &&
+              !RegExp(r'^[a-zA-Z\s]+$')
+                  .hasMatch(_languageController.text.trim())) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Language must contain only letters')),
+            );
+            return;
+          }
+          setState(() => _currentStep = 1);
+        }),
         const SizedBox(height: 24),
       ],
     );
