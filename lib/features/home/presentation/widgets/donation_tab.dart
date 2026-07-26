@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
 import 'format_screen.dart';
@@ -9,8 +10,6 @@ class DonationTab extends StatefulWidget {
   const DonationTab({super.key});
 
   static const _primaryGreen = Color(0xFF2CE07F);
-  static const _textDark = Color(0xFF052E44);
-  static const _background = Color(0xFFFDFDFD);
   static const _cardShadow = Color(0x0D000000);
 
   @override
@@ -43,11 +42,13 @@ class _DonationTabContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final horizontalPadding = size.width * 0.05;
+    final scaffoldBg = AppColors.scaffoldBackground(context);
+    final textPrimary = AppColors.textPrimaryColor(context);
 
     return Scaffold(
-      backgroundColor: DonationTab._background,
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
-        backgroundColor: DonationTab._background,
+        backgroundColor: scaffoldBg,
         elevation: 0,
         centerTitle: false,
         title: Text(
@@ -55,7 +56,7 @@ class _DonationTabContent extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: size.width * 0.055,
             fontWeight: FontWeight.w600,
-            color: DonationTab._textDark,
+            color: textPrimary,
           ),
         ),
       ),
@@ -78,23 +79,23 @@ class _DonationTabContent extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: size.width * 0.045,
                   fontWeight: FontWeight.w600,
-                  color: DonationTab._textDark,
+                  color: textPrimary,
                 ),
               ),
               SizedBox(height: size.height * 0.015),
               const _ImpactSection(),
               SizedBox(height: size.height * 0.035),
 
-              // --- Recent Donations (heading changed) ---
+              // --- Recent Donations ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Recent Donations', // ✅ Changed from 'Your Book Status'
+                    'Recent Donations',
                     style: GoogleFonts.poppins(
                       fontSize: size.width * 0.045,
                       fontWeight: FontWeight.w600,
-                      color: DonationTab._textDark,
+                      color: textPrimary,
                     ),
                   ),
                   TextButton(
@@ -122,7 +123,7 @@ class _DonationTabContent extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: size.width * 0.045,
                   fontWeight: FontWeight.w600,
-                  color: DonationTab._textDark,
+                  color: textPrimary,
                 ),
               ),
               SizedBox(height: size.height * 0.015),
@@ -134,7 +135,7 @@ class _DonationTabContent extends StatelessWidget {
                 onPressed: () => showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColors.surfaceColor(context),
                   shape: const RoundedRectangleBorder(
                     borderRadius:
                         BorderRadius.vertical(top: Radius.circular(24)),
@@ -270,10 +271,10 @@ class _BookStatusSection extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     // Shared card decoration used in all states
-    BoxDecoration cardDecoration() => const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-          boxShadow: [
+    BoxDecoration cardDecoration() => BoxDecoration(
+          color: AppColors.cardColor(context),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          boxShadow: const [
             BoxShadow(
               color: DonationTab._cardShadow,
               blurRadius: 10,
@@ -347,7 +348,7 @@ class _BookStatusSection extends StatelessWidget {
                   'No donated books yet',
                   style: GoogleFonts.poppins(
                     fontSize: size.width * 0.035,
-                    color: const Color(0xFF666666),
+                    color: AppColors.textSecondaryColor(context),
                   ),
                 ),
               ),
@@ -362,10 +363,10 @@ class _BookStatusSection extends StatelessWidget {
           for (var i = 0; i < itemCount; i++) {
             // Add a thin divider between rows (not before the first)
             if (i != 0) {
-              listItems.add(const Divider(
+              listItems.add(Divider(
                 height: 1,
                 thickness: 1,
-                color: Color(0xFFF0F0F0),
+                color: AppColors.dividerColor(context),
               ));
             }
 
@@ -491,7 +492,7 @@ class _ImpactCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(size.width * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardColor(context),
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
@@ -518,14 +519,14 @@ class _ImpactCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: size.width * 0.05,
               fontWeight: FontWeight.bold,
-              color: DonationTab._textDark,
+              color: AppColors.textPrimaryColor(context),
             ),
           ),
           Text(
             label,
             style: GoogleFonts.poppins(
               fontSize: size.width * 0.03,
-              color: const Color(0xFF666666),
+              color: AppColors.textSecondaryColor(context),
             ),
           ),
         ],
@@ -563,14 +564,14 @@ class _BookStatusRow extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: size.width * 0.04,
                   fontWeight: FontWeight.w600,
-                  color: DonationTab._textDark,
+                  color: AppColors.textPrimaryColor(context),
                 ),
               ),
               Text(
                 format,
                 style: GoogleFonts.poppins(
                   fontSize: size.width * 0.035,
-                  color: const Color(0xFF666666),
+                  color: AppColors.textSecondaryColor(context),
                 ),
               ),
             ],

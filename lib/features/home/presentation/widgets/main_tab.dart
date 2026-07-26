@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/banner/domain/entity/banner_entity.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 import 'package:read_buddy_app/features/book_request/presentation/pages/book_detail_page.dart';
@@ -11,8 +12,6 @@ import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_bl
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_event.dart';
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_state.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
-
-const _primary = Color(0xFF03405B);
 
 // ─────────────────────────────────────────────
 // MainTab — always provide both blocs
@@ -60,7 +59,7 @@ class _MainTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F4F7),
+      backgroundColor: AppColors.scaffoldBackground(context),
       body: BlocConsumer<HomeBloc, HomeState>(
         listenWhen: (prev, curr) => curr is HomeLoaded && prev is! HomeLoaded,
         listener: (context, state) {
@@ -166,7 +165,7 @@ class _BannerSection extends StatelessWidget {
             child: Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: _primary,
+                color: Color(0xFF03405B),
               ),
             ),
           );
@@ -194,7 +193,7 @@ class _BannerSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: _primary.withValues(alpha: 0.35),
+                color: const Color(0xFF03405B).withValues(alpha: 0.35),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -460,6 +459,7 @@ class _BookSectionState extends State<_BookSection> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = AppColors.textPrimaryColor(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -469,21 +469,21 @@ class _BookSectionState extends State<_BookSection> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(widget.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: _primary,
+                    color: textColor,
                   )),
               GestureDetector(
                 onTap: _scrollToEnd,
-                child: const Row(children: [
+                child: Row(children: [
                   Text('See All',
                       style: TextStyle(
                           fontSize: 13,
-                          color: _primary,
+                          color: textColor,
                           fontWeight: FontWeight.w500)),
-                  SizedBox(width: 2),
-                  Icon(Icons.arrow_forward_ios, size: 11, color: _primary),
+                  const SizedBox(width: 2),
+                  Icon(Icons.arrow_forward_ios, size: 11, color: textColor),
                 ]),
               ),
             ],
@@ -528,7 +528,7 @@ class _BookCard extends StatelessWidget {
         width: 140,
         margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardColor(context),
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -568,17 +568,18 @@ class _BookCard extends StatelessWidget {
                   Text(book.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A1A2E),
+                        color: AppColors.textPrimaryColor(context),
                       )),
                   const SizedBox(height: 3),
                   Text(book.subtitle ?? book.author,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 11, color: Color(0xFF999999))),
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textMutedColor(context))),
                 ],
               ),
             ),
@@ -663,7 +664,7 @@ class _MonthlyStatsCardState extends State<_MonthlyStatsCard> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardColor(context),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -691,11 +692,11 @@ class _MonthlyStatsCardState extends State<_MonthlyStatsCard> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('This Month',
+                Text('This Month',
                     style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: _primary)),
+                        color: AppColors.textPrimaryColor(context))),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -734,16 +735,18 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 32, color: _primary),
+        Icon(icon, size: 32, color: AppColors.textPrimaryColor(context)),
         const SizedBox(height: 8),
         Text('$value',
-            style: const TextStyle(
-                fontSize: 22, fontWeight: FontWeight.bold, color: _primary)),
+            style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimaryColor(context))),
         const SizedBox(height: 4),
         Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF666666),
+                color: AppColors.textSecondaryColor(context),
                 fontWeight: FontWeight.w500)),
       ],
     );
