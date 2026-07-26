@@ -165,7 +165,7 @@ class _BannerSection extends StatelessWidget {
             child: Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Color(0xFF03405B),
+                color: AppColors.primary,
               ),
             ),
           );

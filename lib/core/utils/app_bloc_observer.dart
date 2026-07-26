@@ -5,7 +5,7 @@ class AppBlocObserver extends BlocObserver {
   void onEvent(Bloc bloc, Object? event) {
     super.onEvent(bloc, event);
     // Only log in debug mode
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
+    if (!const bool.fromEnvironment('dart.vm.product')) {
       _debugLog('[Bloc Event] ${bloc.runtimeType} => $event');
     }
   }
@@ -14,7 +14,7 @@ class AppBlocObserver extends BlocObserver {
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
     // Only log in debug mode
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
+    if (!const bool.fromEnvironment('dart.vm.product')) {
       _debugLog(
           '[Bloc Transition] ${bloc.runtimeType} => ${transition.currentState} -> ${transition.nextState}');
     }
@@ -24,7 +24,7 @@ class AppBlocObserver extends BlocObserver {
   void onChange(BlocBase bloc, Change change) {
     super.onChange(bloc, change);
     // Only log in debug mode
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
+    if (!const bool.fromEnvironment('dart.vm.product')) {
       _debugLog(
           '[Bloc Change] ${bloc.runtimeType} => ${change.currentState} -> ${change.nextState}');
     }
