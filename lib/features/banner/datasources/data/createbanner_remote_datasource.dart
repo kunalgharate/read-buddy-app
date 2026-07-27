@@ -85,7 +85,7 @@ class BannerRemoteDataSourceImpl implements BannerRemoteDataSource {
 
     if (!fileExists) {
       print("File does not exist. Cannot proceed.");
-      return;
+      throw Exception('Selected image file does not exist');
     }
 
     try {
@@ -125,12 +125,12 @@ class BannerRemoteDataSourceImpl implements BannerRemoteDataSource {
     } catch (e) {
       if (e is DioException) {
         print("Dio error: ${e.message}");
-
         print("Status code: ${e.response?.statusCode}");
         print("Response data: ${e.response?.data}");
       } else {
         print("Unexpected error: $e");
       }
+      rethrow;
     }
   }
 

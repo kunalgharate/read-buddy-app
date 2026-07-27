@@ -135,6 +135,9 @@ class BookFormValidator {
     if (value == null || value.trim().isEmpty) {
       return 'Language is required';
     }
+    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
+      return 'Language must contain only letters';
+    }
     return null;
   }
 

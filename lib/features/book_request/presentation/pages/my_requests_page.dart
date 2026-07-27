@@ -320,7 +320,10 @@ class _RequestCard extends StatelessWidget {
                 ),
               ),
             );
-          } else if (method == 'dropoff' || method == 'drop_off' || method == 'delivery' || method == 'shipping') {
+          } else if (method == 'dropoff' ||
+              method == 'drop_off' ||
+              method == 'delivery' ||
+              method == 'shipping') {
             Navigator.push(
               context,
               MaterialPageRoute(

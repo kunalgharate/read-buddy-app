@@ -287,6 +287,14 @@ class _AddBannerState extends State<AddBanner> {
         if (images != null && images.isNotEmpty) {
           if (!mounted) return;
           setState(() => selectedImages = images);
+        } else {
+          if (!mounted) return;
+          // User cancelled or no images selected
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No images selected.'),
+            ),
+          );
         }
       } else {
         final image = await ImagePicker().pickImage(source: source);
@@ -298,7 +306,9 @@ class _AddBannerState extends State<AddBanner> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image(s): $e')),
+        SnackBar(
+            content: Text(
+                'Failed to pick image: ${e.toString().replaceAll('Exception: ', '')}')),
       );
     }
   }

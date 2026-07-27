@@ -1,66 +1,65 @@
+import 'package:read_buddy_app/core/config/app_config.dart';
+
 class ApiConstants {
-  static const String baseUrl =
-      'https://readbuddy-server-b54k.onrender.com/api';
+  static String get baseUrl => AppConfig.instance.baseUrl;
 
   // Auth endpoints
-  static const String login = '$baseUrl/users/login';
-  static const String register = '$baseUrl/users/register';
-  static const String verifyEmail = '$baseUrl/users/verify-email';
-  static const String refreshToken = '$baseUrl/users/refresh-token';
-  static const String loginWithGoogle = '$baseUrl/users/google-auth';
-  static const String resendResetOtp = '$baseUrl/users/resend-reset-otp';
-  static const String changePassword = '$baseUrl/users/reset-password';
-  static const String verifyOtp = '$baseUrl/users/verify-reset-otp';
-  // User endpoints
-  static const String users = '$baseUrl/users';
-  static const String searchUsers = '$baseUrl/searchuser/search';
+  static String get login => '$baseUrl/users/login';
+  static String get register => '$baseUrl/users/register';
+  static String get verifyEmail => '$baseUrl/users/verify-email';
+  static String get refreshToken => '$baseUrl/users/refresh-token';
+  static String get loginWithGoogle => '$baseUrl/users/google-auth';
+  static String get resendResetOtp => '$baseUrl/users/resend-reset-otp';
+  static String get changePassword => '$baseUrl/users/reset-password';
+  static String get verifyOtp => '$baseUrl/users/verify-reset-otp';
 
-// Profile endpoints
-  static const String getProfile = '$baseUrl/users/profile';
-  static const String updateAvatar = '$baseUrl/users/update-avatar';
+  // User endpoints
+  static String get users => '$baseUrl/users';
+  static String get searchUsers => '$baseUrl/searchuser/search';
+
+  // Profile endpoints
+  static String get getProfile => '$baseUrl/users/profile';
+  static String get updateAvatar => '$baseUrl/users/update-avatar';
+
   // Book endpoints
-  static const String books = '$baseUrl/books';
-  static const String searchBooks = '$baseUrl/searchbook/search';
-  static const String bookVariants = '$baseUrl/book-variants';
-  //homebooks
-  static const String trendingBooks = '$baseUrl/home/trending-books';
-  static const String recommendedBooks = '$baseUrl/home/recommended-books';
-  static const String latestBooks = '$baseUrl/home/latest-books';
-  //monthly data
-  static const String monthlyData = '$baseUrl/home/monthly-stats';
+  static String get books => '$baseUrl/books';
+  static String get searchBooks => '$baseUrl/searchbook/search';
+  static String get bookVariants => '$baseUrl/book-variants';
+
+  // Home books
+  static String get trendingBooks => '$baseUrl/home/trending-books';
+  static String get recommendedBooks => '$baseUrl/home/recommended-books';
+  static String get latestBooks => '$baseUrl/home/latest-books';
+
+  // Monthly data
+  static String get monthlyData => '$baseUrl/home/monthly-stats';
+
   // Category endpoints
-  static const String categories = '$baseUrl/categories';
+  static String get categories => '$baseUrl/categories';
 
   // Donation endpoints
-  static const String getAllDonations = '$baseUrl/donations';
-  static const String adminDonations = '$baseUrl/admin/donations';
+  static String get getAllDonations => '$baseUrl/donations';
+  static String get adminDonations => '$baseUrl/admin/donations';
   static String donationById(String id) => '$baseUrl/donations/$id';
   static String updateDonationStatus(String id) => '$baseUrl/donations/$id';
   static String updateAdminDonationStatus(String id) =>
       '$baseUrl/admin/donations/$id';
-  static const String myImpact = '$baseUrl/v1/donations/my-impact';
-  static const String createBookDonation =
+  static String get myImpact => '$baseUrl/v1/donations/my-impact';
+  static String get createBookDonation =>
       '$baseUrl/v1/donations/createBookDonation';
   static String uploadDonationReceipt(String donationId) =>
       '$baseUrl/v1/donations/$donationId/uploadReceipt';
 
   // ─── Book Request endpoints ──────────────────────────────────────────────
-  // User's own requests
-  static const String userBookRequests = '$baseUrl/users/book-requests';
-  // v1 book-requests base
-  // GET all: /api/v1/book-requests
-  // PATCH approve: /api/v1/book-requests/:id/approve
-  // PATCH reject: /api/v1/book-requests/:id/reject
-  static const String v1BookRequests = '$baseUrl/v1/book-requests';
-  // Admin — all requests
-  static const String getAllBookRequests = '$baseUrl/bookrequests';
-  static const String bookRequests = '$baseUrl/bookrequests';
-  // ─────────────────────────────────────────────────────────────────────────
+  static String get userBookRequests => '$baseUrl/users/book-requests';
+  static String get v1BookRequests => '$baseUrl/v1/book-requests';
+  static String get getAllBookRequests => '$baseUrl/bookrequests';
+  static String get bookRequests => '$baseUrl/bookrequests';
 
   // Library endpoints
-  static const String libraryDetails = '$baseUrl/v1/libraries/details';
+  static String get libraryDetails => '$baseUrl/v1/libraries/details';
 
-  static const String olaMap = '$baseUrl/ola/address?input';
+  static String get olaMap => '$baseUrl/ola/address?input';
 
   // HTTP Status Codes
   static const int success = 200;
@@ -72,63 +71,57 @@ class ApiConstants {
   static const int conflict = 409;
   static const int internalServerError = 500;
 
-  static const addCategory = '$baseUrl/categories';
-  static const updateCategory = '$baseUrl/categories'; // append /:id
-  static const deleteCategory = '$baseUrl/categories'; // append /:id
+  static String get addCategory => '$baseUrl/categories';
+  static String get updateCategory => '$baseUrl/categories';
+  static String get deleteCategory => '$baseUrl/categories';
 
-//Banner Apis
-  static const banner = '$baseUrl/banners';
+  // Banner APIs
+  static String get banner => '$baseUrl/banners';
 
-  static const String updateUserInfo = '$baseUrl/users/update-user-info';
-  // Onboarding base
-  static const String onboarding = '$baseUrl/onboarding';
+  static String get updateUserInfo => '$baseUrl/users/update-user-info';
 
-  // Onboarding Endpoints
-  static const String getAllQuestions = '$baseUrl/onboarding/questions';
-  static const String getQuestion =
-      '$baseUrl/onboarding/question'; // append /:id
-
-  static const String setUserPreferences = '$baseUrl/onboarding/preference';
-
-  static const String updateUserPreference = '$baseUrl/onboarding/preference';
-
-  static const String resetUserPreference = '$baseUrl/onboarding/preference';
-
-  static const String setOnboardingStatus = '$baseUrl/users/onboarding-status';
+  // Onboarding
+  static String get onboarding => '$baseUrl/onboarding';
+  static String get getAllQuestions => '$baseUrl/onboarding/questions';
+  static String get getQuestion => '$baseUrl/onboarding/question';
+  static String get setUserPreferences => '$baseUrl/onboarding/preference';
+  static String get updateUserPreference => '$baseUrl/onboarding/preference';
+  static String get resetUserPreference => '$baseUrl/onboarding/preference';
+  static String get setOnboardingStatus => '$baseUrl/users/onboarding-status';
 
   // TTS (Text-to-Speech) endpoints
-  static const String ttsSynthesize = '$baseUrl/tts/synthesize';
-  static const String ttsVoices = '$baseUrl/tts/voices';
+  static String get ttsSynthesize => '$baseUrl/tts/synthesize';
+  static String get ttsVoices => '$baseUrl/tts/voices';
 
   // Money Donation (Razorpay)
-  static const String donateMoneyInitiate = '$baseUrl/donations/money/initiate';
-  static const String donateMoneyVerify = '$baseUrl/donations/money/verify';
-  static const String myMoneyDonations = '$baseUrl/DonateMoney/my';
+  static String get donateMoneyInitiate => '$baseUrl/donations/money/initiate';
+  static String get donateMoneyVerify => '$baseUrl/donations/money/verify';
+  static String get myMoneyDonations => '$baseUrl/DonateMoney/my';
 
   // Address CRUD
-  static const String addresses = '$baseUrl/addresses';
+  static String get addresses => '$baseUrl/addresses';
 
   // Wishlist
-  static const String wishlist = '$baseUrl/wishlist';
+  static String get wishlist => '$baseUrl/wishlist';
 
   // FCM Token
-  static const String fcmToken = '$baseUrl/users/fcm-token';
+  static String get fcmToken => '$baseUrl/users/fcm-token';
 
   // Libraries (multi-library)
-  static const String libraries = '$baseUrl/v1/libraries';
-  static const String superLibraries = '$baseUrl/v1/libraries/super';
+  static String get libraries => '$baseUrl/v1/libraries';
+  static String get superLibraries => '$baseUrl/v1/libraries/super';
 
   // Admin User Management
-  static const String adminUsers = '$baseUrl/admin/users';
-  static const String adminLibrarians = '$baseUrl/admin/librarians';
-  static const String adminLibrariesPath = '$baseUrl/admin/libraries';
+  static String get adminUsers => '$baseUrl/admin/users';
+  static String get adminLibrarians => '$baseUrl/admin/librarians';
+  static String get adminLibrariesPath => '$baseUrl/admin/libraries';
 
   // Librarian endpoints
-  static const String librarianBase = '$baseUrl/librarian';
-  static const String librarianMyLibrary = '$librarianBase/my-library';
-  static const String librarianDashboard = '$librarianBase/dashboard';
-  static const String librarianBookRequests = '$librarianBase/book-requests';
-  static const String librarianDonations = '$librarianBase/donations';
+  static String get librarianBase => '$baseUrl/librarian';
+  static String get librarianMyLibrary => '$librarianBase/my-library';
+  static String get librarianDashboard => '$librarianBase/dashboard';
+  static String get librarianBookRequests => '$librarianBase/book-requests';
+  static String get librarianDonations => '$librarianBase/donations';
   static String librarianRequestAccept(String id) =>
       '$librarianBookRequests/$id/accept';
   static String librarianRequestReject(String id) =>

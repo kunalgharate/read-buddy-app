@@ -1,18 +1,18 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
-import 'package:read_buddy_app/features/auth/domain/entities/app_user.dart';
-import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
 
 part 'google_sign_in_event.dart';
 part 'google_sign_in_state.dart';
 
+/// This BLoC now handles "Sign Up with Google" — it fetches the user's
+/// name and email from their Google account so the sign-up form can be
+/// pre-filled. It does NOT authenticate with the backend directly.
 @injectable
 class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
-  final SignInWithGoogle signInWithGoogle;
-
-  GoogleSignInBloc(this.signInWithGoogle) : super(GoogleSignInInitial()) {
+  GoogleSignInBloc() : super(GoogleSignInInitial()) {
     on<GoogleSignInRequested>(_onGoogleSignInRequested);
   }
 
@@ -24,32 +24,50 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
 
     try {
       final googleSignIn = GoogleSignIn(
-        clientId:
-            '792931872361-1cajorgndi4a5jpb7m150u145kpboggs.apps.googleusercontent.com',
-        serverClientId:
-            '792931872361-sc45u0c4dh0tvsprnat2si7i762jp458.apps.googleusercontent.com',
+        scopes: ['email', 'profile'],
       );
+
+      // Sign out first to force account picker
+      await googleSignIn.signOut();
 
       final account = await googleSignIn.signIn();
       if (account == null) {
-        emit(const GoogleSignInFailure("User cancelled sign-in"));
+        emit(const GoogleSignInFailure("Sign-up cancelled"));
         return;
       }
 
-      final auth = await account.authentication;
-      final idToken = auth.idToken;
+      // Extract profile data from Google account
+      final name = account.displayName ?? '';
+      final email = account.email;
 
-      if (idToken == null) {
-        emit(const GoogleSignInFailure("ID token is null"));
-        return;
+      // Emit success first — disconnect is best-effort cleanup
+      emit(GoogleSignUpDataFetched(name: name, email: email));
+
+      // Best-effort disconnect — don't let failures override the success state
+      try {
+        await googleSignIn.disconnect();
+      } catch (_) {
+        // Ignore disconnect errors; the data is already fetched
       }
-
-      // Send ID token to backend
-      final user = await signInWithGoogle(SignInGoogleParams(token: idToken));
-
-      emit(GoogleSignInSuccess(user));
+    } on PlatformException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'sign_in_failed':
+          message = 'Google account access failed. Please try again.';
+          break;
+        case 'network_error':
+          message = 'Network error. Please check your connection.';
+          break;
+        case 'sign_in_canceled':
+          message = 'Cancelled.';
+          break;
+        default:
+          message = 'Could not access Google account. Please try again.';
+      }
+      emit(GoogleSignInFailure(message));
     } catch (e) {
-      emit(GoogleSignInFailure("Google Sign-In failed: $e"));
+      emit(const GoogleSignInFailure(
+          "Could not access Google account. Please try again."));
     }
   }
 }

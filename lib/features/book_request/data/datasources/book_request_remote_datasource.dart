@@ -87,7 +87,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       if (deliveryPhone != null) body['deliveryPhone'] = deliveryPhone;
       if (deliveryAddress != null) body['deliveryAddress'] = deliveryAddress;
       if (deliveryPincode != null) body['deliveryPincode'] = deliveryPincode;
-      if (deliveryPreferredDate != null) body['deliveryPreferredDate'] = deliveryPreferredDate;
+      if (deliveryPreferredDate != null) {
+        body['deliveryPreferredDate'] = deliveryPreferredDate;
+      }
 
       final response = await dio.post(
         ApiConstants.userBookRequests,
@@ -100,7 +102,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       final decoded = response.data;
       final data = decoded is Map && decoded['data'] is Map
           ? Map<String, dynamic>.from(decoded['data'])
-          : decoded is Map ? Map<String, dynamic>.from(decoded) : <String, dynamic>{};
+          : decoded is Map
+              ? Map<String, dynamic>.from(decoded)
+              : <String, dynamic>{};
       return data['_id'] as String? ?? '';
     } catch (e) {
       rethrow;
@@ -157,7 +161,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       }
       final List list = response.data is List
           ? response.data as List
-          : (response.data['data'] is List ? response.data['data'] as List : []);
+          : (response.data['data'] is List
+              ? response.data['data'] as List
+              : []);
       return list
           .map((e) => BookRequestModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -194,9 +200,11 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       }
     } on DioException catch (e) {
       final serverMsg = e.response?.data is Map
-          ? (e.response!.data['message'] ?? e.response!.data['error']) as String?
+          ? (e.response!.data['message'] ?? e.response!.data['error'])
+              as String?
           : null;
-      throw Exception(serverMsg ?? 'Failed to approve request. Please try again.');
+      throw Exception(
+          serverMsg ?? 'Failed to approve request. Please try again.');
     } catch (e) {
       rethrow;
     }
@@ -248,7 +256,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       final decoded = response.data;
       final data = decoded is Map && decoded['data'] is Map
           ? Map<String, dynamic>.from(decoded['data'])
-          : decoded is Map ? Map<String, dynamic>.from(decoded) : <String, dynamic>{};
+          : decoded is Map
+              ? Map<String, dynamic>.from(decoded)
+              : <String, dynamic>{};
       return BookRequestModel.fromJson(data);
     } catch (e) {
       rethrow;
@@ -345,7 +355,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       final responseData = response.data;
       final data = responseData is Map && responseData['data'] is Map
           ? Map<String, dynamic>.from(responseData['data'])
-          : responseData is Map ? Map<String, dynamic>.from(responseData) : <String, dynamic>{};
+          : responseData is Map
+              ? Map<String, dynamic>.from(responseData)
+              : <String, dynamic>{};
       return BookRequestModel.fromJson(data);
     } on DioException catch (e) {
       final serverMsg = e.response?.data is Map

@@ -7,7 +7,6 @@ import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
-import '../blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../blocs/sign_in/sign_in_bloc.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -31,11 +30,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
   // Colors
   static const _primaryColor = AppColors.primary;
-  static const _textColor = AppColors.textPrimary;
-  static const _labelColor = AppColors.textSecondary;
-  static const _hintColor = AppColors.textHint;
-  static const _borderColor = AppColors.border;
-  static const _errorColor = AppColors.error;
 
   @override
   void dispose() {
@@ -86,88 +80,58 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<SignInBloc, SignInState>(
-          listener: (context, state) async {
-            if (state is SignInSuccess) {
-              UiUtils.showSuccessSnackBar(
-                context,
-                message: 'Welcome back, ${state.user.name}!',
-              );
+    return BlocListener<SignInBloc, SignInState>(
+      listener: (context, state) async {
+        if (state is SignInSuccess) {
+          UiUtils.showSuccessSnackBar(
+            context,
+            message: 'Welcome back, ${state.user.name}!',
+          );
 
-              final secureStorage = getIt<SecureStorageUtil>();
-              await secureStorage.saveUser(state.user);
-              await secureStorage.saveTokens(
-                accessToken: state.user.accessToken,
-                refreshToken: state.user.refreshToken,
-              );
-              await AppPreferences.setLoggedIn(true);
+          final secureStorage = getIt<SecureStorageUtil>();
+          await secureStorage.saveUser(state.user);
+          await secureStorage.saveTokens(
+            accessToken: state.user.accessToken,
+            refreshToken: state.user.refreshToken,
+          );
+          await AppPreferences.setLoggedIn(true);
 
-              if (!context.mounted) return;
-              context.read<ProfileBloc>().add(LoadProfileEvent());
-              if (state.user.role == 'admin') {
-                Navigator.pushReplacementNamed(context, '/admin');
-              } else if (state.user.onboardingCompleted) {
-                Navigator.pushReplacementNamed(context, '/home');
-              } else {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const OnboardingQuestionnaire(),
-                  ),
-                );
-              }
-            } else if (state is SignInFailure) {
-              UiUtils.showErrorSnackBar(
-                context,
-                message: state.errorMessage,
-              );
-            }
-          },
-        ),
-        BlocListener<GoogleSignInBloc, GoogleSignInState>(
-          listener: (context, state) async {
-            if (state is GoogleSignInSuccess) {
-              UiUtils.showSuccessSnackBar(
-                context,
-                message:
-                    'Google Sign-In successful! Welcome ${state.user.name}',
-              );
-
-              final secureStorage = getIt<SecureStorageUtil>();
-              await secureStorage.saveUser(state.user);
-              await secureStorage.saveTokens(
-                accessToken: state.user.accessToken,
-                refreshToken: state.user.refreshToken,
-              );
-              await AppPreferences.setLoggedIn(true);
-
-              if (!context.mounted) return;
-              context.read<ProfileBloc>().add(LoadProfileEvent());
-              if (state.user.role == 'admin') {
-                Navigator.pushReplacementNamed(context, '/admin');
-              } else if (state.user.onboardingCompleted) {
-                Navigator.pushReplacementNamed(context, '/home');
-              } else {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const OnboardingQuestionnaire(),
-                  ),
-                );
-              }
-            } else if (state is GoogleSignInFailure) {
-              UiUtils.showErrorSnackBar(
-                context,
-                message: state.errorMessage,
-              );
-            }
-          },
-        )
-      ],
+          if (!context.mounted) return;
+          context.read<ProfileBloc>().add(LoadProfileEvent());
+          if (state.user.role == 'admin') {
+            Navigator.pushReplacementNamed(context, '/admin');
+          } else if (state.user.onboardingCompleted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const OnboardingQuestionnaire(),
+              ),
+            );
+          }
+        } else if (state is SignInFailure) {
+          final msg = state.errorMessage.toLowerCase();
+          if (msg.contains('verify') && msg.contains('email')) {
+            UiUtils.showErrorSnackBar(
+              context,
+              message: 'Please verify your email before signing in.',
+              action: SnackBarAction(
+                label: 'Sign Up',
+                textColor: Colors.white,
+                onPressed: _navigateToSignUp,
+              ),
+            );
+          } else {
+            UiUtils.showErrorSnackBar(
+              context,
+              message: state.errorMessage,
+            );
+          }
+        }
+      },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -193,8 +157,6 @@ class _SignInScreenState extends State<SignInScreen> {
                         _buildForgotPasswordLink(),
                         const SizedBox(height: 32.0),
                         _buildSignInButton(),
-                        const SizedBox(height: 20.0),
-                        _buildGoogleSignInButton(),
                         const Spacer(),
                         _buildSignUpPrompt(),
                         const Spacer(),
@@ -211,12 +173,12 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget _buildHeader() {
-    return const Text(
+    return Text(
       'Welcome to ReadBuddy',
       style: TextStyle(
         fontSize: 32.0,
         fontWeight: FontWeight.bold,
-        color: _textColor,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
@@ -256,7 +218,7 @@ class _SignInScreenState extends State<SignInScreen> {
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                color: _labelColor,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               onPressed: _togglePasswordVisibility,
             ),
@@ -269,10 +231,10 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _buildFieldLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 20.0,
         fontWeight: FontWeight.w500,
-        color: _labelColor,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }
@@ -282,27 +244,34 @@ class _SignInScreenState extends State<SignInScreen> {
     required IconData prefixIcon,
     Widget? suffixIcon,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return InputDecoration(
       hintText: hintText,
-      hintStyle: const TextStyle(color: _hintColor, fontSize: 18.0),
+      hintStyle: TextStyle(
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          fontSize: 18.0),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: colorScheme.surface,
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-      prefixIcon: Icon(prefixIcon, color: _labelColor),
+      prefixIcon: Icon(prefixIcon, color: colorScheme.onSurfaceVariant),
       suffixIcon: suffixIcon,
-      border: _buildOutlineInputBorder(_borderColor),
-      enabledBorder: _buildOutlineInputBorder(_borderColor),
-      focusedBorder: _buildOutlineInputBorder(_primaryColor, width: 2.0),
-      errorBorder: _buildOutlineInputBorder(_errorColor),
-    );
-  }
-
-  OutlineInputBorder _buildOutlineInputBorder(Color color,
-      {double width = 1.0}) {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8.0),
-      borderSide: BorderSide(color: color, width: width),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide(color: Theme.of(context).dividerColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide(color: Theme.of(context).dividerColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide(color: colorScheme.primary, width: 2.0),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide(color: colorScheme.error),
+      ),
     );
   }
 
@@ -359,56 +328,15 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildGoogleSignInButton() {
-    return BlocBuilder<GoogleSignInBloc, GoogleSignInState>(
-      builder: (context, state) {
-        final isLoading = state is GoogleSignInLoading;
-        return SizedBox(
-          width: double.infinity,
-          height: 52.0,
-          child: OutlinedButton.icon(
-            onPressed: isLoading
-                ? null
-                : () {
-                    context
-                        .read<GoogleSignInBloc>()
-                        .add(const GoogleSignInRequested());
-                  },
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: _borderColor),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-            icon: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.g_mobiledata_rounded,
-                    size: 28, color: Color(0xFF4285F4)),
-            label: Text(
-              isLoading ? 'Signing in...' : 'Sign in with Google',
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w500,
-                color: _textColor,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildSignUpPrompt() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
+        Text(
           "Don't have an account? ",
-          style: TextStyle(color: _hintColor, fontSize: 16.0),
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 16.0),
         ),
         TextButton(
           onPressed: _navigateToSignUp,

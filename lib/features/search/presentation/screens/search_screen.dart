@@ -67,7 +67,7 @@ class _SearchScreenState extends State<SearchScreen> {
     });
     try {
       final usecase = getIt<SearchBookUsecase>();
-      final results = await usecase(Uri.encodeComponent(query));
+      final results = await usecase(query);
       if (_searchGeneration != gen) return;
       if (mounted) {
         setState(() {

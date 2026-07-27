@@ -92,8 +92,7 @@ class _BookDetailView extends StatelessWidget {
           return const SizedBox.shrink();
         },
       ),
-      bottomNavigationBar:
-          BlocBuilder<BookRequestBloc, BookRequestState>(
+      bottomNavigationBar: BlocBuilder<BookRequestBloc, BookRequestState>(
         builder: (context, state) {
           if (state is BookDetailLoaded) {
             return _BottomRequestBar(book: state.book);
@@ -786,7 +785,9 @@ class _BottomRequestBar extends StatelessWidget {
                     );
                   },
             child: Text(
-              variantState.hasActiveRequest ? 'Already Requested' : 'Request Book',
+              variantState.hasActiveRequest
+                  ? 'Already Requested'
+                  : 'Request Book',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),

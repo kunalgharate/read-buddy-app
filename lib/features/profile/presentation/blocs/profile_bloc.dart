@@ -93,16 +93,18 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final currentUser = _currentUser();
     if (currentUser == null) return;
 
+    final profileData = _validateInputs(key: event.field, value: event.value);
+    if (profileData['error'] != null) {
+      emit(ProfileError(profileData['error']!));
+      // Use a small delay so listener can catch the error before we reset state
+      await Future.delayed(const Duration(milliseconds: 50));
+      emit(ProfileLoaded(currentUser));
+      return;
+    }
+    profileData.remove('error');
+
     emit(ProfileUpdating(currentUser));
     try {
-      final profileData = _validateInputs(key: event.field, value: event.value);
-      if (profileData['error'] != null) {
-        emit(ProfileError(profileData['error']!));
-        emit(ProfileLoaded(currentUser));
-        return;
-      }
-      profileData.remove('error');
-
       final updatedAppUser =
           await _updateProfileUseCase.call(profileData: profileData);
       await _secureStorage.saveUser(updatedAppUser);
@@ -111,6 +113,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       add(LoadProfileEvent());
     } catch (error) {
       emit(ProfileError(ErrorHandler.getErrorMessage(error)));
+      await Future.delayed(const Duration(milliseconds: 50));
       emit(ProfileLoaded(currentUser));
     }
   }

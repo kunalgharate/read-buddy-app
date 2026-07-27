@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "773878374124",
+    "project_id": "readbuddycommunity",
+    "storage_bucket": "readbuddycommunity.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:773878374124:android:0b7f3f813d75a40e80cfc9",
+        "android_client_info": {
+          "package_name": "in.thecodershub.readbuddy.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "773878374124-utopgj7oq7nv22adihbs3vb6fio7dfen.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCchLUV-x7yAAqtZh-ugekmrR06Mflj8Oc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "773878374124-utopgj7oq7nv22adihbs3vb6fio7dfen.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "773878374124-8ikb187smima4ik3nagc3ume3uvgn63s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "in.thecodershub.readbuddy"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

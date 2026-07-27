@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:read_buddy_app/core/config/app_config.dart';
+import 'package:read_buddy_app/core/config/dev_config.dart';
 import 'package:read_buddy_app/features/audiobook/presentation/widgets/mini_audio_player.dart';
 import 'package:read_buddy_app/features/splash/splash_screen.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
@@ -24,12 +26,21 @@ import 'package:read_buddy_app/routes/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Default to dev if main.dart is called directly (e.g., flutter run without flavor)
+  if (!AppConfig.isInitialized) {
+    AppConfig.init(
+      environment: Environment.dev,
+      baseUrl: DevConfig.baseUrl,
+      appName: DevConfig.appName,
+    );
+  }
+
   await configureDependencies();
   await ConnectivityService.instance.init();
   await ThemeNotifier.instance.init();
   Bloc.observer = AppBlocObserver();
 
-  print('🚀 [main] App starting...');
+  print('🚀 [main] App starting... (${AppConfig.instance.environment.name})');
 
   runApp(const MyApp());
 }
@@ -123,15 +134,58 @@ class _MyAppState extends State<MyApp> {
               brightness: Brightness.dark,
               primary: AppColors.primary,
               secondary: AppColors.secondary,
-              surface: const Color(0xFF1E1E1E),
+              surface: AppColors.surfaceDark,
               onPrimary: Colors.black,
-              onSurface: Colors.white,
+              onSurface: AppColors.textPrimaryDark,
             ),
-            scaffoldBackgroundColor: const Color(0xFF121212),
+            scaffoldBackgroundColor: AppColors.backgroundDark,
             appBarTheme: const AppBarTheme(
-              backgroundColor: Color(0xFF1E1E1E),
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.surfaceDark,
+              foregroundColor: AppColors.textPrimaryDark,
               elevation: 0,
+            ),
+            cardTheme: CardThemeData(
+              color: AppColors.cardDark,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.borderDark),
+              ),
+            ),
+            dividerTheme: const DividerThemeData(
+              color: AppColors.dividerDark,
+              thickness: 1,
+            ),
+            listTileTheme: const ListTileThemeData(
+              textColor: AppColors.textPrimaryDark,
+              iconColor: AppColors.textSecondaryDark,
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: AppColors.cardDark,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.borderDark),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.borderDark),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide:
+                    const BorderSide(color: AppColors.primary, width: 2),
+              ),
+              labelStyle: const TextStyle(color: AppColors.textSecondaryDark),
+              hintStyle: const TextStyle(color: AppColors.textMutedDark),
+            ),
+            chipTheme: ChipThemeData(
+              backgroundColor: AppColors.cardDark,
+              labelStyle: const TextStyle(color: AppColors.textPrimaryDark),
+              side: const BorderSide(color: AppColors.borderDark),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
             useMaterial3: true,

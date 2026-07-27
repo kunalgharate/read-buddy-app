@@ -230,7 +230,7 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
     try {
       print("🔍 Searching books $query");
       final response = await dio.get(
-        "${ApiConstants.searchBooks}/$query",
+        "${ApiConstants.searchBooks}/${Uri.encodeComponent(query)}",
       );
 
       if (response.statusCode != ApiConstants.success) {

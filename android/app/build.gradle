@@ -30,6 +30,20 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions "environment"
+
+    productFlavors {
+        dev {
+            dimension "environment"
+            applicationIdSuffix ".dev"
+            resValue "string", "app_name", "ReadBuddy Dev"
+        }
+        prod {
+            dimension "environment"
+            resValue "string", "app_name", "ReadBuddy"
+        }
+    }
+
     signingConfigs {
         release {
             def keystoreProperties = new Properties()

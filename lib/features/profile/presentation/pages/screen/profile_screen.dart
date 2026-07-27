@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/di/injection.dart';
 import '../../../../home/presentation/screens/home_screen.dart';
@@ -76,18 +77,60 @@ class _ProfileView extends StatelessWidget {
   void _showEditDialog(
       BuildContext context, String field, String label, String currentValue) {
     final controller = TextEditingController(text: currentValue);
+    final formKey = GlobalKey<FormState>();
+
+    String? validator(String? value) {
+      if (value == null || value.trim().isEmpty) {
+        return '$label is required';
+      }
+      if (field == 'name') {
+        if (value.trim().length < 2) {
+          return 'Name must be at least 2 characters';
+        }
+        if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
+          return 'Name can only contain letters and spaces';
+        }
+      }
+      if (field == 'phno') {
+        if (!RegExp(r'^\d{10}$').hasMatch(value.trim())) {
+          return 'Phone number must be exactly 10 digits';
+        }
+      }
+      return null;
+    }
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Edit $label',
             style: TextStyle(color: Theme.of(ctx).colorScheme.onSurface)),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: label,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            autofocus: true,
+            validator: validator,
+            keyboardType:
+                field == 'phno' ? TextInputType.phone : TextInputType.name,
+            inputFormatters: field == 'name'
+                ? [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))]
+                : field == 'phno'
+                    ? [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ]
+                    : null,
+            decoration: InputDecoration(
+              labelText: label,
+              helperText: field == 'name'
+                  ? 'Letters and spaces only'
+                  : field == 'phno'
+                      ? '10-digit phone number'
+                      : null,
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            ),
           ),
         ),
         actions: [
@@ -100,6 +143,7 @@ class _ProfileView extends StatelessWidget {
           ),
           FilledButton(
             onPressed: () {
+              if (!formKey.currentState!.validate()) return;
               final newValue = controller.text.trim();
               if (newValue.isNotEmpty && newValue != currentValue) {
                 context.read<ProfileBloc>().add(

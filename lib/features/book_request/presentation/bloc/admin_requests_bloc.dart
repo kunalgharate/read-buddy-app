@@ -109,9 +109,8 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
 
       // Fire-and-forget — notification failure must NOT block the approval.
       try {
-        final approvedRequest = currentList
-            .where((r) => r.id == event.requestId)
-            .firstOrNull;
+        final approvedRequest =
+            currentList.where((r) => r.id == event.requestId).firstOrNull;
         final userId = approvedRequest?.userId;
         final bookTitle = approvedRequest?.bookTitle ?? 'your book';
         if (userId != null && userId.isNotEmpty) {
@@ -150,7 +149,8 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
         if (userId != null && userId.isNotEmpty) {
           await sendNotification(
             userId: userId,
-            message: 'Your request for "$bookTitle" was declined. Reason: ${event.reason}',
+            message:
+                'Your request for "$bookTitle" was declined. Reason: ${event.reason}',
             type: 'book_request',
           );
         }

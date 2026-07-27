@@ -59,7 +59,8 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     UpdateAddressEvent event,
     Emitter<AddressState> emit,
   ) async {
-    emit(AddressLoading());
+    // Don't emit full AddressLoading — keep the existing list visible
+    // to prevent white screen during update
     try {
       final address = await _updateAddress(event.id, event.data);
       emit(AddressUpdated(address));
@@ -72,7 +73,7 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     DeleteAddressEvent event,
     Emitter<AddressState> emit,
   ) async {
-    emit(AddressLoading());
+    // Don't emit full AddressLoading to prevent white screen
     try {
       await _deleteAddress(event.id);
       emit(AddressDeleted());

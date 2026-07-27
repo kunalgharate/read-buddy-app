@@ -216,7 +216,8 @@ class _DeliveredRequestDetailPageState
                             ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF052E44),
-                              side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
+                              side: const BorderSide(
+                                  color: Color(0xFFCCCCCC), width: 1.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -357,8 +358,8 @@ class _StatusChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-            fontSize: 11, fontWeight: FontWeight.w700, color: color),
+        style:
+            TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
       ),
     );
   }
