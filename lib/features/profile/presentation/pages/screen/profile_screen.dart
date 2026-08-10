@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/network/api_constants.dart';
 import '../../../../../core/services/app_preferences.dart';
@@ -45,6 +46,70 @@ class _ProfileView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _pickAndUploadPhoto(BuildContext context) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 80,
+    );
+    if (pickedFile == null) return;
+    if (!context.mounted) return;
+
+    // Show uploading indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text('Uploading photo...'),
+          ],
+        ),
+        duration: Duration(seconds: 10),
+      ),
+    );
+
+    try {
+      final dio = getIt<Dio>();
+      final formData = FormData.fromMap({
+        'profileImage': await MultipartFile.fromFile(
+          pickedFile.path,
+          filename: pickedFile.name,
+        ),
+      });
+      await dio.post(ApiConstants.uploadProfileImage, data: formData);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile photo updated successfully!'),
+          backgroundColor: Color(0xFF00C853),
+        ),
+      );
+      // Refresh profile to show updated image
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to upload photo. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showLogoutDialog(BuildContext context) {
@@ -234,22 +299,69 @@ class _ProfileView extends StatelessWidget {
       BuildContext context, ProfileUser user, bool isUpdating) {
     return Column(
       children: [
-        _buildAvatarCircle(user, isUpdating),
+        GestureDetector(
+          onTap: isUpdating ? null : () => _pickAndUploadPhoto(context),
+          child: Stack(
+            children: [
+              _buildAvatarCircle(user, isUpdating),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: _green,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: isUpdating ? null : () => _showAvatarSheet(context, user),
-          icon: const Icon(Icons.face, color: _green, size: 18),
-          label: const Text(
-            'Change Avatar',
-            style: TextStyle(color: _green, fontSize: 13),
-          ),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            side: const BorderSide(color: _green),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              onPressed:
+                  isUpdating ? null : () => _showAvatarSheet(context, user),
+              icon: const Icon(Icons.face, color: _green, size: 18),
+              label: const Text(
+                'Change Avatar',
+                style: TextStyle(color: _green, fontSize: 13),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                side: const BorderSide(color: _green),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: isUpdating ? null : () => _pickAndUploadPhoto(context),
+              icon: const Icon(Icons.photo_library, color: _green, size: 18),
+              label: const Text(
+                'Upload Photo',
+                style: TextStyle(color: _green, fontSize: 13),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                side: const BorderSide(color: _green),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
