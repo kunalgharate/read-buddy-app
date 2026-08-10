@@ -261,6 +261,14 @@ class _AdminDashboardBodyState extends State<_AdminDashboardBody> {
                     Navigator.of(context).pushNamed('/libraries');
                   },
                 ),
+                DashboardBoxWidget(
+                  title: 'Returns',
+                  count: 0,
+                  icon: Icons.assignment_return,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/admin-return-requests');
+                  },
+                ),
               ],
             ),
           ),

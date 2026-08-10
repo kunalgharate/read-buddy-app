@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
-import 'package:read_buddy_app/features/settings/change_password_screen.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/location_cubit.dart';
+import 'package:read_buddy_app/features/book_request/presentation/pages/admin_return_requests_page.dart';
+import 'package:read_buddy_app/features/auth/presentation/pages/change_password_page.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/questionaries/presentations/bloc/on_boarding_bloc.dart';
 import 'package:read_buddy_app/features/library/presentation/pages/library_list_page.dart';
@@ -92,7 +93,10 @@ class AppRouter {
       case '/reset-password':
         return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
       case '/change-password':
-        return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
+        return MaterialPageRoute(builder: (_) => const ChangePasswordPage());
+      case '/admin-return-requests':
+        return MaterialPageRoute(
+            builder: (_) => const AdminReturnRequestsPage());
       case '/admin':
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
       case '/admin-users':

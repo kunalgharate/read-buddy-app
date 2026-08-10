@@ -2,6 +2,7 @@ import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/book_request_entity.dart';
+import '../widgets/shipment_tracking_widget.dart';
 import 'collect_from_library_page.dart';
 
 class DeliveredRequestDetailPage extends StatefulWidget {
@@ -21,9 +22,7 @@ class _DeliveredRequestDetailPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -142,6 +141,11 @@ class _DeliveredRequestDetailPageState
               const SizedBox(height: 4),
               _InfoRow('Delivery Address', widget.request.deliveryAddress!),
             ],
+
+            // Shipment tracking — shown for shipping/delivered/returning
+            if (['shipping', 'delivered', 'returning']
+                .contains(widget.request.status.toLowerCase()))
+              ShipmentTrackingWidget(requestId: widget.request.id),
 
             const SizedBox(height: 16),
 
