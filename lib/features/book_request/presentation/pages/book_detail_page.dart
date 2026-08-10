@@ -10,6 +10,7 @@ import '../../../audiobook/domain/entities/audiobook.dart';
 import '../../../bookcrud/domain/entities/book_variant_entity.dart';
 import '../../../bookcrud/domain/respository/variant_repository.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
+import '../../../reviews/presentation/widgets/book_reviews_section.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
@@ -49,7 +50,6 @@ class _BookDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: BlocConsumer<BookRequestBloc, BookRequestState>(
         listenWhen: (_, current) => current is BookRequestError,
         listener: (context, state) {
@@ -148,6 +148,11 @@ class _BookDetailContent extends StatelessWidget {
           _AboutSection(book: book),
           const SizedBox(height: 12),
           _HighlightSection(book: book),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: BookReviewsSection(bookId: book.id),
+          ),
           const SizedBox(height: 24),
         ],
       ),

@@ -152,7 +152,7 @@ class _QuestionListPageState extends State<QuestionListPage> {
       appBar: AppBar(
         title: const Text('Questions Management',
             style: TextStyle(fontWeight: FontWeight.w600)),
-        backgroundColor: Colors.white,
+  
         foregroundColor: Colors.black,
         elevation: 1,
       ),

@@ -144,7 +144,7 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
           widget.question == null ? 'Add Question' : 'Edit Question',
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        backgroundColor: Colors.white,
+  
         foregroundColor: Colors.black,
         elevation: 1,
       ),

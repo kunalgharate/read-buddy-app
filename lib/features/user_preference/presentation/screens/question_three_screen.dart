@@ -34,7 +34,7 @@ class _QuestionThreeScreenState extends State<QuestionThreeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

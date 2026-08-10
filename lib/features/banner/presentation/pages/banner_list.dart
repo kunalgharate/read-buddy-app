@@ -21,9 +21,9 @@ class _BannersListState extends State<BannersList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+
       appBar: AppBar(
-        backgroundColor: Colors.white,
+  
         title: const Text('Banners'),
         centerTitle: true,
       ),

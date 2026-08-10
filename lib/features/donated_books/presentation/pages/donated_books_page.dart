@@ -22,9 +22,9 @@ class _DonatedBooksPageState extends State<DonatedBooksPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+
       appBar: AppBar(
-        backgroundColor: Colors.white,
+  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF052E44)),

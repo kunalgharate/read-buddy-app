@@ -72,9 +72,9 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+
       appBar: AppBar(
-        backgroundColor: Colors.white,
+  
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -215,7 +215,7 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: Colors.white,
+  
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text(
           'Decline Request',
@@ -297,7 +297,7 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -377,7 +377,7 @@ class _RequestCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: const Color(0xFFE0E0E0)),
         ),

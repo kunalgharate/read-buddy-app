@@ -267,9 +267,9 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
         },
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: Colors.white,
+      
             appBar: AppBar(
-              backgroundColor: Colors.white,
+        
               elevation: 0,
               leading: IconButton(
                 icon:

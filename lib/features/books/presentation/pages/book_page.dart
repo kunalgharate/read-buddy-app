@@ -158,7 +158,7 @@ class _BookPageState extends State<BookPage> {
                       color: isSelected ? Colors.green : Colors.grey.shade300,
                     ),
                   ),
-                  backgroundColor: Colors.white,
+            
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.green : Colors.black,
                   ),
