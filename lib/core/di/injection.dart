@@ -192,6 +192,16 @@ import 'package:read_buddy_app/features/address/presentation/bloc/address_bloc.d
 import 'package:read_buddy_app/features/librarian/data/datasources/librarian_remote_datasource.dart';
 import 'package:read_buddy_app/features/librarian/presentation/bloc/librarian_bloc.dart';
 
+// Reviews
+import 'package:read_buddy_app/features/reviews/data/datasources/review_remote_datasource.dart';
+import 'package:read_buddy_app/features/reviews/data/repositories/review_repository_impl.dart';
+import 'package:read_buddy_app/features/reviews/domain/repositories/review_repository.dart';
+import 'package:read_buddy_app/features/reviews/domain/usecases/get_book_reviews.dart';
+import 'package:read_buddy_app/features/reviews/domain/usecases/create_review.dart';
+import 'package:read_buddy_app/features/reviews/domain/usecases/update_review.dart';
+import 'package:read_buddy_app/features/reviews/domain/usecases/delete_review.dart';
+import 'package:read_buddy_app/features/reviews/presentation/bloc/review_bloc.dart';
+
 final getIt = GetIt.instance;
 
 Future<void> configureDependencies() async {
@@ -205,6 +215,7 @@ Future<void> configureDependencies() async {
   _registerLibraryFeature();
   _registerAddressFeature();
   _registerLibrarianFeature();
+  _registerReviewsFeature();
 }
 
 // ========================================
@@ -789,4 +800,33 @@ void _registerLibrarianFeature() {
 
   getIt
       .registerFactory(() => LibrarianBloc(getIt<LibrarianRemoteDataSource>()));
+}
+
+// ========================================
+// REVIEWS FEATURE
+// ========================================
+void _registerReviewsFeature() {
+  // DataSource
+  getIt.registerLazySingleton<ReviewRemoteDataSource>(
+    () => ReviewRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<ReviewRepository>(
+    () => ReviewRepositoryImpl(getIt<ReviewRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetBookReviews(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(() => CreateReview(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(() => UpdateReview(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(() => DeleteReview(getIt<ReviewRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => ReviewBloc(
+        getBookReviews: getIt<GetBookReviews>(),
+        createReview: getIt<CreateReview>(),
+        updateReview: getIt<UpdateReview>(),
+        deleteReview: getIt<DeleteReview>(),
+      ));
 }

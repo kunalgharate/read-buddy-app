@@ -1,7 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/network/api_constants.dart';
+import '../../../../../core/services/app_preferences.dart';
+import '../../../../../core/utils/secure_storage_utils.dart';
 import '../../../../home/presentation/screens/home_screen.dart';
 import '../../../domain/entities/avatar_user_model.dart';
 import '../../../domain/entities/user_profile.dart';
@@ -62,8 +66,20 @@ class _ProfileView extends StatelessWidget {
                             Colors.grey)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(dialogContext);
+              // Call server logout to invalidate session
+              try {
+                final dio = getIt<Dio>();
+                await dio.post(ApiConstants.logout);
+              } catch (_) {
+                // Best-effort — proceed with local logout even if API fails
+              }
+              // Clear local storage
+              final secureStorage = getIt<SecureStorageUtil>();
+              await secureStorage.clearAll();
+              await AppPreferences.clear();
+              if (!context.mounted) return;
               Navigator.of(context)
                   .pushNamedAndRemoveUntil('/signin', (_) => false);
             },

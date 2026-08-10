@@ -12,6 +12,10 @@ class ApiConstants {
   static String get resendResetOtp => '$baseUrl/users/resend-reset-otp';
   static String get changePassword => '$baseUrl/users/reset-password';
   static String get verifyOtp => '$baseUrl/users/verify-reset-otp';
+  static String get logout => '$baseUrl/users/logout';
+  static String get resendRegisterOtp => '$baseUrl/users/resend-register-otp';
+  static String get changePasswordAuth => '$baseUrl/users/change-password';
+  static String get uploadProfileImage => '$baseUrl/users/upload-profile-image';
 
   // User endpoints
   static String get users => '$baseUrl/users';
@@ -60,6 +64,11 @@ class ApiConstants {
   static String get libraryDetails => '$baseUrl/v1/libraries/details';
 
   static String get olaMap => '$baseUrl/ola/address?input';
+
+  // Reviews
+  static String get reviews => '$baseUrl/review';
+  static String reviewById(String id) => '$baseUrl/review/$id';
+  static String reviewsByBook(String bookId) => '$baseUrl/review/book/$bookId';
 
   // HTTP Status Codes
   static const int success = 200;
@@ -132,4 +141,29 @@ class ApiConstants {
       '$librarianDonations/$id/status';
   static String librarianDonationSchedulePickup(String id) =>
       '$librarianDonations/$id/schedule-pickup';
+
+  // Admin Dashboard
+  static String get adminDashboard => '$baseUrl/admindashboard/dashboard';
+  static String get dashboardCounts => '$baseUrl/dashboard/dashboard-counts';
+
+  // Return Requests
+  static String get returnRequests => '$baseUrl/users/return-requests';
+  static String returnRequestById(String id) =>
+      '$baseUrl/users/return-requests/$id';
+  static String returnRequestMethod(String id) =>
+      '$baseUrl/users/return-requests/$id/method';
+  static String returnRequestPayment(String id) =>
+      '$baseUrl/users/return-requests/$id/payment';
+  static String returnRequestDropConfirm(String id) =>
+      '$baseUrl/users/return-requests/$id/drop-confirm';
+  static String returnRequestReceive(String id) =>
+      '$baseUrl/users/return-requests/$id/receive';
+  static String returnRequestInspect(String id) =>
+      '$baseUrl/users/return-requests/$id/inspect';
+
+  // Shipments
+  static String get shipments => '$baseUrl/shipments';
+  static String shipmentById(String id) => '$baseUrl/shipments/$id';
+  static String shipmentByRequest(String requestId) =>
+      '$baseUrl/shipments/request/$requestId';
 }
