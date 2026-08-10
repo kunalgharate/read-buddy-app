@@ -134,7 +134,7 @@ class EmailVerificationScreen extends StatelessWidget {
 
         if (currentUser != null) {
           return Scaffold(
-            backgroundColor: Colors.white,
+      
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,

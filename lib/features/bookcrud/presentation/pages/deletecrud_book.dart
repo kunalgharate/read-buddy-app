@@ -8,7 +8,7 @@ class DeletecrudBook {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+  
         content: const Text(
           "Are you sure you want to permanently delete this book from the ReadBuddy app?",
           style: TextStyle(fontSize: 18),

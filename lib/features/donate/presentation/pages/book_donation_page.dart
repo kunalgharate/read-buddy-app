@@ -104,7 +104,6 @@ class _DonationPageState extends State<_DonationPageContent> {
 
   static const _primaryGreen = Color(0xFF2CE07F);
   static const _textDark = Color(0xFF052E44);
-  static const _background = Color(0xFFFDFDFD);
   static const _conditions = ['New', 'Like New', 'Good', 'Old', 'Other'];
 
   @override
@@ -269,7 +268,7 @@ class _DonationPageState extends State<_DonationPageContent> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
-              backgroundColor: Colors.white,
+        
               elevation: 8,
               insetPadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -492,9 +491,9 @@ class _DonationPageState extends State<_DonationPageContent> {
     final paddingH = size.width * 0.05;
 
     return Scaffold(
-      backgroundColor: _background,
+      // backgroundColor handled by theme
       appBar: AppBar(
-        backgroundColor: _background,
+        // backgroundColor handled by theme
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: _textDark),

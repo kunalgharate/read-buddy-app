@@ -49,7 +49,7 @@ class _BookDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+
       body: BlocConsumer<BookRequestBloc, BookRequestState>(
         listenWhen: (_, current) => current is BookRequestError,
         listener: (context, state) {

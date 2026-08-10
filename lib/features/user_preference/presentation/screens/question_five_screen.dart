@@ -59,7 +59,7 @@ class _QuestionFiveScreenState extends State<QuestionFiveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

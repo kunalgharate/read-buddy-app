@@ -123,7 +123,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
+  
         title: const Text(
           'Delete Category',
           style:

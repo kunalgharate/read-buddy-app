@@ -122,7 +122,7 @@ class _OnboardingQuestionnaireView extends StatelessWidget {
     final selectedAnswers = state.answers[question.id] ?? [];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),

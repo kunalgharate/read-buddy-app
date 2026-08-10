@@ -57,9 +57,9 @@ class _BooksListPageState extends State<BooksListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+
       appBar: AppBar(
-        backgroundColor: Colors.white,
+  
         title: const Text('Books'),
         centerTitle: true,
       ),

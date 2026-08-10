@@ -15,9 +15,9 @@ class DonatedBookDetailPage extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+
       appBar: AppBar(
-        backgroundColor: Colors.white,
+  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: _textDark),
