@@ -129,7 +129,8 @@ class ErrorHandler {
       return 'This email is already registered. Please try signing in instead.';
     }
 
-    if (message?.toLowerCase().contains('email not verified') == true) {
+    if (message?.toLowerCase().contains('email not verified') == true ||
+        message?.toLowerCase().contains('verify your email') == true) {
       return 'Please verify your email before signing in.';
     }
 
