@@ -29,11 +29,13 @@ import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_p
 import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 import 'package:read_buddy_app/features/donate/presentation/pages/book_donation_page.dart';
 import 'package:read_buddy_app/features/wishlist/presentation/pages/wishlist_page.dart';
+import 'package:read_buddy_app/features/wishlist/presentation/bloc/wishlist_bloc.dart';
 import 'package:read_buddy_app/features/legal/terms_page.dart';
 import 'package:read_buddy_app/features/legal/privacy_policy_page.dart';
 import 'package:read_buddy_app/features/legal/refund_policy_page.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/pages/order_cart_page.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/pages/my_orders_page.dart';
+import 'package:read_buddy_app/features/borrow_order/presentation/bloc/borrow_order_bloc.dart';
 import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_book_detail_page.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_books_page.dart';
@@ -264,7 +266,12 @@ class AppRouter {
           builder: (_) => AdminDonationDetailPage(book: book),
         );
       case '/wishlist':
-        return MaterialPageRoute(builder: (_) => const WishlistPage());
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<WishlistBloc>()..add(LoadWishlist()),
+            child: const WishlistPage(),
+          ),
+        );
       case '/terms':
         return MaterialPageRoute(builder: (_) => const TermsPage());
       case '/privacy':
@@ -272,9 +279,19 @@ class AppRouter {
       case '/refund-policy':
         return MaterialPageRoute(builder: (_) => const RefundPolicyPage());
       case '/order-cart':
-        return MaterialPageRoute(builder: (_) => const OrderCartPage());
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<BorrowOrderBloc>()..add(LoadDraftOrder()),
+            child: const OrderCartPage(),
+          ),
+        );
       case '/my-orders':
-        return MaterialPageRoute(builder: (_) => const MyOrdersPage());
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<BorrowOrderBloc>()..add(LoadMyOrders()),
+            child: const MyOrdersPage(),
+          ),
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

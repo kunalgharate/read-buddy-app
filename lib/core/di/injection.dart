@@ -80,6 +80,20 @@ import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_variants_fo
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/add_parts_to_format.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/variant/variant_bloc.dart';
+
+// Wishlist
+import 'package:read_buddy_app/features/wishlist/data/datasources/wishlist_remote_datasource.dart';
+import 'package:read_buddy_app/features/wishlist/data/repositories/wishlist_repository_impl.dart';
+import 'package:read_buddy_app/features/wishlist/domain/repositories/wishlist_repository.dart';
+import 'package:read_buddy_app/features/wishlist/domain/usecases/wishlist_usecases.dart';
+import 'package:read_buddy_app/features/wishlist/presentation/bloc/wishlist_bloc.dart';
+
+// Borrow Order
+import 'package:read_buddy_app/features/borrow_order/data/datasources/borrow_order_remote_datasource.dart';
+import 'package:read_buddy_app/features/borrow_order/data/repositories/borrow_order_repository_impl.dart';
+import 'package:read_buddy_app/features/borrow_order/domain/repositories/borrow_order_repository.dart';
+import 'package:read_buddy_app/features/borrow_order/domain/usecases/borrow_order_usecases.dart';
+import 'package:read_buddy_app/features/borrow_order/presentation/bloc/borrow_order_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 
 // Category CRUD
@@ -216,6 +230,8 @@ Future<void> configureDependencies() async {
   _registerAddressFeature();
   _registerLibrarianFeature();
   _registerReviewsFeature();
+  _registerWishlistFeature();
+  _registerBorrowOrderFeature();
 }
 
 // ========================================
@@ -828,5 +844,69 @@ void _registerReviewsFeature() {
         createReview: getIt<CreateReview>(),
         updateReview: getIt<UpdateReview>(),
         deleteReview: getIt<DeleteReview>(),
+      ));
+}
+
+// ========================================
+// WISHLIST FEATURE
+// ========================================
+void _registerWishlistFeature() {
+  // DataSource
+  getIt.registerLazySingleton<WishlistRemoteDataSource>(
+    () => WishlistRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<WishlistRepository>(
+    () => WishlistRepositoryImpl(getIt<WishlistRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetWishlist(getIt<WishlistRepository>()));
+  getIt.registerLazySingleton(() => AddToWishlist(getIt<WishlistRepository>()));
+  getIt.registerLazySingleton(() => RemoveFromWishlist(getIt<WishlistRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => WishlistBloc(
+        getWishlist: getIt<GetWishlist>(),
+        addToWishlist: getIt<AddToWishlist>(),
+        removeFromWishlist: getIt<RemoveFromWishlist>(),
+      ));
+}
+
+// ========================================
+// BORROW ORDER FEATURE
+// ========================================
+void _registerBorrowOrderFeature() {
+  // DataSource
+  getIt.registerLazySingleton<BorrowOrderRemoteDataSource>(
+    () => BorrowOrderRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<BorrowOrderRepository>(
+    () => BorrowOrderRepositoryImpl(getIt<BorrowOrderRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetMyDraft(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => AddBookToOrder(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => RemoveBookFromOrder(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => SubmitOrder(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => GetMyOrders(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => CancelOrder(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => CreatePayment(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => VerifyPayment(getIt<BorrowOrderRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => BorrowOrderBloc(
+        getMyDraft: getIt<GetMyDraft>(),
+        addBookToOrder: getIt<AddBookToOrder>(),
+        removeBookFromOrder: getIt<RemoveBookFromOrder>(),
+        submitOrder: getIt<SubmitOrder>(),
+        getMyOrders: getIt<GetMyOrders>(),
+        cancelOrder: getIt<CancelOrder>(),
+        createPayment: getIt<CreatePayment>(),
+        verifyPayment: getIt<VerifyPayment>(),
       ));
 }
