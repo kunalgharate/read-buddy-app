@@ -81,6 +81,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => Navigator.pushNamed(context, '/change-password'),
           ),
           ListTile(
+            leading: const Icon(Icons.favorite_outline),
+            title: const Text('My Wishlist'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/wishlist'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.shopping_bag_outlined),
+            title: const Text('My Orders'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/my-orders'),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Terms of Service'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/terms'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacy Policy'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/privacy'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.receipt_long_outlined),
+            title: const Text('Refund Policy'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/refund-policy'),
+          ),
+          const Divider(),
+          ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('About ReadBuddy'),
             trailing: const Icon(Icons.chevron_right),
