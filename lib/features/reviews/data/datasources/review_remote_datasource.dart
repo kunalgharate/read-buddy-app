@@ -63,7 +63,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
       data: {
         'bookId': bookId,
         'rating': rating,
-        'comment': comment,
+        'review': comment, // Backend expects 'review' field
       },
     );
 
@@ -94,7 +94,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
       ApiConstants.reviewById(id),
       data: {
         'rating': rating,
-        'comment': comment,
+        'review': comment, // Backend expects 'review' field
       },
     );
 
