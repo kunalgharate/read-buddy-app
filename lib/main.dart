@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> {
         // Books — singleton used across multiple screens
         BlocProvider(create: (_) => getIt<BookBloc>()),
         BlocProvider(create: (_) => getIt<DonatedBooksBloc>()),
-        // Categories — singleton used in home, donate, bookcrud
+        // Categories — singleton used in home, donate, book crud
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
       ],
       child: ValueListenableBuilder<ThemeMode>(

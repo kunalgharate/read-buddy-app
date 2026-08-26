@@ -36,6 +36,12 @@ import 'package:read_buddy_app/features/legal/refund_policy_page.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/pages/order_cart_page.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/pages/my_orders_page.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/bloc/borrow_order_bloc.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/pages/video_course_list_page.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/pages/video_course_detail_page.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/pages/video_lesson_page.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/bloc/video_course_bloc.dart';
+import 'package:read_buddy_app/features/tracking/presentation/pages/tracking_page.dart';
+import 'package:read_buddy_app/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_book_detail_page.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_books_page.dart';
@@ -290,6 +296,37 @@ class AppRouter {
           builder: (_) => BlocProvider(
             create: (_) => getIt<BorrowOrderBloc>()..add(LoadMyOrders()),
             child: const MyOrdersPage(),
+          ),
+        );
+      case '/video-courses':
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<VideoCourseBloc>()..add(const LoadVideoCourses()),
+            child: const VideoCourseListPage(),
+          ),
+        );
+      case '/video-course-detail':
+        final courseId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<VideoCourseBloc>()..add(LoadVideoCourseDetail(courseId)),
+            child: VideoCourseDetailPage(courseId: courseId),
+          ),
+        );
+      case '/video-lesson':
+        final args = settings.arguments as Map<String, String>;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<VideoCourseBloc>()..add(LoadVideoLesson(courseId: args['courseId']!, lessonId: args['lessonId']!)),
+            child: VideoLessonPage(courseId: args['courseId']!, lessonId: args['lessonId']!),
+          ),
+        );
+      case '/tracking':
+        final requestId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<TrackingBloc>()..add(LoadShipmentByRequest(requestId)),
+            child: TrackingPage(requestId: requestId),
           ),
         );
       default:

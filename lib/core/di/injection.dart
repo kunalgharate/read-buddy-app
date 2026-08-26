@@ -94,6 +94,20 @@ import 'package:read_buddy_app/features/borrow_order/data/repositories/borrow_or
 import 'package:read_buddy_app/features/borrow_order/domain/repositories/borrow_order_repository.dart';
 import 'package:read_buddy_app/features/borrow_order/domain/usecases/borrow_order_usecases.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/bloc/borrow_order_bloc.dart';
+
+// Video Courses
+import 'package:read_buddy_app/features/video_courses/data/datasources/video_course_remote_datasource.dart';
+import 'package:read_buddy_app/features/video_courses/data/repositories/video_course_repository_impl.dart';
+import 'package:read_buddy_app/features/video_courses/domain/repositories/video_course_repository.dart';
+import 'package:read_buddy_app/features/video_courses/domain/usecases/video_course_usecases.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/bloc/video_course_bloc.dart';
+
+// Tracking
+import 'package:read_buddy_app/features/tracking/data/datasources/tracking_remote_datasource.dart';
+import 'package:read_buddy_app/features/tracking/data/repositories/tracking_repository_impl.dart';
+import 'package:read_buddy_app/features/tracking/domain/repositories/tracking_repository.dart';
+import 'package:read_buddy_app/features/tracking/domain/usecases/tracking_usecases.dart';
+import 'package:read_buddy_app/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 
 // Category CRUD
@@ -232,6 +246,8 @@ Future<void> configureDependencies() async {
   _registerReviewsFeature();
   _registerWishlistFeature();
   _registerBorrowOrderFeature();
+  _registerVideoCourseFeature();
+  _registerTrackingFeature();
 }
 
 // ========================================
@@ -908,5 +924,61 @@ void _registerBorrowOrderFeature() {
         cancelOrder: getIt<CancelOrder>(),
         createPayment: getIt<CreatePayment>(),
         verifyPayment: getIt<VerifyPayment>(),
+      ));
+}
+
+// ========================================
+// VIDEO COURSES FEATURE
+// ========================================
+void _registerVideoCourseFeature() {
+  // DataSource
+  getIt.registerLazySingleton<VideoCourseRemoteDataSource>(
+    () => VideoCourseRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<VideoCourseRepository>(
+    () => VideoCourseRepositoryImpl(getIt<VideoCourseRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetVideoCourses(getIt<VideoCourseRepository>()));
+  getIt.registerLazySingleton(() => GetVideoCourseById(getIt<VideoCourseRepository>()));
+  getIt.registerLazySingleton(() => GetVideoLesson(getIt<VideoCourseRepository>()));
+  getIt.registerLazySingleton(() => EnrolInCourse(getIt<VideoCourseRepository>()));
+  getIt.registerLazySingleton(() => UpdateLessonProgress(getIt<VideoCourseRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => VideoCourseBloc(
+        getVideoCourses: getIt<GetVideoCourses>(),
+        getVideoCourseById: getIt<GetVideoCourseById>(),
+        getVideoLesson: getIt<GetVideoLesson>(),
+        enrolInCourse: getIt<EnrolInCourse>(),
+        updateLessonProgress: getIt<UpdateLessonProgress>(),
+      ));
+}
+
+// ========================================
+// TRACKING FEATURE
+// ========================================
+void _registerTrackingFeature() {
+  // DataSource
+  getIt.registerLazySingleton<TrackingRemoteDataSource>(
+    () => TrackingRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<TrackingRepository>(
+    () => TrackingRepositoryImpl(getIt<TrackingRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetShipmentByRequest(getIt<TrackingRepository>()));
+  getIt.registerLazySingleton(() => GetShipmentById(getIt<TrackingRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => TrackingBloc(
+        getShipmentByRequest: getIt<GetShipmentByRequest>(),
+        getShipmentById: getIt<GetShipmentById>(),
       ));
 }
