@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
+import 'package:read_buddy_app/features/donate/presentation/widgets/donation_book_card.dart';
 import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
+import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'format_screen.dart';
 
 class DonationTab extends StatefulWidget {
@@ -52,13 +54,26 @@ class _DonationTabContent extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
         title: Text(
-          'Get Prime',
+          'Contribute',
           style: GoogleFonts.poppins(
             fontSize: size.width * 0.055,
             fontWeight: FontWeight.w600,
             color: textPrimary,
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pushNamed(context, '/my-contributions'),
+            child: Text(
+              'My Contributions',
+              style: GoogleFonts.poppins(
+                fontSize: size.width * 0.035,
+                fontWeight: FontWeight.w500,
+                color: DonationTab._primaryGreen,
+              ),
+            ),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -119,7 +134,7 @@ class _DonationTabContent extends StatelessWidget {
 
               // --- Donation Section Label ---
               Text(
-                'Donation',
+                'Contribution',
                 style: GoogleFonts.poppins(
                   fontSize: size.width * 0.045,
                   fontWeight: FontWeight.w600,
@@ -132,6 +147,7 @@ class _DonationTabContent extends StatelessWidget {
               _DonationButton(
                 icon: Icons.add,
                 label: 'Donate a Book',
+                color: const Color(0xFF10B981),
                 onPressed: () => showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
@@ -144,6 +160,31 @@ class _DonationTabContent extends StatelessWidget {
                 ),
               ),
               SizedBox(height: size.height * 0.03),
+
+              // --- Buy Prime Button (hidden when already prime) ---
+              BlocBuilder<ProfileBloc, ProfileState>(
+                builder: (context, profileState) {
+                  final isPrime = profileState is ProfileLoaded
+                      ? profileState.user.isPrime
+                      : false;
+                  if (isPrime) return const SizedBox.shrink();
+                  return _DonationButton(
+                    icon: Icons.star,
+                    label: 'Buy Prime \u2014 \u20B9100',
+                    color: const Color(0xFFF59E0B),
+                    onPressed: () async {
+                      final result =
+                          await Navigator.pushNamed(context, '/donate-money');
+                      if (result == true && context.mounted) {
+                        context
+                            .read<DonateBookBloc>()
+                            .add(LoadDonationStats());
+                      }
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: size.height * 0.04),
             ],
           ),
         ),
@@ -240,32 +281,6 @@ class _ImpactSection extends StatelessWidget {
 class _BookStatusSection extends StatelessWidget {
   const _BookStatusSection();
 
-  // Maps raw API status string → (display label, color)
-  ({String label, Color color}) _resolveStatus(String apiStatus) {
-    switch (apiStatus.toLowerCase()) {
-      case 'donation_created':
-      case 'pickup_requested':
-      case 'pending':
-        return (label: 'Pending', color: const Color(0xFFFFC107));
-      case 'accepted':
-      case 'processing':
-      case 'out_for_pickup':
-        return (label: 'In Progress', color: const Color(0xFF2196F3));
-      case 'completed':
-      case 'delivered':
-      case 'success':
-        return (label: 'Completed', color: const Color(0xFF4CAF50));
-      case 'cancelled':
-      case 'rejected':
-        return (label: 'Cancelled', color: const Color(0xFFF44336));
-      default:
-        return (
-          label: apiStatus.replaceAll('_', ' ').toUpperCase(),
-          color: const Color(0xFF9E9E9E),
-        );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -336,7 +351,7 @@ class _BookStatusSection extends StatelessWidget {
 
         // --- Loaded ---
         if (state is DonationStatsLoaded) {
-          final books = state.stats.bookStatusList;
+          final books = confirmedBooksSorted(state.stats.bookStatusList);
 
           // --- Empty state ---
           if (books.isEmpty) {
@@ -345,7 +360,7 @@ class _BookStatusSection extends StatelessWidget {
               decoration: cardDecoration(),
               child: Center(
                 child: Text(
-                  'No donated books yet',
+                  'No confirmed donations yet',
                   style: GoogleFonts.poppins(
                     fontSize: size.width * 0.035,
                     color: AppColors.textSecondaryColor(context),
@@ -355,62 +370,37 @@ class _BookStatusSection extends StatelessWidget {
             );
           }
 
-          // Show max 5 books
-          final itemCount = books.length > 5 ? 5 : books.length;
-
-          final listItems = <Widget>[];
-
-          for (var i = 0; i < itemCount; i++) {
-            // Add a thin divider between rows (not before the first)
-            if (i != 0) {
-              listItems.add(Divider(
-                height: 1,
-                thickness: 1,
-                color: AppColors.dividerColor(context),
-              ));
-            }
-
-            // Resolve status label + color
-            final resolved = _resolveStatus(books[i].status);
-
-            listItems.add(
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/donated-book-detail',
-                    arguments: DonatedBooksEntity(
-                      id: books[i].id,
-                      bookTitle: books[i].title,
-                      format: books[i].format,
-                      status: books[i].status,
-                      category: books[i].categoryName ?? '',
-                      donorName: 'You',
-                      coverImageUrl: books[i].coverImageUrl ?? '',
-                      createdAt: books[i].createdAt ??
-                          DateTime.now().toIso8601String(),
-                      language: 'English',
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: size.height * 0.015),
-                  child: _BookStatusRow(
-                    title: books[i].title,
-                    format: books[i].format,
-                    status: resolved.label,
-                    statusColor: resolved.color,
-                  ),
-                ),
-              ),
-            );
-          }
+          // Show max 5
+          final display = books.length > 5 ? books.sublist(0, 5) : books;
 
           return Container(
-            padding: EdgeInsets.symmetric(horizontal: size.width * 0.04),
+            padding: EdgeInsets.symmetric(horizontal: size.width * 0.03),
             decoration: cardDecoration(),
             child: Column(
-              children: listItems,
+              mainAxisSize: MainAxisSize.min,
+              children: display.map((book) {
+                return DonationBookCard(
+                  book: book,
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/donated-book-detail',
+                      arguments: DonatedBooksEntity(
+                        id: book.id,
+                        bookTitle: book.title,
+                        format: book.format,
+                        status: book.status,
+                        category: book.categoryName ?? '',
+                        donorName: 'You',
+                        coverImageUrl: book.coverImageUrl ?? '',
+                        createdAt: book.createdAt ??
+                            DateTime.now().toIso8601String(),
+                        language: 'English',
+                      ),
+                    );
+                  },
+                );
+              }).toList(),
             ),
           );
         }
@@ -426,11 +416,13 @@ class _BookStatusSection extends StatelessWidget {
 class _DonationButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color color;
   final VoidCallback onPressed;
 
   const _DonationButton({
     required this.icon,
     required this.label,
+    required this.color,
     required this.onPressed,
   });
 
@@ -443,7 +435,7 @@ class _DonationButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2CE07F),
+          backgroundColor: color,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -535,67 +527,3 @@ class _ImpactCard extends StatelessWidget {
   }
 }
 
-// ─── Book Status Row ──────────────────────────────────────────
-
-class _BookStatusRow extends StatelessWidget {
-  final String title;
-  final String format;
-  final String status;
-  final Color statusColor;
-
-  const _BookStatusRow({
-    required this.title,
-    required this.format,
-    required this.status,
-    required this.statusColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.poppins(
-                  fontSize: size.width * 0.04,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimaryColor(context),
-                ),
-              ),
-              Text(
-                format,
-                style: GoogleFonts.poppins(
-                  fontSize: size.width * 0.035,
-                  color: AppColors.textSecondaryColor(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.03,
-            vertical: size.height * 0.007,
-          ),
-          decoration: BoxDecoration(
-            color: statusColor,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            status,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: size.width * 0.03,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

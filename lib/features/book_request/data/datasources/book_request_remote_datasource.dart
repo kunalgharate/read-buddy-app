@@ -53,7 +53,7 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   Future<BookDetailModel> getBookById(String id) async {
     try {
       final response = await dio.get('${ApiConstants.books}/$id');
-      if (response.statusCode != ApiConstants.success) {
+        if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load book details');
       }
       final decoded = response.data;

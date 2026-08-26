@@ -81,6 +81,8 @@ import 'package:read_buddy_app/features/settings/settings_screen.dart';
 import 'package:read_buddy_app/features/splash/splash_screen.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/Add/manage_book_variants_page.dart';
+import 'package:read_buddy_app/features/contribute/presentation/pages/contribute_page.dart';
+import 'package:read_buddy_app/features/contribute/presentation/pages/my_contributions_page.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -161,7 +163,9 @@ class AppRouter {
           ),
         );
       case '/verification':
-        return MaterialPageRoute(builder: (_) => EmailVerificationScreen());
+        final email = settings.arguments as String?;
+        return MaterialPageRoute(
+            builder: (_) => EmailVerificationScreen(email: email));
       case '/book-variants':
         final book = settings.arguments as BookCrudModel;
         return MaterialPageRoute(
@@ -355,6 +359,10 @@ class AppRouter {
         );
       case '/subscription':
         return MaterialPageRoute(builder: (_) => const SubscriptionPage());
+      case '/contribute':
+        return MaterialPageRoute(builder: (_) => const ContributePage());
+      case '/my-contributions':
+        return MaterialPageRoute(builder: (_) => const MyContributionsPage());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

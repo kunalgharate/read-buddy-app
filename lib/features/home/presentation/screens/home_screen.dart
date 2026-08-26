@@ -20,6 +20,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
+  void _onTabChanged(int index) {
+    setState(() => _currentIndex = index);
+    // Refresh donation stats every time user switches to Donate tab
+    if (index == 2) {
+      context.read<DonateBookBloc>().add(LoadDonationStats());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: BottomNavWidget(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: _onTabChanged,
       ),
     );
   }

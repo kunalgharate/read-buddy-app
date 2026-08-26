@@ -67,6 +67,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<AppUserModel> registerUser(Map<String, dynamic> data) async {
+    if (kDebugMode) {
+      print('🌐 AuthRemoteDataSource: Starting register API call');
+      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.register}');
+      print('🌐 AuthRemoteDataSource: Raw data: $data');
+    }
+
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
       throw DioException(
@@ -83,7 +89,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'name': data['name']?.toString().trim(),
       };
 
+      // Strip empty picture — backend requires a valid URL or absent
+      if (cleanData['picture'] != null &&
+          cleanData['picture'].toString().trim().isEmpty) {
+        cleanData.remove('picture');
+      }
+
+      if (kDebugMode) {
+        print('🌐 AuthRemoteDataSource: Clean data: $cleanData');
+      }
+
       final response = await _dio.post(ApiConstants.register, data: cleanData);
+
+      if (kDebugMode) {
+        print(
+            '🌐 AuthRemoteDataSource: Register response status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Register response body: ${response.data}');
+      }
 
       if (response.statusCode == ApiConstants.success ||
           response.statusCode == ApiConstants.created) {
@@ -155,11 +178,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<AppUserModel> signInWithGoogle({required String token}) async {
+    if (kDebugMode) {
+      print('🌐 AuthRemoteDataSource: Starting Google sign-in API call');
+      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.loginWithGoogle}');
+      print('🌐 AuthRemoteDataSource: Token length: ${token.length}');
+    }
+
     try {
       final response = await _dio.post(
         ApiConstants.loginWithGoogle,
         data: {'token': token},
       );
+
+      if (kDebugMode) {
+        print(
+            '🌐 AuthRemoteDataSource: Google sign-in response status: ${response.statusCode}');
+        print(
+            '🌐 AuthRemoteDataSource: Google sign-in response body: ${response.data}');
+      }
 
       if (response.statusCode == ApiConstants.success) {
         return AppUserModel.fromJson(response.data);
@@ -171,6 +207,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'Google login failed',
       );
     } catch (e) {
+      if (kDebugMode) {
+        print('🌐 AuthRemoteDataSource: Google sign-in error: $e');
+      }
       rethrow;
     }
   }

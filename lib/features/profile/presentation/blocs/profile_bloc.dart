@@ -31,6 +31,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<UpdateAvatarEvent>(_onUpdateAvatar);
     on<UpdateProfileFieldEvent>(_onUpdateProfileField);
     on<RefreshProfileEvent>(_onRefreshProfile);
+    on<TogglePrimeDebugEvent>(_onTogglePrimeDebug);
   }
 
   // ─── GET /users/profile ───────────────────────────────────────────────────
@@ -123,6 +124,17 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) async {
     add(LoadProfileEvent());
+  }
+
+  /// DEBUG: Toggle isPrime locally without backend call
+  void _onTogglePrimeDebug(
+    TogglePrimeDebugEvent event,
+    Emitter<ProfileState> emit,
+  ) {
+    final currentUser = _currentUser();
+    if (currentUser == null) return;
+    final toggled = currentUser.copyWith(isPrime: !currentUser.isPrime);
+    emit(ProfileLoaded(toggled));
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

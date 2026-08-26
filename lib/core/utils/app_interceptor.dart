@@ -52,10 +52,23 @@ class AppInterceptor extends QueuedInterceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
-      final accessToken = await _secureStorage.read(key: 'accessToken');
-      if (accessToken != null && accessToken.isNotEmpty) {
-        options.headers['Authorization'] = 'Bearer $accessToken';
+      final path = options.uri.path;
+      final isAuthRoute = path.contains('/login') ||
+          path.contains('/register') ||
+          path.contains('/google-auth') ||
+          path.contains('/verify-email') ||
+          path.contains('/resend-reset-otp') ||
+          path.contains('/verify-reset-otp') ||
+          path.contains('/reset-password') ||
+          path.contains('/refresh-token');
+
+      if (!isAuthRoute) {
+        final accessToken = await _secureStorage.read(key: 'accessToken');
+        if (accessToken != null && accessToken.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $accessToken';
+        }
       }
+
       if (!options.headers.containsKey('Content-Type') &&
           options.data is! FormData) {
         options.headers['Content-Type'] = 'application/json';

@@ -33,7 +33,7 @@ class ProfileUser {
     required this.updatedAt,
   });
 
-  ProfileUser copyWith({String? userAvatar, String? picture}) {
+  ProfileUser copyWith({String? userAvatar, String? picture, bool? isPrime}) {
     return ProfileUser(
       id: id,
       name: name,
@@ -42,7 +42,7 @@ class ProfileUser {
       picture: picture ?? this.picture,
       userAvatar: userAvatar ?? this.userAvatar,
       role: role,
-      isPrime: isPrime,
+      isPrime: isPrime ?? this.isPrime,
       finesDue: finesDue,
       isEmailVerified: isEmailVerified,
       onboardingCompleted: onboardingCompleted,

@@ -86,12 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         "email": _emailController.text.trim().toLowerCase(),
         "password": _passwordController.text,
         "phno": _phoneController.text.trim(),
-        "userRole": "user",
-        "picture": "",
-        "deviceInfo": {
-          "deviceModel": "Mobile Device",
-          "deviceOS": "Mobile OS",
-        },
+        "deviceInfo": {},
       };
       context.read<SignUpBloc>().add(RegisterUserEvent(data));
     } else {
@@ -121,7 +116,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 context,
                 message: 'Registration successful! Please verify your email.',
               );
-              Navigator.pushNamed(context, '/verification');
+              Navigator.pushNamed(context, '/verification',
+                  arguments: _emailController.text.trim().toLowerCase());
             }
 
             if (state is SignUpError) {
@@ -322,10 +318,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _phoneController,
                         validator: _validatePhone,
                         keyboardType: TextInputType.number,
+                        maxLength: 10,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Theme.of(context).colorScheme.surface,
                           hintText: 'Enter Phone Number',
+                          counterText: '',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
