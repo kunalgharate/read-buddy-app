@@ -69,6 +69,26 @@ class AppInterceptor extends QueuedInterceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    // Handle rate limiting (429 Too Many Requests)
+    if (err.response?.statusCode == 429) {
+      if (kDebugMode) {
+        print('⚠️ Rate limited: ${err.requestOptions.path}');
+      }
+      // Don't retry — let the error propagate so UI can show appropriate message
+      handler.next(err);
+      return;
+    }
+
+    // Handle Prime membership required
+    if (err.response?.statusCode == 403) {
+      final data = err.response?.data;
+      if (data is Map && data['code'] == 'NOT_PRIME') {
+        // Let the error propagate — UI handles this with a donation prompt
+        handler.next(err);
+        return;
+      }
+    }
+
     if (_shouldAttemptTokenRefresh(err)) {
       try {
         if (kDebugMode) {

@@ -44,10 +44,12 @@ class ApiConstants {
   // Donation endpoints
   static String get getAllDonations => '$baseUrl/donations';
   static String get adminDonations => '$baseUrl/admin/donations';
+  static String get adminDonationSummary => '$baseUrl/admin/donations/summary';
+  static String get adminMoneyDonations => '$baseUrl/admin/donations/money';
   static String donationById(String id) => '$baseUrl/donations/$id';
   static String updateDonationStatus(String id) => '$baseUrl/donations/$id';
   static String updateAdminDonationStatus(String id) =>
-      '$baseUrl/admin/donations/$id';
+      '$baseUrl/admin/donations/$id/status';
   static String get myImpact => '$baseUrl/v1/donations/my-impact';
   static String get createBookDonation =>
       '$baseUrl/v1/donations/createBookDonation';
@@ -105,7 +107,7 @@ class ApiConstants {
   // Money Donation (Razorpay)
   static String get donateMoneyInitiate => '$baseUrl/donations/money/initiate';
   static String get donateMoneyVerify => '$baseUrl/donations/money/verify';
-  static String get myMoneyDonations => '$baseUrl/DonateMoney/my';
+  static String get myMoneyDonations => '$baseUrl/donations/money/my';
 
   // Address CRUD
   static String get addresses => '$baseUrl/addresses';
