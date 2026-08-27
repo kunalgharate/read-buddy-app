@@ -87,7 +87,7 @@ class _DonationSuccessScreenState extends State<DonationSuccessScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Your hardcover book donation has been submitted successfully.\nWe\'ll be in touch soon!',
+                  'Your book donation has been submitted successfully.\nWe\'ll be in touch soon!',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 14,

@@ -35,7 +35,7 @@ Opens PDF or EPUB reader
 Opens audiobook player with background playback
 
 ## Watch Video
-Not yet implemented
+Implemented — in-app video player with Chewie
 
 ---
 

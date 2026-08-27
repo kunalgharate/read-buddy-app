@@ -350,7 +350,7 @@ Splash screen → Check stored token
 | /requests/:id | PATCH | Update request status |
 | /donations/books | POST | Submit a book donation |
 | /donations/money | POST | Submit a money donation |
-| /donations/impact | GET | Get user donation impact stats |
+| /v1/donations/my-impact | GET | Get user donation impact stats |
 | /users/profile | GET | Get user profile |
 | /users/profile | PATCH | Update user profile |
 | /admin/books | POST | Add a new book |

@@ -70,7 +70,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (kDebugMode) {
       print('🌐 AuthRemoteDataSource: Starting register API call');
       print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.register}');
-      print('🌐 AuthRemoteDataSource: Raw data: $data');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -95,17 +94,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         cleanData.remove('picture');
       }
 
-      if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Clean data: $cleanData');
-      }
-
       final response = await _dio.post(ApiConstants.register, data: cleanData);
 
       if (kDebugMode) {
-        print(
-            '🌐 AuthRemoteDataSource: Register response status: ${response.statusCode}');
-        print(
-            '🌐 AuthRemoteDataSource: Register response body: ${response.data}');
+        print('🌐 AuthRemoteDataSource: Register response status: ${response.statusCode}');
       }
 
       if (response.statusCode == ApiConstants.success ||
@@ -193,8 +185,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (kDebugMode) {
         print(
             '🌐 AuthRemoteDataSource: Google sign-in response status: ${response.statusCode}');
-        print(
-            '🌐 AuthRemoteDataSource: Google sign-in response body: ${response.data}');
       }
 
       if (response.statusCode == ApiConstants.success) {

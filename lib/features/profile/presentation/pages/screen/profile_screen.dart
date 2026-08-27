@@ -396,10 +396,6 @@ class _ProfileView extends StatelessWidget {
   }
 
   Widget _buildPrimeMembershipCard() {
-    final now = DateTime.now();
-    final activatedOn = '${now.day} ${_monthName(now.month)} ${now.year}';
-    final expiresOn = '${now.day} ${_monthName(now.month)} ${now.year + 1}';
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -437,56 +433,9 @@ class _ProfileView extends StatelessWidget {
             style: TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              _primeDateChip('Activated On', activatedOn),
-              const SizedBox(width: 20),
-              _primeDateChip('Expires On', expiresOn),
-            ],
-          ),
         ],
       ),
     );
-  }
-
-  Widget _primeDateChip(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white60, fontSize: 11),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _monthName(int m) {
-    const names = [
-      '',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return names[m];
   }
 
   Widget _buildSection({

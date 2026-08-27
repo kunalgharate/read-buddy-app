@@ -29,9 +29,7 @@ class AppUserModel extends AppUser {
         json['user'] != null ? json['user'] as Map<String, dynamic> : json;
 
     if (kDebugMode) {
-      print('👤 AppUserModel: User data: $user');
-      print('👤 AppUserModel: Access token: ${json['accessToken']}');
-      print('👤 AppUserModel: Refresh token: ${json['refreshToken']}');
+      print('👤 AppUserModel: Parsed user id: ${user['_id'] ?? user['id']}');
       print('👤 AppUserModel: isEmailVerified: ${user['isEmailVerified']}');
       print(
           '👤 AppUserModel: onboardingCompleted: ${user['onboardingCompleted']}');

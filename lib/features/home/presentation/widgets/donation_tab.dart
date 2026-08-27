@@ -164,10 +164,12 @@ class _DonationTabContent extends StatelessWidget {
               // --- Buy Prime Button (hidden when already prime) ---
               BlocBuilder<ProfileBloc, ProfileState>(
                 builder: (context, profileState) {
-                  final isPrime = profileState is ProfileLoaded
-                      ? profileState.user.isPrime
-                      : false;
-                  if (isPrime) return const SizedBox.shrink();
+                  if (profileState is! ProfileLoaded) {
+                    return const SizedBox.shrink();
+                  }
+                  if (profileState.user.isPrime) {
+                    return const SizedBox.shrink();
+                  }
                   return _DonationButton(
                     icon: Icons.star,
                     label: 'Buy Prime \u2014 \u20B9100',

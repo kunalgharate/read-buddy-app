@@ -37,7 +37,7 @@ Email/password sign-up
 
 ## 4. Donate Books
 
-User donates a physical, eBook, audiobook, or video book.
+User donates a physical book.
 
 **Fulfillment options:**
 - **Pick Up** — agent collects from user's home
@@ -66,7 +66,7 @@ Requires Prime membership.
 - **Drop** — user collects from library
 
 **Request lifecycle:**
-- Pending → Accepted / Declined
+- Pending → Approved / Cancelled
 - Scheduled → In Transit → Delivered
 - **Validity extend** — user can extend reading period
 - **Return** — Pick Up (agent collects) or Drop (user returns to library)

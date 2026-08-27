@@ -5,9 +5,7 @@ import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/contribute/data/money_donation_service.dart';
 import 'package:read_buddy_app/features/contribute/presentation/bloc/contribute_cubit.dart';
-import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
-import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_events.dart';
-import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_states.dart';
+import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/format_screen.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 
@@ -28,7 +26,7 @@ class _ContributePageState extends State<ContributePage> {
             ..loadMoneyDonations(),
         ),
         BlocProvider(
-          create: (_) => getIt<DonatedBooksBloc>()..add(LoadDonatedBooks()),
+          create: (_) => getIt<DonateBookBloc>()..add(LoadDonationStats()),
         ),
       ],
       child: Scaffold(
@@ -481,13 +479,13 @@ class _ContributePageState extends State<ContributePage> {
   }
 
   Widget _buildImpactSection(BuildContext context, bool isPrime) {
-    return BlocBuilder<DonatedBooksBloc, DonatedBooksState>(
+    return BlocBuilder<DonateBookBloc, DonateBookState>(
       builder: (context, bookState) {
         return BlocBuilder<ContributeCubit, ContributeState>(
           builder: (context, moneyState) {
             int booksDonated = 0;
-            if (bookState is DonatedBooksLoaded) {
-              booksDonated = bookState.donatedBooks.length;
+            if (bookState is DonationStatsLoaded) {
+              booksDonated = bookState.stats.booksDonated;
             }
             int moneyDonated = 0;
             if (moneyState is ContributeLoaded) {
@@ -612,9 +610,9 @@ class _ContributePageState extends State<ContributePage> {
             ),
           ),
           const SizedBox(height: 12),
-          BlocBuilder<DonatedBooksBloc, DonatedBooksState>(
+          BlocBuilder<DonateBookBloc, DonateBookState>(
             builder: (context, state) {
-              if (state is DonatedBooksLoading) {
+              if (state is DonateBookLoading) {
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(32),
@@ -622,11 +620,11 @@ class _ContributePageState extends State<ContributePage> {
                   ),
                 );
               }
-              if (state is DonatedBooksLoaded) {
-                if (state.donatedBooks.isEmpty) {
+              if (state is DonationStatsLoaded) {
+                if (state.stats.bookStatusList.isEmpty) {
                   return _buildEmptySection('No books donated yet.');
                 }
-                final items = state.donatedBooks.take(5).toList();
+                final items = state.stats.bookStatusList.take(5).toList();
                 return Column(
                   children: items.map((d) {
                     return Container(
@@ -654,7 +652,7 @@ class _ContributePageState extends State<ContributePage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  d.bookTitle,
+                                  d.title,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14,
@@ -665,7 +663,7 @@ class _ContributePageState extends State<ContributePage> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${d.category} \u2022 ${d.language}',
+                                  '${d.format} \u2022 ${d.categoryName ?? ''}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: AppColors.textSecondary,
@@ -681,7 +679,7 @@ class _ContributePageState extends State<ContributePage> {
                   }).toList(),
                 );
               }
-              if (state is DonatedBooksLoadingError) {
+              if (state is DonateBookError) {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(32),

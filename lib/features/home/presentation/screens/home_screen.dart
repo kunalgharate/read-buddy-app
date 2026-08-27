@@ -50,19 +50,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             )
           : null,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          MainTab(
-              onDonatePressed: () =>
-                  Navigator.pushNamed(context, '/donate-money')),
-          const CategoryTab(),
-          BlocProvider(
-            create: (_) => getIt<DonateBookBloc>(),
-            child: const DonationTab(),
-          ),
-          const ProfileScreen(),
-        ],
+      body: BlocProvider(
+        create: (_) => getIt<DonateBookBloc>(),
+        child: IndexedStack(
+          index: _currentIndex,
+          children: [
+            MainTab(
+                onDonatePressed: () =>
+                    Navigator.pushNamed(context, '/donate-money')),
+            const CategoryTab(),
+            const DonationTab(),
+            const ProfileScreen(),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavWidget(
         currentIndex: _currentIndex,
