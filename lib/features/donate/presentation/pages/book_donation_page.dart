@@ -13,8 +13,6 @@ import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/cat
 import 'package:read_buddy_app/features/donate/domain/entities/book_donation_request.dart';
 import 'package:read_buddy_app/features/library/domain/entities/library_entity.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
-import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
-import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_events.dart';
 import 'package:read_buddy_app/features/donate/presentation/pages/donation_success_screen.dart';
 
 class DonationPage extends StatelessWidget {
@@ -515,10 +513,9 @@ class _DonationPageState extends State<_DonationPageContent> {
             if (context.mounted) {
               try {
                 context.read<BookBloc>().add(RefreshBooks());
-              } catch (_) {}
-            }
-
-            if (context.mounted) {
+              } catch (e) {
+                debugPrint('❌ BookBloc refresh failed: $e');
+              }
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

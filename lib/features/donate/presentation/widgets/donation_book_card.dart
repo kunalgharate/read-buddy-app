@@ -42,14 +42,13 @@ List<BookStatusItem> confirmedBooksSorted(List<BookStatusItem> all) {
     'success',
     'received',
   };
-  final filtered = all
-      .where((b) => confirmed.contains(b.status.toLowerCase()))
-      .toList()
-    ..sort((a, b) {
-      final da = DateTime.tryParse(a.createdAt ?? '') ?? DateTime(0);
-      final db = DateTime.tryParse(b.createdAt ?? '') ?? DateTime(0);
-      return db.compareTo(da);
-    });
+  final filtered =
+      all.where((b) => confirmed.contains(b.status.toLowerCase())).toList()
+        ..sort((a, b) {
+          final da = DateTime.tryParse(a.createdAt ?? '') ?? DateTime(0);
+          final db = DateTime.tryParse(b.createdAt ?? '') ?? DateTime(0);
+          return db.compareTo(da);
+        });
   return filtered;
 }
 
@@ -68,9 +67,9 @@ class DonationBookCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: AppColors.surfaceColor(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: AppColors.borderColor(context)),
         ),
         child: Row(
           children: [
@@ -94,17 +93,19 @@ class DonationBookCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textPrimaryColor(context),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${book.categoryName ?? ''} \u2022 ${book.format}',
+                    book.categoryName == null || book.categoryName!.isEmpty
+                        ? book.format
+                        : '${book.categoryName} \u2022 ${book.format}',
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSecondaryColor(context),
                     ),
                   ),
                 ],

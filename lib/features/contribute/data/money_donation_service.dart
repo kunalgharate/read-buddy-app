@@ -32,27 +32,23 @@ class MoneyDonationService {
   MoneyDonationService(this._dio);
 
   Future<List<MoneyDonationRecord>> fetchMyMoneyDonations() async {
-    try {
-      final response = await _dio.get(ApiConstants.myMoneyDonations);
-      if (response.statusCode == 200) {
-        final data = response.data;
-        List<dynamic> list;
-        if (data is List) {
-          list = data;
-        } else if (data is Map<String, dynamic>) {
-          list = data['donations'] as List<dynamic>? ??
-              data['data'] as List<dynamic>? ??
-              [];
-        } else {
-          list = [];
-        }
-        return list
-            .map((e) => MoneyDonationRecord.fromJson(e as Map<String, dynamic>))
-            .toList();
+    final response = await _dio.get(ApiConstants.myMoneyDonations);
+    if (response.statusCode == 200) {
+      final data = response.data;
+      List<dynamic> list;
+      if (data is List) {
+        list = data;
+      } else if (data is Map<String, dynamic>) {
+        list = data['donations'] as List<dynamic>? ??
+            data['data'] as List<dynamic>? ??
+            [];
+      } else {
+        list = [];
       }
-      return [];
-    } catch (_) {
-      return [];
+      return list
+          .map((e) => MoneyDonationRecord.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
+    return [];
   }
 }

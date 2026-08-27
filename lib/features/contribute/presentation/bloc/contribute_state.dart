@@ -27,3 +27,12 @@ class ContributeLoaded extends ContributeState {
   @override
   List<Object?> get props => [moneyDonations, totalMoneyDonated];
 }
+
+class ContributeError extends ContributeState {
+  final String message;
+
+  const ContributeError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

@@ -7,7 +7,6 @@ import 'package:read_buddy_app/features/home/presentation/widgets/category_tab.d
 import 'package:read_buddy_app/features/home/presentation/widgets/donation_tab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/main_tab.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/features/profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -50,19 +49,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             )
           : null,
-      body: BlocProvider(
-        create: (_) => getIt<DonateBookBloc>(),
-        child: IndexedStack(
-          index: _currentIndex,
-          children: [
-            MainTab(
-                onDonatePressed: () =>
-                    Navigator.pushNamed(context, '/donate-money')),
-            const CategoryTab(),
-            const DonationTab(),
-            const ProfileScreen(),
-          ],
-        ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          MainTab(
+              onDonatePressed: () =>
+                  Navigator.pushNamed(context, '/donate-money')),
+          const CategoryTab(),
+          const DonationTab(),
+          const ProfileScreen(),
+        ],
       ),
       bottomNavigationBar: BottomNavWidget(
         currentIndex: _currentIndex,

@@ -6,7 +6,7 @@ import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/contribute/data/money_donation_service.dart';
 import 'package:read_buddy_app/features/contribute/presentation/bloc/contribute_cubit.dart';
-import 'package:read_buddy_app/features/donate/domain/entities/donation_stats.dart';
+import 'package:read_buddy_app/features/contribute/presentation/widgets/contribution_utils.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/donate/presentation/widgets/donation_book_card.dart';
 
@@ -110,9 +110,8 @@ class _BooksTab extends StatelessWidget {
                 Text(state.message),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => context
-                      .read<DonateBookBloc>()
-                      .add(LoadDonationStats()),
+                  onPressed: () =>
+                      context.read<DonateBookBloc>().add(LoadDonationStats()),
                   child: const Text('Retry'),
                 ),
               ],
@@ -155,6 +154,9 @@ class _MoneyTab extends StatelessWidget {
         if (state is ContributeLoading) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (state is ContributeError) {
+          return _buildEmpty('Could not load money donations.');
+        }
         if (state is ContributeLoaded) {
           if (state.moneyDonations.isEmpty) {
             return _buildEmpty('No money donations yet.');
@@ -165,8 +167,9 @@ class _MoneyTab extends StatelessWidget {
             itemBuilder: (context, index) {
               final donation = state.moneyDonations[index];
               final dt = DateTime.tryParse(donation.createdAt);
-              final dateStr =
-                  dt != null ? '${dt.day} ${_month(dt.month)} ${dt.year}' : '';
+              final dateStr = dt != null
+                  ? '${dt.day} ${monthName(dt.month)} ${dt.year}'
+                  : '';
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
@@ -211,7 +214,7 @@ class _MoneyTab extends StatelessWidget {
                         ],
                       ),
                     ),
-                    _statusBadge(donation.status),
+                    buildStatusBadge(donation.status),
                   ],
                 ),
               );
@@ -247,55 +250,4 @@ Widget _buildEmpty(String message) {
       ),
     ),
   );
-}
-
-Widget _statusBadge(String status) {
-  Color color;
-  switch (status.toLowerCase()) {
-    case 'completed':
-    case 'success':
-      color = const Color(0xFF4CAF50);
-      break;
-    case 'donation_created':
-    case 'pickup_requested':
-    case 'pending':
-      color = const Color(0xFF2196F3);
-      break;
-    default:
-      color = AppColors.textSecondary;
-  }
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(
-      status.replaceAll('_', ' '),
-      style: GoogleFonts.poppins(
-        color: color,
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-  );
-}
-
-String _month(int m) {
-  const names = [
-    '',
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec'
-  ];
-  return names[m];
 }

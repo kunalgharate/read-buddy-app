@@ -37,11 +37,12 @@ class AppInterceptor extends QueuedInterceptor {
   final FlutterSecureStorage _secureStorage;
   final Dio _authDio;
 
-  static final _authRouteSegments = [
+  static const _authRouteSegments = [
     '/login',
     '/register',
     '/google-auth',
     '/verify-email',
+    '/resend-register-otp',
     '/resend-reset-otp',
     '/verify-reset-otp',
     '/reset-password',
@@ -49,7 +50,7 @@ class AppInterceptor extends QueuedInterceptor {
   ];
 
   static bool _isAuthRoute(String path) =>
-      _authRouteSegments.any(path.contains);
+      _authRouteSegments.any(path.endsWith);
 
   AppInterceptor(this._secureStorage, this._authDio) {
     _authDio.options.connectTimeout = const Duration(seconds: 30);

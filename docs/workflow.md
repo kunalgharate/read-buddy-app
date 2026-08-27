@@ -31,7 +31,7 @@ Email/password sign-up
 |------|----------|
 | User | Home (if onboarding done), else Questionnaire |
 | Admin | Admin Dashboard |
-| Librarian | Librarian Dashboard |
+| Librarian | Home (with a drawer link to the Librarian Dashboard) |
 
 ---
 

@@ -5,6 +5,7 @@ import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/contribute/data/money_donation_service.dart';
 import 'package:read_buddy_app/features/contribute/presentation/bloc/contribute_cubit.dart';
+import 'package:read_buddy_app/features/contribute/presentation/widgets/contribution_utils.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/format_screen.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
@@ -672,7 +673,7 @@ class _ContributePageState extends State<ContributePage> {
                               ],
                             ),
                           ),
-                          _statusBadge(d.status),
+                          buildStatusBadge(d.status),
                         ],
                       ),
                     );
@@ -702,6 +703,9 @@ class _ContributePageState extends State<ContributePage> {
     return BlocBuilder<ContributeCubit, ContributeState>(
       builder: (context, state) {
         if (state is ContributeLoading) {
+          return const SizedBox.shrink();
+        }
+        if (state is ContributeError) {
           return const SizedBox.shrink();
         }
         if (state is ContributeLoaded) {
@@ -775,7 +779,7 @@ class _ContributePageState extends State<ContributePage> {
                               ],
                             ),
                           ),
-                          _statusBadge(d.status),
+                          buildStatusBadge(d.status),
                         ],
                       ),
                     );
@@ -793,26 +797,7 @@ class _ContributePageState extends State<ContributePage> {
   String _formatDate(String iso) {
     final dt = DateTime.tryParse(iso);
     if (dt == null) return '';
-    return '${dt.day} ${_month(dt.month)} ${dt.year}';
-  }
-
-  String _month(int m) {
-    const names = [
-      '',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return names[m];
+    return '${dt.day} ${monthName(dt.month)} ${dt.year}';
   }
 
   Widget _buildEmptySection(String message) {
@@ -828,36 +813,6 @@ class _ContributePageState extends State<ContributePage> {
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _statusBadge(String status) {
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'completed':
-        color = const Color(0xFF4CAF50);
-        break;
-      case 'donation_created':
-      case 'pickup_requested':
-        color = const Color(0xFF2196F3);
-        break;
-      default:
-        color = AppColors.textSecondary;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status.replaceAll('_', ' '),
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );

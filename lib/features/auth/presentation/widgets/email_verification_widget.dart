@@ -186,10 +186,14 @@ class EmailVerificationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   GestureDetector(
-                    onTap: () => _resendCode(
-                      context,
-                      currentUser.toResendPayload(),
-                    ),
+                    onTap: () {
+                      final payload = currentUser.toResendPayload();
+                      if (currentUser.email.isEmpty &&
+                          displayEmail.isNotEmpty) {
+                        payload['email'] = displayEmail;
+                      }
+                      _resendCode(context, payload);
+                    },
                     child: const Text.rich(
                       TextSpan(
                         text: 'If you did not receive code? ',

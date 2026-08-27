@@ -34,6 +34,3 @@ class UpdateProfileFieldEvent extends ProfileEvent {
 }
 
 class RefreshProfileEvent extends ProfileEvent {}
-
-/// DEBUG: Locally toggle isPrime without hitting the backend
-class TogglePrimeDebugEvent extends ProfileEvent {}
