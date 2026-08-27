@@ -42,6 +42,7 @@ import 'package:read_buddy_app/features/video_courses/presentation/pages/video_l
 import 'package:read_buddy_app/features/video_courses/presentation/bloc/video_course_bloc.dart';
 import 'package:read_buddy_app/features/tracking/presentation/pages/tracking_page.dart';
 import 'package:read_buddy_app/features/tracking/presentation/bloc/tracking_bloc.dart';
+import 'package:read_buddy_app/features/subscription/presentation/pages/subscription_page.dart';
 import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_book_detail_page.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_books_page.dart';
@@ -329,6 +330,8 @@ class AppRouter {
             child: TrackingPage(requestId: requestId),
           ),
         );
+      case '/subscription':
+        return MaterialPageRoute(builder: (_) => const SubscriptionPage());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

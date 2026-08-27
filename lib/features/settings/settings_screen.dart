@@ -40,6 +40,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
+          const _SectionHeader(title: 'Membership'),
+          ListTile(
+            leading: const Icon(Icons.workspace_premium, color: Color(0xFF2CE07F)),
+            title: const Text('ReadBuddy Prime'),
+            subtitle: const Text('Unlock unlimited borrowing & more'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/subscription'),
+          ),
+          const Divider(),
           const _SectionHeader(title: 'Appearance'),
           ValueListenableBuilder<ThemeMode>(
             valueListenable: ThemeNotifier.instance,
@@ -91,6 +100,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('My Orders'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.pushNamed(context, '/my-orders'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.play_circle_outline),
+            title: const Text('Video Courses'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/video-courses'),
           ),
           const Divider(),
           ListTile(
