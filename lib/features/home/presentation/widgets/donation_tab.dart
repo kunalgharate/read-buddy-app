@@ -115,7 +115,7 @@ class _DonationTabContent extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/donated-books');
+                      Navigator.pushNamed(context, '/my-contributions');
                     },
                     child: Text(
                       'See all',
