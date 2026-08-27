@@ -30,15 +30,20 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
 
   String get _baseEndpoint => '${ApiConstants.baseUrl}/v1/borrow-orders';
 
+  /// Safely unwrap a `{ data: {...} }` envelope (or a bare object) into a Map.
+  /// Throws a descriptive error if the payload is null/malformed instead of
+  /// letting a raw cast crash.
+  Map<String, dynamic> _unwrapOrder(dynamic data) {
+    final raw = data is Map && data.containsKey('data') ? data['data'] : data;
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    throw Exception('Unexpected or empty order response from server');
+  }
+
   @override
   Future<BorrowOrderModel> getMyDraft() async {
     final response = await _dio.get('$_baseEndpoint/my-draft');
-    final data = response.data;
-
-    final json = data is Map && data.containsKey('data')
-        ? data['data']
-        : data;
-    return BorrowOrderModel.fromJson(json as Map<String, dynamic>);
+    return BorrowOrderModel.fromJson(_unwrapOrder(response.data));
   }
 
   @override
@@ -47,12 +52,7 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
       '$_baseEndpoint/add-book',
       data: {'bookId': bookId},
     );
-    final data = response.data;
-
-    final json = data is Map && data.containsKey('data')
-        ? data['data']
-        : data;
-    return BorrowOrderModel.fromJson(json as Map<String, dynamic>);
+    return BorrowOrderModel.fromJson(_unwrapOrder(response.data));
   }
 
   @override
@@ -60,12 +60,7 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
     final response = await _dio.delete(
       '$_baseEndpoint/remove-book/$bookRequestId',
     );
-    final data = response.data;
-
-    final json = data is Map && data.containsKey('data')
-        ? data['data']
-        : data;
-    return BorrowOrderModel.fromJson(json as Map<String, dynamic>);
+    return BorrowOrderModel.fromJson(_unwrapOrder(response.data));
   }
 
   @override
@@ -81,12 +76,7 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
     if (libraryId != null) body['libraryId'] = libraryId;
 
     final response = await _dio.post('$_baseEndpoint/submit', data: body);
-    final data = response.data;
-
-    final json = data is Map && data.containsKey('data')
-        ? data['data']
-        : data;
-    return BorrowOrderModel.fromJson(json as Map<String, dynamic>);
+    return BorrowOrderModel.fromJson(_unwrapOrder(response.data));
   }
 
   @override
@@ -97,14 +87,16 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
     final List list;
     if (data is List) {
       list = data;
-    } else if (data is Map && data.containsKey('data')) {
+    } else if (data is Map && data['data'] is List) {
       list = data['data'] as List;
     } else {
       list = [];
     }
 
     return list
-        .map((json) => BorrowOrderModel.fromJson(json as Map<String, dynamic>))
+        .whereType<Map>()
+        .map((json) =>
+            BorrowOrderModel.fromJson(Map<String, dynamic>.from(json)))
         .toList();
   }
 
@@ -117,12 +109,7 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
       '$_baseEndpoint/$orderId/cancel',
       data: body,
     );
-    final data = response.data;
-
-    final json = data is Map && data.containsKey('data')
-        ? data['data']
-        : data;
-    return BorrowOrderModel.fromJson(json as Map<String, dynamic>);
+    return BorrowOrderModel.fromJson(_unwrapOrder(response.data));
   }
 
   @override
@@ -130,10 +117,11 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
     final response = await _dio.post('$_baseEndpoint/$orderId/payment');
     final data = response.data;
 
-    if (data is Map && data.containsKey('data')) {
+    if (data is Map && data['data'] is Map) {
       return Map<String, dynamic>.from(data['data'] as Map);
     }
-    return Map<String, dynamic>.from(data as Map);
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return <String, dynamic>{};
   }
 
   @override

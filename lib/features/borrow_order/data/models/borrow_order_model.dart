@@ -20,10 +20,24 @@ class OrderBookItemModel extends OrderBookItem {
       bookAuthor: json['bookAuthor']?.toString() ?? '',
       bookCoverUrl: json['bookCoverUrl']?.toString() ?? '',
       bookPrice: (json['bookPrice'] ?? 0).toDouble(),
-      bookPages: (json['bookPages'] ?? 0) is int
+      bookPages: json['bookPages'] is int
           ? json['bookPages'] as int
           : int.tryParse(json['bookPages']?.toString() ?? '0') ?? 0,
       status: json['status']?.toString() ?? 'pending',
+    );
+  }
+
+  /// Build a model from a plain domain entity (used for safe serialization).
+  factory OrderBookItemModel.fromEntity(OrderBookItem entity) {
+    return OrderBookItemModel(
+      id: entity.id,
+      bookId: entity.bookId,
+      bookTitle: entity.bookTitle,
+      bookAuthor: entity.bookAuthor,
+      bookCoverUrl: entity.bookCoverUrl,
+      bookPrice: entity.bookPrice,
+      bookPages: entity.bookPages,
+      status: entity.status,
     );
   }
 
@@ -58,8 +72,8 @@ class BorrowOrderModel extends BorrowOrderEntity {
 
   factory BorrowOrderModel.fromJson(Map<String, dynamic> json) {
     final bookRequestsList = (json['bookRequests'] as List? ?? [])
-        .map((item) =>
-            OrderBookItemModel.fromJson(item as Map<String, dynamic>))
+        .map(
+            (item) => OrderBookItemModel.fromJson(item as Map<String, dynamic>))
         .toList();
 
     return BorrowOrderModel(
@@ -129,7 +143,9 @@ class BorrowOrderModel extends BorrowOrderEntity {
   Map<String, dynamic> toJson() => {
         'id': id,
         'bookRequests': bookRequests
-            .map((item) => (item as OrderBookItemModel).toJson())
+            .map((item) => item is OrderBookItemModel
+                ? item.toJson()
+                : OrderBookItemModel.fromEntity(item).toJson())
             .toList(),
         'totalBookValue': totalBookValue,
         'budgetLimit': budgetLimit,

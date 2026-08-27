@@ -42,7 +42,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           const _SectionHeader(title: 'Membership'),
           ListTile(
-            leading: const Icon(Icons.workspace_premium, color: Color(0xFF2CE07F)),
+            leading:
+                const Icon(Icons.workspace_premium, color: Color(0xFF2CE07F)),
             title: const Text('ReadBuddy Prime'),
             subtitle: const Text('Unlock unlimited borrowing & more'),
             trailing: const Icon(Icons.chevron_right),
@@ -108,6 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => Navigator.pushNamed(context, '/video-courses'),
           ),
           const Divider(),
+          const _SectionHeader(title: 'Legal & Policies'),
           ListTile(
             leading: const Icon(Icons.description_outlined),
             title: const Text('Terms of Service'),

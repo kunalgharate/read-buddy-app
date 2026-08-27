@@ -23,3 +23,14 @@ final class TrackingError extends TrackingState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Emitted when a refresh fails but we still have the previously loaded
+/// shipment to display. Carries both so the UI can show a transient error
+/// (e.g. snackbar) without losing the visible data.
+final class TrackingRefreshError extends TrackingState {
+  final ShipmentEntity shipment;
+  final String message;
+  const TrackingRefreshError(this.shipment, this.message);
+  @override
+  List<Object?> get props => [shipment, message];
+}

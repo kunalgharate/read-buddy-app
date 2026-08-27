@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import '../../domain/entities/borrow_order_entity.dart';
 import '../bloc/borrow_order_bloc.dart';
@@ -11,10 +11,7 @@ class OrderCartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<BorrowOrderBloc>()..add(LoadDraftOrder()),
-      child: const _OrderCartView(),
-    );
+    return const _OrderCartView();
   }
 }
 
@@ -29,6 +26,13 @@ class _OrderCartViewState extends State<_OrderCartView> {
   FulfillmentMethod? _selectedMethod;
   final _addressController = TextEditingController();
   final _libraryIdController = TextEditingController();
+  Completer<void>? _refreshCompleter;
+
+  void _completeRefresh() {
+    if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+      _refreshCompleter!.complete();
+    }
+  }
 
   @override
   void dispose() {
@@ -46,18 +50,6 @@ class _OrderCartViewState extends State<_OrderCartView> {
       ),
       body: BlocConsumer<BorrowOrderBloc, BorrowOrderState>(
         listener: (context, state) {
-          if (state is BookRemovedFromCart) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Book removed from cart')),
-            );
-            context.read<BorrowOrderBloc>().add(LoadDraftOrder());
-          }
-          if (state is BookAddedToCart) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Book added to cart')),
-            );
-            context.read<BorrowOrderBloc>().add(LoadDraftOrder());
-          }
           if (state is OrderSubmitted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -68,11 +60,15 @@ class _OrderCartViewState extends State<_OrderCartView> {
             Navigator.pop(context);
           }
           if (state is BorrowOrderError) {
+            _completeRefresh();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
-            // Reload draft on error to restore state
-            context.read<BorrowOrderBloc>().add(LoadDraftOrder());
+            // NOTE: Do NOT auto-reload here — a failing LoadDraftOrder would
+            // re-emit BorrowOrderError and cause an infinite request loop.
+          }
+          if (state is DraftOrderLoaded) {
+            _completeRefresh();
           }
         },
         builder: (context, state) {
@@ -83,6 +79,9 @@ class _OrderCartViewState extends State<_OrderCartView> {
           }
           if (state is DraftOrderLoaded) {
             return _buildCartContent(context, state.order);
+          }
+          if (state is BorrowOrderError) {
+            return _buildErrorState(context, state.message);
           }
           return const SizedBox.shrink();
         },
@@ -100,8 +99,10 @@ class _OrderCartViewState extends State<_OrderCartView> {
         Expanded(
           child: RefreshIndicator(
             color: AppColors.primary,
-            onRefresh: () async {
-              context.read<BorrowOrderBloc>().add(LoadDraftOrder());
+            onRefresh: () {
+              _refreshCompleter = Completer<void>();
+              context.read<BorrowOrderBloc>().add(const LoadDraftOrder());
+              return _refreshCompleter!.future;
             },
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -224,6 +225,7 @@ class _OrderCartViewState extends State<_OrderCartView> {
   Widget _buildSubmitSection(BuildContext context, BorrowOrderEntity order) {
     final canSubmit = _selectedMethod != null &&
         order.bookRequests.isNotEmpty &&
+        order.totalBookValue <= order.budgetLimit &&
         (_selectedMethod == FulfillmentMethod.DELIVERY
             ? _addressController.text.trim().isNotEmpty
             : _libraryIdController.text.trim().isNotEmpty);
@@ -372,6 +374,47 @@ class _OrderCartViewState extends State<_OrderCartView> {
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.menu_book_rounded),
               label: const Text('Browse Books'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: AppColors.error),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () =>
+                  context.read<BorrowOrderBloc>().add(const LoadDraftOrder()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -547,9 +590,7 @@ class _MethodCard extends StatelessWidget {
               : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : Colors.grey.shade300,
+            color: isSelected ? AppColors.primary : Colors.grey.shade300,
             width: isSelected ? 2 : 1,
           ),
         ),

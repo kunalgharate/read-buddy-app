@@ -164,7 +164,8 @@ class _PlanCard extends StatelessWidget {
         color: AppColors.cardColor(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: highlighted ? AppColors.primary : AppColors.borderColor(context),
+          color:
+              highlighted ? AppColors.primary : AppColors.borderColor(context),
           width: highlighted ? 2 : 1,
         ),
       ),

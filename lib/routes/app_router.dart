@@ -280,7 +280,7 @@ class AppRouter {
           ),
         );
       case '/terms':
-        return MaterialPageRoute(builder: (_) => const TermsPage());
+        return MaterialPageRoute(builder: (_) => const TermsOfServicePage());
       case '/privacy':
         return MaterialPageRoute(builder: (_) => const PrivacyPolicyPage());
       case '/refund-policy':
@@ -288,21 +288,23 @@ class AppRouter {
       case '/order-cart':
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => getIt<BorrowOrderBloc>()..add(LoadDraftOrder()),
+            create: (_) =>
+                getIt<BorrowOrderBloc>()..add(const LoadDraftOrder()),
             child: const OrderCartPage(),
           ),
         );
       case '/my-orders':
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => getIt<BorrowOrderBloc>()..add(LoadMyOrders()),
+            create: (_) => getIt<BorrowOrderBloc>()..add(const LoadMyOrders()),
             child: const MyOrdersPage(),
           ),
         );
       case '/video-courses':
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => getIt<VideoCourseBloc>()..add(const LoadVideoCourses()),
+            create: (_) =>
+                getIt<VideoCourseBloc>()..add(const LoadVideoCourses()),
             child: const VideoCourseListPage(),
           ),
         );
@@ -310,7 +312,8 @@ class AppRouter {
         final courseId = settings.arguments as String;
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => getIt<VideoCourseBloc>()..add(LoadVideoCourseDetail(courseId)),
+            create: (_) =>
+                getIt<VideoCourseBloc>()..add(LoadVideoCourseDetail(courseId)),
             child: VideoCourseDetailPage(courseId: courseId),
           ),
         );
@@ -318,15 +321,19 @@ class AppRouter {
         final args = settings.arguments as Map<String, String>;
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => getIt<VideoCourseBloc>()..add(LoadVideoLesson(courseId: args['courseId']!, lessonId: args['lessonId']!)),
-            child: VideoLessonPage(courseId: args['courseId']!, lessonId: args['lessonId']!),
+            create: (_) => getIt<VideoCourseBloc>()
+              ..add(LoadVideoLesson(
+                  courseId: args['courseId']!, lessonId: args['lessonId']!)),
+            child: VideoLessonPage(
+                courseId: args['courseId']!, lessonId: args['lessonId']!),
           ),
         );
       case '/tracking':
         final requestId = settings.arguments as String;
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => getIt<TrackingBloc>()..add(LoadShipmentByRequest(requestId)),
+            create: (_) =>
+                getIt<TrackingBloc>()..add(LoadShipmentByRequest(requestId)),
             child: TrackingPage(requestId: requestId),
           ),
         );

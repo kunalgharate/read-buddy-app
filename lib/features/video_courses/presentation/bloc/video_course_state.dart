@@ -34,7 +34,18 @@ final class VideoLessonLoaded extends VideoCourseState {
 
 final class VideoCourseEnrolled extends VideoCourseState {}
 
-final class VideoLessonProgressUpdated extends VideoCourseState {}
+final class VideoLessonProgressUpdated extends VideoCourseState {
+  final VideoLessonEntity lesson;
+  final String courseId;
+  final bool completed;
+  const VideoLessonProgressUpdated(
+    this.lesson,
+    this.courseId, {
+    this.completed = false,
+  });
+  @override
+  List<Object?> get props => [lesson, courseId, completed];
+}
 
 final class VideoCourseError extends VideoCourseState {
   final String message;

@@ -17,20 +17,6 @@ final class DraftOrderLoaded extends BorrowOrderState {
   List<Object?> get props => [order];
 }
 
-final class BookAddedToCart extends BorrowOrderState {
-  final BorrowOrderEntity order;
-  const BookAddedToCart(this.order);
-  @override
-  List<Object?> get props => [order];
-}
-
-final class BookRemovedFromCart extends BorrowOrderState {
-  final BorrowOrderEntity order;
-  const BookRemovedFromCart(this.order);
-  @override
-  List<Object?> get props => [order];
-}
-
 final class OrderSubmitted extends BorrowOrderState {
   final BorrowOrderEntity order;
   const OrderSubmitted(this.order);

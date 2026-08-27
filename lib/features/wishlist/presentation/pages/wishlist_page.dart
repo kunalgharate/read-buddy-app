@@ -1,6 +1,8 @@
+import 'dart:async';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import '../../domain/entities/wishlist_book_entity.dart';
 import '../bloc/wishlist_bloc.dart';
@@ -10,15 +12,36 @@ class WishlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<WishlistBloc>()..add(LoadWishlist()),
-      child: const _WishlistView(),
-    );
+    return const _WishlistView();
   }
 }
 
-class _WishlistView extends StatelessWidget {
+class _WishlistView extends StatefulWidget {
   const _WishlistView();
+
+  @override
+  State<_WishlistView> createState() => _WishlistViewState();
+}
+
+class _WishlistViewState extends State<_WishlistView> {
+  Completer<void>? _refreshCompleter;
+
+  // Ids optimistically removed so the swiped card leaves the tree immediately.
+  final Set<String> _removedIds = {};
+
+  Future<void> _onRefresh() {
+    final completer = Completer<void>();
+    _refreshCompleter = completer;
+    context.read<WishlistBloc>().add(LoadWishlist());
+    return completer.future;
+  }
+
+  void _completeRefresh() {
+    if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+      _refreshCompleter!.complete();
+    }
+    _refreshCompleter = null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +52,14 @@ class _WishlistView extends StatelessWidget {
       ),
       body: BlocConsumer<WishlistBloc, WishlistState>(
         listener: (context, state) {
-          if (state is WishlistBookRemoved) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Book removed from wishlist')),
-            );
-            context.read<WishlistBloc>().add(LoadWishlist());
+          if (state is WishlistLoaded || state is WishlistError) {
+            _completeRefresh();
           }
-          if (state is WishlistBookAdded) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Book added to wishlist')),
-            );
-            context.read<WishlistBloc>().add(LoadWishlist());
+          if (state is WishlistLoaded) {
+            // Fresh list arrived; clear optimistic overrides.
+            if (_removedIds.isNotEmpty) {
+              setState(_removedIds.clear);
+            }
           }
           if (state is WishlistError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -52,21 +72,24 @@ class _WishlistView extends StatelessWidget {
             return const _WishlistShimmer();
           }
           if (state is WishlistLoaded) {
-            if (state.books.isEmpty) {
+            final books = state.books
+                .where((book) => !_removedIds.contains(book.id))
+                .toList();
+            if (books.isEmpty) {
               return _WishlistEmpty(
                 onBrowse: () => Navigator.pop(context),
               );
             }
             return RefreshIndicator(
               color: AppColors.primary,
-              onRefresh: () async {
-                context.read<WishlistBloc>().add(LoadWishlist());
-              },
+              onRefresh: _onRefresh,
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: state.books.length,
+                itemCount: books.length,
                 itemBuilder: (context, index) => _WishlistBookCard(
-                  book: state.books[index],
+                  book: books[index],
+                  onRemoved: () =>
+                      setState(() => _removedIds.add(books[index].id)),
                 ),
               ),
             );
@@ -151,7 +174,8 @@ class _WishlistEmpty extends StatelessWidget {
 
 class _WishlistBookCard extends StatelessWidget {
   final WishlistBookEntity book;
-  const _WishlistBookCard({required this.book});
+  final VoidCallback onRemoved;
+  const _WishlistBookCard({required this.book, required this.onRemoved});
 
   @override
   Widget build(BuildContext context) {
@@ -195,6 +219,10 @@ class _WishlistBookCard extends StatelessWidget {
         );
       },
       onDismissed: (_) {
+        onRemoved();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Book removed from wishlist')),
+        );
         context.read<WishlistBloc>().add(RemoveBookFromWishlist(book.id));
       },
       child: Card(
@@ -209,12 +237,13 @@ class _WishlistBookCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: book.coverImageUrl.isNotEmpty
-                    ? Image.network(
-                        book.coverImageUrl,
+                    ? CachedNetworkImage(
+                        imageUrl: book.coverImageUrl,
                         width: 60,
                         height: 85,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _coverPlaceholder(),
+                        placeholder: (_, __) => _coverLoading(),
+                        errorWidget: (_, __, ___) => _coverPlaceholder(),
                       )
                     : _coverPlaceholder(),
               ),
@@ -266,6 +295,10 @@ class _WishlistBookCard extends StatelessWidget {
               // Remove button
               IconButton(
                 onPressed: () {
+                  onRemoved();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Book removed from wishlist')),
+                  );
                   context
                       .read<WishlistBloc>()
                       .add(RemoveBookFromWishlist(book.id));
@@ -277,6 +310,27 @@ class _WishlistBookCard extends StatelessWidget {
                 tooltip: 'Remove from Wishlist',
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _coverLoading() {
+    return Container(
+      width: 60,
+      height: 85,
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.primary,
           ),
         ),
       ),

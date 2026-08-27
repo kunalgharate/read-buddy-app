@@ -6,7 +6,9 @@ sealed class BorrowOrderEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-final class LoadDraftOrder extends BorrowOrderEvent {}
+final class LoadDraftOrder extends BorrowOrderEvent {
+  const LoadDraftOrder();
+}
 
 final class AddBookToCart extends BorrowOrderEvent {
   final String bookId;
@@ -35,7 +37,9 @@ final class SubmitBorrowOrder extends BorrowOrderEvent {
   List<Object?> get props => [fulfillmentMethod, address, libraryId];
 }
 
-final class LoadMyOrders extends BorrowOrderEvent {}
+final class LoadMyOrders extends BorrowOrderEvent {
+  const LoadMyOrders();
+}
 
 final class CancelBorrowOrder extends BorrowOrderEvent {
   final String orderId;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import '../../domain/entities/video_course_entity.dart';
 import '../bloc/video_course_bloc.dart';
@@ -16,11 +15,7 @@ class VideoLessonPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<VideoCourseBloc>()
-        ..add(LoadVideoLesson(courseId: courseId, lessonId: lessonId)),
-      child: _VideoLessonView(courseId: courseId, lessonId: lessonId),
-    );
+    return _VideoLessonView(courseId: courseId, lessonId: lessonId);
   }
 }
 
@@ -38,13 +33,12 @@ class _VideoLessonView extends StatelessWidget {
       ),
       body: BlocConsumer<VideoCourseBloc, VideoCourseState>(
         listener: (context, state) {
-          if (state is VideoLessonProgressUpdated) {
+          // Only show a snackbar when the lesson is marked complete —
+          // not on every routine progress (slider) update.
+          if (state is VideoLessonProgressUpdated && state.completed) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Progress updated!')),
+              const SnackBar(content: Text('Lesson marked as complete!')),
             );
-            context.read<VideoCourseBloc>().add(
-                  LoadVideoLesson(courseId: courseId, lessonId: lessonId),
-                );
           }
           if (state is VideoCourseError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -64,8 +58,50 @@ class _VideoLessonView extends StatelessWidget {
               courseId: state.courseId,
             );
           }
+          // Keep showing the lesson content after a progress update
+          if (state is VideoLessonProgressUpdated) {
+            return _LessonContent(
+              lesson: state.lesson,
+              courseId: state.courseId,
+            );
+          }
+          if (state is VideoCourseError) {
+            return _buildError(context);
+          }
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+
+  Widget _buildError(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: AppColors.error),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to load lesson',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => context.read<VideoCourseBloc>().add(
+                    LoadVideoLesson(courseId: courseId, lessonId: lessonId),
+                  ),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -201,7 +237,9 @@ class _LessonContentState extends State<_LessonContent> {
                 Row(
                   children: [
                     Text(
-                      _formatDuration(widget.lesson.watchedSeconds),
+                      _formatDuration(
+                        (_sliderValue * widget.lesson.duration).round(),
+                      ),
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -228,8 +266,7 @@ class _LessonContentState extends State<_LessonContent> {
                               );
                         },
                         activeColor: AppColors.primary,
-                        inactiveColor:
-                            AppColors.primary.withValues(alpha: 0.2),
+                        inactiveColor: AppColors.primary.withValues(alpha: 0.2),
                       ),
                     ),
                     Text(

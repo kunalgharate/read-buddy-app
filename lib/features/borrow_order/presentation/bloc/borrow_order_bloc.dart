@@ -62,10 +62,12 @@ class BorrowOrderBloc extends Bloc<BorrowOrderEvent, BorrowOrderState> {
     AddBookToCart event,
     Emitter<BorrowOrderState> emit,
   ) async {
-    emit(BorrowOrderLoading());
+    // Don't emit full loading — keep the existing cart visible during mutation
     try {
-      final order = await _addBookToOrder(event.bookId);
-      emit(BookAddedToCart(order));
+      await _addBookToOrder(event.bookId);
+      // Re-fetch the draft so the UI shows the authoritative updated cart
+      final order = await _getMyDraft();
+      emit(DraftOrderLoaded(order));
     } catch (e) {
       emit(BorrowOrderError(ErrorHandler.getErrorMessage(e)));
     }
@@ -75,9 +77,10 @@ class BorrowOrderBloc extends Bloc<BorrowOrderEvent, BorrowOrderState> {
     RemoveBookFromCart event,
     Emitter<BorrowOrderState> emit,
   ) async {
+    // Don't emit full loading — keep the existing cart visible during mutation
     try {
       final order = await _removeBookFromOrder(event.bookRequestId);
-      emit(BookRemovedFromCart(order));
+      emit(DraftOrderLoaded(order));
     } catch (e) {
       emit(BorrowOrderError(ErrorHandler.getErrorMessage(e)));
     }

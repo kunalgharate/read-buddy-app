@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import '../../domain/entities/video_course_entity.dart';
 import '../bloc/video_course_bloc.dart';
-import 'video_course_detail_page.dart';
 
 class VideoCourseListPage extends StatelessWidget {
   const VideoCourseListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<VideoCourseBloc>()..add(const LoadVideoCourses()),
-      child: const _VideoCourseListView(),
-    );
+    return const _VideoCourseListView();
   }
 }
 
@@ -72,10 +68,14 @@ class _VideoCourseListViewState extends State<_VideoCourseListView> {
                 ),
               ),
               onSubmitted: (query) {
-                if (query.trim().isNotEmpty) {
+                final trimmed = query.trim();
+                if (trimmed.isNotEmpty) {
                   context
                       .read<VideoCourseBloc>()
-                      .add(SearchVideoCourses(query.trim()));
+                      .add(SearchVideoCourses(trimmed));
+                } else {
+                  // Empty query — reload all courses
+                  context.read<VideoCourseBloc>().add(const LoadVideoCourses());
                 }
               },
             ),
@@ -100,7 +100,21 @@ class _VideoCourseListViewState extends State<_VideoCourseListView> {
                 }
                 if (state is VideoCoursesLoaded) {
                   if (state.courses.isEmpty) {
-                    return const _EmptyCourses();
+                    return RefreshIndicator(
+                      color: AppColors.primary,
+                      onRefresh: () async {
+                        context
+                            .read<VideoCourseBloc>()
+                            .add(const LoadVideoCourses());
+                      },
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(height: 120),
+                          _EmptyCourses(),
+                        ],
+                      ),
+                    );
                   }
                   return RefreshIndicator(
                     color: AppColors.primary,
@@ -110,6 +124,7 @@ class _VideoCourseListViewState extends State<_VideoCourseListView> {
                           .add(const LoadVideoCourses());
                     },
                     child: GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.all(16),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -125,11 +140,45 @@ class _VideoCourseListViewState extends State<_VideoCourseListView> {
                     ),
                   );
                 }
+                if (state is VideoCourseError) {
+                  return _buildError(context);
+                }
                 return const SizedBox.shrink();
               },
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildError(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: AppColors.error),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to load courses',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () =>
+                  context.read<VideoCourseBloc>().add(const LoadVideoCourses()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -196,11 +245,10 @@ class _CourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
+        Navigator.pushNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => VideoCourseDetailPage(courseId: course.id),
-          ),
+          '/video-course-detail',
+          arguments: course.id,
         );
       },
       child: Card(
@@ -214,10 +262,11 @@ class _CourseCard extends StatelessWidget {
             AspectRatio(
               aspectRatio: 16 / 9,
               child: course.thumbnail.isNotEmpty
-                  ? Image.network(
-                      course.thumbnail,
+                  ? CachedNetworkImage(
+                      imageUrl: course.thumbnail,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _thumbnailPlaceholder(),
+                      placeholder: (_, __) => _thumbnailPlaceholder(),
+                      errorWidget: (_, __, ___) => _thumbnailPlaceholder(),
                     )
                   : _thumbnailPlaceholder(),
             ),

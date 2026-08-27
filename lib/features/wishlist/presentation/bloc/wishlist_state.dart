@@ -17,10 +17,6 @@ final class WishlistLoaded extends WishlistState {
   List<Object?> get props => [books];
 }
 
-final class WishlistBookAdded extends WishlistState {}
-
-final class WishlistBookRemoved extends WishlistState {}
-
 final class WishlistError extends WishlistState {
   final String message;
   const WishlistError(this.message);

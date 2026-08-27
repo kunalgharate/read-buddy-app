@@ -15,11 +15,19 @@ class ShipmentModel extends ShipmentEntity {
   factory ShipmentModel.fromJson(Map<String, dynamic> json) {
     return ShipmentModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      requestId: json['requestId']?.toString() ?? '',
-      trackingId: json['trackingId']?.toString() ?? '',
-      courier: json['courier']?.toString() ?? '',
+      requestId: json['requestId']?.toString() ??
+          json['bookRequestId']?.toString() ??
+          '',
+      // Backend uses 'trackingNumber' (see ShipmentTrackingWidget); accept
+      // 'trackingId' as a fallback.
+      trackingId: json['trackingNumber']?.toString() ??
+          json['trackingId']?.toString() ??
+          '',
+      // Backend uses 'carrier'; accept 'courier' as a fallback.
+      courier: json['carrier']?.toString() ?? json['courier']?.toString() ?? '',
       status: json['status']?.toString() ?? 'ordered',
-      receiptImageUrl: json['receiptImageUrl']?.toString(),
+      receiptImageUrl:
+          json['receiptImageUrl']?.toString() ?? json['receiptUrl']?.toString(),
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
@@ -28,10 +36,10 @@ class ShipmentModel extends ShipmentEntity {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
+        '_id': id,
         'requestId': requestId,
-        'trackingId': trackingId,
-        'courier': courier,
+        'trackingNumber': trackingId,
+        'carrier': courier,
         'status': status,
         'receiptImageUrl': receiptImageUrl,
         'createdAt': createdAt.toIso8601String(),

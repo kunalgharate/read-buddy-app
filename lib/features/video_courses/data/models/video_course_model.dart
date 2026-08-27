@@ -31,8 +31,22 @@ class VideoLessonModel extends VideoLessonEntity {
     );
   }
 
+  /// Build a model from a plain domain entity (for safe serialization).
+  factory VideoLessonModel.fromEntity(VideoLessonEntity e) {
+    return VideoLessonModel(
+      id: e.id,
+      title: e.title,
+      duration: e.duration,
+      videoUrl: e.videoUrl,
+      thumbnailUrl: e.thumbnailUrl,
+      orderIndex: e.orderIndex,
+      isCompleted: e.isCompleted,
+      watchedSeconds: e.watchedSeconds,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
-        'id': id,
+        '_id': id,
         'title': title,
         'duration': duration,
         'videoUrl': videoUrl,
@@ -86,7 +100,7 @@ class VideoCourseModel extends VideoCourseEntity {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
+        '_id': id,
         'title': title,
         'description': description,
         'thumbnail': thumbnail,
@@ -97,7 +111,9 @@ class VideoCourseModel extends VideoCourseEntity {
         'isEnrolled': isEnrolled,
         'progress': progress,
         'lessons': lessons
-            .map((e) => (e as VideoLessonModel).toJson())
+            .map((e) => e is VideoLessonModel
+                ? e.toJson()
+                : VideoLessonModel.fromEntity(e).toJson())
             .toList(),
       };
 }

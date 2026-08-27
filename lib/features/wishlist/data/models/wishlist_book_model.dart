@@ -16,10 +16,12 @@ class WishlistBookModel extends WishlistBookEntity {
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       author: json['author']?.toString() ?? '',
-      coverImageUrl: json['coverImageUrl']?.toString() ?? json['coverImage']?.toString() ?? '',
+      coverImageUrl: json['coverImageUrl']?.toString() ??
+          json['coverImage']?.toString() ??
+          '',
       price: (json['price'] ?? 0).toDouble(),
       condition: json['condition']?.toString() ?? 'Good',
-      pages: (json['pages'] ?? 0) is int
+      pages: json['pages'] is int
           ? json['pages'] as int
           : int.tryParse(json['pages']?.toString() ?? '0') ?? 0,
     );

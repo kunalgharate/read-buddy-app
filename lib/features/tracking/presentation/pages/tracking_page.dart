@@ -22,7 +22,14 @@ class TrackingPage extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocBuilder<TrackingBloc, TrackingState>(
+      body: BlocConsumer<TrackingBloc, TrackingState>(
+        listener: (context, state) {
+          if (state is TrackingRefreshError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Refresh failed: ${state.message}')),
+            );
+          }
+        },
         builder: (context, state) {
           if (state is TrackingLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -33,6 +40,11 @@ class TrackingPage extends StatelessWidget {
           }
 
           if (state is TrackingLoaded) {
+            return _buildTrackingContent(context, state.shipment);
+          }
+
+          // Keep showing the last-good shipment behind a transient refresh error
+          if (state is TrackingRefreshError) {
             return _buildTrackingContent(context, state.shipment);
           }
 
@@ -168,8 +180,13 @@ class TrackingPage extends StatelessWidget {
   }
 
   Widget _buildStatusTimeline(BuildContext context, String currentStatus) {
-    final steps = ['ordered', 'shipped', 'in_transit', 'delivered'];
-    final currentIndex = steps.indexOf(currentStatus.toLowerCase());
+    const steps = ['ordered', 'shipped', 'in_transit', 'delivered'];
+    // Map common backend aliases to the canonical timeline steps.
+    final normalized = _normalizeStatus(currentStatus);
+    final rawIndex = steps.indexOf(normalized);
+    // If the status is unknown, default to the first step so the timeline
+    // still renders sensibly (with the current status shown separately above).
+    final currentIndex = rawIndex >= 0 ? rawIndex : 0;
 
     return Card(
       child: Padding(
@@ -183,10 +200,19 @@ class TrackingPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
+            if (rawIndex < 0) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Current status: ${_formatStatus(currentStatus)}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ],
             const SizedBox(height: 16),
             ...List.generate(steps.length, (index) {
-              final isCompleted = index <= currentIndex;
-              final isCurrent = index == currentIndex;
+              final isCompleted = rawIndex >= 0 && index <= currentIndex;
+              final isCurrent = rawIndex >= 0 && index == currentIndex;
               final isLast = index == steps.length - 1;
 
               return _buildTimelineStep(
@@ -202,6 +228,28 @@ class TrackingPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Maps known backend status aliases to canonical timeline step names.
+  String _normalizeStatus(String status) {
+    final s = status.toLowerCase().trim();
+    switch (s) {
+      case 'pending':
+      case 'created':
+      case 'confirmed':
+        return 'ordered';
+      case 'dispatched':
+      case 'out_for_delivery':
+        return 'shipped';
+      case 'intransit':
+      case 'in-transit':
+        return 'in_transit';
+      case 'completed':
+      case 'received':
+        return 'delivered';
+      default:
+        return s;
+    }
   }
 
   Widget _buildTimelineStep(
@@ -229,9 +277,7 @@ class TrackingPage extends StatelessWidget {
                   height: 32,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isCompleted
-                        ? activeColor
-                        : colorScheme.surface,
+                    color: isCompleted ? activeColor : colorScheme.surface,
                     border: Border.all(
                       color: isCompleted ? activeColor : inactiveColor,
                       width: 2,
@@ -240,9 +286,7 @@ class TrackingPage extends StatelessWidget {
                   child: Icon(
                     icon,
                     size: 16,
-                    color: isCompleted
-                        ? colorScheme.onPrimary
-                        : inactiveColor,
+                    color: isCompleted ? colorScheme.onPrimary : inactiveColor,
                   ),
                 ),
                 if (!isLast)
@@ -311,9 +355,8 @@ class TrackingPage extends StatelessWidget {
                     height: 200,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(

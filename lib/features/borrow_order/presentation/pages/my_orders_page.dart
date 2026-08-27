@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import '../../domain/entities/borrow_order_entity.dart';
 import '../bloc/borrow_order_bloc.dart';
@@ -11,15 +11,25 @@ class MyOrdersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<BorrowOrderBloc>()..add(LoadMyOrders()),
-      child: const _MyOrdersView(),
-    );
+    return const _MyOrdersView();
   }
 }
 
-class _MyOrdersView extends StatelessWidget {
+class _MyOrdersView extends StatefulWidget {
   const _MyOrdersView();
+
+  @override
+  State<_MyOrdersView> createState() => _MyOrdersViewState();
+}
+
+class _MyOrdersViewState extends State<_MyOrdersView> {
+  Completer<void>? _refreshCompleter;
+
+  void _completeRefresh() {
+    if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+      _refreshCompleter!.complete();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +47,18 @@ class _MyOrdersView extends StatelessWidget {
                 backgroundColor: Colors.green,
               ),
             );
-            context.read<BorrowOrderBloc>().add(LoadMyOrders());
+            context.read<BorrowOrderBloc>().add(const LoadMyOrders());
           }
           if (state is BorrowOrderError) {
+            _completeRefresh();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
-            context.read<BorrowOrderBloc>().add(LoadMyOrders());
+            // NOTE: Do NOT auto-reload — a failing LoadMyOrders would re-emit
+            // BorrowOrderError and cause an infinite request loop.
+          }
+          if (state is MyOrdersLoaded) {
+            _completeRefresh();
           }
         },
         builder: (context, state) {
@@ -58,8 +73,10 @@ class _MyOrdersView extends StatelessWidget {
             }
             return RefreshIndicator(
               color: AppColors.primary,
-              onRefresh: () async {
-                context.read<BorrowOrderBloc>().add(LoadMyOrders());
+              onRefresh: () {
+                _refreshCompleter = Completer<void>();
+                context.read<BorrowOrderBloc>().add(const LoadMyOrders());
+                return _refreshCompleter!.future;
               },
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -69,6 +86,9 @@ class _MyOrdersView extends StatelessWidget {
                 ),
               ),
             );
+          }
+          if (state is BorrowOrderError) {
+            return _buildErrorState(context, state.message);
           }
           return const SizedBox.shrink();
         },
@@ -112,6 +132,47 @@ class _MyOrdersView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: AppColors.error),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () =>
+                  context.read<BorrowOrderBloc>().add(const LoadMyOrders()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
@@ -327,61 +388,98 @@ class _OrderCardState extends State<_OrderCard> {
   }
 
   void _showCancelDialog(BuildContext context, String orderId) {
-    final noteController = TextEditingController();
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Cancel Order'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Are you sure you want to cancel this order?'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: noteController,
-              maxLines: 2,
-              decoration: InputDecoration(
-                labelText: 'Reason (optional)',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Keep Order'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<BorrowOrderBloc>().add(
-                    CancelBorrowOrder(
-                      orderId,
-                      note: noteController.text.trim().isNotEmpty
-                          ? noteController.text.trim()
-                          : null,
-                    ),
-                  );
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
+      builder: (ctx) => _CancelOrderDialog(
+        orderId: orderId,
+        bloc: context.read<BorrowOrderBloc>(),
       ),
     );
   }
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+}
+
+// ─── Cancel Order Dialog (StatefulWidget to properly dispose controller) ─────
+
+class _CancelOrderDialog extends StatefulWidget {
+  final String orderId;
+  final BorrowOrderBloc bloc;
+  const _CancelOrderDialog({required this.orderId, required this.bloc});
+
+  @override
+  State<_CancelOrderDialog> createState() => _CancelOrderDialogState();
+}
+
+class _CancelOrderDialogState extends State<_CancelOrderDialog> {
+  final _noteController = TextEditingController();
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Cancel Order'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Are you sure you want to cancel this order?'),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _noteController,
+            maxLines: 2,
+            decoration: InputDecoration(
+              labelText: 'Reason (optional)',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Keep Order'),
+        ),
+        TextButton(
+          onPressed: () {
+            final note = _noteController.text.trim();
+            Navigator.pop(context);
+            widget.bloc.add(
+              CancelBorrowOrder(
+                widget.orderId,
+                note: note.isNotEmpty ? note : null,
+              ),
+            );
+          },
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: AppColors.error),
+          ),
+        ),
+      ],
+    );
   }
 }
 

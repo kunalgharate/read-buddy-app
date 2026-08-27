@@ -108,6 +108,11 @@ class VideoCourseBloc extends Bloc<VideoCourseEvent, VideoCourseState> {
     UpdateVideoLessonProgress event,
     Emitter<VideoCourseState> emit,
   ) async {
+    // Capture the current lesson so we can emit an updated copy without a reload
+    final current = state;
+    final VideoLessonEntity? currentLesson =
+        current is VideoLessonLoaded ? current.lesson : null;
+
     try {
       await _updateLessonProgress(
         courseId: event.courseId,
@@ -115,7 +120,25 @@ class VideoCourseBloc extends Bloc<VideoCourseEvent, VideoCourseState> {
         watchedSeconds: event.watchedSeconds,
         completed: event.completed,
       );
-      emit(VideoLessonProgressUpdated());
+
+      // Build an updated lesson locally so the UI keeps its content and does
+      // not flash a full-screen loading spinner.
+      final base = currentLesson;
+      final updated = VideoLessonEntity(
+        id: base?.id ?? event.lessonId,
+        title: base?.title ?? '',
+        duration: base?.duration ?? 0,
+        videoUrl: base?.videoUrl ?? '',
+        thumbnailUrl: base?.thumbnailUrl ?? '',
+        orderIndex: base?.orderIndex ?? 0,
+        isCompleted: event.completed || (base?.isCompleted ?? false),
+        watchedSeconds: event.watchedSeconds,
+      );
+      emit(VideoLessonProgressUpdated(
+        updated,
+        event.courseId,
+        completed: event.completed,
+      ));
     } catch (e) {
       emit(VideoCourseError(ErrorHandler.getErrorMessage(e)));
     }

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import '../../domain/entities/video_course_entity.dart';
 import '../bloc/video_course_bloc.dart';
-import 'video_lesson_page.dart';
 
 class VideoCourseDetailPage extends StatelessWidget {
   final String courseId;
@@ -12,11 +10,7 @@ class VideoCourseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) =>
-          getIt<VideoCourseBloc>()..add(LoadVideoCourseDetail(courseId)),
-      child: _VideoCourseDetailView(courseId: courseId),
-    );
+    return _VideoCourseDetailView(courseId: courseId);
   }
 }
 
@@ -56,8 +50,43 @@ class _VideoCourseDetailView extends StatelessWidget {
           if (state is VideoCourseDetailLoaded) {
             return _CourseDetailContent(course: state.course);
           }
+          if (state is VideoCourseError) {
+            return _buildError(context);
+          }
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+
+  Widget _buildError(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: AppColors.error),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to load course',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => context
+                  .read<VideoCourseBloc>()
+                  .add(LoadVideoCourseDetail(courseId)),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -279,14 +308,10 @@ class _LessonTile extends StatelessWidget {
       child: ListTile(
         onTap: isEnrolled
             ? () {
-                Navigator.push(
+                Navigator.pushNamed(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => VideoLessonPage(
-                      courseId: courseId,
-                      lessonId: lesson.id,
-                    ),
-                  ),
+                  '/video-lesson',
+                  arguments: {'courseId': courseId, 'lessonId': lesson.id},
                 );
               }
             : null,

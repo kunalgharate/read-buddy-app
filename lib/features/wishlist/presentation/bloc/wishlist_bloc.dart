@@ -44,7 +44,8 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
   ) async {
     try {
       await _addToWishlist(event.bookId);
-      emit(WishlistBookAdded());
+      final books = await _getWishlist();
+      emit(WishlistLoaded(books));
     } catch (e) {
       emit(WishlistError(ErrorHandler.getErrorMessage(e)));
     }
@@ -56,7 +57,8 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
   ) async {
     try {
       await _removeFromWishlist(event.bookId);
-      emit(WishlistBookRemoved());
+      final books = await _getWishlist();
+      emit(WishlistLoaded(books));
     } catch (e) {
       emit(WishlistError(ErrorHandler.getErrorMessage(e)));
     }

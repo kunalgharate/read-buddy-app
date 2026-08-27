@@ -12,17 +12,20 @@ class TrackingRemoteDataSourceImpl implements TrackingRemoteDataSource {
 
   TrackingRemoteDataSourceImpl({required Dio dio}) : _dio = dio;
 
+  /// Safely unwrap a `{ data: {...} }` envelope (or bare object) into a Map.
+  Map<String, dynamic> _unwrap(dynamic data) {
+    final raw = data is Map && data.containsKey('data') ? data['data'] : data;
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    throw Exception('No shipment information available yet');
+  }
+
   @override
   Future<ShipmentModel> getShipmentByRequest(String requestId) async {
     final response = await _dio.get(
       ApiConstants.shipmentByRequest(requestId),
     );
-    final data = response.data;
-
-    final json = data is Map && data.containsKey('data')
-        ? data['data']
-        : data;
-    return ShipmentModel.fromJson(json as Map<String, dynamic>);
+    return ShipmentModel.fromJson(_unwrap(response.data));
   }
 
   @override
@@ -30,11 +33,6 @@ class TrackingRemoteDataSourceImpl implements TrackingRemoteDataSource {
     final response = await _dio.get(
       ApiConstants.shipmentById(id),
     );
-    final data = response.data;
-
-    final json = data is Map && data.containsKey('data')
-        ? data['data']
-        : data;
-    return ShipmentModel.fromJson(json as Map<String, dynamic>);
+    return ShipmentModel.fromJson(_unwrap(response.data));
   }
 }
