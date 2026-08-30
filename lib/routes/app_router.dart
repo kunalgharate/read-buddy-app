@@ -33,6 +33,8 @@ import 'package:read_buddy_app/features/wishlist/presentation/bloc/wishlist_bloc
 import 'package:read_buddy_app/features/legal/terms_page.dart';
 import 'package:read_buddy_app/features/legal/privacy_policy_page.dart';
 import 'package:read_buddy_app/features/legal/refund_policy_page.dart';
+import 'package:read_buddy_app/features/legal/copyright_policy_page.dart';
+import 'package:read_buddy_app/features/legal/faq_page.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/pages/order_cart_page.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/pages/my_orders_page.dart';
 import 'package:read_buddy_app/features/borrow_order/presentation/bloc/borrow_order_bloc.dart';
@@ -294,6 +296,11 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const PrivacyPolicyPage());
       case '/refund-policy':
         return MaterialPageRoute(builder: (_) => const RefundPolicyPage());
+      case '/copyright':
+        return MaterialPageRoute(builder: (_) => const CopyrightPolicyPage());
+      case '/faq':
+      case '/help':
+        return MaterialPageRoute(builder: (_) => const FaqPage());
       case '/order-cart':
         return MaterialPageRoute(
           builder: (_) => BlocProvider(

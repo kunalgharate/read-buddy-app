@@ -128,6 +128,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.pushNamed(context, '/refund-policy'),
           ),
+          ListTile(
+            leading: const Icon(Icons.copyright_outlined),
+            title: const Text('Copyright & Takedown'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/copyright'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.help_outline),
+            title: const Text('Help & FAQ'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/faq'),
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.info_outline),
