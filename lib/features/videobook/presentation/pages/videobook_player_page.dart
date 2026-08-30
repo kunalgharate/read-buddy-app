@@ -41,6 +41,9 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
   final SaveReadingProgress _saveProgress = getIt<SaveReadingProgress>();
   final GetReadingProgress _getProgress = getIt<GetReadingProgress>();
   Timer? _saveDebounce;
+  Timer? _positionTimer;
+  int _resumeSeconds = 0; // exact position to seek to on the resumed part
+  bool _seekedToResume = false;
 
   bool get _trackProgress =>
       widget.bookId != null && widget.bookId!.isNotEmpty;
@@ -52,15 +55,16 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
     _resolveStartPartThenInit();
   }
 
-  /// Resume from the saved chapter if no explicit start index was provided.
+  /// Resume from the saved chapter + position if no explicit start index.
   Future<void> _resolveStartPartThenInit() async {
     if (_trackProgress && widget.startPartIndex == 0) {
       try {
         final saved = await _getProgress(widget.bookId!);
         if (saved != null &&
-            saved.currentPart > 0 &&
+            saved.currentPart >= 0 &&
             saved.currentPart < widget.parts.length) {
           _currentPartIndex = saved.currentPart;
+          _resumeSeconds = saved.positionSeconds;
         }
       } catch (_) {}
     }
@@ -70,31 +74,40 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
   void _persistProgress() {
     if (!_trackProgress) return;
     _saveDebounce?.cancel();
-    _saveDebounce = Timer(const Duration(milliseconds: 600), () {
-      final total = widget.parts.length;
-      final percentage = total > 0 ? ((_currentPartIndex + 1) / total) * 100 : 0.0;
-      _saveProgress(
-        ReadingProgressEntity(
-          bookId: widget.bookId!,
-          title: widget.bookTitle,
-          coverImageUrl: widget.coverImageUrl ?? '',
-          format: 'videobook',
-          fileUrl: widget.parts[_currentPartIndex].videoUrl ?? '',
-          currentPart: _currentPartIndex,
-          totalParts: total,
-          positionSeconds:
-              _videoController?.value.position.inSeconds ?? 0,
-          percentage: percentage.clamp(0, 100),
-          completed: _currentPartIndex >= total - 1,
-          lastReadAt: DateTime.now(),
-        ),
-      );
-    });
+    _saveDebounce = Timer(const Duration(milliseconds: 600), _saveNow);
+  }
+
+  void _saveNow() {
+    if (!_trackProgress) return;
+    final total = widget.parts.length;
+    final partDur = _videoController?.value.duration.inSeconds ?? 0;
+    final posSec = _videoController?.value.position.inSeconds ?? 0;
+    final perPart = total > 0 ? 100.0 / total : 0.0;
+    final withinPart = partDur > 0 ? (posSec / partDur).clamp(0.0, 1.0) : 0.0;
+    final percentage = (_currentPartIndex * perPart) + (withinPart * perPart);
+    _saveProgress(
+      ReadingProgressEntity(
+        bookId: widget.bookId!,
+        title: widget.bookTitle,
+        coverImageUrl: widget.coverImageUrl ?? '',
+        format: 'videobook',
+        fileUrl: widget.parts[_currentPartIndex].videoUrl ?? '',
+        currentPart: _currentPartIndex,
+        totalParts: total,
+        positionSeconds: posSec,
+        percentage: percentage.clamp(0, 100),
+        completed:
+            _currentPartIndex >= total - 1 && withinPart > 0.98,
+        lastReadAt: DateTime.now(),
+      ),
+    );
   }
 
   @override
   void dispose() {
     _saveDebounce?.cancel();
+    _positionTimer?.cancel();
+    _saveNow();
     _chewieController?.dispose();
     _videoController?.dispose();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -156,6 +169,22 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
       // Auto-play next when video ends
       _videoController!.addListener(_onVideoProgress);
 
+      // Seek to the saved position once, when resuming this part.
+      if (!_seekedToResume && _resumeSeconds > 0) {
+        _seekedToResume = true;
+        final dur = _videoController!.value.duration;
+        final target = Duration(seconds: _resumeSeconds);
+        if (target < dur) {
+          await _videoController!.seekTo(target);
+        }
+      }
+
+      // Persist exact position periodically while watching.
+      _positionTimer?.cancel();
+      _positionTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+        if (_videoController?.value.isPlaying ?? false) _saveNow();
+      });
+
       setState(() => _loading = false);
       _persistProgress();
     } catch (e) {
@@ -181,6 +210,7 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
   void _playPart(int index) {
     if (index < 0 || index >= widget.parts.length) return;
     _videoController?.removeListener(_onVideoProgress);
+    _resumeSeconds = 0; // new part starts from the beginning
     setState(() => _currentPartIndex = index);
     _initPlayer();
     _persistProgress();
