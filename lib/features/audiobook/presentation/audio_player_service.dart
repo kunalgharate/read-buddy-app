@@ -2,7 +2,10 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/services/file_cache_service.dart';
+import '../../reading_progress/domain/entities/reading_progress_entity.dart';
+import '../../reading_progress/domain/usecases/reading_progress_usecases.dart';
 import '../domain/entities/audiobook.dart';
 import 'services/playback_state_service.dart';
 
@@ -44,6 +47,7 @@ class AudioPlayerService {
   Duration get position => player.position;
 
   StreamSubscription? _completionSub;
+  Timer? _progressTimer;
   _AudioHandler? _audioHandler;
 
   /// Initialize audio service for background playback. Call once at app start.
@@ -138,6 +142,13 @@ class AudioPlayerService {
 
     // Also listen to play/pause changes for notification
     player.playingStream.listen((_) => _updatePlaybackState());
+
+    // Periodically persist progress while playing so it appears in
+    // "Continue reading" even without an explicit pause.
+    _progressTimer?.cancel();
+    _progressTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (player.playing) _saveState();
+    });
 
     // Restore saved state if same book and no explicit track
     if (trackIndex == 0) {
@@ -246,6 +257,7 @@ class AudioPlayerService {
 
   Future<void> stop() async {
     await _saveState();
+    _progressTimer?.cancel();
     await player.stop();
     _currentBook = null;
     _bookNotifier.value = null;
@@ -258,11 +270,46 @@ class AudioPlayerService {
 
   Future<void> _saveState() async {
     if (_currentBook == null) return;
+    final book = _currentBook!;
+    final trackIndex = _currentTrackIndex;
+    final position = player.position;
+
+    // Local (existing) — instant resume for the audio player itself.
     try {
       await PlaybackStateService.save(
-        bookId: _currentBook!.id,
-        trackIndex: _currentTrackIndex,
-        position: player.position,
+        bookId: book.id,
+        trackIndex: trackIndex,
+        position: position,
+      );
+    } catch (_) {}
+
+    // Backend — powers the cross-device "Continue reading" section.
+    try {
+      final totalTracks = book.tracks.length;
+      final trackDur = book.tracks[trackIndex].duration.inSeconds;
+      // Approximate overall percentage across the whole audiobook.
+      final perTrack = totalTracks > 0 ? 100.0 / totalTracks : 0.0;
+      final withinTrack = trackDur > 0
+          ? (position.inSeconds / trackDur).clamp(0.0, 1.0)
+          : 0.0;
+      final percentage =
+          (trackIndex * perTrack) + (withinTrack * perTrack);
+
+      await getIt<SaveReadingProgress>()(
+        ReadingProgressEntity(
+          bookId: book.id,
+          title: book.title,
+          author: book.author,
+          coverImageUrl: book.coverUrl,
+          format: 'audiobook',
+          fileUrl: book.tracks[trackIndex].url,
+          currentPart: trackIndex,
+          totalParts: totalTracks,
+          positionSeconds: position.inSeconds,
+          percentage: percentage.clamp(0, 100),
+          completed: trackIndex >= totalTracks - 1 && withinTrack > 0.98,
+          lastReadAt: DateTime.now(),
+        ),
       );
     } catch (_) {}
   }
