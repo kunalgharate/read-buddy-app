@@ -280,6 +280,9 @@ class _LanguageAndActions extends StatelessWidget {
                 'url': url,
                 'title': book.title,
                 'language': cubitState.selectedLanguage ?? 'en',
+                'bookId': book.id,
+                'coverImageUrl': book.coverImageUrl,
+                'author': book.author,
               },
             );
           }
@@ -336,6 +339,8 @@ class _LanguageAndActions extends StatelessWidget {
               Navigator.pushNamed(context, '/videobook-player', arguments: {
                 'bookTitle': book.title,
                 'parts': videoParts,
+                'bookId': book.id,
+                'coverImageUrl': book.coverImageUrl,
               });
             } else {
               ScaffoldMessenger.of(context).showSnackBar(

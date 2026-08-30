@@ -1,20 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_variant_entity.dart';
+import 'package:read_buddy_app/features/reading_progress/domain/entities/reading_progress_entity.dart';
+import 'package:read_buddy_app/features/reading_progress/domain/usecases/reading_progress_usecases.dart';
 
 class VideobookPlayerPage extends StatefulWidget {
   final String bookTitle;
   final List<MediaPartEntity> parts;
   final int startPartIndex;
+  final String? bookId;
+  final String? coverImageUrl;
 
   const VideobookPlayerPage({
     super.key,
     required this.bookTitle,
     required this.parts,
     this.startPartIndex = 0,
+    this.bookId,
+    this.coverImageUrl,
   });
 
   @override
@@ -28,15 +37,64 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
   bool _loading = true;
   bool _hasError = false;
 
+  // ─── Reading progress ─────────────────────────────────────────────────────
+  final SaveReadingProgress _saveProgress = getIt<SaveReadingProgress>();
+  final GetReadingProgress _getProgress = getIt<GetReadingProgress>();
+  Timer? _saveDebounce;
+
+  bool get _trackProgress =>
+      widget.bookId != null && widget.bookId!.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
     _currentPartIndex = widget.startPartIndex;
-    _initPlayer();
+    _resolveStartPartThenInit();
+  }
+
+  /// Resume from the saved chapter if no explicit start index was provided.
+  Future<void> _resolveStartPartThenInit() async {
+    if (_trackProgress && widget.startPartIndex == 0) {
+      try {
+        final saved = await _getProgress(widget.bookId!);
+        if (saved != null &&
+            saved.currentPart > 0 &&
+            saved.currentPart < widget.parts.length) {
+          _currentPartIndex = saved.currentPart;
+        }
+      } catch (_) {}
+    }
+    await _initPlayer();
+  }
+
+  void _persistProgress() {
+    if (!_trackProgress) return;
+    _saveDebounce?.cancel();
+    _saveDebounce = Timer(const Duration(milliseconds: 600), () {
+      final total = widget.parts.length;
+      final percentage = total > 0 ? ((_currentPartIndex + 1) / total) * 100 : 0.0;
+      _saveProgress(
+        ReadingProgressEntity(
+          bookId: widget.bookId!,
+          title: widget.bookTitle,
+          coverImageUrl: widget.coverImageUrl ?? '',
+          format: 'videobook',
+          fileUrl: widget.parts[_currentPartIndex].videoUrl ?? '',
+          currentPart: _currentPartIndex,
+          totalParts: total,
+          positionSeconds:
+              _videoController?.value.position.inSeconds ?? 0,
+          percentage: percentage.clamp(0, 100),
+          completed: _currentPartIndex >= total - 1,
+          lastReadAt: DateTime.now(),
+        ),
+      );
+    });
   }
 
   @override
   void dispose() {
+    _saveDebounce?.cancel();
     _chewieController?.dispose();
     _videoController?.dispose();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -99,6 +157,7 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
       _videoController!.addListener(_onVideoProgress);
 
       setState(() => _loading = false);
+      _persistProgress();
     } catch (e) {
       setState(() {
         _loading = false;
@@ -124,6 +183,7 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
     _videoController?.removeListener(_onVideoProgress);
     setState(() => _currentPartIndex = index);
     _initPlayer();
+    _persistProgress();
   }
 
   void _showChapterList(BuildContext context) {

@@ -38,6 +38,12 @@ class ApiConstants {
   // Monthly data
   static String get monthlyData => '$baseUrl/home/monthly-stats';
 
+  // Reading progress (continue reading / resume)
+  static String get readingProgress => '$baseUrl/reading-progress';
+  static String get recentReadingProgress => '$baseUrl/reading-progress/recent';
+  static String readingProgressByBook(String bookId) =>
+      '$baseUrl/reading-progress/$bookId';
+
   // Category endpoints
   static String get categories => '$baseUrl/categories';
 

@@ -28,6 +28,21 @@ import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dar
 import 'package:read_buddy_app/features/bookcrud/presentation/pages/books_list_page.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/pages/category_list_page.dart';
 import 'package:read_buddy_app/features/donate/presentation/pages/book_donation_page.dart';
+import 'package:read_buddy_app/features/wishlist/presentation/pages/wishlist_page.dart';
+import 'package:read_buddy_app/features/wishlist/presentation/bloc/wishlist_bloc.dart';
+import 'package:read_buddy_app/features/legal/terms_page.dart';
+import 'package:read_buddy_app/features/legal/privacy_policy_page.dart';
+import 'package:read_buddy_app/features/legal/refund_policy_page.dart';
+import 'package:read_buddy_app/features/borrow_order/presentation/pages/order_cart_page.dart';
+import 'package:read_buddy_app/features/borrow_order/presentation/pages/my_orders_page.dart';
+import 'package:read_buddy_app/features/borrow_order/presentation/bloc/borrow_order_bloc.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/pages/video_course_list_page.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/pages/video_course_detail_page.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/pages/video_lesson_page.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/bloc/video_course_bloc.dart';
+import 'package:read_buddy_app/features/tracking/presentation/pages/tracking_page.dart';
+import 'package:read_buddy_app/features/tracking/presentation/bloc/tracking_bloc.dart';
+import 'package:read_buddy_app/features/subscription/presentation/pages/subscription_page.dart';
 import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_book_detail_page.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/pages/donated_books_page.dart';
@@ -213,21 +228,27 @@ class AppRouter {
         final ebook = settings.arguments as EBook;
         return MaterialPageRoute(builder: (_) => EBookDetailPage(ebook: ebook));
       case '/pdf-reader':
-        final args = settings.arguments as Map<String, String>;
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
           builder: (_) => PdfReaderPage(
-            url: args['url']!,
-            title: args['title']!,
-            language: args['language'] ?? 'en',
+            url: args['url'] as String,
+            title: args['title'] as String,
+            language: (args['language'] as String?) ?? 'en',
+            bookId: args['bookId'] as String?,
+            coverImageUrl: args['coverImageUrl'] as String?,
+            author: args['author'] as String?,
           ),
         );
       case '/epub-reader':
-        final args = settings.arguments as Map<String, String>;
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
           builder: (_) => EpubReaderPage(
-            url: args['url']!,
-            title: args['title']!,
-            language: args['language'] ?? 'en',
+            url: args['url'] as String,
+            title: args['title'] as String,
+            language: (args['language'] as String?) ?? 'en',
+            bookId: args['bookId'] as String?,
+            coverImageUrl: args['coverImageUrl'] as String?,
+            author: args['author'] as String?,
           ),
         );
       case '/audiobooks':
@@ -245,6 +266,9 @@ class AppRouter {
           builder: (_) => VideobookPlayerPage(
             bookTitle: args['bookTitle'] as String,
             parts: args['parts'] as List<MediaPartEntity>,
+            bookId: args['bookId'] as String?,
+            coverImageUrl: args['coverImageUrl'] as String?,
+            startPartIndex: (args['startPartIndex'] as int?) ?? 0,
           ),
         );
       case '/donated-book-detail':
@@ -257,6 +281,73 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => AdminDonationDetailPage(book: book),
         );
+      case '/wishlist':
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<WishlistBloc>()..add(LoadWishlist()),
+            child: const WishlistPage(),
+          ),
+        );
+      case '/terms':
+        return MaterialPageRoute(builder: (_) => const TermsOfServicePage());
+      case '/privacy':
+        return MaterialPageRoute(builder: (_) => const PrivacyPolicyPage());
+      case '/refund-policy':
+        return MaterialPageRoute(builder: (_) => const RefundPolicyPage());
+      case '/order-cart':
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) =>
+                getIt<BorrowOrderBloc>()..add(const LoadDraftOrder()),
+            child: const OrderCartPage(),
+          ),
+        );
+      case '/my-orders':
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<BorrowOrderBloc>()..add(const LoadMyOrders()),
+            child: const MyOrdersPage(),
+          ),
+        );
+      case '/video-courses':
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) =>
+                getIt<VideoCourseBloc>()..add(const LoadVideoCourses()),
+            child: const VideoCourseListPage(),
+          ),
+        );
+      case '/video-course-detail':
+        final courseId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) =>
+                getIt<VideoCourseBloc>()..add(LoadVideoCourseDetail(courseId)),
+            child: VideoCourseDetailPage(courseId: courseId),
+          ),
+        );
+      case '/video-lesson':
+        final args = settings.arguments as Map<String, String>;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => getIt<VideoCourseBloc>()
+              ..add(LoadVideoLesson(
+                  courseId: args['courseId']!, lessonId: args['lessonId']!)),
+            child: VideoLessonPage(
+                courseId: args['courseId']!, lessonId: args['lessonId']!),
+          ),
+        );
+      case '/tracking':
+        final requestId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) =>
+                getIt<TrackingBloc>()..add(LoadShipmentByRequest(requestId)),
+            child: TrackingPage(requestId: requestId),
+          ),
+        );
+      case '/subscription':
+        return MaterialPageRoute(builder: (_) => const SubscriptionPage());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

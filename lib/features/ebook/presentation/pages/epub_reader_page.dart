@@ -1,19 +1,30 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_epub_viewer/flutter_epub_viewer.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../reading_progress/domain/entities/reading_progress_entity.dart';
+import '../../../reading_progress/domain/usecases/reading_progress_usecases.dart';
 import '../services/tts_service.dart';
 
 class EpubReaderPage extends StatefulWidget {
   final String url;
   final String title;
   final String language;
+  final String? bookId;
+  final String? coverImageUrl;
+  final String? author;
 
   const EpubReaderPage({
     super.key,
     required this.url,
     required this.title,
     this.language = 'en',
+    this.bookId,
+    this.coverImageUrl,
+    this.author,
   });
 
   @override
@@ -30,14 +41,65 @@ class _EpubReaderPageState extends State<EpubReaderPage> {
   List<EpubChapter> _chapters = [];
   String? _selectedText;
 
+  // ─── Reading progress ─────────────────────────────────────────────────────
+  final SaveReadingProgress _saveProgress = getIt<SaveReadingProgress>();
+  final GetReadingProgress _getProgress = getIt<GetReadingProgress>();
+  String? _restoreCfi;
+  bool _restored = false;
+  String _currentCfi = '';
+  Timer? _saveDebounce;
+
+  bool get _trackProgress =>
+      widget.bookId != null && widget.bookId!.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
     _ttsService.init(widget.language);
+    _loadSavedProgress();
+  }
+
+  Future<void> _loadSavedProgress() async {
+    if (!_trackProgress) return;
+    try {
+      final saved = await _getProgress(widget.bookId!);
+      if (saved != null && saved.locator.isNotEmpty) {
+        _restoreCfi = saved.locator;
+      }
+    } catch (_) {
+      // start from beginning
+    }
+  }
+
+  void _persistProgress() {
+    if (!_trackProgress) return;
+    _saveDebounce?.cancel();
+    _saveDebounce = Timer(const Duration(milliseconds: 800), _saveNow);
+  }
+
+  void _saveNow() {
+    if (!_trackProgress) return;
+    _saveProgress(
+      ReadingProgressEntity(
+        bookId: widget.bookId!,
+        title: widget.title,
+        author: widget.author ?? '',
+        coverImageUrl: widget.coverImageUrl ?? '',
+        format: 'ebook',
+        fileUrl: widget.url,
+        language: widget.language,
+        locator: _currentCfi,
+        percentage: (_progress * 100).clamp(0, 100),
+        completed: _progress >= 0.99,
+        lastReadAt: DateTime.now(),
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _saveDebounce?.cancel();
+    _saveNow();
     _ttsService.dispose();
     super.dispose();
   }
@@ -305,11 +367,23 @@ class _EpubReaderPageState extends State<EpubReaderPage> {
         onChaptersLoaded: (chapters) {
           setState(() => _chapters = chapters);
         },
-        onEpubLoaded: () {},
+        onEpubLoaded: () {
+          // Resume to the saved CFI once the book is ready.
+          final cfi = _restoreCfi;
+          if (!_restored && cfi != null && cfi.isNotEmpty) {
+            _restored = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _epubController.display(cfi: cfi);
+              _showSnackBar('Resumed where you left off');
+            });
+          }
+        },
         onRelocated: (value) {
           setState(() {
             _progress = value.progress;
+            _currentCfi = value.startCfi;
           });
+          _persistProgress();
         },
         onTextSelected: _onTextSelected,
         displaySettings: EpubDisplaySettings(

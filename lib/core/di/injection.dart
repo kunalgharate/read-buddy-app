@@ -80,7 +80,43 @@ import 'package:read_buddy_app/features/bookcrud/domain/usecases/get_variants_fo
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/add_parts_to_format.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/bloc/book_crud_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/bloc/variant/variant_bloc.dart';
+
+// Wishlist
+import 'package:read_buddy_app/features/wishlist/data/datasources/wishlist_remote_datasource.dart';
+import 'package:read_buddy_app/features/wishlist/data/repositories/wishlist_repository_impl.dart';
+import 'package:read_buddy_app/features/wishlist/domain/repositories/wishlist_repository.dart';
+import 'package:read_buddy_app/features/wishlist/domain/usecases/wishlist_usecases.dart';
+import 'package:read_buddy_app/features/wishlist/presentation/bloc/wishlist_bloc.dart';
+
+// Borrow Order
+import 'package:read_buddy_app/features/borrow_order/data/datasources/borrow_order_remote_datasource.dart';
+import 'package:read_buddy_app/features/borrow_order/data/repositories/borrow_order_repository_impl.dart';
+import 'package:read_buddy_app/features/borrow_order/domain/repositories/borrow_order_repository.dart';
+import 'package:read_buddy_app/features/borrow_order/domain/usecases/borrow_order_usecases.dart';
+import 'package:read_buddy_app/features/borrow_order/presentation/bloc/borrow_order_bloc.dart';
+
+// Video Courses
+import 'package:read_buddy_app/features/video_courses/data/datasources/video_course_remote_datasource.dart';
+import 'package:read_buddy_app/features/video_courses/data/repositories/video_course_repository_impl.dart';
+import 'package:read_buddy_app/features/video_courses/domain/repositories/video_course_repository.dart';
+import 'package:read_buddy_app/features/video_courses/domain/usecases/video_course_usecases.dart';
+import 'package:read_buddy_app/features/video_courses/presentation/bloc/video_course_bloc.dart';
+
+// Tracking
+import 'package:read_buddy_app/features/tracking/data/datasources/tracking_remote_datasource.dart';
+import 'package:read_buddy_app/features/tracking/data/repositories/tracking_repository_impl.dart';
+import 'package:read_buddy_app/features/tracking/domain/repositories/tracking_repository.dart';
+import 'package:read_buddy_app/features/tracking/domain/usecases/tracking_usecases.dart';
+import 'package:read_buddy_app/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
+
+// Reading Progress
+import 'package:read_buddy_app/features/reading_progress/data/datasources/reading_progress_local_datasource.dart';
+import 'package:read_buddy_app/features/reading_progress/data/datasources/reading_progress_remote_datasource.dart';
+import 'package:read_buddy_app/features/reading_progress/data/repositories/reading_progress_repository_impl.dart';
+import 'package:read_buddy_app/features/reading_progress/domain/repositories/reading_progress_repository.dart';
+import 'package:read_buddy_app/features/reading_progress/domain/usecases/reading_progress_usecases.dart';
+import 'package:read_buddy_app/features/reading_progress/presentation/cubit/recent_reading_cubit.dart';
 
 // Category CRUD
 import 'package:read_buddy_app/features/category_crud/data/datasources/category_remote_dataresources.dart';
@@ -216,6 +252,11 @@ Future<void> configureDependencies() async {
   _registerAddressFeature();
   _registerLibrarianFeature();
   _registerReviewsFeature();
+  _registerWishlistFeature();
+  _registerBorrowOrderFeature();
+  _registerVideoCourseFeature();
+  _registerTrackingFeature();
+  _registerReadingProgressFeature();
 }
 
 // ========================================
@@ -829,4 +870,157 @@ void _registerReviewsFeature() {
         updateReview: getIt<UpdateReview>(),
         deleteReview: getIt<DeleteReview>(),
       ));
+}
+
+// ========================================
+// WISHLIST FEATURE
+// ========================================
+void _registerWishlistFeature() {
+  // DataSource
+  getIt.registerLazySingleton<WishlistRemoteDataSource>(
+    () => WishlistRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<WishlistRepository>(
+    () => WishlistRepositoryImpl(getIt<WishlistRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetWishlist(getIt<WishlistRepository>()));
+  getIt.registerLazySingleton(() => AddToWishlist(getIt<WishlistRepository>()));
+  getIt.registerLazySingleton(() => RemoveFromWishlist(getIt<WishlistRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => WishlistBloc(
+        getWishlist: getIt<GetWishlist>(),
+        addToWishlist: getIt<AddToWishlist>(),
+        removeFromWishlist: getIt<RemoveFromWishlist>(),
+      ));
+}
+
+// ========================================
+// BORROW ORDER FEATURE
+// ========================================
+void _registerBorrowOrderFeature() {
+  // DataSource
+  getIt.registerLazySingleton<BorrowOrderRemoteDataSource>(
+    () => BorrowOrderRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<BorrowOrderRepository>(
+    () => BorrowOrderRepositoryImpl(getIt<BorrowOrderRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetMyDraft(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => AddBookToOrder(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => RemoveBookFromOrder(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => SubmitOrder(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => GetMyOrders(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => CancelOrder(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => CreatePayment(getIt<BorrowOrderRepository>()));
+  getIt.registerLazySingleton(() => VerifyPayment(getIt<BorrowOrderRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => BorrowOrderBloc(
+        getMyDraft: getIt<GetMyDraft>(),
+        addBookToOrder: getIt<AddBookToOrder>(),
+        removeBookFromOrder: getIt<RemoveBookFromOrder>(),
+        submitOrder: getIt<SubmitOrder>(),
+        getMyOrders: getIt<GetMyOrders>(),
+        cancelOrder: getIt<CancelOrder>(),
+        createPayment: getIt<CreatePayment>(),
+        verifyPayment: getIt<VerifyPayment>(),
+      ));
+}
+
+// ========================================
+// VIDEO COURSES FEATURE
+// ========================================
+void _registerVideoCourseFeature() {
+  // DataSource
+  getIt.registerLazySingleton<VideoCourseRemoteDataSource>(
+    () => VideoCourseRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<VideoCourseRepository>(
+    () => VideoCourseRepositoryImpl(getIt<VideoCourseRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetVideoCourses(getIt<VideoCourseRepository>()));
+  getIt.registerLazySingleton(() => GetVideoCourseById(getIt<VideoCourseRepository>()));
+  getIt.registerLazySingleton(() => GetVideoLesson(getIt<VideoCourseRepository>()));
+  getIt.registerLazySingleton(() => EnrolInCourse(getIt<VideoCourseRepository>()));
+  getIt.registerLazySingleton(() => UpdateLessonProgress(getIt<VideoCourseRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => VideoCourseBloc(
+        getVideoCourses: getIt<GetVideoCourses>(),
+        getVideoCourseById: getIt<GetVideoCourseById>(),
+        getVideoLesson: getIt<GetVideoLesson>(),
+        enrolInCourse: getIt<EnrolInCourse>(),
+        updateLessonProgress: getIt<UpdateLessonProgress>(),
+      ));
+}
+
+// ========================================
+// TRACKING FEATURE
+// ========================================
+void _registerTrackingFeature() {
+  // DataSource
+  getIt.registerLazySingleton<TrackingRemoteDataSource>(
+    () => TrackingRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<TrackingRepository>(
+    () => TrackingRepositoryImpl(getIt<TrackingRemoteDataSource>()),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(() => GetShipmentByRequest(getIt<TrackingRepository>()));
+  getIt.registerLazySingleton(() => GetShipmentById(getIt<TrackingRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => TrackingBloc(
+        getShipmentByRequest: getIt<GetShipmentByRequest>(),
+        getShipmentById: getIt<GetShipmentById>(),
+      ));
+}
+
+// ========================================
+// READING PROGRESS FEATURE
+// ========================================
+void _registerReadingProgressFeature() {
+  // DataSources
+  getIt.registerLazySingleton<ReadingProgressRemoteDataSource>(
+    () => ReadingProgressRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<ReadingProgressLocalDataSource>(
+    () => ReadingProgressLocalDataSourceImpl(),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<ReadingProgressRepository>(
+    () => ReadingProgressRepositoryImpl(
+      getIt<ReadingProgressRemoteDataSource>(),
+      getIt<ReadingProgressLocalDataSource>(),
+    ),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(
+      () => SaveReadingProgress(getIt<ReadingProgressRepository>()));
+  getIt.registerLazySingleton(
+      () => GetReadingProgress(getIt<ReadingProgressRepository>()));
+  getIt.registerLazySingleton(
+      () => GetRecentReadingProgress(getIt<ReadingProgressRepository>()));
+
+  // Cubit
+  getIt.registerFactory(
+      () => RecentReadingCubit(getIt<GetRecentReadingProgress>()));
 }

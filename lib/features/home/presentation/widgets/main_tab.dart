@@ -12,6 +12,8 @@ import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_bl
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_event.dart';
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_state.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
+import 'package:read_buddy_app/features/reading_progress/domain/entities/reading_progress_entity.dart';
+import 'package:read_buddy_app/features/reading_progress/presentation/cubit/recent_reading_cubit.dart';
 
 // ─────────────────────────────────────────────
 // MainTab — always provide both blocs
@@ -27,16 +29,19 @@ class MainTab extends StatefulWidget {
 
 class _MainTabState extends State<MainTab> {
   late final HomeBloc _homeBloc;
+  late final RecentReadingCubit _recentReadingCubit;
 
   @override
   void initState() {
     super.initState();
     _homeBloc = getIt<HomeBloc>()..add(LoadHomeData());
+    _recentReadingCubit = getIt<RecentReadingCubit>()..load();
   }
 
   @override
   void dispose() {
     _homeBloc.close();
+    _recentReadingCubit.close();
     super.dispose();
   }
 
@@ -45,6 +50,7 @@ class _MainTabState extends State<MainTab> {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _homeBloc),
+        BlocProvider.value(value: _recentReadingCubit),
         BlocProvider(create: (_) => getIt<BannerBloc>()),
       ],
       child: _MainTabView(onDonatePressed: widget.onDonatePressed),
@@ -112,6 +118,7 @@ class _MainTabView extends StatelessWidget {
                       isPrime: isPrime,
                       onDonatePressed: onDonatePressed,
                     ),
+                    const _ContinueReadingSection(),
                     const SizedBox(height: 32),
                     _BookSection(
                       title: 'Latest',
@@ -751,4 +758,356 @@ class _StatItem extends StatelessWidget {
       ],
     );
   }
+}
+
+// ─────────────────────────────────────────────
+// Continue Reading — shows the last read book (hero) plus a
+// "Recent reading" row with one item per format (ebook / video / audio).
+// Placed right after the banner. Hidden entirely when there's no history.
+// ─────────────────────────────────────────────
+
+class _ContinueReadingSection extends StatelessWidget {
+  const _ContinueReadingSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<RecentReadingCubit, RecentReadingState>(
+      builder: (context, state) {
+        if (state is! RecentReadingLoaded) {
+          return const SizedBox.shrink();
+        }
+
+        final last = state.lastRead;
+        if (last == null) return const SizedBox.shrink();
+
+        final recent = state.oncePerFormat;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 28),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Continue Reading',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimaryColor(context),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _ContinueReadingHeroCard(item: last),
+            ),
+            if (recent.length > 1) ...[
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Jump back in',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimaryColor(context),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 150,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: recent.length,
+                  itemBuilder: (_, i) =>
+                      _RecentReadingCard(item: recent[i]),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Route the user back into the correct reader/player, resuming position.
+void resumeReading(BuildContext context, ReadingProgressEntity item) {
+  switch (item.format) {
+    case 'videobook':
+      // Video parts aren't available here; open the book detail to re-enter.
+      _openBookDetail(context, item.bookId);
+      break;
+    case 'audiobook':
+      _openBookDetail(context, item.bookId);
+      break;
+    case 'ebook':
+    default:
+      if (item.fileUrl.isEmpty) {
+        _openBookDetail(context, item.bookId);
+        return;
+      }
+      final route = item.fileUrl.toLowerCase().contains('.epub')
+          ? '/epub-reader'
+          : '/pdf-reader';
+      Navigator.pushNamed(
+        context,
+        route,
+        arguments: {
+          'url': item.fileUrl,
+          'title': item.title,
+          'language': item.language,
+          'bookId': item.bookId,
+          'coverImageUrl': item.coverImageUrl,
+          'author': item.author,
+        },
+      );
+  }
+}
+
+void _openBookDetail(BuildContext context, String bookId) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => BookDetailPage(bookId: bookId),
+    ),
+  );
+}
+
+IconData _formatIcon(String format) {
+  switch (format) {
+    case 'videobook':
+      return Icons.play_circle_rounded;
+    case 'audiobook':
+      return Icons.headphones_rounded;
+    case 'ebook':
+    default:
+      return Icons.chrome_reader_mode_rounded;
+  }
+}
+
+String _formatActionLabel(String format) {
+  switch (format) {
+    case 'videobook':
+      return 'Resume watching';
+    case 'audiobook':
+      return 'Resume listening';
+    case 'ebook':
+    default:
+      return 'Resume reading';
+  }
+}
+
+class _ContinueReadingHeroCard extends StatelessWidget {
+  final ReadingProgressEntity item;
+  const _ContinueReadingHeroCard({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (item.percentage.clamp(0, 100)) / 100.0;
+    return GestureDetector(
+      onTap: () => resumeReading(context, item),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF03405B), Color(0xFF076A8F)],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF03405B).withValues(alpha: 0.3),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: item.coverImageUrl.isNotEmpty
+                  ? Image.network(
+                      item.coverImageUrl,
+                      width: 70,
+                      height: 100,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _cover(),
+                    )
+                  : _cover(),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Icon(_formatIcon(item.format),
+                          color: Colors.white70, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        _formatActionLabel(item.format),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    item.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    item.progressLabel,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: pct == 0 ? null : pct,
+                      minHeight: 5,
+                      backgroundColor: Colors.white24,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFF2CE07F),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_ios,
+                color: Colors.white70, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cover() => Container(
+        width: 70,
+        height: 100,
+        color: Colors.white12,
+        child: const Icon(Icons.menu_book, color: Colors.white38, size: 30),
+      );
+}
+
+class _RecentReadingCard extends StatelessWidget {
+  final ReadingProgressEntity item;
+  const _RecentReadingCard({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => resumeReading(context, item),
+      child: Container(
+        width: 220,
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.cardColor(context),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: item.coverImageUrl.isNotEmpty
+                  ? Image.network(
+                      item.coverImageUrl,
+                      width: 60,
+                      height: 90,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _cover(context),
+                    )
+                  : _cover(context),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Icon(_formatIcon(item.format),
+                          size: 14, color: AppColors.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        item.format == 'videobook'
+                            ? 'Video'
+                            : item.format == 'audiobook'
+                                ? 'Audio'
+                                : 'E-Book',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textMutedColor(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryColor(context),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    item.progressLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMutedColor(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cover(BuildContext context) => Container(
+        width: 60,
+        height: 90,
+        decoration: const BoxDecoration(
+          color: Color(0xFFE8EDF2),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        child: const Icon(Icons.book, size: 28, color: Color(0xFFB0BEC5)),
+      );
 }
