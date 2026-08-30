@@ -155,6 +155,7 @@ import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_
 
 // Book Request
 import '../../features/book_request/data/datasources/book_request_remote_datasource.dart';
+import '../../features/book_request/data/datasources/book_report_service.dart';
 import '../../features/book_request/data/repositories/book_request_repository_impl.dart';
 import '../../features/book_request/domain/repositories/book_request_repository.dart';
 import '../../features/book_request/domain/usecases/get_book_detail.dart';
@@ -343,6 +344,11 @@ void _registerDataSources() {
       dio: getIt<Dio>(),
       secureStorage: getIt<SecureStorageUtil>(),
     ),
+  );
+
+  // Book Report (copyright/content concerns)
+  getIt.registerLazySingleton<BookReportService>(
+    () => BookReportService(dio: getIt<Dio>()),
   );
 
   // Question CRUD (Admin)

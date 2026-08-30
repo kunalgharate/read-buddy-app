@@ -17,6 +17,7 @@ import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
 import '../cubit/book_detail_variant_cubit.dart';
 import '../../domain/entities/book_detail_entity.dart';
+import '../widgets/report_concern_button.dart';
 import 'book_request_form_page.dart';
 
 class BookDetailPage extends StatelessWidget {
@@ -618,17 +619,27 @@ class _AboutSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SectionCard(
       title: 'About This Book',
-      child: Text(
-        book.description.isNotEmpty
-            ? book.description
-            : 'No description available.',
-        style: const TextStyle(
-          fontSize: 14,
-          color: Color(0xFF444444),
-          height: 1.6,
-        ),
-        maxLines: 6,
-        overflow: TextOverflow.ellipsis,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            book.description.isNotEmpty
+                ? book.description
+                : 'No description available.',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF444444),
+              height: 1.6,
+            ),
+            maxLines: 6,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ReportConcernButton(bookId: book.id),
+          ),
+        ],
       ),
     );
   }
