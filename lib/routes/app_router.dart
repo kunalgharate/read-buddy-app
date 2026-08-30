@@ -228,21 +228,27 @@ class AppRouter {
         final ebook = settings.arguments as EBook;
         return MaterialPageRoute(builder: (_) => EBookDetailPage(ebook: ebook));
       case '/pdf-reader':
-        final args = settings.arguments as Map<String, String>;
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
           builder: (_) => PdfReaderPage(
-            url: args['url']!,
-            title: args['title']!,
-            language: args['language'] ?? 'en',
+            url: args['url'] as String,
+            title: args['title'] as String,
+            language: (args['language'] as String?) ?? 'en',
+            bookId: args['bookId'] as String?,
+            coverImageUrl: args['coverImageUrl'] as String?,
+            author: args['author'] as String?,
           ),
         );
       case '/epub-reader':
-        final args = settings.arguments as Map<String, String>;
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
           builder: (_) => EpubReaderPage(
-            url: args['url']!,
-            title: args['title']!,
-            language: args['language'] ?? 'en',
+            url: args['url'] as String,
+            title: args['title'] as String,
+            language: (args['language'] as String?) ?? 'en',
+            bookId: args['bookId'] as String?,
+            coverImageUrl: args['coverImageUrl'] as String?,
+            author: args['author'] as String?,
           ),
         );
       case '/audiobooks':
@@ -260,6 +266,9 @@ class AppRouter {
           builder: (_) => VideobookPlayerPage(
             bookTitle: args['bookTitle'] as String,
             parts: args['parts'] as List<MediaPartEntity>,
+            bookId: args['bookId'] as String?,
+            coverImageUrl: args['coverImageUrl'] as String?,
+            startPartIndex: (args['startPartIndex'] as int?) ?? 0,
           ),
         );
       case '/donated-book-detail':

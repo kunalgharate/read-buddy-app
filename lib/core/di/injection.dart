@@ -110,6 +110,14 @@ import 'package:read_buddy_app/features/tracking/domain/usecases/tracking_usecas
 import 'package:read_buddy_app/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:read_buddy_app/features/bookcrud/presentation/cubit/cubit/user_cubit.dart';
 
+// Reading Progress
+import 'package:read_buddy_app/features/reading_progress/data/datasources/reading_progress_local_datasource.dart';
+import 'package:read_buddy_app/features/reading_progress/data/datasources/reading_progress_remote_datasource.dart';
+import 'package:read_buddy_app/features/reading_progress/data/repositories/reading_progress_repository_impl.dart';
+import 'package:read_buddy_app/features/reading_progress/domain/repositories/reading_progress_repository.dart';
+import 'package:read_buddy_app/features/reading_progress/domain/usecases/reading_progress_usecases.dart';
+import 'package:read_buddy_app/features/reading_progress/presentation/cubit/recent_reading_cubit.dart';
+
 // Category CRUD
 import 'package:read_buddy_app/features/category_crud/data/datasources/category_remote_dataresources.dart';
 import 'package:read_buddy_app/features/category_crud/data/repositories/category_repo_impl.dart';
@@ -248,6 +256,7 @@ Future<void> configureDependencies() async {
   _registerBorrowOrderFeature();
   _registerVideoCourseFeature();
   _registerTrackingFeature();
+  _registerReadingProgressFeature();
 }
 
 // ========================================
@@ -981,4 +990,37 @@ void _registerTrackingFeature() {
         getShipmentByRequest: getIt<GetShipmentByRequest>(),
         getShipmentById: getIt<GetShipmentById>(),
       ));
+}
+
+// ========================================
+// READING PROGRESS FEATURE
+// ========================================
+void _registerReadingProgressFeature() {
+  // DataSources
+  getIt.registerLazySingleton<ReadingProgressRemoteDataSource>(
+    () => ReadingProgressRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<ReadingProgressLocalDataSource>(
+    () => ReadingProgressLocalDataSourceImpl(),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<ReadingProgressRepository>(
+    () => ReadingProgressRepositoryImpl(
+      getIt<ReadingProgressRemoteDataSource>(),
+      getIt<ReadingProgressLocalDataSource>(),
+    ),
+  );
+
+  // UseCases
+  getIt.registerLazySingleton(
+      () => SaveReadingProgress(getIt<ReadingProgressRepository>()));
+  getIt.registerLazySingleton(
+      () => GetReadingProgress(getIt<ReadingProgressRepository>()));
+  getIt.registerLazySingleton(
+      () => GetRecentReadingProgress(getIt<ReadingProgressRepository>()));
+
+  // Cubit
+  getIt.registerFactory(
+      () => RecentReadingCubit(getIt<GetRecentReadingProgress>()));
 }

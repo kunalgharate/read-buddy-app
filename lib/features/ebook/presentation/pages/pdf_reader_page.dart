@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,7 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as syncpdf;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/services/file_cache_service.dart';
+import '../../../reading_progress/domain/entities/reading_progress_entity.dart';
+import '../../../reading_progress/domain/usecases/reading_progress_usecases.dart';
 import '../services/tts_service.dart';
 
 class PdfReaderPage extends StatefulWidget {
@@ -13,11 +17,20 @@ class PdfReaderPage extends StatefulWidget {
   final String title;
   final String language;
 
+  /// Book identifier used to persist/restore reading progress. When null,
+  /// progress tracking is disabled (e.g. demo ebooks without an id).
+  final String? bookId;
+  final String? coverImageUrl;
+  final String? author;
+
   const PdfReaderPage({
     super.key,
     required this.url,
     required this.title,
     this.language = 'en',
+    this.bookId,
+    this.coverImageUrl,
+    this.author,
   });
 
   @override
@@ -42,6 +55,16 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
   final TextEditingController _searchController = TextEditingController();
   final List<int> _bookmarkedPages = [];
   final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
+
+  // ─── Reading progress ─────────────────────────────────────────────────────
+  final SaveReadingProgress _saveProgress = getIt<SaveReadingProgress>();
+  final GetReadingProgress _getProgress = getIt<GetReadingProgress>();
+  int _restorePage = 0; // page to jump to once the document is loaded
+  bool _restored = false;
+  Timer? _saveDebounce;
+
+  bool get _trackProgress =>
+      widget.bookId != null && widget.bookId!.isNotEmpty;
 
   String get _ttsSpeedLabel {
     final map = <double, String>{
@@ -76,7 +99,61 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
     _pdfController = PdfViewerController();
     _searchResult = PdfTextSearchResult();
     _ttsService.init(widget.language);
+    _loadSavedProgress();
     _loadCachedPdf();
+  }
+
+  /// Fetch the last saved page for this book so we can resume where the user
+  /// left off — including after a voice/language change reopened the reader.
+  Future<void> _loadSavedProgress() async {
+    if (!_trackProgress) return;
+    try {
+      final saved = await _getProgress(widget.bookId!);
+      if (saved != null && saved.currentPage > 0) {
+        _restorePage = saved.currentPage;
+      }
+    } catch (_) {
+      // Ignore — start from page 1.
+    }
+  }
+
+  /// Persist the current page (debounced to avoid spamming on fast paging).
+  void _persistProgress() {
+    if (!_trackProgress) return;
+    _saveDebounce?.cancel();
+    _saveDebounce = Timer(const Duration(milliseconds: 800), () {
+      final percentage =
+          _totalPages > 0 ? (_currentPage / _totalPages) * 100 : 0.0;
+      _saveProgress(
+        ReadingProgressEntity(
+          bookId: widget.bookId!,
+          title: widget.title,
+          author: widget.author ?? '',
+          coverImageUrl: widget.coverImageUrl ?? '',
+          format: 'ebook',
+          fileUrl: widget.url,
+          language: widget.language,
+          currentPage: _currentPage,
+          totalPages: _totalPages,
+          percentage: percentage.clamp(0, 100),
+          completed: _totalPages > 0 && _currentPage >= _totalPages,
+          lastReadAt: DateTime.now(),
+        ),
+      );
+    });
+  }
+
+  /// Jump to the saved page once the document has loaded (only once).
+  void _restoreToSavedPage() {
+    if (_restored) return;
+    _restored = true;
+    if (_restorePage > 1 && _restorePage <= _totalPages) {
+      // Defer to next frame so the viewer is ready to jump.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _pdfController.jumpToPage(_restorePage);
+        _showSnackBar('Resumed from page $_restorePage');
+      });
+    }
   }
 
   /// Download and cache the PDF file. On second open, loads from cache instantly.
@@ -97,6 +174,27 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
 
   @override
   void dispose() {
+    _saveDebounce?.cancel();
+    // Persist final position synchronously (fire-and-forget).
+    if (_trackProgress && _totalPages > 0) {
+      final percentage = (_currentPage / _totalPages) * 100;
+      _saveProgress(
+        ReadingProgressEntity(
+          bookId: widget.bookId!,
+          title: widget.title,
+          author: widget.author ?? '',
+          coverImageUrl: widget.coverImageUrl ?? '',
+          format: 'ebook',
+          fileUrl: widget.url,
+          language: widget.language,
+          currentPage: _currentPage,
+          totalPages: _totalPages,
+          percentage: percentage.clamp(0, 100),
+          completed: _currentPage >= _totalPages,
+          lastReadAt: DateTime.now(),
+        ),
+      );
+    }
     _pdfController.dispose();
     _searchController.dispose();
     _searchResult.clear();
@@ -382,9 +480,11 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
         enableTextSelection: true,
         onDocumentLoaded: (details) {
           setState(() => _totalPages = details.document.pages.count);
+          _restoreToSavedPage();
         },
         onPageChanged: (details) {
           setState(() => _currentPage = details.newPageNumber);
+          _persistProgress();
         },
       );
     } else {
@@ -398,9 +498,11 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
         enableTextSelection: true,
         onDocumentLoaded: (details) {
           setState(() => _totalPages = details.document.pages.count);
+          _restoreToSavedPage();
         },
         onPageChanged: (details) {
           setState(() => _currentPage = details.newPageNumber);
+          _persistProgress();
         },
       );
     }
