@@ -777,10 +777,8 @@ class _ContinueReadingSection extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final last = state.lastRead;
-        if (last == null) return const SizedBox.shrink();
-
-        final recent = state.oncePerFormat;
+        final items = state.continueReading;
+        if (items.isEmpty) return const SizedBox.shrink();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -798,35 +796,12 @@ class _ContinueReadingSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _ContinueReadingHeroCard(item: last),
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: _ContinueReadingCard(item: item),
+              ),
             ),
-            if (recent.length > 1) ...[
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Jump back in',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimaryColor(context),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 150,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: recent.length,
-                  itemBuilder: (_, i) =>
-                      _RecentReadingCard(item: recent[i]),
-                ),
-              ),
-            ],
           ],
         );
       },
@@ -901,9 +876,9 @@ String _formatActionLabel(String format) {
   }
 }
 
-class _ContinueReadingHeroCard extends StatelessWidget {
+class _ContinueReadingCard extends StatelessWidget {
   final ReadingProgressEntity item;
-  const _ContinueReadingHeroCard({required this.item});
+  const _ContinueReadingCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -912,19 +887,17 @@ class _ContinueReadingHeroCard extends StatelessWidget {
       onTap: () => resumeReading(context, item),
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF03405B), Color(0xFF076A8F)],
-          ),
-          borderRadius: BorderRadius.circular(18),
+          color: AppColors.cardColor(context),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF03405B).withValues(alpha: 0.3),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
+              color: Colors.black.withValues(alpha: 0.07),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             ClipRRect(
@@ -932,123 +905,14 @@ class _ContinueReadingHeroCard extends StatelessWidget {
               child: item.coverImageUrl.isNotEmpty
                   ? Image.network(
                       item.coverImageUrl,
-                      width: 70,
-                      height: 100,
+                      width: 60,
+                      height: 88,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _cover(),
                     )
                   : _cover(),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Icon(_formatIcon(item.format),
-                          color: Colors.white70, size: 16),
-                      const SizedBox(width: 6),
-                      Text(
-                        _formatActionLabel(item.format),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    item.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item.progressLabel,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: LinearProgressIndicator(
-                      value: pct == 0 ? null : pct,
-                      minHeight: 5,
-                      backgroundColor: Colors.white24,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF2CE07F),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios,
-                color: Colors.white70, size: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _cover() => Container(
-        width: 70,
-        height: 100,
-        color: Colors.white12,
-        child: const Icon(Icons.menu_book, color: Colors.white38, size: 30),
-      );
-}
-
-class _RecentReadingCard extends StatelessWidget {
-  final ReadingProgressEntity item;
-  const _RecentReadingCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => resumeReading(context, item),
-      child: Container(
-        width: 220,
-        margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: AppColors.cardColor(context),
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: item.coverImageUrl.isNotEmpty
-                  ? Image.network(
-                      item.coverImageUrl,
-                      width: 60,
-                      height: 90,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _cover(context),
-                    )
-                  : _cover(context),
-            ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1058,28 +922,24 @@ class _RecentReadingCard extends StatelessWidget {
                     children: [
                       Icon(_formatIcon(item.format),
                           size: 14, color: AppColors.primary),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 5),
                       Text(
-                        item.format == 'videobook'
-                            ? 'Video'
-                            : item.format == 'audiobook'
-                                ? 'Audio'
-                                : 'E-Book',
+                        _formatActionLabel(item.format),
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textMutedColor(context),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
                   Text(
                     item.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimaryColor(context),
                     ),
@@ -1092,21 +952,36 @@ class _RecentReadingCard extends StatelessWidget {
                       color: AppColors.textMutedColor(context),
                     ),
                   ),
+                  const SizedBox(height: 7),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: pct == 0 ? null : pct,
+                      minHeight: 5,
+                      backgroundColor: const Color(0xFFE0E0E0),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFF2CE07F),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
+            Icon(Icons.arrow_forward_ios,
+                size: 15, color: AppColors.textMutedColor(context)),
           ],
         ),
       ),
     );
   }
 
-  Widget _cover(BuildContext context) => Container(
+  Widget _cover() => Container(
         width: 60,
-        height: 90,
+        height: 88,
         decoration: const BoxDecoration(
           color: Color(0xFFE8EDF2),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
         child: const Icon(Icons.book, size: 28, color: Color(0xFFB0BEC5)),
       );
