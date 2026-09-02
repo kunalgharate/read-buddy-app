@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -46,6 +47,16 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
       _currentAmount = _selectedPlan;
       final razorpayKey = result['razorpayKey'] as String;
 
+      if (kDebugMode) {
+        final prefix = razorpayKey.length >= 12
+            ? razorpayKey.substring(0, 12)
+            : razorpayKey;
+        print('💳 [Razorpay] Backend returned key: $prefix (len=${razorpayKey.length})');
+        print('💳 [Razorpay] Key is TEST mode: ${razorpayKey.startsWith('rzp_test_')}');
+        print('💳 [Razorpay] Key is LIVE mode: ${razorpayKey.startsWith('rzp_live_')}');
+        print('💳 [Razorpay] Order ID: $_currentOrderId | Amount: $_currentAmount INR');
+      }
+
       final options = {
         'key': razorpayKey,
         'amount': (_selectedPlan * 100).toString(), // paise
@@ -70,6 +81,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   }
 
   Future<void> _onPaymentSuccess(PaymentSuccessResponse response) async {
+    if (kDebugMode) {
+      print('💳 [Razorpay] PAYMENT_SUCCESS | paymentId=${response.paymentId} | orderId=${response.orderId}');
+    }
     try {
       final datasource = getIt<DonateRemoteDataSource>();
       await datasource.verifyMoneyDonation(
@@ -78,6 +92,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         razorpaySignature: response.signature ?? '',
         amount: _currentAmount,
       );
+      if (kDebugMode) {
+        print('💳 [Razorpay] VERIFY SUCCESS | orderId=${response.orderId ?? _currentOrderId}');
+      }
 
       if (mounted) {
         showDialog(
@@ -119,6 +136,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         );
       }
     } catch (e) {
+      if (kDebugMode) {
+        print('💳 [Razorpay] VERIFY FAILED: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Payment verification failed: $e')),
@@ -128,6 +148,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   }
 
   void _onPaymentError(PaymentFailureResponse response) {
+    if (kDebugMode) {
+      print('💳 [Razorpay] PAYMENT_ERROR | code=${response.code} | message=${response.message}');
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
