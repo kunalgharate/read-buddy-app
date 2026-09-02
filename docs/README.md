@@ -348,9 +348,9 @@ Splash screen → Check stored token
 | /books/:id | GET | Get book details |
 | /book-variants | GET | Get book variants |
 | /categories | GET | List categories |
-| /v1/book-requests | POST | Create a book request |
-| /users/book-requests | GET | List user requests |
-| /bookrequests/:id | PATCH | Update request status |
+| /users/book-requests | POST | Create a book request |
+| /v1/book-requests/my | GET | List user requests |
+| /v1/book-requests/:id/status | PATCH | Update request status |
 | /v1/donations/createBookDonation | POST | Submit a book donation |
 | /donations/money/initiate | POST | Initiate a money donation |
 | /donations/money/verify | POST | Verify a money donation |
@@ -367,7 +367,6 @@ Splash screen → Check stored token
 | /admin/books/:id | DELETE | Delete a book |
 | /admin/users | GET | List all users |
 | /bookrequests | GET | List all book requests |
-| /admin/donations | GET | List all donations |
 
 ### Request Example — Login
 

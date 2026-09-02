@@ -39,6 +39,9 @@ DonationStatusInfo resolveDonationStatus(String apiStatus) {
     case 'approved':
     case 'processing':
     case 'out_for_pickup':
+    case 'pickup_scheduled':
+    case 'book_shipped':
+    case 'in_transit':
     case 'picked_up':
       return const DonationStatusInfo(
         label: 'In Progress',
@@ -92,6 +95,9 @@ const List<String> _allStatusStrings = [
   'approved',
   'processing',
   'out_for_pickup',
+  'pickup_scheduled',
+  'book_shipped',
+  'in_transit',
   'picked_up',
   'completed',
   'done',

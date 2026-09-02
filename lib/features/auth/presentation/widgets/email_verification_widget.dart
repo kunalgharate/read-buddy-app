@@ -105,14 +105,15 @@ class EmailVerificationScreen extends StatelessWidget {
               context, '/onboarding-questionnaire', (route) => false);
         } else if (state is ResendVerificationEmailSuccess) {
           if (!context.mounted) return;
-          final resendedEmail = (state.user.email.isNotEmpty == true)
+          final resendedEmail = state.user.email.isNotEmpty
               ? state.user.email
               : (email ?? '');
+          final message = resendedEmail.isNotEmpty
+              ? 'Verification code re-sent to $resendedEmail'
+              : 'Verification code re-sent';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                'Verification code re-sent to $resendedEmail',
-              ),
+              content: Text(message),
               backgroundColor: const Color(0xFF00C853),
             ),
           );
