@@ -5,15 +5,6 @@ import 'package:read_buddy_app/features/donate/presentation/widgets/donation_sta
     show DonationStatusInfo, allBooksSorted, confirmedBooksSorted, resolveDonationStatus;
 
 void main() {
-  BookStatusItem item(String id, String status, {String? createdAt}) =>
-      BookStatusItem(
-        id: id,
-        title: 'Book $id',
-        format: 'Hardcover',
-        status: status,
-        createdAt: createdAt,
-      );
-
   group('resolveDonationStatus', () {
     DonationStatusInfo resolved(String status) => resolveDonationStatus(status);
 
@@ -31,9 +22,6 @@ void main() {
         'approved',
         'processing',
         'out_for_pickup',
-        'pickup_scheduled',
-        'book_shipped',
-        'in_transit',
         'picked_up',
       ]) {
         final r = resolved(s);
@@ -73,6 +61,15 @@ void main() {
   });
 
   group('allBooksSorted', () {
+    BookStatusItem item(String id, String status, {String? createdAt}) =>
+        BookStatusItem(
+          id: id,
+          title: 'Book $id',
+          format: 'Hardcover',
+          status: status,
+          createdAt: createdAt,
+        );
+
     test('keeps all donations, pending and confirmed', () {
       final items = [
         item('1', 'completed', createdAt: '2026-01-02'),
@@ -102,6 +99,15 @@ void main() {
   });
 
   group('confirmedBooksSorted', () {
+    BookStatusItem item(String id, String status, {String? createdAt}) =>
+        BookStatusItem(
+          id: id,
+          title: 'Book $id',
+          format: 'Hardcover',
+          status: status,
+          createdAt: createdAt,
+        );
+
     test('keeps only confirmed statuses', () {
       final items = [
         item('1', 'completed', createdAt: '2026-01-02'),

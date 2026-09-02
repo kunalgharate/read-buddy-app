@@ -124,7 +124,7 @@ class _BooksTab extends StatelessWidget {
           if (books.isEmpty) {
             return _buildEmpty(context,
               'No donations yet.\n'
-              'Books you donate will appear here right after you submit them.',
+              'Books appear here after you donate and once admin processes them.',
             );
           }
 
