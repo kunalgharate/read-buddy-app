@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   void _onTabChanged(int index) {
+    if (index == _currentIndex) return;
     setState(() => _currentIndex = index);
     // Refresh donation stats every time user switches to Donate tab
     if (index == 2) {

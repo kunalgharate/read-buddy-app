@@ -88,8 +88,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'name': data['name']?.toString().trim(),
       };
 
-      // Strip empty picture — backend requires a valid URL or absent
-      if (cleanData['picture'] != null &&
+      // Strip empty or null picture — backend requires a valid URL or absent
+      if (cleanData['picture'] == null ||
           cleanData['picture'].toString().trim().isEmpty) {
         cleanData.remove('picture');
       }
@@ -198,7 +198,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Google sign-in error: $e');
+        // Log only the error type, not the message, to avoid leaking any
+        // request payload or credentials from the exception.
+        print('🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
       }
       rethrow;
     }

@@ -5,9 +5,10 @@
 ## 1. Onboarding
 
 4 intro screens (World of Books → Donate → Request → Delivery)
-- Sign In button visible throughout
+- Sign In button only on the final screen
 - On completion → mark onboarding as seen
-- Redirect → Questionnaire (first time) or Home (returning user)
+- No redirect to Questionnaire or Home until the user signs in
+- After sign-in → Questionnaire (first time) or Home (returning user)
 
 ---
 

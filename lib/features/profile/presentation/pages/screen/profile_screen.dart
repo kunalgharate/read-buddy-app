@@ -429,7 +429,7 @@ class _ProfileView extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Enjoy premium benefits for 1 year',
+            'Enjoy premium benefits',
             style: TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 16),

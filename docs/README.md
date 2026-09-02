@@ -275,14 +275,14 @@ Splash screen → Check stored token
 
 ### User
 
-- id — Unique user identifier assigned by the server.
+- `_id` — Unique user identifier assigned by the server.
 - name — Display name of the user.
 - email — Email address used for login and communication.
-- token — JWT access token for authenticated API requests.
+- accessToken — JWT access token for authenticated API requests.
 - refreshToken — Token used to obtain a new access token on expiry.
 - role — User role: user, admin, or librarian.
 - isPrime — Boolean indicating Prime membership status.
-- avatar — URL to the user's profile picture.
+- picture — URL to the user's profile picture.
 
 ### Book
 
@@ -335,29 +335,38 @@ Splash screen → Check stored token
 
 | Endpoint | Method | Description |
 | --- | --- | --- |
-| /auth/register | POST | Register a new user |
-| /auth/login | POST | User login |
-| /auth/google | POST | Google sign-in |
-| /auth/verify-otp | POST | Verify OTP during registration |
-| /auth/forgot-password | POST | Request password reset |
-| /auth/refresh | POST | Refresh JWT token |
+| /users/register | POST | Register a new user |
+| /users/login | POST | User login |
+| /users/google-auth | POST | Google sign-in |
+| /users/verify-email | POST | Verify email during registration |
+| /users/resend-register-otp | POST | Resend registration OTP |
+| /users/verify-reset-otp | POST | Verify OTP for password reset |
+| /users/resend-reset-otp | POST | Resend password-reset OTP |
+| /users/reset-password | POST | Reset password |
+| /users/refresh-token | POST | Refresh JWT token |
 | /books | GET | List books with pagination |
 | /books/:id | GET | Get book details |
-| /books/:id/variants | GET | Get book variants |
+| /book-variants | GET | Get book variants |
 | /categories | GET | List categories |
-| /requests | POST | Create a book request |
-| /requests | GET | List user requests |
-| /requests/:id | PATCH | Update request status |
-| /donations/books | POST | Submit a book donation |
-| /donations/money | POST | Submit a money donation |
+| /v1/book-requests | POST | Create a book request |
+| /users/book-requests | GET | List user requests |
+| /bookrequests/:id | PATCH | Update request status |
+| /v1/donations/createBookDonation | POST | Submit a book donation |
+| /donations/money/initiate | POST | Initiate a money donation |
+| /donations/money/verify | POST | Verify a money donation |
+| /donations/money/my | GET | List my money donations |
 | /v1/donations/my-impact | GET | Get user donation impact stats |
+| /donations | GET | List donations |
+| /admin/donations | GET | List all admin donations |
 | /users/profile | GET | Get user profile |
-| /users/profile | PATCH | Update user profile |
+| /users/update-user-info | PATCH | Update user profile |
+| /users/update-avatar | POST | Update profile picture |
+| /users/upload-profile-image | POST | Upload profile image |
 | /admin/books | POST | Add a new book |
 | /admin/books/:id | PUT | Update a book |
 | /admin/books/:id | DELETE | Delete a book |
 | /admin/users | GET | List all users |
-| /admin/requests | GET | List all book requests |
+| /bookrequests | GET | List all book requests |
 | /admin/donations | GET | List all donations |
 
 ### Request Example — Login
@@ -373,10 +382,10 @@ Splash screen → Check stored token
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
   "refreshToken": "dGhpcyBpcyBhIHJlZnJl...",
   "user": {
-    "id": "usr_12345",
+    "_id": "usr_12345",
     "name": "John Doe",
     "email": "user@example.com",
     "role": "user",

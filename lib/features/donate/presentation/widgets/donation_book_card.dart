@@ -2,56 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/donation_stats.dart';
+import 'package:read_buddy_app/features/donate/presentation/widgets/donation_status.dart'
+    show resolveDonationStatus;
 
-({String label, Color color}) resolveDonationStatus(String apiStatus) {
-  switch (apiStatus.toLowerCase()) {
-    case 'donation_created':
-    case 'pickup_requested':
-    case 'pending':
-      return (label: 'Pending', color: const Color(0xFFFFC107));
-    case 'accepted':
-    case 'processing':
-    case 'out_for_pickup':
-    case 'picked_up':
-      return (label: 'In Progress', color: const Color(0xFF2196F3));
-    case 'completed':
-    case 'delivered':
-    case 'success':
-    case 'received':
-      return (label: 'Completed', color: const Color(0xFF4CAF50));
-    case 'cancelled':
-    case 'rejected':
-      return (label: 'Cancelled', color: const Color(0xFFF44336));
-    default:
-      return (
-        label: apiStatus.replaceAll('_', ' ').toUpperCase(),
-        color: const Color(0xFF9E9E9E),
-      );
-  }
-}
+export 'package:read_buddy_app/features/donate/presentation/widgets/donation_status.dart'
+    show allBooksSorted, confirmedBooksSorted;
 
-/// Filter to only admin-confirmed donations, sorted newest first.
-List<BookStatusItem> confirmedBooksSorted(List<BookStatusItem> all) {
-  const confirmed = {
-    'accepted',
-    'processing',
-    'out_for_pickup',
-    'picked_up',
-    'completed',
-    'delivered',
-    'success',
-    'received',
-  };
-  final filtered =
-      all.where((b) => confirmed.contains(b.status.toLowerCase())).toList()
-        ..sort((a, b) {
-          final da = DateTime.tryParse(a.createdAt ?? '') ?? DateTime(0);
-          final db = DateTime.tryParse(b.createdAt ?? '') ?? DateTime(0);
-          return db.compareTo(da);
-        });
-  return filtered;
-}
-
+/// Returns ALL donations (pending and confirmed) newest first, so a just
+/// submitted donation is always visible to the user with its current status.
+/// Definition moved to `donation_status.dart`; re-exported here for
+/// backward-compatible imports.
 class DonationBookCard extends StatelessWidget {
   final BookStatusItem book;
   final VoidCallback? onTap;

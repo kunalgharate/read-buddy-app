@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 
 class DonationSuccessScreen extends StatefulWidget {
   const DonationSuccessScreen({super.key});
@@ -51,7 +52,7 @@ class _DonationSuccessScreenState extends State<DonationSuccessScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBackground(context),
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -82,7 +83,7 @@ class _DonationSuccessScreenState extends State<DonationSuccessScreen>
                   style: GoogleFonts.poppins(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF052E44),
+                    color: AppColors.textPrimaryColor(context),
                   ),
                 ),
                 const SizedBox(height: 12),

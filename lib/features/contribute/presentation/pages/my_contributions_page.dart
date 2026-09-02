@@ -62,14 +62,14 @@ class _MyContributionsContentState extends State<_MyContributionsContent>
           'My Contributions',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: AppColors.textPrimaryColor(context),
           ),
         ),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
+          unselectedLabelColor: AppColors.textSecondaryColor(context),
           indicatorColor: AppColors.primary,
           tabs: const [
             Tab(text: 'Books'),
@@ -119,12 +119,12 @@ class _BooksTab extends StatelessWidget {
           );
         }
         if (state is DonationStatsLoaded) {
-          final books = confirmedBooksSorted(state.stats.bookStatusList);
+          final books = allBooksSorted(state.stats.bookStatusList);
 
           if (books.isEmpty) {
-            return _buildEmpty(
-              'No confirmed donations yet.\n'
-              'Books appear here after admin picks them up or marks them received.',
+            return _buildEmpty(context,
+              'No donations yet.\n'
+              'Books appear here after you donate and once admin processes them.',
             );
           }
 
@@ -155,11 +155,11 @@ class _MoneyTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (state is ContributeError) {
-          return _buildEmpty('Could not load money donations.');
+          return _buildEmpty(context, 'Could not load money donations.');
         }
         if (state is ContributeLoaded) {
           if (state.moneyDonations.isEmpty) {
-            return _buildEmpty('No money donations yet.');
+            return _buildEmpty(context, 'No money donations yet.');
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -174,9 +174,9 @@ class _MoneyTab extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.surfaceColor(context),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: AppColors.borderColor(context)),
                 ),
                 child: Row(
                   children: [
@@ -200,7 +200,7 @@ class _MoneyTab extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
-                              color: AppColors.textPrimary,
+                              color: AppColors.textPrimaryColor(context),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -208,7 +208,7 @@ class _MoneyTab extends StatelessWidget {
                             dateStr,
                             style: GoogleFonts.poppins(
                               fontSize: 12,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textSecondaryColor(context),
                             ),
                           ),
                         ],
@@ -229,21 +229,22 @@ class _MoneyTab extends StatelessWidget {
 
 // ─── Helpers ──────────────────────────────────────────────────
 
-Widget _buildEmpty(String message) {
+Widget _buildEmpty(BuildContext context, String message) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.all(40),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.inbox_outlined, size: 48, color: AppColors.textHint),
+          Icon(Icons.inbox_outlined,
+              size: 48, color: AppColors.textMutedColor(context)),
           const SizedBox(height: 12),
           Text(
             message,
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryColor(context),
             ),
           ),
         ],

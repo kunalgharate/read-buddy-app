@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/donate/presentation/widgets/donation_status.dart'
+    show resolveDonationStatus;
 import 'package:read_buddy_app/features/donated_books/domain/entities/donated_books_entity.dart';
 
 class DonatedBookDetailPage extends StatelessWidget {
@@ -8,7 +11,6 @@ class DonatedBookDetailPage extends StatelessWidget {
   const DonatedBookDetailPage({super.key, required this.book});
 
   static const _textDark = Color(0xFF052E44);
-  static const _primaryGreen = Color(0xFF2CE07F);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class DonatedBookDetailPage extends StatelessWidget {
   
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _textDark),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimaryColor(context)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -28,7 +30,7 @@ class DonatedBookDetailPage extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: _textDark,
+            color: AppColors.textPrimaryColor(context),
           ),
         ),
         centerTitle: true,
@@ -163,24 +165,9 @@ class DonatedBookDetailPage extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(String status) {
-    final apiStatus = status.toLowerCase();
-    String displayStatus;
-    Color color;
-
-    if (apiStatus.contains('pending') || apiStatus.contains('created')) {
-      displayStatus = 'Pending';
-      color = const Color(0xFFFFC107);
-    } else if (apiStatus.contains('progress') || apiStatus.contains('pickup')) {
-      displayStatus = 'In Progress';
-      color = const Color(0xFF2196F3);
-    } else if (apiStatus.contains('complete') ||
-        apiStatus.contains('success')) {
-      displayStatus = 'Completed';
-      color = _primaryGreen;
-    } else {
-      displayStatus = status;
-      color = Colors.grey;
-    }
+    final resolved = resolveDonationStatus(status);
+    final displayStatus = resolved.label.toUpperCase();
+    final color = resolved.color;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -190,7 +177,7 @@ class DonatedBookDetailPage extends StatelessWidget {
         border: Border.all(color: color, width: 1),
       ),
       child: Text(
-        displayStatus.toUpperCase(),
+        displayStatus,
         style: GoogleFonts.poppins(
           fontSize: 10,
           fontWeight: FontWeight.bold,

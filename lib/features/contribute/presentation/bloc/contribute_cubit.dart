@@ -14,6 +14,7 @@ class ContributeCubit extends Cubit<ContributeState> {
     emit(const ContributeLoading());
     try {
       final donations = await _moneyDonationService.fetchMyMoneyDonations();
+      if (isClosed) return;
       final confirmed = donations.where((d) {
         final status = d.status.toLowerCase();
         return status == 'completed' ||
@@ -26,6 +27,7 @@ class ContributeCubit extends Cubit<ContributeState> {
         totalMoneyDonated: totalAmount,
       ));
     } catch (e) {
+      if (isClosed) return;
       emit(ContributeError(e.toString()));
     }
   }

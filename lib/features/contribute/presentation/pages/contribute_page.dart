@@ -7,6 +7,7 @@ import 'package:read_buddy_app/features/contribute/data/money_donation_service.d
 import 'package:read_buddy_app/features/contribute/presentation/bloc/contribute_cubit.dart';
 import 'package:read_buddy_app/features/contribute/presentation/widgets/contribution_utils.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
+import 'package:read_buddy_app/features/donate/presentation/widgets/donation_book_card.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/format_screen.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 
@@ -78,13 +79,13 @@ class _ContributePageState extends State<ContributePage> {
       children: [
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Text(
                 'Support ReadBuddy',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryColor(context),
                 ),
               ),
             ),
@@ -121,7 +122,7 @@ class _ContributePageState extends State<ContributePage> {
               : 'Choose how you want to contribute to our community',
           style: TextStyle(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: AppColors.textSecondaryColor(context),
           ),
         ),
       ],
@@ -143,9 +144,9 @@ class _ContributePageState extends State<ContributePage> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surfaceColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.borderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -170,20 +171,20 @@ class _ContributePageState extends State<ContributePage> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Contribute a Book',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimaryColor(context),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'As a Prime member, you can donate physical books to our library network.',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryColor(context),
               height: 1.5,
             ),
           ),
@@ -240,7 +241,7 @@ class _ContributePageState extends State<ContributePage> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildFormatChips(),
+          _buildFormatChips(context),
         ],
       ),
     );
@@ -251,9 +252,9 @@ class _ContributePageState extends State<ContributePage> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surfaceColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.borderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -278,12 +279,12 @@ class _ContributePageState extends State<ContributePage> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Contribute a Book',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimaryColor(context),
             ),
           ),
           const SizedBox(height: 8),
@@ -291,7 +292,7 @@ class _ContributePageState extends State<ContributePage> {
             'Donate physical books to our library network. Once approved by admin, you get Prime for free!',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryColor(context),
               height: 1.5,
             ),
           ),
@@ -322,26 +323,26 @@ class _ContributePageState extends State<ContributePage> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildFormatChips(),
+          _buildFormatChips(context),
         ],
       ),
     );
   }
 
-  Widget _buildFormatChips() {
+  Widget _buildFormatChips(BuildContext context) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
-        _chip('Hardcover', true),
-        _chip('Digital Book', false),
-        _chip('Audio Book', false),
-        _chip('Video Book', false),
+        _chip(context, 'Hardcover', true),
+        _chip(context, 'Digital Book', false),
+        _chip(context, 'Audio Book', false),
+        _chip(context, 'Video Book', false),
       ],
     );
   }
 
-  Widget _chip(String label, bool available) {
+  Widget _chip(BuildContext context, String label, bool available) {
     return Chip(
       label: Row(
         mainAxisSize: MainAxisSize.min,
@@ -350,25 +351,28 @@ class _ContributePageState extends State<ContributePage> {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: available ? AppColors.textPrimary : AppColors.textHint,
+              color: available
+                  ? AppColors.textPrimaryColor(context)
+                  : AppColors.textMutedColor(context),
             ),
           ),
           if (!available) ...[
             const SizedBox(width: 4),
             Text(
               '(Soon)',
-              style: TextStyle(fontSize: 10, color: AppColors.textHint),
+              style: TextStyle(
+                  fontSize: 10, color: AppColors.textMutedColor(context)),
             ),
           ],
         ],
       ),
       backgroundColor: available
           ? AppColors.primary.withValues(alpha: 0.08)
-          : AppColors.background,
+          : AppColors.scaffoldBackground(context),
       side: BorderSide(
         color: available
             ? AppColors.primary.withValues(alpha: 0.3)
-            : AppColors.border,
+            : AppColors.borderColor(context),
       ),
     );
   }
@@ -378,9 +382,9 @@ class _ContributePageState extends State<ContributePage> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surfaceColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.borderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -407,32 +411,32 @@ class _ContributePageState extends State<ContributePage> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Buy Prime Membership',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textPrimaryColor(context),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Unlock full access to borrow, read, listen & watch for just \u20B9100/year.',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryColor(context),
               height: 1.5,
             ),
           ),
           const SizedBox(height: 16),
-          _benefitRow(Icons.menu_book, 'Borrow physical books'),
-          _benefitRow(Icons.chrome_reader_mode, 'Read eBooks'),
-          _benefitRow(Icons.headphones, 'Listen to Audiobooks'),
-          _benefitRow(Icons.play_circle, 'Watch Videobooks'),
+          _benefitRow(context, Icons.menu_book, 'Borrow physical books'),
+          _benefitRow(context, Icons.chrome_reader_mode, 'Read eBooks'),
+          _benefitRow(context, Icons.headphones, 'Listen to Audiobooks'),
+          _benefitRow(context, Icons.play_circle, 'Watch Videobooks'),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -442,6 +446,9 @@ class _ContributePageState extends State<ContributePage> {
                     await Navigator.pushNamed(context, '/donate-money');
                 if (result == true && context.mounted) {
                   context.read<ProfileBloc>().add(LoadProfileEvent());
+                  // Reload money donations so the impact section reflects the
+                  // newly completed payment immediately.
+                  context.read<ContributeCubit>().loadMoneyDonations();
                 }
               },
               icon: const Icon(Icons.star, size: 20),
@@ -463,7 +470,7 @@ class _ContributePageState extends State<ContributePage> {
     );
   }
 
-  Widget _benefitRow(IconData icon, String text) {
+  Widget _benefitRow(BuildContext context, IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -472,7 +479,7 @@ class _ContributePageState extends State<ContributePage> {
           const SizedBox(width: 10),
           Text(
             text,
-            style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 13, color: AppColors.textPrimaryColor(context)),
           ),
         ],
       ),
@@ -486,7 +493,8 @@ class _ContributePageState extends State<ContributePage> {
           builder: (context, moneyState) {
             int booksDonated = 0;
             if (bookState is DonationStatsLoaded) {
-              booksDonated = bookState.stats.booksDonated;
+              booksDonated =
+                  confirmedBooksSorted(bookState.stats.bookStatusList).length;
             }
             int moneyDonated = 0;
             if (moneyState is ContributeLoaded) {
@@ -497,26 +505,26 @@ class _ContributePageState extends State<ContributePage> {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: AppColors.surfaceColor(context),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: AppColors.borderColor(context)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Your Personal Impact',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textPrimaryColor(context),
                     ),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
-                        child: _impactCard(
+                        child: _impactCard(context,
                           icon: Icons.menu_book,
                           label: 'Books Donated',
                           value: '$booksDonated',
@@ -526,7 +534,7 @@ class _ContributePageState extends State<ContributePage> {
                       const SizedBox(width: 12),
                       if (!isPrime) ...[
                         Expanded(
-                          child: _impactCard(
+                          child: _impactCard(context,
                             icon: Icons.attach_money,
                             label: 'Money Donated',
                             value: '\u20B9$moneyDonated',
@@ -536,7 +544,7 @@ class _ContributePageState extends State<ContributePage> {
                         const SizedBox(width: 12),
                       ],
                       Expanded(
-                        child: _impactCard(
+                        child: _impactCard(context,
                           icon: Icons.emoji_events,
                           label: 'Donor Badge',
                           value: isPrime ? 'Prime' : 'None',
@@ -554,7 +562,8 @@ class _ContributePageState extends State<ContributePage> {
     );
   }
 
-  Widget _impactCard({
+  Widget _impactCard(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
@@ -582,7 +591,8 @@ class _ContributePageState extends State<ContributePage> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: TextStyle(
+                fontSize: 11, color: AppColors.textSecondaryColor(context)),
             textAlign: TextAlign.center,
           ),
         ],
@@ -595,19 +605,19 @@ class _ContributePageState extends State<ContributePage> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surfaceColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.borderColor(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Donated Books',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimaryColor(context),
             ),
           ),
           const SizedBox(height: 12),
@@ -623,16 +633,16 @@ class _ContributePageState extends State<ContributePage> {
               }
               if (state is DonationStatsLoaded) {
                 if (state.stats.bookStatusList.isEmpty) {
-                  return _buildEmptySection('No books donated yet.');
+                  return _buildEmptySection(context, 'No books donated yet.');
                 }
-                final items = state.stats.bookStatusList.take(5).toList();
+                final items = allBooksSorted(state.stats.bookStatusList).take(5).toList();
                 return Column(
                   children: items.map((d) {
                     return Container(
                       padding: const EdgeInsets.all(14),
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: AppColors.scaffoldBackground(context),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -654,10 +664,10 @@ class _ContributePageState extends State<ContributePage> {
                               children: [
                                 Text(
                                   d.title,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14,
-                                    color: AppColors.textPrimary,
+                                    color: AppColors.textPrimaryColor(context),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -667,7 +677,7 @@ class _ContributePageState extends State<ContributePage> {
                                   '${d.format} \u2022 ${d.categoryName ?? ''}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                    color: AppColors.textSecondaryColor(context),
                                   ),
                                 ),
                               ],
@@ -686,7 +696,7 @@ class _ContributePageState extends State<ContributePage> {
                     padding: const EdgeInsets.all(32),
                     child: Text(
                       state.message,
-                      style: TextStyle(color: AppColors.textSecondary),
+                      style: TextStyle(color: AppColors.textSecondaryColor(context)),
                     ),
                   ),
                 );
@@ -706,7 +716,59 @@ class _ContributePageState extends State<ContributePage> {
           return const SizedBox.shrink();
         }
         if (state is ContributeError) {
-          return const SizedBox.shrink();
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceColor(context),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.borderColor(context)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Money Donations',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimaryColor(context),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: AppColors.error,
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Could not load your money donations.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondaryColor(context),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () =>
+                              context.read<ContributeCubit>().loadMoneyDonations(),
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
         }
         if (state is ContributeLoaded) {
           if (state.moneyDonations.isEmpty) {
@@ -717,19 +779,19 @@ class _ContributePageState extends State<ContributePage> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: AppColors.surfaceColor(context),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: AppColors.borderColor(context)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Money Donations',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textPrimaryColor(context),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -739,7 +801,7 @@ class _ContributePageState extends State<ContributePage> {
                       padding: const EdgeInsets.all(14),
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: AppColors.scaffoldBackground(context),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -762,10 +824,10 @@ class _ContributePageState extends State<ContributePage> {
                               children: [
                                 Text(
                                   '\u20B9${d.amount}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14,
-                                    color: AppColors.textPrimary,
+                                    color: AppColors.textPrimaryColor(context),
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -773,7 +835,7 @@ class _ContributePageState extends State<ContributePage> {
                                   _formatDate(d.createdAt),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                    color: AppColors.textSecondaryColor(context),
                                   ),
                                 ),
                               ],
@@ -800,17 +862,19 @@ class _ContributePageState extends State<ContributePage> {
     return '${dt.day} ${monthName(dt.month)} ${dt.year}';
   }
 
-  Widget _buildEmptySection(String message) {
+  Widget _buildEmptySection(BuildContext context, String message) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           children: [
-            Icon(Icons.inbox_outlined, size: 40, color: AppColors.textHint),
+            Icon(Icons.inbox_outlined,
+                size: 40, color: AppColors.textMutedColor(context)),
             const SizedBox(height: 10),
             Text(
               message,
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style:
+                  TextStyle(fontSize: 13, color: AppColors.textSecondaryColor(context)),
             ),
           ],
         ),

@@ -20,8 +20,18 @@ class MoneyDonationRecord {
       amount: json['amount'] is int
           ? json['amount']
           : int.tryParse(json['amount']?.toString() ?? '0') ?? 0,
-      status: (json['status'] ?? 'completed').toString(),
-      createdAt: (json['createdAt'] ?? json['created_at'] ?? '').toString(),
+      // Preserve the API status verbatim. Do NOT default a missing status to a
+      // confirmed value, otherwise unconfirmed donations would be counted in
+      // the user's total. Unknown/missing statuses fall to 'pending' so the
+      // confirmed-total logic only counts explicitly confirmed statuses.
+      status: (json['status'] ?? 'pending').toString(),
+      // The money-donation API may return the date as 'donationDate'; fall back
+      // to 'createdAt'/'created_at' so history rows never show a blank date.
+      createdAt: (json['donationDate'] ??
+              json['createdAt'] ??
+              json['created_at'] ??
+              '')
+          .toString(),
     );
   }
 }

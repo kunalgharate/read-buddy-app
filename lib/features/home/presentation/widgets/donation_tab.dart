@@ -164,8 +164,12 @@ class _DonationTabContent extends StatelessWidget {
               // --- Buy Prime Button (hidden when already prime) ---
               BlocBuilder<ProfileBloc, ProfileState>(
                 builder: (context, profileState) {
-                  if (profileState is ProfileLoaded &&
-                      profileState.user.isPrime) {
+                  // Only show Buy Prime once the profile has loaded, and only
+                  // for non-prime users. While loading or on error we hide the
+                  // button so we never prompt a payment based on unknown state.
+                  final isKnownNonPrime =
+                      profileState is ProfileLoaded && !profileState.user.isPrime;
+                  if (!isKnownNonPrime) {
                     return const SizedBox.shrink();
                   }
                   return _DonationButton(
@@ -243,8 +247,9 @@ class _ImpactSection extends StatelessWidget {
           );
         }
 
-        final booksDonated =
-            state is DonationStatsLoaded ? state.stats.booksDonated : 0;
+        final booksDonated = state is DonationStatsLoaded
+            ? confirmedBooksSorted(state.stats.bookStatusList).length
+            : 0;
         final studentsHelped =
             state is DonationStatsLoaded ? state.stats.studentsHelped : 0;
 
@@ -351,7 +356,9 @@ class _BookStatusSection extends StatelessWidget {
 
         // --- Loaded ---
         if (state is DonationStatsLoaded) {
-          final books = confirmedBooksSorted(state.stats.bookStatusList);
+          // Show all donations (pending + confirmed) so a just-submitted book
+          // is visible immediately with its current status.
+          final books = allBooksSorted(state.stats.bookStatusList);
 
           // --- Empty state ---
           if (books.isEmpty) {
@@ -360,7 +367,7 @@ class _BookStatusSection extends StatelessWidget {
               decoration: cardDecoration(),
               child: Center(
                 child: Text(
-                  'No confirmed donations yet',
+                  'No donations yet',
                   style: GoogleFonts.poppins(
                     fontSize: size.width * 0.035,
                     color: AppColors.textSecondaryColor(context),

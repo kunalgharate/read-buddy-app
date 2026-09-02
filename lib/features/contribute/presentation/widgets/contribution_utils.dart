@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/donate/presentation/widgets/donation_status.dart'
+    show resolveDonationStatus;
 
 /// Shared month-name helper for formatting donation dates.
 String monthName(int m) {
@@ -22,22 +23,11 @@ String monthName(int m) {
   return names[m];
 }
 
-/// Shared status badge used across the contribution pages.
+/// Shared status badge used across the contribution pages. Reads its color
+/// from the single status source of truth so every screen agrees.
 Widget buildStatusBadge(String status) {
-  Color color;
-  switch (status.toLowerCase()) {
-    case 'completed':
-    case 'success':
-      color = const Color(0xFF4CAF50);
-      break;
-    case 'donation_created':
-    case 'pickup_requested':
-    case 'pending':
-      color = const Color(0xFF2196F3);
-      break;
-    default:
-      color = AppColors.textSecondary;
-  }
+  final resolved = resolveDonationStatus(status);
+  final color = resolved.color;
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(
@@ -45,7 +35,7 @@ Widget buildStatusBadge(String status) {
       borderRadius: BorderRadius.circular(20),
     ),
     child: Text(
-      status.replaceAll('_', ' '),
+      resolved.label,
       style: GoogleFonts.poppins(
         color: color,
         fontSize: 11,
