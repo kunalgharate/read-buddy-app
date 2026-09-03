@@ -13,8 +13,7 @@ import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/cat
 import 'package:read_buddy_app/features/donate/domain/entities/book_donation_request.dart';
 import 'package:read_buddy_app/features/library/domain/entities/library_entity.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
-import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
-import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_events.dart';
+import 'package:read_buddy_app/features/donate/presentation/pages/donation_success_screen.dart';
 
 class DonationPage extends StatelessWidget {
   const DonationPage({super.key});
@@ -268,7 +267,6 @@ class _DonationPageState extends State<_DonationPageContent> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
-        
               elevation: 8,
               insetPadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -512,23 +510,19 @@ class _DonationPageState extends State<_DonationPageContent> {
       body: BlocListener<DonateBookBloc, DonateBookState>(
         listener: (context, state) {
           if (state is BookDonationCreated) {
-            // Refresh book pages so new donation appears
-            context.read<BookBloc>().add(RefreshBooks());
-            context.read<DonatedBooksBloc>().add(LoadDonatedBooks());
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Book donated successfully! ',
-                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.white),
+            if (context.mounted) {
+              try {
+                context.read<BookBloc>().add(RefreshBooks());
+              } catch (e) {
+                debugPrint('❌ BookBloc refresh failed: $e');
+              }
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const DonationSuccessScreen(),
                 ),
-                backgroundColor: _primaryGreen,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            );
-            Navigator.pop(context);
+              );
+            }
           } else if (state is DonateBookError) {
             debugPrint('❌ Donation error: ${state.message}');
             ScaffoldMessenger.of(context).showSnackBar(

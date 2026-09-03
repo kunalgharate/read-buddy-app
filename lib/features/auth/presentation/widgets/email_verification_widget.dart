@@ -8,7 +8,8 @@ import '../blocs/sign_up/sign_up_bloc.dart';
 import 'custom_button_widget.dart';
 
 class EmailVerificationScreen extends StatelessWidget {
-  EmailVerificationScreen({super.key});
+  final String? email;
+  EmailVerificationScreen({super.key, this.email});
 
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
   final List<TextEditingController> _controllers =
@@ -104,10 +105,13 @@ class EmailVerificationScreen extends StatelessWidget {
               context, '/onboarding-questionnaire', (route) => false);
         } else if (state is ResendVerificationEmailSuccess) {
           if (!context.mounted) return;
+          final resendedEmail = (state.user.email.isNotEmpty == true)
+              ? state.user.email
+              : (email ?? '');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Verification code re-sent to ${state.user.email}',
+                'Verification code re-sent to $resendedEmail',
               ),
               backgroundColor: const Color(0xFF00C853),
             ),
@@ -132,9 +136,12 @@ class EmailVerificationScreen extends StatelessWidget {
           _ => null,
         };
 
+        final displayEmail = (currentUser?.email.isNotEmpty == true)
+            ? currentUser!.email
+            : (email ?? '');
+
         if (currentUser != null) {
           return Scaffold(
-      
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
@@ -167,7 +174,7 @@ class EmailVerificationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    currentUser.email,
+                    displayEmail,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 18,
@@ -182,10 +189,14 @@ class EmailVerificationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   GestureDetector(
-                    onTap: () => _resendCode(
-                      context,
-                      currentUser.toResendPayload(),
-                    ),
+                    onTap: () {
+                      final payload = currentUser.toResendPayload();
+                      if (currentUser.email.isEmpty &&
+                          displayEmail.isNotEmpty) {
+                        payload['email'] = displayEmail;
+                      }
+                      _resendCode(context, payload);
+                    },
                     child: const Text.rich(
                       TextSpan(
                         text: 'If you did not receive code? ',
@@ -210,7 +221,7 @@ class EmailVerificationScreen extends StatelessWidget {
                   const SizedBox(height: 48),
                   CustomButton(
                     text: 'Continue',
-                    onPressed: () => _verifyOTP(context, currentUser.email),
+                    onPressed: () => _verifyOTP(context, displayEmail),
                     backgroundColor: const Color(0xFF00C853),
                   ),
                 ],

@@ -369,25 +369,70 @@ class _ProfileView extends StatelessWidget {
 
   Widget _buildPrimeBadge() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8E1),
+        color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFFFD700)),
+        border:
+            Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.3)),
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.star, color: Color(0xFFFFD700), size: 14),
-          SizedBox(width: 4),
+          Icon(Icons.star, color: Color(0xFF7C3AED), size: 14),
+          SizedBox(width: 6),
           Text(
-            'Prime Member',
+            'SUPPORTER CONTRIBUTOR',
             style: TextStyle(
-              color: Color(0xFFB8860B),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+              color: Color(0xFF7C3AED),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrimeMembershipCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF059669), Color(0xFF2CE07F)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Text(
+                '\uD83D\uDC51',
+                style: TextStyle(fontSize: 24),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'You are a Prime Member',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Enjoy premium benefits',
+            style: TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -718,7 +763,11 @@ class _ProfileView extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
-          if (user.isPrime) _buildPrimeBadge(),
+          if (user.isPrime) ...[
+            _buildPrimeBadge(),
+            const SizedBox(height: 16),
+            _buildPrimeMembershipCard(),
+          ],
           const SizedBox(height: 32),
           _buildInfoSection(context, user),
           const SizedBox(height: 24),

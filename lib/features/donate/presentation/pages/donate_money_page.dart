@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -46,6 +47,12 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
       _currentAmount = _selectedPlan;
       final razorpayKey = result['razorpayKey'] as String;
 
+      if (kDebugMode) {
+        debugPrint('💳 [Razorpay] Key is TEST mode: ${razorpayKey.startsWith('rzp_test_')}');
+        debugPrint('💳 [Razorpay] Key is LIVE mode: ${razorpayKey.startsWith('rzp_live_')}');
+        debugPrint('💳 [Razorpay] Amount: $_currentAmount INR');
+      }
+
       final options = {
         'key': razorpayKey,
         'amount': (_selectedPlan * 100).toString(), // paise
@@ -70,6 +77,11 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   }
 
   Future<void> _onPaymentSuccess(PaymentSuccessResponse response) async {
+    if (kDebugMode) {
+      final paymentId = response.paymentId ?? '';
+      final orderId = response.orderId ?? _currentOrderId ?? '';
+      debugPrint('💳 [Razorpay] PAYMENT_SUCCESS | paymentId=...${paymentId.length > 6 ? paymentId.substring(paymentId.length - 6) : paymentId} | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId}');
+    }
     try {
       final datasource = getIt<DonateRemoteDataSource>();
       await datasource.verifyMoneyDonation(
@@ -78,6 +90,10 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         razorpaySignature: response.signature ?? '',
         amount: _currentAmount,
       );
+      if (kDebugMode) {
+        final orderId = response.orderId ?? _currentOrderId ?? '';
+        debugPrint('💳 [Razorpay] VERIFY SUCCESS | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId}');
+      }
 
       if (mounted) {
         showDialog(
@@ -119,6 +135,11 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         );
       }
     } catch (e) {
+      if (kDebugMode) {
+        final orderId = (response.orderId ?? _currentOrderId ?? '');
+        debugPrint(
+            '💳 [Razorpay] VERIFY FAILED | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId} | error=$e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Payment verification failed: $e')),
@@ -128,6 +149,10 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   }
 
   void _onPaymentError(PaymentFailureResponse response) {
+    if (kDebugMode) {
+      debugPrint(
+          '💳 [Razorpay] PAYMENT_ERROR | code=${response.code} (redacted: ${response.message == null ? 'none' : '${response.message!.length} chars'})');
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -195,12 +220,12 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
             const SizedBox(height: 24),
 
             // Benefits
-            const Text(
+            Text(
               'Prime Benefits',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryColor(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -213,12 +238,12 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
             const SizedBox(height: 24),
 
             // How to get Prime
-            const Text(
+            Text(
               'How to Get Prime',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryColor(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -230,35 +255,39 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                 border:
                     Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '📚 Option 1: Donate a Book',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textPrimaryColor(context),
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'Donate any book to our library network. Once approved by admin, you get Prime for free!',
-                    style:
-                        TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondaryColor(context),
+                    ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     '💳 Option 2: Buy Membership',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textPrimaryColor(context),
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'Purchase Prime Membership starting at ₹100/year and get instant access.',
-                    style:
-                        TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondaryColor(context),
+                    ),
                   ),
                 ],
               ),
@@ -266,12 +295,12 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
             const SizedBox(height: 24),
 
             // Pricing
-            const Text(
+            Text(
               'Select Plan',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryColor(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -313,31 +342,32 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: AppColors.surfaceColor(context),
                 borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.borderColor(context)),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(Icons.info_outline,
-                          size: 16, color: AppColors.textHint),
-                      SizedBox(width: 8),
+                          size: 16, color: AppColors.textMutedColor(context)),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Important Information',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textPrimaryColor(context),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     '• This is a membership purchase, not a donation.\n'
                     '• Membership is valid for 1 year from the date of purchase.\n'
@@ -347,7 +377,7 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                     '• Payment processed securely via Razorpay.',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSecondaryColor(context),
                       height: 1.5,
                     ),
                   ),
@@ -371,9 +401,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryColor(context),
               ),
             ),
           ),
@@ -391,10 +421,10 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? Colors.amber.shade700 : AppColors.border,
+            color: selected ? Colors.amber.shade700 : AppColors.borderColor(context),
             width: selected ? 2 : 1,
           ),
-          color: selected ? Colors.amber.shade50 : Colors.white,
+          color: selected ? Colors.amber.shade50 : AppColors.surfaceColor(context),
         ),
         child: Row(
           children: [
@@ -414,17 +444,21 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                 children: [
                   Text(
                     duration,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: AppColors.textPrimary,
+                      color: selected
+                          ? AppColors.textPrimary
+                          : AppColors.textPrimaryColor(context),
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: selected
+                          ? AppColors.textSecondary
+                          : AppColors.textSecondaryColor(context),
                     ),
                   ),
                 ],

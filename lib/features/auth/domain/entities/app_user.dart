@@ -107,11 +107,6 @@ class AppUser {
         'email': email,
         'password': password,
         'phno': phno ?? '',
-        'userRole': role,
-        'picture': picture ?? '',
-        'deviceInfo': {
-          'deviceModel': 'Mobile Device',
-          'deviceOS': 'Mobile OS',
-        },
+        'deviceInfo': {},
       };
 }

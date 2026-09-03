@@ -25,37 +25,40 @@ class AppUserModel extends AppUser {
   });
 
   factory AppUserModel.fromJson(Map<String, dynamic> json) {
-    final user = json['user'];
+    final Map<String, dynamic> user =
+        json['user'] != null ? json['user'] as Map<String, dynamic> : json;
 
     if (kDebugMode) {
-      print('👤 AppUserModel: User data: $user');
-      print('👤 AppUserModel: Access token: ${json['accessToken']}');
-      print('👤 AppUserModel: Refresh token: ${json['refreshToken']}');
+      print('👤 AppUserModel: Parsed user id: ${user['_id'] ?? user['id']}');
       print('👤 AppUserModel: isEmailVerified: ${user['isEmailVerified']}');
       print(
-          '👤 AppUserModel: onboardingCompleted: ${user['onboardingCompleted']}'); // ← ADDED
+          '👤 AppUserModel: onboardingCompleted: ${user['onboardingCompleted']}');
     }
 
     return AppUserModel(
-      id: user['_id'] ?? '',
-      name: user['name'] ?? '',
-      email: user['email'] ?? '',
-      password: user['password'] ?? '',
-      role: user['role'] ?? user['userRole'] ?? 'user',
-      isPrime: user['isPrime'] ?? false,
-      finesDue: user['finesDue'] ?? 0,
-      isEmailVerified: user['isEmailVerified'] ?? false,
-      onboardingCompleted: user['onboardingCompleted'] ?? false, // ← ADDED
+      id: (user['_id'] ?? user['id'] ?? '').toString(),
+      name: (user['name'] ?? '').toString(),
+      email: (user['email'] ?? '').toString(),
+      password: (user['password'] ?? '').toString(),
+      role: (user['role'] ?? user['userRole'] ?? 'user').toString(),
+      isPrime: user['isPrime'] as bool? ?? false,
+      finesDue: (user['finesDue'] as num?)?.toInt() ?? 0,
+      isEmailVerified: user['isEmailVerified'] as bool? ?? false,
+      onboardingCompleted: user['onboardingCompleted'] as bool? ?? false,
       badges: List<dynamic>.from(user['badges'] ?? []),
-      createdAt: DateTime.tryParse(user['createdAt'] ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(user['updatedAt'] ?? '') ?? DateTime.now(),
-      version: user['__v'] ?? 0,
-      accessToken: json['accessToken'] ?? '',
-      refreshToken: json['refreshToken'] ?? '',
-      picture: user['picture'],
-      phno: user['phno'],
-      gender: user['gender'],
-      wishlist: user['wishlist'] ?? [],
+      createdAt: DateTime.tryParse((user['createdAt'] ?? '').toString()) ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse((user['updatedAt'] ?? '').toString()) ??
+          DateTime.now(),
+      version: (user['__v'] as num?)?.toInt() ?? 0,
+      accessToken:
+          (json['accessToken'] ?? user['accessToken'] ?? '').toString(),
+      refreshToken:
+          (json['refreshToken'] ?? user['refreshToken'] ?? '').toString(),
+      picture: user['picture']?.toString(),
+      phno: user['phno']?.toString(),
+      gender: user['gender']?.toString(),
+      wishlist: user['wishlist'] as List<dynamic>?,
     );
   }
 

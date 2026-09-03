@@ -7,7 +7,6 @@ import 'package:read_buddy_app/features/home/presentation/widgets/category_tab.d
 import 'package:read_buddy_app/features/home/presentation/widgets/donation_tab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/main_tab.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
-import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/features/profile/presentation/pages/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,6 +18,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+
+  void _onTabChanged(int index) {
+    if (index == _currentIndex) return;
+    setState(() => _currentIndex = index);
+    // Refresh donation stats every time user switches to Donate tab
+    if (index == 2) {
+      context.read<DonateBookBloc>().add(LoadDonationStats());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,16 +57,13 @@ class _HomeScreenState extends State<HomeScreen> {
               onDonatePressed: () =>
                   Navigator.pushNamed(context, '/donate-money')),
           const CategoryTab(),
-          BlocProvider(
-            create: (_) => getIt<DonateBookBloc>(),
-            child: const DonationTab(),
-          ),
+          const DonationTab(),
           const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavWidget(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: _onTabChanged,
       ),
     );
   }

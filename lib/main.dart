@@ -12,6 +12,7 @@ import 'package:read_buddy_app/features/auth/presentation/blocs/sign_up/sign_up_
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
 import 'package:read_buddy_app/features/donated_books/presentation/bloc/donated_books_bloc.dart';
+import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/category_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/services/connectivity_service.dart';
@@ -100,7 +101,9 @@ class _MyAppState extends State<MyApp> {
         // Books — singleton used across multiple screens
         BlocProvider(create: (_) => getIt<BookBloc>()),
         BlocProvider(create: (_) => getIt<DonatedBooksBloc>()),
-        // Categories — singleton used in home, donate, book crud
+        // Donate — needed by home Donate tab and my-contributions pages
+        BlocProvider(create: (_) => getIt<DonateBookBloc>()),
+        // Categories — singleton used in home, donate, bookcrud
         BlocProvider(create: (_) => getIt<CategoryBloc>()),
       ],
       child: ValueListenableBuilder<ThemeMode>(

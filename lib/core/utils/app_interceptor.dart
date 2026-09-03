@@ -37,6 +37,21 @@ class AppInterceptor extends QueuedInterceptor {
   final FlutterSecureStorage _secureStorage;
   final Dio _authDio;
 
+  static const _authRouteSegments = [
+    '/login',
+    '/register',
+    '/google-auth',
+    '/verify-email',
+    '/resend-register-otp',
+    '/resend-reset-otp',
+    '/verify-reset-otp',
+    '/reset-password',
+    '/refresh-token',
+  ];
+
+  static bool _isAuthRoute(String path) =>
+      _authRouteSegments.any(path.endsWith);
+
   AppInterceptor(this._secureStorage, this._authDio) {
     _authDio.options.connectTimeout = const Duration(seconds: 30);
     _authDio.options.receiveTimeout = const Duration(seconds: 30);
@@ -52,10 +67,14 @@ class AppInterceptor extends QueuedInterceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
-      final accessToken = await _secureStorage.read(key: 'accessToken');
-      if (accessToken != null && accessToken.isNotEmpty) {
-        options.headers['Authorization'] = 'Bearer $accessToken';
+      final path = options.uri.path;
+      if (!_isAuthRoute(path)) {
+        final accessToken = await _secureStorage.read(key: 'accessToken');
+        if (accessToken != null && accessToken.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $accessToken';
+        }
       }
+
       if (!options.headers.containsKey('Content-Type') &&
           options.data is! FormData) {
         options.headers['Content-Type'] = 'application/json';
@@ -115,11 +134,7 @@ class AppInterceptor extends QueuedInterceptor {
 
   bool _shouldAttemptTokenRefresh(DioException err) {
     final status = err.response?.statusCode;
-    final path = err.requestOptions.uri.path;
-    final isAuthRoute = path.contains('/refresh-token') ||
-        path.contains('/login') ||
-        path.contains('/register');
-    if (isAuthRoute) return false;
+    if (_isAuthRoute(err.requestOptions.uri.path)) return false;
 
     final responseData = err.response?.data;
     if (status == 401 && responseData is Map) {
