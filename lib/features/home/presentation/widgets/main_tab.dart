@@ -11,7 +11,6 @@ import 'package:read_buddy_app/features/homebooks/domain/entities/book_entity.da
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_bloc.dart';
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_event.dart';
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_state.dart';
-import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'package:read_buddy_app/features/reading_progress/domain/entities/reading_progress_entity.dart';
 import 'package:read_buddy_app/features/reading_progress/presentation/cubit/recent_reading_cubit.dart';
 
@@ -70,15 +69,9 @@ class _MainTabView extends StatelessWidget {
         listenWhen: (prev, curr) => curr is HomeLoaded && prev is! HomeLoaded,
         listener: (context, state) {
           if (state is HomeLoaded) {
-            final profileState = context.read<ProfileBloc>().state;
-            final isPrime = profileState is ProfileLoaded
-                ? profileState.user.isPrime
-                : false;
-            if (isPrime) {
-              context
-                  .read<BannerBloc>()
-                  .add(const GetBannerListEvent(typeFilter: 'homepage'));
-            }
+            context
+                .read<BannerBloc>()
+                .add(const GetBannerListEvent(typeFilter: 'homepage'));
           }
         },
         builder: (context, state) {
@@ -100,12 +93,6 @@ class _MainTabView extends StatelessWidget {
           }
 
           if (state is HomeLoaded) {
-            // Use fresh isPrime from ProfileBloc — default to false if not loaded
-            final profileState = context.watch<ProfileBloc>().state;
-            final isPrime = profileState is ProfileLoaded
-                ? profileState.user.isPrime
-                : false;
-
             return SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(0, 20, 0, 80),
@@ -115,7 +102,6 @@ class _MainTabView extends StatelessWidget {
                     _BannerSection(
                       trendingCover:
                           state.trendingBooks.firstOrNull?.coverImageUrl,
-                      isPrime: isPrime,
                       onDonatePressed: onDonatePressed,
                     ),
                     const _ContinueReadingSection(),
@@ -152,18 +138,12 @@ class _MainTabView extends StatelessWidget {
 
 class _BannerSection extends StatelessWidget {
   final String? trendingCover;
-  final bool isPrime;
   final VoidCallback? onDonatePressed;
-  const _BannerSection(
-      {this.trendingCover, required this.isPrime, this.onDonatePressed});
+  const _BannerSection({this.trendingCover, this.onDonatePressed});
 
   @override
   Widget build(BuildContext context) {
-    if (!isPrime) {
-      return _buildDonationCard();
-    }
-
-    // Prime: wait for banners, show loader until ready
+    // Wait for banners, show loader until ready
     return BlocBuilder<BannerBloc, BannerState>(
       builder: (context, state) {
         if (state is BannerLoading || state is BannerInitial) {
