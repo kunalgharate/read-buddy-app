@@ -12,9 +12,17 @@ final class LoadDraftOrder extends BorrowOrderEvent {
 
 final class AddBookToCart extends BorrowOrderEvent {
   final String bookId;
-  const AddBookToCart(this.bookId);
+  final String variantId;
+  final String formatId;
+  final String? libraryId;
+  const AddBookToCart({
+    required this.bookId,
+    required this.variantId,
+    required this.formatId,
+    this.libraryId,
+  });
   @override
-  List<Object?> get props => [bookId];
+  List<Object?> get props => [bookId, variantId, formatId, libraryId];
 }
 
 final class RemoveBookFromCart extends BorrowOrderEvent {

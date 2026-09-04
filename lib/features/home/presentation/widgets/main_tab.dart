@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/services/city_notifier.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/core/widgets/city_location_bar.dart';
 import 'package:read_buddy_app/features/banner/domain/entity/banner_entity.dart';
 import 'package:read_buddy_app/features/banner/presentation/bloc/banner_bloc.dart';
 import 'package:read_buddy_app/features/book_request/presentation/pages/book_detail_page.dart';
@@ -11,6 +14,8 @@ import 'package:read_buddy_app/features/homebooks/domain/entities/book_entity.da
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_bloc.dart';
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_event.dart';
 import 'package:read_buddy_app/features/homebooks/presentation/bloc/home_book_state.dart';
+import 'package:read_buddy_app/features/library_inventory/domain/entities/library_inventory_entity.dart';
+import 'package:read_buddy_app/features/library_inventory/presentation/bloc/library_inventory_bloc.dart';
 import 'package:read_buddy_app/features/reading_progress/domain/entities/reading_progress_entity.dart';
 import 'package:read_buddy_app/features/reading_progress/presentation/cubit/recent_reading_cubit.dart';
 
@@ -29,18 +34,37 @@ class MainTab extends StatefulWidget {
 class _MainTabState extends State<MainTab> {
   late final HomeBloc _homeBloc;
   late final RecentReadingCubit _recentReadingCubit;
+  late final LibraryInventoryBloc _inventoryBloc;
 
   @override
   void initState() {
     super.initState();
     _homeBloc = getIt<HomeBloc>()..add(LoadHomeData());
     _recentReadingCubit = getIt<RecentReadingCubit>()..load();
+    _inventoryBloc = getIt<LibraryInventoryBloc>();
+
+    // Load city books when city is available
+    final city = CityNotifier.instance.value;
+    if (city != null && city.isNotEmpty) {
+      _inventoryBloc.add(BrowseCityBooks(city: city));
+    }
+    // Also listen for future city changes
+    CityNotifier.instance.addListener(_onCityChanged);
+  }
+
+  void _onCityChanged() {
+    final city = CityNotifier.instance.value;
+    if (city != null && city.isNotEmpty) {
+      _inventoryBloc.add(BrowseCityBooks(city: city));
+    }
   }
 
   @override
   void dispose() {
+    CityNotifier.instance.removeListener(_onCityChanged);
     _homeBloc.close();
     _recentReadingCubit.close();
+    _inventoryBloc.close();
     super.dispose();
   }
 
@@ -50,6 +74,7 @@ class _MainTabState extends State<MainTab> {
       providers: [
         BlocProvider.value(value: _homeBloc),
         BlocProvider.value(value: _recentReadingCubit),
+        BlocProvider.value(value: _inventoryBloc),
         BlocProvider(create: (_) => getIt<BannerBloc>()),
       ],
       child: _MainTabView(onDonatePressed: widget.onDonatePressed),
@@ -95,10 +120,17 @@ class _MainTabView extends StatelessWidget {
           if (state is HomeLoaded) {
             return SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(0, 20, 0, 80),
+                padding: const EdgeInsets.fromLTRB(0, 12, 0, 80),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ── City Location Bar (Zomato-style) ──
+                    CityLocationBar(
+                      onCityChanged: (city) {
+                        // Bloc already listens via CityNotifier listener in _MainTabState
+                      },
+                    ),
+                    const SizedBox(height: 16),
                     _BannerSection(
                       trendingCover:
                           state.trendingBooks.firstOrNull?.coverImageUrl,
@@ -106,15 +138,10 @@ class _MainTabView extends StatelessWidget {
                     ),
                     const _ContinueReadingSection(),
                     const SizedBox(height: 32),
-                    _BookSection(
-                      title: 'Latest',
-                      books: state.latestBooks,
-                    ),
-                    const SizedBox(height: 32),
-                    _BookSection(
-                      title: 'Recommended for you',
-                      books: state.recommendedBooks,
-                    ),
+
+                    // ── City-Filtered Books (replaces global Latest / Recommended) ──
+                    const _CityBooksSection(),
+
                     const SizedBox(height: 32),
                     _MonthlyStatsCard(
                         dataSource: getIt<HomeRemoteDataSource>()),
@@ -413,7 +440,320 @@ class _BannerCarouselState extends State<_BannerCarousel> {
 }
 
 // ─────────────────────────────────────────────
-// Book section = header + horizontal list
+// City Books Section — shows books filtered by user's selected city
+// Replaces the old global Latest / Recommended sections
+// ─────────────────────────────────────────────
+
+class _CityBooksSection extends StatelessWidget {
+  const _CityBooksSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: CityNotifier.instance,
+      builder: (context, city, _) {
+        if (city == null || city.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.cardColor(context),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.borderColor(context)),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.location_off, size: 40, color: AppColors.textMutedColor(context)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Select your city to see available books',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondaryColor(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap the location bar above to choose your city',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMutedColor(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return BlocBuilder<LibraryInventoryBloc, LibraryInventoryState>(
+          builder: (context, state) {
+            if (state is LibraryInventoryLoading) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              );
+            }
+
+            if (state is CityBooksLoaded) {
+              if (state.books.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardColor(context),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.menu_book, size: 40, color: AppColors.textMutedColor(context)),
+                        const SizedBox(height: 8),
+                        Text(
+                          'No books available in $city yet',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondaryColor(context),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Books will appear here once libraries in your city add them',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMutedColor(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return _CityBooksList(city: city, books: state.books);
+            }
+
+            if (state is LibraryInventoryError) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(state.message, textAlign: TextAlign.center,
+                        style: TextStyle(color: AppColors.textSecondaryColor(context), fontSize: 13)),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => context.read<LibraryInventoryBloc>()
+                          .add(BrowseCityBooks(city: city)),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // Initial state — trigger load
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.read<LibraryInventoryBloc>()
+                .add(BrowseCityBooks(city: city));
+            });
+            return const SizedBox.shrink();
+          },
+        );
+      },
+    );
+  }
+}
+
+class _CityBooksList extends StatelessWidget {
+  final String city;
+  final List<CityBookEntity> books;
+
+  const _CityBooksList({required this.city, required this.books});
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = AppColors.textPrimaryColor(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              const Icon(Icons.location_on, size: 16, color: AppColors.primary),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  'Available in $city',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+              ),
+              Text(
+                '${books.length} books',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMutedColor(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 260,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: books.length,
+            itemBuilder: (_, i) => _CityBookCard(book: books[i]),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CityBookCard extends StatelessWidget {
+  final CityBookEntity book;
+  const _CityBookCard({required this.book});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BookDetailPage(bookId: book.bookId),
+        ),
+      ),
+      child: Container(
+        width: 145,
+        margin: const EdgeInsets.only(right: 14),
+        decoration: BoxDecoration(
+          color: AppColors.cardColor(context),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Cover
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(14)),
+                  child: book.coverImageUrl?.isNotEmpty == true
+                      ? CachedNetworkImage(
+                          imageUrl: book.coverImageUrl!,
+                          height: 170,
+                          width: 145,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => _imgPlaceholder(),
+                          errorWidget: (_, __, ___) => _imgPlaceholder(),
+                        )
+                      : _imgPlaceholder(),
+                ),
+                // Availability badge
+                Positioned(
+                  bottom: 8,
+                  left: 8,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: book.isAvailable
+                          ? Colors.green.withValues(alpha: 0.9)
+                          : Colors.red.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text(
+                      book.isAvailable
+                          ? '${book.totalAvailable} available'
+                          : 'Out of Stock',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Title & author
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 9, 10, 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    book.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryColor(context),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    book.author,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMutedColor(context),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${book.libraries.length} ${book.libraries.length == 1 ? 'library' : 'libraries'}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppColors.textHint,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _imgPlaceholder() => Container(
+        height: 170,
+        width: 145,
+        decoration: const BoxDecoration(
+          color: Color(0xFFE8EDF2),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+        ),
+        child: const Icon(Icons.book, size: 44, color: Color(0xFFB0BEC5)),
+      );
+}
+
+// ─────────────────────────────────────────────
+// Book section = header + horizontal list (kept for Continue Reading etc.)
 // ─────────────────────────────────────────────
 
 class _BookSection extends StatefulWidget {

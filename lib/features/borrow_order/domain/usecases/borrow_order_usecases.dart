@@ -12,7 +12,18 @@ class AddBookToOrder {
   final BorrowOrderRepository _repository;
   AddBookToOrder(this._repository);
 
-  Future<BorrowOrderEntity> call(String bookId) => _repository.addBook(bookId);
+  Future<BorrowOrderEntity> call({
+    required String bookId,
+    required String variantId,
+    required String formatId,
+    String? libraryId,
+  }) =>
+      _repository.addBook(
+        bookId: bookId,
+        variantId: variantId,
+        formatId: formatId,
+        libraryId: libraryId,
+      );
 }
 
 class RemoveBookFromOrder {

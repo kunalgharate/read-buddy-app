@@ -21,6 +21,7 @@ import 'package:read_buddy_app/core/utils/app_bloc_observer.dart';
 import 'package:read_buddy_app/core/widgets/connectivity_wrapper.dart';
 import 'package:read_buddy_app/core/widgets/session_expired_dialog.dart';
 import 'package:read_buddy_app/core/theme/theme_notifier.dart';
+import 'package:read_buddy_app/core/services/city_notifier.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/routes/app_router.dart';
 
@@ -39,6 +40,8 @@ void main() async {
   await configureDependencies();
   await ConnectivityService.instance.init();
   await ThemeNotifier.instance.init();
+  // Initialize city selection (loads from prefs or attempts GPS)
+  CityNotifier.instance.init(); // fire-and-forget; UI handles loading state
   Bloc.observer = AppBlocObserver();
 
   print('🚀 [main] App starting... (${AppConfig.instance.environment.name})');
