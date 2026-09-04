@@ -11,8 +11,18 @@ class BorrowOrderRepositoryImpl implements BorrowOrderRepository {
   Future<BorrowOrderEntity> getMyDraft() => _remoteDataSource.getMyDraft();
 
   @override
-  Future<BorrowOrderEntity> addBook(String bookId) =>
-      _remoteDataSource.addBook(bookId);
+  Future<BorrowOrderEntity> addBook({
+    required String bookId,
+    required String variantId,
+    required String formatId,
+    String? libraryId,
+  }) =>
+      _remoteDataSource.addBook(
+        bookId: bookId,
+        variantId: variantId,
+        formatId: formatId,
+        libraryId: libraryId,
+      );
 
   @override
   Future<BorrowOrderEntity> removeBook(String bookRequestId) =>

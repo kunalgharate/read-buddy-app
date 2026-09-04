@@ -128,6 +128,11 @@ class ApiConstants {
   static String get libraries => '$baseUrl/v1/libraries';
   static String get superLibraries => '$baseUrl/v1/libraries/super';
 
+  // Library Inventory
+  static String get libraryInventory => '$baseUrl/v1/library-inventory';
+  static String get libraryInventoryBrowse => '$baseUrl/v1/library-inventory/browse';
+  static String libraryInventoryById(String id) => '$baseUrl/v1/library-inventory/$id';
+
   // Admin User Management
   static String get adminUsers => '$baseUrl/admin/users';
   static String get adminLibrarians => '$baseUrl/admin/librarians';

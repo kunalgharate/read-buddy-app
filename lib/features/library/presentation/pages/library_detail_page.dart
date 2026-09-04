@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/network/api_constants.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/library_inventory/presentation/pages/add_book_to_library_dialog.dart';
+import 'package:read_buddy_app/features/library_inventory/presentation/pages/library_books_page.dart';
 import '../../domain/entities/library_entity.dart';
 
 /// Page to view a library's details and manage its assigned librarians.
@@ -220,6 +222,61 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                 ],
               ),
             ),
+            const SizedBox(height: 24),
+
+            // Book Inventory section
+            Row(
+              children: [
+                const Text(
+                  'Book Inventory',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => LibraryBooksPage(
+                          libraryId: lib.id,
+                          libraryName: lib.name,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.list, size: 18),
+                  label: const Text('View Books'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final result = await AddBookToLibraryDialog.show(
+                    context,
+                    libraryId: lib.id,
+                    libraryName: lib.name,
+                  );
+                  if (result != null && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Book added to library!')),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Add Book to Library'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+
             const SizedBox(height: 24),
 
             // Librarians section

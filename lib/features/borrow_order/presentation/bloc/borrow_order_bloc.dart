@@ -64,7 +64,12 @@ class BorrowOrderBloc extends Bloc<BorrowOrderEvent, BorrowOrderState> {
   ) async {
     // Don't emit full loading — keep the existing cart visible during mutation
     try {
-      await _addBookToOrder(event.bookId);
+      await _addBookToOrder(
+        bookId: event.bookId,
+        variantId: event.variantId,
+        formatId: event.formatId,
+        libraryId: event.libraryId,
+      );
       // Re-fetch the draft so the UI shows the authoritative updated cart
       final order = await _getMyDraft();
       emit(DraftOrderLoaded(order));

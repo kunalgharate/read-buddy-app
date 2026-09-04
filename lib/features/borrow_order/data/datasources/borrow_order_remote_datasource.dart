@@ -5,7 +5,12 @@ import '../models/borrow_order_model.dart';
 
 abstract class BorrowOrderRemoteDataSource {
   Future<BorrowOrderModel> getMyDraft();
-  Future<BorrowOrderModel> addBook(String bookId);
+  Future<BorrowOrderModel> addBook({
+    required String bookId,
+    required String variantId,
+    required String formatId,
+    String? libraryId,
+  });
   Future<BorrowOrderModel> removeBook(String bookRequestId);
   Future<BorrowOrderModel> submitOrder({
     required FulfillmentMethod fulfillmentMethod,
@@ -47,10 +52,22 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
   }
 
   @override
-  Future<BorrowOrderModel> addBook(String bookId) async {
+  Future<BorrowOrderModel> addBook({
+    required String bookId,
+    required String variantId,
+    required String formatId,
+    String? libraryId,
+  }) async {
+    final data = <String, dynamic>{
+      'bookId': bookId,
+      'variantId': variantId,
+      'formatId': formatId,
+    };
+    if (libraryId != null) data['libraryId'] = libraryId;
+
     final response = await _dio.post(
       '$_baseEndpoint/add-book',
-      data: {'bookId': bookId},
+      data: data,
     );
     return BorrowOrderModel.fromJson(_unwrapOrder(response.data));
   }

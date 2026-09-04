@@ -218,6 +218,12 @@ import 'package:read_buddy_app/features/library/domain/repositories/library_repo
 import 'package:read_buddy_app/features/library/domain/usecases/library_usecases.dart';
 import 'package:read_buddy_app/features/library/presentation/bloc/library_bloc.dart';
 
+// Library Inventory
+import 'package:read_buddy_app/features/library_inventory/data/datasources/library_inventory_remote_datasource.dart';
+import 'package:read_buddy_app/features/library_inventory/data/repositories/library_inventory_repository_impl.dart';
+import 'package:read_buddy_app/features/library_inventory/domain/repositories/library_inventory_repository.dart';
+import 'package:read_buddy_app/features/library_inventory/presentation/bloc/library_inventory_bloc.dart';
+
 // Address
 import 'package:read_buddy_app/features/address/data/datasources/address_remote_datasource.dart';
 import 'package:read_buddy_app/features/address/data/repositories/address_repository_impl.dart';
@@ -250,6 +256,7 @@ Future<void> configureDependencies() async {
   _registerBlocs();
   _registerCubits();
   _registerLibraryFeature();
+  _registerLibraryInventoryFeature();
   _registerAddressFeature();
   _registerLibrarianFeature();
   _registerReviewsFeature();
@@ -805,6 +812,27 @@ void _registerLibraryFeature() {
         assignLibrarian: getIt<AssignLibrarian>(),
         unassignLibrarian: getIt<UnassignLibrarian>(),
         getLibrarians: getIt<GetLibrarians>(),
+      ));
+}
+
+// ========================================
+// LIBRARY INVENTORY FEATURE
+// ========================================
+void _registerLibraryInventoryFeature() {
+  // DataSource
+  getIt.registerLazySingleton<LibraryInventoryRemoteDataSource>(
+    () => LibraryInventoryRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<LibraryInventoryRepository>(
+    () => LibraryInventoryRepositoryImpl(
+        getIt<LibraryInventoryRemoteDataSource>()),
+  );
+
+  // BLoC
+  getIt.registerFactory(() => LibraryInventoryBloc(
+        repository: getIt<LibraryInventoryRepository>(),
       ));
 }
 
