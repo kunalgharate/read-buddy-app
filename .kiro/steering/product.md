@@ -20,14 +20,16 @@ ReadBuddy is a donation-based book sharing platform. This is the Flutter mobile 
 ## Core Features
 1. **Auth**: Sign in, sign up, Google sign in, email verification, forgot password
 2. **Onboarding**: Preference questionnaire after first registration
-3. **Home**: Latest, recommended, trending books + category browse
-4. **Book Formats**: Physical request, eBook reader (PDF/EPUB), Audiobook player, Videobook player
-5. **Donation**: Book donation (pickup/drop-off) + Money donation (Razorpay)
-6. **Book Request**: Create request → admin approves → schedule pickup/delivery → receive → return
-7. **Settings**: Dark/Light theme, notifications toggle, address management
-8. **Single-Device Session**: Only 1 device active. Show `showSessionExpiredDialog()` if kicked out.
-9. **Notifications**: Firebase FCM for request updates, delivery alerts
-10. **Admin Dashboard**: Book requests, donation management, user management (librarian app features)
+3. **Home**: City-filtered book browsing (CityLocationBar + CityBooksSection), continue reading, monthly stats
+4. **City Selection**: CityNotifier (SharedPreferences + GPS auto-detect), Zomato-style picker, recent locations
+5. **Book Formats**: Physical request, eBook reader (PDF/EPUB), Audiobook player, Videobook player
+6. **Donation**: Book donation (pickup/drop-off) + Money donation (Razorpay)
+7. **Book Request / Borrow**: Multi-book cart (BorrowOrder, ₹500 budget), library selection (LibraryPickerSheet), city-restricted inventory locks
+8. **Library Inventory Admin**: Add books to libraries, view/edit/delete copies per library
+9. **Settings**: Dark/Light theme, notifications toggle, address management
+10. **Single-Device Session**: Only 1 device active. Show `showSessionExpiredDialog()` if kicked out.
+11. **Notifications**: Firebase FCM for request updates, delivery alerts
+12. **Admin Dashboard**: Book requests, donation management, user management, library inventory
 
 ## Business Rules
 - Non-prime users CANNOT access read/listen/watch — always show donation prompt

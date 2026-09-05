@@ -12,6 +12,7 @@ IMPORTANT: The project standards are split across focused steering files in `.ki
 - `structure.md` (always) — Architecture, DI, navigation, file naming, git
 - `bloc-patterns.md` (auto for bloc files) — BLoC/Cubit code patterns
 - `api-standards.md` (auto for data layer) — API, models, data sources
+- `city-inventory.md` (auto for inventory/city files) — City-based inventory architecture, CityNotifier, LibraryInventoryBloc, borrow flow
 - `testing-guide.md` (manual via #testing-guide) — Test patterns and examples
 
 ## Your Responsibilities
