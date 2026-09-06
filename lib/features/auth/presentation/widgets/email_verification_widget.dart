@@ -82,10 +82,10 @@ class EmailVerificationScreen extends StatelessWidget {
 
   void _resendCode(
     BuildContext context,
-    Map<String, dynamic> userData,
+      String email,
   ) {
     BlocProvider.of<SignUpBloc>(context)
-        .add(ResendVerificationEmailEvent(userData));
+        .add(ResendVerificationEmailEvent(email));
   }
 
   @override
@@ -190,12 +190,7 @@ class EmailVerificationScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   GestureDetector(
                     onTap: () {
-                      final payload = currentUser.toResendPayload();
-                      if (currentUser.email.isEmpty &&
-                          displayEmail.isNotEmpty) {
-                        payload['email'] = displayEmail;
-                      }
-                      _resendCode(context, payload);
+                      _resendCode(context, displayEmail);
                     },
                     child: const Text.rich(
                       TextSpan(

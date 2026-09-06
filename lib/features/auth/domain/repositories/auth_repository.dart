@@ -6,6 +6,7 @@ abstract class AuthRepository {
   Future<AppUser> registerUser(Map<String, dynamic> data);
   Future<AppUser> verifyEmail(String email, String code);
   Future<void> sendOtp(String email);
+  Future<void> resendRegisterOtp(String email);
   Future<void> verifyResetOtp(String email, String otp);
   Future<void> changePassword(String email, String code, String newPassword);
 }

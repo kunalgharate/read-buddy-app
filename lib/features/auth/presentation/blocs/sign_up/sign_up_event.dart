@@ -15,6 +15,6 @@ class VerifyEmailEvent extends SignUpEvent {
 }
 
 class ResendVerificationEmailEvent extends SignUpEvent {
-  final Map<String, dynamic> userData;
-  ResendVerificationEmailEvent(this.userData);
+  final String email;
+  ResendVerificationEmailEvent(this.email);
 }

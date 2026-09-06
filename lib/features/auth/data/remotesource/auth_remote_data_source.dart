@@ -12,6 +12,7 @@ abstract class AuthRemoteDataSource {
   Future<AppUserModel> verifyEmail(String email, String code);
   Future<AppUserModel> signInWithGoogle({required String token});
   Future<void> sendOtp(String email);
+  Future<void> resendRegisterOtp(String email);
   Future<void> verifyResetOtp(String email, String otp);
   Future<void> changePassword(String email, String code, String newPassword);
 }
@@ -316,6 +317,45 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           requestOptions: response.requestOptions,
           response: response,
           message: 'Password change failed',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> resendRegisterOtp(String email) async {
+    if (kDebugMode) {
+      print('🌐 AuthRemoteDataSource: Resending register OTP to $email');
+    }
+
+    final hasInternet = await NetworkUtils.hasInternetConnection();
+    if (!hasInternet) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ApiConstants.resendRegisterOtp),
+        type: DioExceptionType.connectionError,
+        message: 'No internet connection available',
+      );
+    }
+
+    try {
+      final response = await _dio.post(
+        ApiConstants.resendRegisterOtp,
+        data: {'email': email.trim().toLowerCase()},
+      );
+
+      if (kDebugMode) {
+        print(
+            '🌐 AuthRemoteDataSource: Resend register OTP status: ${response.statusCode}');
+      }
+
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to resend verification email',
         );
       }
     } catch (e) {
