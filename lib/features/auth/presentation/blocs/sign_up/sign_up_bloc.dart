@@ -97,7 +97,11 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       ));
     } catch (error) {
       final errorMessage = ErrorHandler.getErrorMessage(error);
-      emit(SignUpError(message: errorMessage));
+      final isUserExists = ErrorHandler.isUserAlreadyExists(error);
+      emit(SignUpError(
+        message: errorMessage,
+        isUserAlreadyExists: isUserExists,
+      ));
     }
   }
 }

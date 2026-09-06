@@ -101,15 +101,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         print('🌐 AuthRemoteDataSource: Register response status: ${response.statusCode}');
       }
 
-      if (response.statusCode == ApiConstants.success ||
-          response.statusCode == ApiConstants.created) {
-        // Check if the API returned "user already registered" with 200 status
+      if (response.statusCode == ApiConstants.created ||
+          response.statusCode == ApiConstants.success) {
         final responseData = response.data;
+
+        if (kDebugMode) {
+          print('🌐 AuthRemoteDataSource: Register response: $responseData');
+        }
+
         if (responseData is Map<String, dynamic>) {
-          final message =
-              responseData['message']?.toString().toLowerCase() ?? '';
-          if (message.contains('already registered') ||
-              message.contains('user already exists')) {
+          // Backend contract:
+          //  201 + full `user` object  -> brand-new user registered
+          //  200 + generic message     -> email already exists (no user object)
+          // Distinguish the two so already-registered users are blocked
+          // before reaching the OTP screen.
+          final hasUser = responseData['user'] is Map<String, dynamic>;
+          final isNewRegistration =
+              response.statusCode == ApiConstants.created && hasUser;
+
+          if (!isNewRegistration) {
             throw DioException(
               requestOptions: response.requestOptions,
               response: Response(
@@ -123,6 +133,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         }
 
         return AppUserModel.fromJson(response.data);
+      }
+
+      // 400/409 = backend rejected (likely duplicate email)
+      if (response.statusCode == ApiConstants.badRequest ||
+          response.statusCode == ApiConstants.conflict) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'user already registered',
+        );
       }
 
       throw DioException(

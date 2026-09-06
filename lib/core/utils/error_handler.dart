@@ -157,11 +157,40 @@ class ErrorHandler {
   }
 
   static bool isUserAlreadyExists(dynamic error) {
-    if (error is DioException &&
-        error.response?.statusCode == ApiConstants.forbidden) {
-      final message = _extractErrorMessage(error.response?.data)?.toLowerCase();
-      return message?.contains('already registered') == true ||
-          message?.contains('user already exists') == true;
+    if (error is DioException) {
+      final statusCode = error.response?.statusCode;
+      final rawMessage =
+          _extractErrorMessage(error.response?.data)?.toLowerCase() ?? '';
+
+      // Direct match on the exception message thrown by the data source
+      if (error.message?.toLowerCase().contains('already registered') == true ||
+          error.message?.toLowerCase().contains('user already exists') ==
+              true) {
+        return true;
+      }
+
+      if (statusCode == ApiConstants.forbidden) {
+        // 403 = duplicate detected in registerUser
+        // "If this email is registered..." is the backend's generic duplicate
+        // signature — the account already exists.
+        return rawMessage.contains('already registered') ||
+            rawMessage.contains('user already exists') ||
+            rawMessage.contains('if this email is registered');
+      }
+      // 400/409 from register endpoint = likely duplicate email
+      if (statusCode == ApiConstants.badRequest ||
+          statusCode == ApiConstants.conflict) {
+        if (rawMessage.contains('already') || rawMessage.contains('exist')) {
+          return true;
+        }
+        final data = error.response?.data;
+        if (data is Map<String, dynamic>) {
+          // If backend returned the user with isEmailVerified: true
+          final userData =
+              data['user'] as Map<String, dynamic>? ?? data;
+          if (userData['isEmailVerified'] == true) return true;
+        }
+      }
     }
     return false;
   }
