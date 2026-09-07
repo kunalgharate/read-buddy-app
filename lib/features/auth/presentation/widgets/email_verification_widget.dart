@@ -190,54 +190,61 @@ class EmailVerificationScreen extends StatelessWidget {
               context, '/onboarding-questionnaire', (route) => false);
         } else if (state is ResendVerificationEmailSuccess) {
           if (!context.mounted) return;
-          final resendedEmail = (state.user.email.isNotEmpty == true)
-              ? state.user.email
-              : (email ?? '');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Verification code re-sent to $resendedEmail',
+                'Verification code re-sent to ${state.email}',
               ),
               backgroundColor: const Color(0xFF00C853),
             ),
           );
         } else if (state is SignUpError) {
+          // Errors from the signup form are owned by the SignUpScreen below.
+          if (state.source == SignUpErrorSource.register) return;
+
+          // A verified existing account was detected (e.g. via resend) —
+          // the user can sign in, so send them there instead of the OTP flow.
+          if (state.isUserAlreadyExists) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                action: SnackBarAction(
+                  label: 'Sign In',
+                  textColor: Colors.white,
+                  onPressed: () => Navigator.pushReplacementNamed(
+                      context, '/signin'),
+                ),
+              ),
+            );
+            Future.delayed(const Duration(seconds: 3), () {
+              if (!context.mounted) return;
+              Navigator.pushReplacementNamed(context, '/signin');
+            });
+            return;
+          }
+
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
               backgroundColor: Colors.red,
-              action: state.isUserAlreadyExists
-                  ? SnackBarAction(
-                      label: 'Sign In',
-                      textColor: Colors.white,
-                      onPressed: () => Navigator.pushReplacementNamed(
-                          context, '/signin'),
-                    )
-                  : null,
             ),
           );
-          if (state.isUserAlreadyExists) {
-            Future.delayed(const Duration(seconds: 3), () {
-              if (!context.mounted) return;
-              Navigator.pushReplacementNamed(context, '/signin');
-            });
-          }
         }
       },
       child: BlocBuilder<SignUpBloc, SignUpState>(
           builder: (context, signUpBlocState) {
-        final currentUser = switch (signUpBlocState) {
-          SignUpSuccess s => s.user,
-          ResendVerificationEmailSuccess s => s.user,
-          _ => null,
-        };
-
-        if (currentUser != null) {
-          final displayEmail = currentUser.email.isNotEmpty
-              ? currentUser.email
-              : (email ?? '');
+        if (signUpBlocState is SignUpSuccess) {
+          final displayEmail = signUpBlocState.email.isEmpty
+              ? (email ?? '')
+              : signUpBlocState.email;
           return _buildOtpScreen(context, displayEmail);
+        }
+
+        if (signUpBlocState is ResendVerificationEmailSuccess) {
+          return _buildOtpScreen(context, signUpBlocState.email);
         }
 
         if (signUpBlocState is SignUpLoading) {

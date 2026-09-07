@@ -170,25 +170,33 @@ class ErrorHandler {
       }
 
       if (statusCode == ApiConstants.forbidden) {
-        // 403 = duplicate detected in registerUser
+        // 403 = duplicate detected in registerUser / resendRegisterOtp.
         // "If this email is registered..." is the backend's generic duplicate
         // signature — the account already exists.
         return rawMessage.contains('already registered') ||
             rawMessage.contains('user already exists') ||
             rawMessage.contains('if this email is registered');
       }
-      // 400/409 from register endpoint = likely duplicate email
+
+      // 400/409 — only explicit duplicate/verified phrases qualify.
+      // Never bare "already"/"exist" substrings (e.g. "email does not exist"
+      // or "OTP already sent" must NOT redirect the user to Sign In).
       if (statusCode == ApiConstants.badRequest ||
           statusCode == ApiConstants.conflict) {
-        if (rawMessage.contains('already') || rawMessage.contains('exist')) {
+        if (rawMessage.contains('already verified and registered') ||
+            rawMessage.contains('user already verified and registered') ||
+            rawMessage.contains('already registered') ||
+            rawMessage.contains('already exists')) {
           return true;
         }
         final data = error.response?.data;
         if (data is Map<String, dynamic>) {
-          // If backend returned the user with isEmailVerified: true
-          final userData =
-              data['user'] as Map<String, dynamic>? ?? data;
-          if (userData['isEmailVerified'] == true) return true;
+          final user = data['user'];
+          if (user is Map<String, dynamic> &&
+              user['isEmailVerified'] == true) {
+            return true;
+          }
+          if (data['isEmailVerified'] == true) return true;
         }
       }
     }

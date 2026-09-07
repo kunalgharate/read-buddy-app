@@ -8,7 +8,7 @@ import '../models/app_user_model.dart';
 abstract class AuthRemoteDataSource {
   Future<AppUserModel> signIn(
       {required String email, required String password});
-  Future<AppUserModel> registerUser(Map<String, dynamic> data);
+  Future<String> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
   Future<AppUserModel> signInWithGoogle({required String token});
   Future<void> sendOtp(String email);
@@ -67,7 +67,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<AppUserModel> registerUser(Map<String, dynamic> data) async {
+  Future<String> registerUser(Map<String, dynamic> data) async {
     if (kDebugMode) {
       print('🌐 AuthRemoteDataSource: Starting register API call');
       print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.register}');
@@ -95,54 +95,48 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         cleanData.remove('picture');
       }
 
+      final email = cleanData['email'].toString();
       final response = await _dio.post(ApiConstants.register, data: cleanData);
+      final responseData = response.data;
+
+      // Backend contract:
+      //  201 + full `user` object  -> brand-new user registered (OTP sent)
+      //  200 + generic message     -> email already exists (no user object)
+      //                              -> resend probe decides verified vs not
+      final hasUser = responseData is Map<String, dynamic> &&
+          responseData['user'] is Map<String, dynamic>;
+      final isNewRegistration =
+          response.statusCode == ApiConstants.created && hasUser;
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Register response status: ${response.statusCode}');
+        print('🌐 AuthRemoteDataSource: Register new-user ($isNewRegistration)'
+            ' status: ${response.statusCode}');
       }
 
-      if (response.statusCode == ApiConstants.created ||
-          response.statusCode == ApiConstants.success) {
-        final responseData = response.data;
+      if (isNewRegistration) {
+        return email;
+      }
 
-        if (kDebugMode) {
-          print('🌐 AuthRemoteDataSource: Register response: $responseData');
-        }
-
-        if (responseData is Map<String, dynamic>) {
-          // Backend contract:
-          //  201 + full `user` object  -> brand-new user registered
-          //  200 + generic message     -> email already exists (no user object)
-          // Distinguish the two so already-registered users are blocked
-          // before reaching the OTP screen.
-          final hasUser = responseData['user'] is Map<String, dynamic>;
-          final isNewRegistration =
-              response.statusCode == ApiConstants.created && hasUser;
-
-          if (!isNewRegistration) {
-            throw DioException(
+      if (response.statusCode == ApiConstants.success) {
+        // Existing account. The register response cannot distinguish a
+        // verified account from an unverified one, but resend-register-otp
+        // can: verified accounts answer 400 "already verified and
+        // registered"; unverified accounts answer 200 (and an OTP is sent,
+        // which the user needs anyway). Only verified accounts proceed to
+        // Sign In — never to the OTP screen.
+        final isVerified = await _isVerifiedExistingAccount(email);
+        if (isVerified) {
+          throw DioException(
+            requestOptions: response.requestOptions,
+            response: Response(
               requestOptions: response.requestOptions,
-              response: Response(
-                requestOptions: response.requestOptions,
-                statusCode: ApiConstants.forbidden,
-                data: responseData,
-              ),
-              message: 'user already registered',
-            );
-          }
+              statusCode: ApiConstants.forbidden,
+              data: responseData,
+            ),
+            message: 'user already registered',
+          );
         }
-
-        return AppUserModel.fromJson(response.data);
-      }
-
-      // 400/409 = backend rejected (likely duplicate email)
-      if (response.statusCode == ApiConstants.badRequest ||
-          response.statusCode == ApiConstants.conflict) {
-        throw DioException(
-          requestOptions: response.requestOptions,
-          response: response,
-          message: 'user already registered',
-        );
+        return email;
       }
 
       throw DioException(
@@ -152,6 +146,35 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     } catch (e) {
       rethrow;
+    }
+  }
+
+  /// Probes resend-register-otp to tell a verified existing account apart
+  /// from an unverified one. Only the backend's explicit "already verified
+  /// and registered" signature marks an account as verified; every other
+  /// outcome (OTP sent, rate-limited, network failure) is treated as
+  /// unverified so an unverified user is never locked out of the OTP flow
+  /// by a probe failure.
+  Future<bool> _isVerifiedExistingAccount(String email) async {
+    try {
+      await _dio.post(
+        ApiConstants.resendRegisterOtp,
+        data: {'email': email},
+      );
+      return false;
+    } catch (error) {
+      if (error is DioException) {
+        final data = error.response?.data;
+        final message =
+            '${data is Map ? (data['message'] ?? data['error'] ?? '') : ''} '
+            '${error.message ?? ''}'
+                .toLowerCase();
+        if (message.contains('already verified and registered') ||
+            message.contains('already registered')) {
+          return true;
+        }
+      }
+      return false;
     }
   }
 
@@ -377,6 +400,31 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           response: response,
           message: 'Failed to resend verification email',
         );
+      }
+
+      // Some backends answer 200 with an explicit "already verified and
+      // registered" body instead of an error status. Match the exact
+      // signature so the user is redirected to Sign In rather than left
+      // waiting for an OTP that will never arrive.
+      final responseData = response.data;
+      if (responseData is Map<String, dynamic>) {
+        final message = (responseData['message'] ??
+                responseData['error'] ??
+                '')
+            .toString()
+            .toLowerCase();
+        if (message.contains('already verified and registered') ||
+            message.contains('already registered')) {
+          throw DioException(
+            requestOptions: response.requestOptions,
+            response: Response(
+              requestOptions: response.requestOptions,
+              statusCode: ApiConstants.forbidden,
+              data: responseData,
+            ),
+            message: 'user already registered',
+          );
+        }
       }
     } catch (e) {
       rethrow;

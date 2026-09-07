@@ -111,16 +111,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
       listeners: [
         BlocListener<SignUpBloc, SignUpState>(
           listener: (context, state) {
-            if (state is SignUpSuccess) {
+            if (state is SignUpSuccess && state.email.isNotEmpty) {
               UiUtils.showSuccessSnackBar(
                 context,
                 message: 'Registration successful! Please verify your email.',
               );
               Navigator.pushNamed(context, '/verification',
-                  arguments: _emailController.text.trim().toLowerCase());
+                  arguments: state.email);
             }
 
-            if (state is SignUpError) {
+            // Only react to errors this screen originated; the OTP screen
+            // owns verify/resend errors (shared app-wide bloc).
+            if (state is SignUpError &&
+                state.source == SignUpErrorSource.register) {
               if (state.isUserAlreadyExists) {
                 UiUtils.showErrorSnackBar(
                   context,
