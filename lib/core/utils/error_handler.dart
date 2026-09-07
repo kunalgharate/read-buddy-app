@@ -178,15 +178,18 @@ class ErrorHandler {
             rawMessage.contains('if this email is registered');
       }
 
-      // 400/409 — only explicit duplicate/verified phrases qualify.
-      // Never bare "already"/"exist" substrings (e.g. "email does not exist"
-      // or "OTP already sent" must NOT redirect the user to Sign In).
+      // 400/409 — only explicit verified-account signatures qualify.
+      // Never bare "already"/"exist" or unqualified "already exists"
+      // substrings: "email does not exist", "OTP already sent", or a
+      // non-account duplicate such as "phone number already exists" must
+      // NOT redirect the user to Sign In.
       if (statusCode == ApiConstants.badRequest ||
           statusCode == ApiConstants.conflict) {
         if (rawMessage.contains('already verified and registered') ||
             rawMessage.contains('user already verified and registered') ||
-            rawMessage.contains('already registered') ||
-            rawMessage.contains('already exists')) {
+            rawMessage.contains('email already exists') ||
+            rawMessage.contains('user already exists') ||
+            rawMessage.contains('account already exists')) {
           return true;
         }
         final data = error.response?.data;

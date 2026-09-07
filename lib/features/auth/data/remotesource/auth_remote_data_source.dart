@@ -157,10 +157,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   /// by a probe failure.
   Future<bool> _isVerifiedExistingAccount(String email) async {
     try {
-      await _dio.post(
+      final response = await _dio.post(
         ApiConstants.resendRegisterOtp,
         data: {'email': email},
       );
+      // Inspect the response body too: some backends announce a verified
+      // account inside a success response instead of an error status, so a
+      // verified account must still be redirected to Sign In.
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        final message = (data['message'] ?? data['error'] ?? '')
+            .toString()
+            .toLowerCase();
+        if (message.contains('already verified and registered')) return true;
+      }
       return false;
     } catch (error) {
       if (error is DioException) {
@@ -169,8 +179,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             '${data is Map ? (data['message'] ?? data['error'] ?? '') : ''} '
             '${error.message ?? ''}'
                 .toLowerCase();
-        if (message.contains('already verified and registered') ||
-            message.contains('already registered')) {
+        if (message.contains('already verified and registered')) {
           return true;
         }
       }
@@ -413,8 +422,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                 '')
             .toString()
             .toLowerCase();
-        if (message.contains('already verified and registered') ||
-            message.contains('already registered')) {
+        if (message.contains('already verified and registered')) {
           throw DioException(
             requestOptions: response.requestOptions,
             response: Response(
