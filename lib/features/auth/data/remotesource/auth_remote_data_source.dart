@@ -123,7 +123,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         // can: verified accounts answer 400 "already verified and
         // registered"; unverified accounts answer 200 (and an OTP is sent,
         // which the user needs anyway). Only verified accounts proceed to
-        // Sign In — never to the OTP screen.
+        // Sign In — never to the OTP screen. Ambiguous probe failures (500,
+        // offline, timeout) propagate so the user sees the error instead of
+        // an OTP screen with no code sent.
         final isVerified = await _isVerifiedExistingAccount(email);
         if (isVerified) {
           throw DioException(
@@ -150,11 +152,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   /// Probes resend-register-otp to tell a verified existing account apart
-  /// from an unverified one. Only the backend's explicit "already verified
-  /// and registered" signature marks an account as verified; every other
-  /// outcome (OTP sent, rate-limited, network failure) is treated as
-  /// unverified so an unverified user is never locked out of the OTP flow
-  /// by a probe failure.
+  /// from an unverified one.
+  ///
+  /// Clear outcomes:
+  ///  - 200 success (OTP sent)                        -> unverified
+  ///  - "already verified and registered" signature   -> verified
+  ///  - 429 rate-limit (register just created an OTP) -> unverified
+  ///
+  /// Everything else (500, offline, timeout) is ambiguous: neither a usable
+  /// OTP nor the verified signature was observed, so the error is rethrown
+  /// to surface to the user instead of silently continuing to the OTP screen
+  /// without a code being sent.
   Future<bool> _isVerifiedExistingAccount(String email) async {
     try {
       final response = await _dio.post(
@@ -182,8 +190,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         if (message.contains('already verified and registered')) {
           return true;
         }
+        // Rate-limit right after registration: the register request just
+        // created an OTP, so continuing to the OTP screen is safe.
+        if (error.response?.statusCode == 429) {
+          return false;
+        }
       }
-      return false;
+      // Ambiguous failure (500, offline, timeout): surface the error instead
+      // of returning false, which would open verification without a usable
+      // code ever being sent.
+      rethrow;
     }
   }
 
