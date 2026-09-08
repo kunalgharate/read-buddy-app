@@ -157,12 +157,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   /// Clear outcomes:
   ///  - 200 success (OTP sent)                        -> unverified
   ///  - "already verified and registered" signature   -> verified
-  ///  - 429 rate-limit (register just created an OTP) -> unverified
   ///
-  /// Everything else (500, offline, timeout) is ambiguous: neither a usable
-  /// OTP nor the verified signature was observed, so the error is rethrown
-  /// to surface to the user instead of silently continuing to the OTP screen
-  /// without a code being sent.
+  /// Everything else (500, 429, offline, timeout) is ambiguous: neither a
+  /// usable OTP nor the verified signature was observed, so the error is
+  /// rethrown to surface to the user instead of silently continuing to the
+  /// OTP screen without a code being sent. Note that register created a fresh
+  /// OTP only for brand-new accounts (201, which returns before this probe),
+  /// so a rate-limited resend here cannot be assumed to mean "an OTP is
+  /// still valid" — it must surface like any other probe failure.
   Future<bool> _isVerifiedExistingAccount(String email) async {
     try {
       final response = await _dio.post(
@@ -190,15 +192,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         if (message.contains('already verified and registered')) {
           return true;
         }
-        // Rate-limit right after registration: the register request just
-        // created an OTP, so continuing to the OTP screen is safe.
-        if (error.response?.statusCode == 429) {
-          return false;
-        }
       }
-      // Ambiguous failure (500, offline, timeout): surface the error instead
-      // of returning false, which would open verification without a usable
-      // code ever being sent.
+      // Ambiguous failure (500, 429, offline, timeout): surface the error
+      // instead of returning false, which would open verification without a
+      // usable code ever being sent.
       rethrow;
     }
   }
