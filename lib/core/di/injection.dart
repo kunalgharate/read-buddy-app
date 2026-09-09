@@ -639,7 +639,7 @@ void _registerBlocs() {
         getIt<RegisterUserUseCase>(),
         getIt<VerifyEmailUseCase>(),
         getIt<ResendRegisterOtpUseCase>(),
-  ));
+      ));
 
   // Profile
   getIt.registerFactory(() => ProfileBloc(

@@ -103,8 +103,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       //  201 + full `user` object  -> brand-new user registered (OTP sent)
       //  200 + generic message     -> email already exists (no user object)
       //                              -> resend probe decides verified vs not
-      final hasUser = responseData is Map<String, dynamic> &&
+      //
+      // The user shape may be nested (`{ "user": {...} }`) or flat (the user
+      // fields at the top level, as AppUserModel.fromJson already supports).
+      // Detect both before classifying the outcome as a new registration.
+      final isNestedUser = responseData is Map<String, dynamic> &&
           responseData['user'] is Map<String, dynamic>;
+      final isFlatUser = responseData is Map<String, dynamic> &&
+          (responseData['_id'] != null || responseData['id'] != null) &&
+          (responseData['email'] != null || responseData['name'] != null);
+      final hasUser = isNestedUser || isFlatUser;
       final isNewRegistration =
           response.statusCode == ApiConstants.created && hasUser;
 
@@ -176,9 +184,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // verified account must still be redirected to Sign In.
       final data = response.data;
       if (data is Map<String, dynamic>) {
-        final message = (data['message'] ?? data['error'] ?? '')
-            .toString()
-            .toLowerCase();
+        final message =
+            (data['message'] ?? data['error'] ?? '').toString().toLowerCase();
         if (message.contains('already verified and registered')) return true;
       }
       return false;
@@ -187,7 +194,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         final data = error.response?.data;
         final message =
             '${data is Map ? (data['message'] ?? data['error'] ?? '') : ''} '
-            '${error.message ?? ''}'
+                    '${error.message ?? ''}'
                 .toLowerCase();
         if (message.contains('already verified and registered')) {
           return true;
@@ -266,7 +273,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (kDebugMode) {
         // Log only the error type, not the message, to avoid leaking any
         // request payload or credentials from the exception.
-        print('🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
+        print(
+            '🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
       }
       rethrow;
     }
@@ -430,9 +438,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // waiting for an OTP that will never arrive.
       final responseData = response.data;
       if (responseData is Map<String, dynamic>) {
-        final message = (responseData['message'] ??
-                responseData['error'] ??
-                '')
+        final message = (responseData['message'] ?? responseData['error'] ?? '')
             .toString()
             .toLowerCase();
         if (message.contains('already verified and registered')) {

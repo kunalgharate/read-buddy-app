@@ -17,19 +17,19 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   final ResendRegisterOtpUseCase _resendRegisterOtpUseCase;
 
   SignUpBloc(
-      this._registerUserUseCase,
-      this._verifyEmailUseCase,
-      this._resendRegisterOtpUseCase,
-      ) : super(SignUpInitial()) {
+    this._registerUserUseCase,
+    this._verifyEmailUseCase,
+    this._resendRegisterOtpUseCase,
+  ) : super(SignUpInitial()) {
     on<RegisterUserEvent>(_onRegisterUser);
     on<VerifyEmailEvent>(_onVerifyEmail);
     on<ResendVerificationEmailEvent>(_onResendVerificationEmail);
   }
 
   Future<void> _onRegisterUser(
-      RegisterUserEvent event,
-      Emitter<SignUpState> emit,
-      ) async {
+    RegisterUserEvent event,
+    Emitter<SignUpState> emit,
+  ) async {
     emit(SignUpLoading());
 
     try {
@@ -52,9 +52,9 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   }
 
   Future<void> _onVerifyEmail(
-      VerifyEmailEvent event,
-      Emitter<SignUpState> emit,
-      ) async {
+    VerifyEmailEvent event,
+    Emitter<SignUpState> emit,
+  ) async {
     emit(SignUpLoading());
 
     try {
@@ -70,9 +70,9 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   }
 
   Future<void> _onResendVerificationEmail(
-      ResendVerificationEmailEvent event,
-      Emitter<SignUpState> emit,
-      ) async {
+    ResendVerificationEmailEvent event,
+    Emitter<SignUpState> emit,
+  ) async {
     try {
       await _resendRegisterOtpUseCase(event.email);
       emit(ResendVerificationEmailSuccess(event.email));

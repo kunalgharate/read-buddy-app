@@ -183,20 +183,19 @@ class ErrorHandler {
       // substrings: "email does not exist", "OTP already sent", or a
       // non-account duplicate such as "phone number already exists" must
       // NOT redirect the user to Sign In.
+      // Note: "email already exists" / "account already exists" by
+      // themselves only prove a record exists, not that it is verified, so
+      // they are deliberately excluded here.
       if (statusCode == ApiConstants.badRequest ||
           statusCode == ApiConstants.conflict) {
         if (rawMessage.contains('already verified and registered') ||
-            rawMessage.contains('user already verified and registered') ||
-            rawMessage.contains('email already exists') ||
-            rawMessage.contains('user already exists') ||
-            rawMessage.contains('account already exists')) {
+            rawMessage.contains('user already verified and registered')) {
           return true;
         }
         final data = error.response?.data;
         if (data is Map<String, dynamic>) {
           final user = data['user'];
-          if (user is Map<String, dynamic> &&
-              user['isEmailVerified'] == true) {
+          if (user is Map<String, dynamic> && user['isEmailVerified'] == true) {
             return true;
           }
           if (data['isEmailVerified'] == true) return true;
