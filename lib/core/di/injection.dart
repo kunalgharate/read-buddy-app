@@ -26,6 +26,7 @@ import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/verify_email_usecase.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/send_otp_usecase.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/resend_register_otp_usecase.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/verify_reset_otp_usecase.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/change_password_usecase.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
@@ -480,6 +481,8 @@ void _registerUseCases() {
       .registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => SendOtpUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(
+          () => ResendRegisterOtpUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(
       () => VerifyResetOtpUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(
       () => ChangePasswordUseCase(getIt<AuthRepository>()));
@@ -642,6 +645,7 @@ void _registerBlocs() {
   getIt.registerLazySingleton(() => SignUpBloc(
         getIt<RegisterUserUseCase>(),
         getIt<VerifyEmailUseCase>(),
+        getIt<ResendRegisterOtpUseCase>(),
       ));
 
   // Profile

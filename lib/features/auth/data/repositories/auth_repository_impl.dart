@@ -26,7 +26,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AppUser> registerUser(Map<String, dynamic> data) async {
+  Future<String> registerUser(Map<String, dynamic> data) async {
     try {
       return await remoteDataSource.registerUser(data);
     } catch (e) {
@@ -48,6 +48,15 @@ class AuthRepositoryImpl implements AuthRepository {
     if (kDebugMode) print('📦 AuthRepository: Sending OTP to $email');
     try {
       await remoteDataSource.sendOtp(email);
+    } catch (e) {
+      rethrow;
+    }
+  }
+  @override
+  Future<void> resendRegisterOtp(String email) async {
+    if (kDebugMode) print('📦 AuthRepository: Resending register OTP to $email');
+    try {
+      await remoteDataSource.resendRegisterOtp(email);
     } catch (e) {
       rethrow;
     }

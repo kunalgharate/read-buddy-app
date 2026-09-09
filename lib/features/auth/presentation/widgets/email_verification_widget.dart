@@ -82,10 +82,95 @@ class EmailVerificationScreen extends StatelessWidget {
 
   void _resendCode(
     BuildContext context,
-    Map<String, dynamic> userData,
+      String email,
   ) {
     BlocProvider.of<SignUpBloc>(context)
-        .add(ResendVerificationEmailEvent(userData));
+        .add(ResendVerificationEmailEvent(email));
+  }
+
+  Widget _buildOtpScreen(BuildContext context, String displayEmail) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF0B2545)),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Verification Email',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0B2545),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Please enter the code we just sent to',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19,
+                color: Color(0xFF2E2E2E),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              displayEmail,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2C3E50),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: List.generate(
+                  6, (index) => _buildCodeBox(index, context)),
+            ),
+            const SizedBox(height: 32),
+            GestureDetector(
+              onTap: () {
+                _resendCode(context, displayEmail);
+              },
+              child: const Text.rich(
+                TextSpan(
+                  text: 'If you did not receive code? ',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black87,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: 'Resend',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFF0B2545),
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 48),
+            CustomButton(
+              text: 'Continue',
+              onPressed: () => _verifyOTP(context, displayEmail),
+              backgroundColor: const Color(0xFF00C853),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -105,18 +190,41 @@ class EmailVerificationScreen extends StatelessWidget {
               context, '/onboarding-questionnaire', (route) => false);
         } else if (state is ResendVerificationEmailSuccess) {
           if (!context.mounted) return;
-          final resendedEmail = (state.user.email.isNotEmpty == true)
-              ? state.user.email
-              : (email ?? '');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Verification code re-sent to $resendedEmail',
+                'Verification code re-sent to ${state.email}',
               ),
               backgroundColor: const Color(0xFF00C853),
             ),
           );
         } else if (state is SignUpError) {
+          // Errors from the signup form are owned by the SignUpScreen below.
+          if (state.source == SignUpErrorSource.register) return;
+
+          // A verified existing account was detected (e.g. via resend) —
+          // the user can sign in, so send them there instead of the OTP flow.
+          if (state.isUserAlreadyExists) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                action: SnackBarAction(
+                  label: 'Sign In',
+                  textColor: Colors.white,
+                  onPressed: () => Navigator.pushReplacementNamed(
+                      context, '/signin'),
+                ),
+              ),
+            );
+            Future.delayed(const Duration(seconds: 3), () {
+              if (!context.mounted) return;
+              Navigator.pushReplacementNamed(context, '/signin');
+            });
+            return;
+          }
+
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -128,117 +236,30 @@ class EmailVerificationScreen extends StatelessWidget {
       },
       child: BlocBuilder<SignUpBloc, SignUpState>(
           builder: (context, signUpBlocState) {
-        // Accept both SignUpSuccess and ResendVerificationEmailSuccess
-        // so the OTP screen stays visible after a resend.
-        final currentUser = switch (signUpBlocState) {
-          SignUpSuccess s => s.user,
-          ResendVerificationEmailSuccess s => s.user,
-          _ => null,
-        };
+        if (signUpBlocState is SignUpSuccess) {
+          final displayEmail = signUpBlocState.email.isEmpty
+              ? (email ?? '')
+              : signUpBlocState.email;
+          return _buildOtpScreen(context, displayEmail);
+        }
 
-        final displayEmail = (currentUser?.email.isNotEmpty == true)
-            ? currentUser!.email
-            : (email ?? '');
+        if (signUpBlocState is ResendVerificationEmailSuccess) {
+          return _buildOtpScreen(context, signUpBlocState.email);
+        }
 
-        if (currentUser != null) {
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Color(0xFF0B2545)),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Verification Email',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF0B2545),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Please enter the code we just sent to',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 19,
-                      color: Color(0xFF2E2E2E),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    displayEmail,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Row(
-                    children: List.generate(
-                        6, (index) => _buildCodeBox(index, context)),
-                  ),
-                  const SizedBox(height: 32),
-                  GestureDetector(
-                    onTap: () {
-                      final payload = currentUser.toResendPayload();
-                      if (currentUser.email.isEmpty &&
-                          displayEmail.isNotEmpty) {
-                        payload['email'] = displayEmail;
-                      }
-                      _resendCode(context, payload);
-                    },
-                    child: const Text.rich(
-                      TextSpan(
-                        text: 'If you did not receive code? ',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black87,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: 'Resend',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Color(0xFF0B2545),
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-                  CustomButton(
-                    text: 'Continue',
-                    onPressed: () => _verifyOTP(context, displayEmail),
-                    backgroundColor: const Color(0xFF00C853),
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else if (signUpBlocState is SignUpLoading) {
+        if (signUpBlocState is SignUpLoading) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
+
+        // Error or initial — keep OTP screen if email is available
+        if (email != null && email!.isNotEmpty) {
+          return _buildOtpScreen(context, email!);
+        }
+
         return const Scaffold(
-          body: Center(
-            child: Text('Something went wrong'),
-          ),
+          body: Center(child: Text('Something went wrong')),
         );
       }),
     );

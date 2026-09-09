@@ -8,10 +8,11 @@ import '../models/app_user_model.dart';
 abstract class AuthRemoteDataSource {
   Future<AppUserModel> signIn(
       {required String email, required String password});
-  Future<AppUserModel> registerUser(Map<String, dynamic> data);
+  Future<String> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
   Future<AppUserModel> signInWithGoogle({required String token});
   Future<void> sendOtp(String email);
+  Future<void> resendRegisterOtp(String email);
   Future<void> verifyResetOtp(String email, String otp);
   Future<void> changePassword(String email, String code, String newPassword);
 }
@@ -66,7 +67,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<AppUserModel> registerUser(Map<String, dynamic> data) async {
+  Future<String> registerUser(Map<String, dynamic> data) async {
     if (kDebugMode) {
       print('🌐 AuthRemoteDataSource: Starting register API call');
       print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.register}');
@@ -94,34 +95,58 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         cleanData.remove('picture');
       }
 
+      final email = cleanData['email'].toString();
       final response = await _dio.post(ApiConstants.register, data: cleanData);
+      final responseData = response.data;
+
+      // Backend contract:
+      //  201 + full `user` object  -> brand-new user registered (OTP sent)
+      //  200 + generic message     -> email already exists (no user object)
+      //                              -> resend probe decides verified vs not
+      //
+      // The user shape may be nested (`{ "user": {...} }`) or flat (the user
+      // fields at the top level, as AppUserModel.fromJson already supports).
+      // Detect both before classifying the outcome as a new registration.
+      final isNestedUser = responseData is Map<String, dynamic> &&
+          responseData['user'] is Map<String, dynamic>;
+      final isFlatUser = responseData is Map<String, dynamic> &&
+          (responseData['_id'] != null || responseData['id'] != null) &&
+          (responseData['email'] != null || responseData['name'] != null);
+      final hasUser = isNestedUser || isFlatUser;
+      final isNewRegistration =
+          response.statusCode == ApiConstants.created && hasUser;
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Register response status: ${response.statusCode}');
+        print('🌐 AuthRemoteDataSource: Register new-user ($isNewRegistration)'
+            ' status: ${response.statusCode}');
       }
 
-      if (response.statusCode == ApiConstants.success ||
-          response.statusCode == ApiConstants.created) {
-        // Check if the API returned "user already registered" with 200 status
-        final responseData = response.data;
-        if (responseData is Map<String, dynamic>) {
-          final message =
-              responseData['message']?.toString().toLowerCase() ?? '';
-          if (message.contains('already registered') ||
-              message.contains('user already exists')) {
-            throw DioException(
-              requestOptions: response.requestOptions,
-              response: Response(
-                requestOptions: response.requestOptions,
-                statusCode: ApiConstants.forbidden,
-                data: responseData,
-              ),
-              message: 'user already registered',
-            );
-          }
-        }
+      if (isNewRegistration) {
+        return email;
+      }
 
-        return AppUserModel.fromJson(response.data);
+      if (response.statusCode == ApiConstants.success) {
+        // Existing account. The register response cannot distinguish a
+        // verified account from an unverified one, but resend-register-otp
+        // can: verified accounts answer 400 "already verified and
+        // registered"; unverified accounts answer 200 (and an OTP is sent,
+        // which the user needs anyway). Only verified accounts proceed to
+        // Sign In — never to the OTP screen. Ambiguous probe failures (500,
+        // offline, timeout) propagate so the user sees the error instead of
+        // an OTP screen with no code sent.
+        final isVerified = await _isVerifiedExistingAccount(email);
+        if (isVerified) {
+          throw DioException(
+            requestOptions: response.requestOptions,
+            response: Response(
+              requestOptions: response.requestOptions,
+              statusCode: ApiConstants.forbidden,
+              data: responseData,
+            ),
+            message: 'user already registered',
+          );
+        }
+        return email;
       }
 
       throw DioException(
@@ -130,6 +155,54 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: 'Registration failed',
       );
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Probes resend-register-otp to tell a verified existing account apart
+  /// from an unverified one.
+  ///
+  /// Clear outcomes:
+  ///  - 200 success (OTP sent)                        -> unverified
+  ///  - "already verified and registered" signature   -> verified
+  ///
+  /// Everything else (500, 429, offline, timeout) is ambiguous: neither a
+  /// usable OTP nor the verified signature was observed, so the error is
+  /// rethrown to surface to the user instead of silently continuing to the
+  /// OTP screen without a code being sent. Note that register created a fresh
+  /// OTP only for brand-new accounts (201, which returns before this probe),
+  /// so a rate-limited resend here cannot be assumed to mean "an OTP is
+  /// still valid" — it must surface like any other probe failure.
+  Future<bool> _isVerifiedExistingAccount(String email) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.resendRegisterOtp,
+        data: {'email': email},
+      );
+      // Inspect the response body too: some backends announce a verified
+      // account inside a success response instead of an error status, so a
+      // verified account must still be redirected to Sign In.
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        final message =
+            (data['message'] ?? data['error'] ?? '').toString().toLowerCase();
+        if (message.contains('already verified and registered')) return true;
+      }
+      return false;
+    } catch (error) {
+      if (error is DioException) {
+        final data = error.response?.data;
+        final message =
+            '${data is Map ? (data['message'] ?? data['error'] ?? '') : ''} '
+                    '${error.message ?? ''}'
+                .toLowerCase();
+        if (message.contains('already verified and registered')) {
+          return true;
+        }
+      }
+      // Ambiguous failure (500, 429, offline, timeout): surface the error
+      // instead of returning false, which would open verification without a
+      // usable code ever being sent.
       rethrow;
     }
   }
@@ -200,7 +273,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (kDebugMode) {
         // Log only the error type, not the message, to avoid leaking any
         // request payload or credentials from the exception.
-        print('🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
+        print(
+            '🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
       }
       rethrow;
     }
@@ -317,6 +391,67 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           response: response,
           message: 'Password change failed',
         );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> resendRegisterOtp(String email) async {
+    if (kDebugMode) {
+      print('🌐 AuthRemoteDataSource: Resending register OTP to $email');
+    }
+
+    final hasInternet = await NetworkUtils.hasInternetConnection();
+    if (!hasInternet) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ApiConstants.resendRegisterOtp),
+        type: DioExceptionType.connectionError,
+        message: 'No internet connection available',
+      );
+    }
+
+    try {
+      final response = await _dio.post(
+        ApiConstants.resendRegisterOtp,
+        data: {'email': email.trim().toLowerCase()},
+      );
+
+      if (kDebugMode) {
+        print(
+            '🌐 AuthRemoteDataSource: Resend register OTP status: ${response.statusCode}');
+      }
+
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to resend verification email',
+        );
+      }
+
+      // Some backends answer 200 with an explicit "already verified and
+      // registered" body instead of an error status. Match the exact
+      // signature so the user is redirected to Sign In rather than left
+      // waiting for an OTP that will never arrive.
+      final responseData = response.data;
+      if (responseData is Map<String, dynamic>) {
+        final message = (responseData['message'] ?? responseData['error'] ?? '')
+            .toString()
+            .toLowerCase();
+        if (message.contains('already verified and registered')) {
+          throw DioException(
+            requestOptions: response.requestOptions,
+            response: Response(
+              requestOptions: response.requestOptions,
+              statusCode: ApiConstants.forbidden,
+              data: responseData,
+            ),
+            message: 'user already registered',
+          );
+        }
       }
     } catch (e) {
       rethrow;

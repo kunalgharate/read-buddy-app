@@ -157,11 +157,50 @@ class ErrorHandler {
   }
 
   static bool isUserAlreadyExists(dynamic error) {
-    if (error is DioException &&
-        error.response?.statusCode == ApiConstants.forbidden) {
-      final message = _extractErrorMessage(error.response?.data)?.toLowerCase();
-      return message?.contains('already registered') == true ||
-          message?.contains('user already exists') == true;
+    if (error is DioException) {
+      final statusCode = error.response?.statusCode;
+      final rawMessage =
+          _extractErrorMessage(error.response?.data)?.toLowerCase() ?? '';
+
+      // Direct match on the exception message thrown by the data source
+      if (error.message?.toLowerCase().contains('already registered') == true ||
+          error.message?.toLowerCase().contains('user already exists') ==
+              true) {
+        return true;
+      }
+
+      if (statusCode == ApiConstants.forbidden) {
+        // 403 = duplicate detected in registerUser / resendRegisterOtp.
+        // "If this email is registered..." is the backend's generic duplicate
+        // signature — the account already exists.
+        return rawMessage.contains('already registered') ||
+            rawMessage.contains('user already exists') ||
+            rawMessage.contains('if this email is registered');
+      }
+
+      // 400/409 — only explicit verified-account signatures qualify.
+      // Never bare "already"/"exist" or unqualified "already exists"
+      // substrings: "email does not exist", "OTP already sent", or a
+      // non-account duplicate such as "phone number already exists" must
+      // NOT redirect the user to Sign In.
+      // Note: "email already exists" / "account already exists" by
+      // themselves only prove a record exists, not that it is verified, so
+      // they are deliberately excluded here.
+      if (statusCode == ApiConstants.badRequest ||
+          statusCode == ApiConstants.conflict) {
+        if (rawMessage.contains('already verified and registered') ||
+            rawMessage.contains('user already verified and registered')) {
+          return true;
+        }
+        final data = error.response?.data;
+        if (data is Map<String, dynamic>) {
+          final user = data['user'];
+          if (user is Map<String, dynamic> && user['isEmailVerified'] == true) {
+            return true;
+          }
+          if (data['isEmailVerified'] == true) return true;
+        }
+      }
     }
     return false;
   }
