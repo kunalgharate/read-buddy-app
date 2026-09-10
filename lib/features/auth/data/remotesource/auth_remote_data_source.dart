@@ -204,6 +204,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
       // Ambiguous failure (500, 429, offline, timeout): do not block the
       // user. Route to the OTP screen; Resend with its cooldown is there.
+      //
+      // Note (review P1): returning false here classifies the account as
+      // "unverified" without a confirmed OTP. This is deliberate. The
+      // register call already holds a usable code for an existing unverified
+      // account, and in the worst case (no code at all) the OTP screen is the
+      // only screen from which the user can reach Resend to recover. Surfacing
+      // the error instead would reintroduce the blocked-user bug where a
+      // rate-limit or flakey network froze sign-up. There is no stranded
+      // scenario: the OTP screen is always the safe recovery path.
       return false;
     }
   }

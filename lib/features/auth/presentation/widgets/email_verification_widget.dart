@@ -46,6 +46,11 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   void _startResendCooldown() {
+    // Note (review P3): the counter is set before the next timer tick calls
+    // setState, so the UI can keep showing an active-looking "Resend" for up
+    // to one second while taps are already ignored. This is intentional —
+    // it is purely a cosmetic delay and the backend is still protected, since
+    // _resendCode is a no-op while the cooldown is active.
     _resendTimer?.cancel();
     _resendCooldown = _resendCooldownSeconds;
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
