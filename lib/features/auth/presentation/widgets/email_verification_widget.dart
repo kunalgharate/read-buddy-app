@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,13 +9,60 @@ import '../../../../core/utils/secure_storage_utils.dart';
 import '../blocs/sign_up/sign_up_bloc.dart';
 import 'custom_button_widget.dart';
 
-class EmailVerificationScreen extends StatelessWidget {
+class EmailVerificationScreen extends StatefulWidget {
   final String? email;
-  EmailVerificationScreen({super.key, this.email});
+  const EmailVerificationScreen({super.key, this.email});
 
+  @override
+  State<EmailVerificationScreen> createState() =>
+      _EmailVerificationScreenState();
+}
+
+class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
   final List<TextEditingController> _controllers =
       List.generate(6, (_) => TextEditingController());
+
+  static const int _resendCooldownSeconds = 60;
+  int _resendCooldown = _resendCooldownSeconds;
+  Timer? _resendTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startResendCooldown();
+  }
+
+  @override
+  void dispose() {
+    _resendTimer?.cancel();
+    for (final controller in _controllers) {
+      controller.dispose();
+    }
+    for (final node in _focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
+  void _startResendCooldown() {
+    // Note (review P3): the counter is set before the next timer tick calls
+    // setState, so the UI can keep showing an active-looking "Resend" for up
+    // to one second while taps are already ignored. This is intentional —
+    // it is purely a cosmetic delay and the backend is still protected, since
+    // _resendCode is a no-op while the cooldown is active.
+    _resendTimer?.cancel();
+    _resendCooldown = _resendCooldownSeconds;
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      if (_resendCooldown <= 1) {
+        timer.cancel();
+        setState(() => _resendCooldown = 0);
+      } else {
+        setState(() => _resendCooldown--);
+      }
+    });
+  }
 
   Widget _buildCodeBox(int index, BuildContext context) {
     return Expanded(
@@ -82,8 +131,10 @@ class EmailVerificationScreen extends StatelessWidget {
 
   void _resendCode(
     BuildContext context,
-      String email,
+    String email,
   ) {
+    if (_resendCooldown > 0) return;
+    _startResendCooldown();
     BlocProvider.of<SignUpBloc>(context)
         .add(ResendVerificationEmailEvent(email));
   }
@@ -137,24 +188,32 @@ class EmailVerificationScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             GestureDetector(
-              onTap: () {
-                _resendCode(context, displayEmail);
-              },
-              child: const Text.rich(
+              onTap: _resendCooldown > 0
+                  ? null
+                  : () {
+                      _resendCode(context, displayEmail);
+                    },
+              child: Text.rich(
                 TextSpan(
                   text: 'If you did not receive code? ',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     color: Colors.black87,
                   ),
                   children: [
                     TextSpan(
-                      text: 'Resend',
+                      text: _resendCooldown > 0
+                          ? 'Resend in ${_resendCooldown}s'
+                          : 'Resend',
                       style: TextStyle(
                         fontSize: 18,
-                        color: Color(0xFF0B2545),
+                        color: _resendCooldown > 0
+                            ? Colors.grey
+                            : const Color(0xFF0B2545),
                         fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
+                        decoration: _resendCooldown > 0
+                            ? TextDecoration.none
+                            : TextDecoration.underline,
                       ),
                     ),
                   ],
@@ -238,7 +297,7 @@ class EmailVerificationScreen extends StatelessWidget {
           builder: (context, signUpBlocState) {
         if (signUpBlocState is SignUpSuccess) {
           final displayEmail = signUpBlocState.email.isEmpty
-              ? (email ?? '')
+              ? (widget.email ?? '')
               : signUpBlocState.email;
           return _buildOtpScreen(context, displayEmail);
         }
@@ -254,8 +313,8 @@ class EmailVerificationScreen extends StatelessWidget {
         }
 
         // Error or initial — keep OTP screen if email is available
-        if (email != null && email!.isNotEmpty) {
-          return _buildOtpScreen(context, email!);
+        if (widget.email != null && widget.email!.isNotEmpty) {
+          return _buildOtpScreen(context, widget.email!);
         }
 
         return const Scaffold(

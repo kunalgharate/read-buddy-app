@@ -125,15 +125,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return email;
       }
 
-      if (response.statusCode == ApiConstants.success) {
-        // Existing account. The register response cannot distinguish a
-        // verified account from an unverified one, but resend-register-otp
-        // can: verified accounts answer 400 "already verified and
-        // registered"; unverified accounts answer 200 (and an OTP is sent,
-        // which the user needs anyway). Only verified accounts proceed to
-        // Sign In — never to the OTP screen. Ambiguous probe failures (500,
-        // offline, timeout) propagate so the user sees the error instead of
-        // an OTP screen with no code sent.
+      // Existing account or rate-limited register. The register response
+      // cannot distinguish a verified account from an unverified one, but
+      // resend-register-otp can: verified accounts answer 400 "already
+      // verified and registered"; unverified accounts answer 200 (and an OTP
+      // is sent, which the user needs anyway). Only a confirmed verified
+      // account proceeds to Sign In — every other outcome lands on the OTP
+      // screen so the user is never blocked. A rate-limited register (429)
+      // is treated as an existing account too: an OTP from an earlier
+      // attempt is likely still valid, and Resend (with its 60s cooldown)
+      // is always available on the OTP screen.
+      if (response.statusCode == ApiConstants.success ||
+          response.statusCode == ApiConstants.tooManyRequests) {
         final isVerified = await _isVerifiedExistingAccount(email);
         if (isVerified) {
           throw DioException(
@@ -159,20 +162,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  /// Probes resend-register-otp to tell a verified existing account apart
-  /// from an unverified one.
+  /// Tells a verified existing account apart from an unverified one by
+  /// probing resend-register-otp.
   ///
   /// Clear outcomes:
-  ///  - 200 success (OTP sent)                        -> unverified
-  ///  - "already verified and registered" signature   -> verified
+  ///  - 200 success (OTP sent)                        -> unverified (false)
+  ///  - "already verified and registered" signature   -> verified (true)
   ///
-  /// Everything else (500, 429, offline, timeout) is ambiguous: neither a
-  /// usable OTP nor the verified signature was observed, so the error is
-  /// rethrown to surface to the user instead of silently continuing to the
-  /// OTP screen without a code being sent. Note that register created a fresh
-  /// OTP only for brand-new accounts (201, which returns before this probe),
-  /// so a rate-limited resend here cannot be assumed to mean "an OTP is
-  /// still valid" — it must surface like any other probe failure.
+  /// Every other outcome (429 rate limit, 500, offline, timeout) is treated
+  /// as unverified (false) so the user is always routed to the OTP screen
+  /// and never blocked: the register call holds a usable code for existing
+  /// unverified accounts, and the Resend action (with its 60s cooldown) is
+  /// always available on the OTP screen. A confirmed-verified account is
+  /// the only case that diverts to Sign In.
   Future<bool> _isVerifiedExistingAccount(String email) async {
     try {
       final response = await _dio.post(
@@ -200,10 +202,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           return true;
         }
       }
-      // Ambiguous failure (500, 429, offline, timeout): surface the error
-      // instead of returning false, which would open verification without a
-      // usable code ever being sent.
-      rethrow;
+      // Ambiguous failure (500, 429, offline, timeout): do not block the
+      // user. Route to the OTP screen; Resend with its cooldown is there.
+      //
+      // Note (review P1): returning false here classifies the account as
+      // "unverified" without a confirmed OTP. This is deliberate. The
+      // register call already holds a usable code for an existing unverified
+      // account, and in the worst case (no code at all) the OTP screen is the
+      // only screen from which the user can reach Resend to recover. Surfacing
+      // the error instead would reintroduce the blocked-user bug where a
+      // rate-limit or flakey network froze sign-up. There is no stranded
+      // scenario: the OTP screen is always the safe recovery path.
+      return false;
     }
   }
 

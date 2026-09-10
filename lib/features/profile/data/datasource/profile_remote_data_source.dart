@@ -126,7 +126,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     await _checkInternet(ApiConstants.updateUserInfo);
 
     try {
-      final response = await _dio.put(
+      final response = await _dio.patch(
         ApiConstants.updateUserInfo,
         data: profileData,
         options: await _authOptions(),
