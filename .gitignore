@@ -64,3 +64,6 @@ android/key.properties
 *.jks
 *.keystore
 img.png
+
+# Generated localization (built from ARB via generate: true on `flutter pub get`)
+lib/l10n/app_localizations*.dart

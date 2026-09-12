@@ -22,6 +22,8 @@ import '../../features/auth/domain/usecases/change_password_usecase.dart'
     as _i788;
 import '../../features/auth/domain/usecases/register_user_usecase.dart'
     as _i241;
+import '../../features/auth/domain/usecases/resend_register_otp_usecase.dart'
+    as _i900;
 import '../../features/auth/domain/usecases/send_otp_usecase.dart' as _i663;
 import '../../features/auth/domain/usecases/sign_in.dart' as _i920;
 import '../../features/auth/domain/usecases/sign_in_with_google.dart' as _i692;
@@ -167,6 +169,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i692.SignInWithGoogle(gh<_i787.AuthRepository>()));
     gh.factory<_i30.VerifyEmailUseCase>(
         () => _i30.VerifyEmailUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i900.ResendRegisterOtpUseCase>(
+        () => _i900.ResendRegisterOtpUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i78.SignInBloc>(() => _i78.SignInBloc(
           gh<_i920.SignIn>(),
           gh<_i663.SendOtpUseCase>(),
@@ -185,6 +189,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i725.SignUpBloc>(() => _i725.SignUpBloc(
           gh<_i241.RegisterUserUseCase>(),
           gh<_i30.VerifyEmailUseCase>(),
+          gh<_i900.ResendRegisterOtpUseCase>(),
         ));
     return this;
   }

@@ -31,3 +31,9 @@ class ResendVerificationEmailSuccess extends SignUpState {
   final AppUser user;
   ResendVerificationEmailSuccess(this.user);
 }
+
+/// Emitted after a login-originated resend (only the email is known).
+class RegisterOtpResent extends SignUpState {
+  final String email;
+  RegisterOtpResent(this.email);
+}

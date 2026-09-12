@@ -5,6 +5,7 @@ import '../../domain/usecases/get_library_details.dart';
 import '../../domain/usecases/schedule_pickup.dart';
 import '../../domain/usecases/schedule_delivery.dart';
 import '../../domain/usecases/update_request_status.dart';
+import '../../domain/usecases/initiate_return.dart';
 import 'book_request_event.dart';
 import 'book_request_state.dart';
 
@@ -15,6 +16,7 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   final SchedulePickupUsecase schedulePickup;
   final ScheduleDeliveryUsecase scheduleDelivery;
   final UpdateRequestStatusUsecase updateRequestStatus;
+  final InitiateReturnUsecase initiateReturn;
 
   BookRequestBloc({
     required this.getBookDetail,
@@ -23,6 +25,7 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
     required this.schedulePickup,
     required this.scheduleDelivery,
     required this.updateRequestStatus,
+    required this.initiateReturn,
   }) : super(BookRequestInitial()) {
     on<LoadBookDetail>(_onLoadBookDetail);
     on<CreateBookRequest>(_onCreateBookRequest);
@@ -87,7 +90,15 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
     try {
       final updated = await schedulePickup(event.details);
       if (event.isReturn) {
-        await updateRequestStatus(event.details.requestId, 'returning');
+        // Persist the chosen return method (DROP_OFF / PICKUP) so return
+        // details render correctly. Falls back to a status update if the
+        // method is unknown.
+        final method = event.returnMethod;
+        if (method != null && method.isNotEmpty) {
+          await initiateReturn(event.details.requestId, method);
+        } else {
+          await updateRequestStatus(event.details.requestId, 'returning');
+        }
       }
       emit(PickupScheduled(updated));
     } catch (e) {

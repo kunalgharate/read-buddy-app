@@ -9,6 +9,8 @@ import '../../../../core/widgets/prime_required_dialog.dart';
 import '../../../audiobook/domain/entities/audiobook.dart';
 import '../../../bookcrud/domain/entities/book_variant_entity.dart';
 import '../../../bookcrud/domain/respository/variant_repository.dart';
+import '../../../borrow_order/domain/usecases/borrow_order_usecases.dart';
+import '../../../../core/utils/error_handler.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../reviews/presentation/widgets/book_reviews_section.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
@@ -18,7 +20,6 @@ import '../bloc/book_request_state.dart';
 import '../cubit/book_detail_variant_cubit.dart';
 import '../../domain/entities/book_detail_entity.dart';
 import '../widgets/report_concern_button.dart';
-import 'book_request_form_page.dart';
 
 class BookDetailPage extends StatelessWidget {
   final String bookId;
@@ -753,10 +754,84 @@ class _SectionCard extends StatelessWidget {
 
 // ─── Bottom Request Bar ─────────────────────────────────────────────────────
 
-class _BottomRequestBar extends StatelessWidget {
+class _BottomRequestBar extends StatefulWidget {
   final BookDetailEntity book;
 
   const _BottomRequestBar({required this.book});
+
+  @override
+  State<_BottomRequestBar> createState() => _BottomRequestBarState();
+}
+
+class _BottomRequestBarState extends State<_BottomRequestBar> {
+  bool _isAdding = false;
+
+  BookDetailEntity get book => widget.book;
+
+  /// Physical formats that can be borrowed via the cart.
+  static const _physicalFormats = ['hardcover', 'paperback'];
+
+  /// Resolve the currently-selected variant from the variant cubit state.
+  BookVariantEntity? _selectedVariant(BookDetailVariantState state) {
+    final variants = state.variants;
+    if (variants.isEmpty) return null;
+    final lang = state.selectedLanguage;
+    if (lang == null) return variants.first;
+    final match = variants.where((v) => v.language == lang);
+    return match.isNotEmpty ? match.first : variants.first;
+  }
+
+  /// Pick a borrowable (physical) format from the variant. Falls back to the
+  /// first available format so the user can still add to the cart.
+  BookFormatEntity? _borrowableFormat(BookVariantEntity variant) {
+    for (final type in _physicalFormats) {
+      final match = variant.formats.where((f) => f.type == type);
+      if (match.isNotEmpty) return match.first;
+    }
+    return variant.formats.isNotEmpty ? variant.formats.first : null;
+  }
+
+  Future<void> _addToCartAndOpen(BookDetailVariantState variantState) async {
+    final variant = _selectedVariant(variantState);
+    if (variant == null) {
+      _showSnack('This book has no available editions to borrow');
+      return;
+    }
+    final format = _borrowableFormat(variant);
+    if (format == null || format.id == null) {
+      _showSnack('Selected edition has no borrowable format');
+      return;
+    }
+
+    setState(() => _isAdding = true);
+    try {
+      await getIt<AddBookToOrder>()(
+        bookId: book.id,
+        variantId: variant.id,
+        formatId: format.id!,
+        // libraryId is chosen later in the cart / at submission time.
+        libraryId: null,
+      );
+      if (!mounted) return;
+      _showSnack('Added to your borrow cart', success: true);
+      Navigator.pushNamed(context, '/order-cart');
+    } catch (e) {
+      if (!mounted) return;
+      _showSnack(ErrorHandler.getErrorMessage(e));
+    } finally {
+      if (mounted) setState(() => _isAdding = false);
+    }
+  }
+
+  void _showSnack(String message, {bool success = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: success ? Colors.green : null,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -780,37 +855,35 @@ class _BottomRequestBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            onPressed: variantState.hasActiveRequest
-                ? () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('You have already requested this book'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                : () {
-                    if (!isPrime) {
-                      showPrimeRequiredDialog(context);
-                      return;
-                    }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BookRequestFormPage(
-                          bookId: book.id,
-                          bookTitle: book.title,
-                          coverImageUrl: book.coverImageUrl,
-                        ),
-                      ),
-                    );
-                  },
-            child: Text(
-              variantState.hasActiveRequest
-                  ? 'Already Requested'
-                  : 'Request Book',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
+            onPressed: _isAdding
+                ? null
+                : variantState.hasActiveRequest
+                    ? () {
+                        _showSnack('You have already requested this book');
+                      }
+                    : () {
+                        if (!isPrime) {
+                          showPrimeRequiredDialog(context);
+                          return;
+                        }
+                        _addToCartAndOpen(variantState);
+                      },
+            child: _isAdding
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.black87,
+                    ),
+                  )
+                : Text(
+                    variantState.hasActiveRequest
+                        ? 'Already Requested'
+                        : 'Add to Borrow Cart',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
           ),
         ),
       ),

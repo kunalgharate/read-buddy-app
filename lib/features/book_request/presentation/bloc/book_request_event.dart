@@ -32,7 +32,11 @@ class LoadLibraryDetails extends BookRequestEvent {}
 class SchedulePickup extends BookRequestEvent {
   final PickupDetailsEntity details;
   final bool isReturn;
-  SchedulePickup(this.details, {this.isReturn = false});
+
+  /// Return method to persist when [isReturn] is true.
+  /// 'DROP_OFF' for library drop-off, 'PICKUP' for home pickup.
+  final String? returnMethod;
+  SchedulePickup(this.details, {this.isReturn = false, this.returnMethod});
 }
 
 class ScheduleDelivery extends BookRequestEvent {

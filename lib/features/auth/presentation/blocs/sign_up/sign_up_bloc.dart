@@ -5,6 +5,7 @@ import '../../../../../core/utils/error_handler.dart';
 import '../../../domain/entities/app_user.dart';
 import '../../../domain/usecases/register_user_usecase.dart';
 import '../../../domain/usecases/verify_email_usecase.dart';
+import '../../../domain/usecases/resend_register_otp_usecase.dart';
 
 part 'sign_up_event.dart';
 part 'sign_up_state.dart';
@@ -13,12 +14,17 @@ part 'sign_up_state.dart';
 class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   final RegisterUserUseCase _registerUserUseCase;
   final VerifyEmailUseCase _verifyEmailUseCase;
+  final ResendRegisterOtpUseCase _resendRegisterOtpUseCase;
 
-  SignUpBloc(this._registerUserUseCase, this._verifyEmailUseCase)
-      : super(SignUpInitial()) {
+  SignUpBloc(
+    this._registerUserUseCase,
+    this._verifyEmailUseCase,
+    this._resendRegisterOtpUseCase,
+  ) : super(SignUpInitial()) {
     on<RegisterUserEvent>(_onRegisterUser);
     on<VerifyEmailEvent>(_onVerifyEmail);
     on<ResendVerificationEmailEvent>(_onResendVerificationEmail);
+    on<ResendRegisterOtpEvent>(_onResendRegisterOtp);
   }
 
   Future<void> _onRegisterUser(
@@ -73,6 +79,20 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     try {
       final user = await _registerUserUseCase(event.userData);
       emit(ResendVerificationEmailSuccess(user));
+    } catch (error) {
+      final errorMessage = ErrorHandler.getErrorMessage(error);
+      emit(SignUpError(message: errorMessage));
+    }
+  }
+
+  Future<void> _onResendRegisterOtp(
+    ResendRegisterOtpEvent event,
+    Emitter<SignUpState> emit,
+  ) async {
+    // Don't emit loading — keep the OTP screen visible during resend.
+    try {
+      await _resendRegisterOtpUseCase(event.email);
+      emit(RegisterOtpResent(event.email));
     } catch (error) {
       final errorMessage = ErrorHandler.getErrorMessage(error);
       emit(SignUpError(message: errorMessage));

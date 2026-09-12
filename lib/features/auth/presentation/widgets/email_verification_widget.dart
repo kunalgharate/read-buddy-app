@@ -116,6 +116,14 @@ class EmailVerificationScreen extends StatelessWidget {
               backgroundColor: const Color(0xFF00C853),
             ),
           );
+        } else if (state is RegisterOtpResent) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Verification code re-sent to ${email ?? ''}'),
+              backgroundColor: const Color(0xFF00C853),
+            ),
+          );
         } else if (state is SignUpError) {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -140,7 +148,12 @@ class EmailVerificationScreen extends StatelessWidget {
             ? currentUser!.email
             : (email ?? '');
 
-        if (currentUser != null) {
+        // Show the OTP form when we came from sign-up (currentUser != null) OR
+        // from a login attempt on an unverified account (email passed via
+        // constructor with no SignUp state yet).
+        final showOtpForm = currentUser != null || displayEmail.isNotEmpty;
+
+        if (showOtpForm) {
           return Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.transparent,
@@ -190,12 +203,20 @@ class EmailVerificationScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   GestureDetector(
                     onTap: () {
-                      final payload = currentUser.toResendPayload();
-                      if (currentUser.email.isEmpty &&
-                          displayEmail.isNotEmpty) {
-                        payload['email'] = displayEmail;
+                      if (currentUser != null) {
+                        // Sign-up origin: re-register to re-trigger the OTP.
+                        final payload = currentUser.toResendPayload();
+                        if (currentUser.email.isEmpty &&
+                            displayEmail.isNotEmpty) {
+                          payload['email'] = displayEmail;
+                        }
+                        _resendCode(context, payload);
+                      } else if (displayEmail.isNotEmpty) {
+                        // Login origin: only the email is known — use the
+                        // dedicated resend-register-otp endpoint.
+                        BlocProvider.of<SignUpBloc>(context)
+                            .add(ResendRegisterOtpEvent(displayEmail));
                       }
-                      _resendCode(context, payload);
                     },
                     child: const Text.rich(
                       TextSpan(

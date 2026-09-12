@@ -156,6 +156,44 @@ class ErrorHandler {
     return null;
   }
 
+  /// Detects the backend "email not verified" 403 case.
+  /// Prefers the structured `code == 'EMAIL_NOT_VERIFIED'` flag, and falls
+  /// back to matching the human-readable verify/email message.
+  static bool isEmailNotVerified(dynamic error) {
+    if (error is DioException &&
+        error.response?.statusCode == ApiConstants.forbidden) {
+      final data = error.response?.data;
+      if (data is Map<String, dynamic>) {
+        final code = data['code']?.toString().toUpperCase();
+        if (code == 'EMAIL_NOT_VERIFIED') {
+          return true;
+        }
+      }
+      final message = _extractErrorMessage(data)?.toLowerCase();
+      if (message != null &&
+          (message.contains('email not verified') ||
+              (message.contains('verify') && message.contains('email')))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Extracts the email surfaced by the backend on the "email not verified"
+  /// 403 response, if present.
+  static String? extractEmail(dynamic error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map<String, dynamic>) {
+        final email = data['email']?.toString();
+        if (email != null && email.trim().isNotEmpty) {
+          return email.trim();
+        }
+      }
+    }
+    return null;
+  }
+
   static bool isUserAlreadyExists(dynamic error) {
     if (error is DioException &&
         error.response?.statusCode == ApiConstants.forbidden) {
