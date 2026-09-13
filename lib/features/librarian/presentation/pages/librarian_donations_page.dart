@@ -108,6 +108,16 @@ class _DonationCard extends StatelessWidget {
     final bookTitle =
         donation['bookTitle'] ?? donation['book']?['title'] ?? 'Book Donation';
     final donationId = donation['_id'] ?? '';
+    final fulfillmentType =
+        (donation['fulfillmentType'] ?? 'DROP_OFF').toString().toUpperCase();
+
+    // Backend PICKUP_FLOW: donation_created → approved → pickup_requested →
+    // pickup_scheduled → picked_up → delivered → completed.
+    // A librarian can schedule the physical pickup once a PICKUP donation has
+    // been approved / requested and before it is already scheduled.
+    final isPickup = fulfillmentType == 'PICKUP';
+    final canSchedulePickup = isPickup &&
+        (status == 'approved' || status == 'pickup_requested');
 
     Color statusColor;
     switch (status) {
@@ -121,6 +131,7 @@ class _DonationCard extends StatelessWidget {
         break;
       case 'in_transit':
       case 'scheduled':
+      case 'pickup_scheduled':
         statusColor = Colors.blue;
         break;
       default:
@@ -206,9 +217,57 @@ class _DonationCard extends StatelessWidget {
                 ],
               ),
             ],
+            if (canSchedulePickup) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  onPressed: () =>
+                      _showSchedulePickupDialog(context, donationId.toString()),
+                  icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  label: const Text('Schedule Pickup'),
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _showSchedulePickupDialog(
+      BuildContext context, String donationId) async {
+    final bloc = context.read<LibrarianBloc>();
+    final now = DateTime.now();
+
+    final date = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 60)),
+    );
+    if (date == null || !context.mounted) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (time == null) return;
+
+    // Backend expects scheduledDate (ISO date) and scheduledTime (string).
+    final scheduledDate =
+        '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final scheduledTime =
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+    bloc.add(SchedulePickupEvent(donationId, {
+      'scheduledDate': scheduledDate,
+      'scheduledTime': scheduledTime,
+    }));
   }
 }

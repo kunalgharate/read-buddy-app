@@ -84,11 +84,23 @@ class _AdminReturnRequestsPageState extends State<AdminReturnRequestsPage> {
   }
 
   Future<void> _completeInspection(String requestId) async {
+    // Let the admin choose the actual inspection result instead of
+    // hardcoding 'good'. Returns null if the admin cancels.
+    final result = await _promptInspectionResult();
+    if (result == null) return;
+
     setState(() => _loadingIds.add('$requestId-inspect'));
     try {
       await getIt<Dio>().patch(
         ApiConstants.returnRequestInspect(requestId),
-        data: {'condition': 'good'},
+        // Backend (PATCH /users/return-requests/:id/inspect) reads
+        // `returnCondition` and optional `inspectionNotes`. The previous
+        // 'condition' key was silently ignored by the server.
+        data: {
+          'returnCondition': result.condition,
+          if (result.notes != null && result.notes!.isNotEmpty)
+            'inspectionNotes': result.notes,
+        },
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -114,6 +126,98 @@ class _AdminReturnRequestsPageState extends State<AdminReturnRequestsPage> {
     } finally {
       if (mounted) setState(() => _loadingIds.remove('$requestId-inspect'));
     }
+  }
+
+  /// Prompts the admin to select the inspection result (condition) and add
+  /// optional notes. Returns null if cancelled.
+  Future<_InspectionResult?> _promptInspectionResult() async {
+    String selected = 'good';
+    final notesController = TextEditingController();
+    const options = <String, String>{
+      'good': 'Good',
+      'damaged': 'Damaged',
+      'lost': 'Lost',
+    };
+
+    final result = await showDialog<_InspectionResult>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Complete Inspection'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Select book condition',
+                    style: TextStyle(fontSize: 13, color: Color(0xFF555555)),
+                  ),
+                  const SizedBox(height: 8),
+                  ...options.entries.map(
+                    (e) => InkWell(
+                      onTap: () => setDialogState(() => selected = e.key),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              selected == e.key
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                              size: 20,
+                              color: selected == e.key
+                                  ? AppColors.primary
+                                  : const Color(0xFF999999),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(e.value),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: notesController,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'Notes (optional)',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () => Navigator.pop(
+                    dialogContext,
+                    _InspectionResult(
+                      condition: selected,
+                      notes: notesController.text.trim(),
+                    ),
+                  ),
+                  child: const Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    notesController.dispose();
+    return result;
   }
 
   @override
@@ -378,4 +482,14 @@ class _ActionButton extends StatelessWidget {
       ),
     );
   }
+}
+
+
+/// Result of the admin inspection dialog: the selected book [condition]
+/// (e.g. good/damaged/lost) and optional inspection [notes].
+class _InspectionResult {
+  final String condition;
+  final String? notes;
+
+  const _InspectionResult({required this.condition, this.notes});
 }

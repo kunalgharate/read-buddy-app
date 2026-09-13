@@ -79,10 +79,24 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
     String? deliveryPreferredDate,
   }) async {
     try {
+      // Normalize the caller's fulfillment method to the backend enum
+      // (['DELIVERY', 'PICKUP', 'MEETUP']). The UI sends 'pickup'/'dropoff'.
+      final normalized = fulfillmentMethod.trim().toUpperCase();
+      final method = (normalized == 'DROPOFF' ||
+              normalized == 'DROP_OFF' ||
+              normalized == 'DELIVERY')
+          ? 'DELIVERY'
+          : (normalized == 'MEETUP' ? 'MEETUP' : 'PICKUP');
+
       final body = <String, dynamic>{
         'bookId': bookId,
-        'fulfillmentMethod': 'PICKUP',
+        'fulfillmentMethod': method,
       };
+      // Backend stores `address` only for DELIVERY; forward the user's
+      // delivery address so it is not silently dropped.
+      if (method == 'DELIVERY' && deliveryAddress != null) {
+        body['address'] = deliveryAddress;
+      }
       if (deliveryName != null) body['deliveryName'] = deliveryName;
       if (deliveryPhone != null) body['deliveryPhone'] = deliveryPhone;
       if (deliveryAddress != null) body['deliveryAddress'] = deliveryAddress;

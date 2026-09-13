@@ -12,6 +12,7 @@ import '../../../bookcrud/domain/respository/variant_repository.dart';
 import '../../../borrow_order/domain/usecases/borrow_order_usecases.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
+import '../../../reviews/presentation/bloc/review_bloc.dart';
 import '../../../reviews/presentation/widgets/book_reviews_section.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/book_request_bloc.dart';
@@ -571,17 +572,66 @@ class _TitleSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const _StarRating(rating: 1),
-          const SizedBox(height: 4),
-          const Text(
-            '10+ readers loved this',
-            style: TextStyle(
-              fontSize: 13,
-              color: Color(0xFF555555),
-            ),
+          // Live rating driven by the real reviews API (averageRating /
+          // totalReviews). Falls back to a neutral "No ratings yet" label
+          // when the book has no reviews instead of a hardcoded value.
+          BlocProvider(
+            create: (_) =>
+                getIt<ReviewBloc>()..add(LoadBookReviews(book.id)),
+            child: const _BookRatingSummary(),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Shows the real average rating and review count for the book by listening
+/// to [ReviewBloc]. Replaces the previously hardcoded 1-star rating and the
+/// fake "10+ readers loved this" copy.
+class _BookRatingSummary extends StatelessWidget {
+  const _BookRatingSummary();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ReviewBloc, ReviewState>(
+      builder: (context, state) {
+        if (state is ReviewsLoaded && state.totalReviews > 0) {
+          final label = state.totalReviews == 1
+              ? '1 reader rated this'
+              : '${state.totalReviews} readers rated this';
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _StarRating(rating: state.averageRating),
+              const SizedBox(height: 4),
+              Text(
+                '${state.averageRating.toStringAsFixed(1)} · $label',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF555555),
+                ),
+              ),
+            ],
+          );
+        }
+        // No reviews yet (or still loading / errored) — show a neutral label
+        // rather than a misleading hardcoded rating.
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _StarRating(rating: 0),
+            SizedBox(height: 4),
+            Text(
+              'No ratings yet',
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF555555),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
