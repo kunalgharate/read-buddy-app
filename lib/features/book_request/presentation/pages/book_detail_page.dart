@@ -127,37 +127,46 @@ class _BookDetailContent extends StatelessWidget {
       );
     }
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _CoverImageSection(book: book),
-          _TitleSection(book: book),
-          const SizedBox(height: 12),
-          BlocBuilder<BookDetailVariantCubit, BookDetailVariantState>(
-            builder: (context, state) {
-              if (state.isLoading) {
-                return const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(
-                      child:
-                          CircularProgressIndicator(color: Color(0xFF2CE07F))),
-                );
-              }
-              return _LanguageAndActions(book: book);
-            },
-          ),
-          const SizedBox(height: 12),
-          _AboutSection(book: book),
-          const SizedBox(height: 12),
-          _HighlightSection(book: book),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: BookReviewsSection(bookId: book.id),
-          ),
-          const SizedBox(height: 24),
-        ],
+    // Single shared ReviewBloc for the whole page so the title rating summary
+    // and the reviews section stay in sync: a review mutation (create/edit/
+    // delete) reloads reviews once and both widgets rebuild from the same
+    // ReviewsLoaded state (single source of truth).
+    return BlocProvider<ReviewBloc>(
+      create: (_) => getIt<ReviewBloc>()..add(LoadBookReviews(book.id)),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _CoverImageSection(book: book),
+            _TitleSection(book: book),
+            const SizedBox(height: 12),
+            BlocBuilder<BookDetailVariantCubit, BookDetailVariantState>(
+              builder: (context, state) {
+                if (state.isLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(
+                        child: CircularProgressIndicator(
+                            color: Color(0xFF2CE07F))),
+                  );
+                }
+                return _LanguageAndActions(book: book);
+              },
+            ),
+            const SizedBox(height: 12),
+            _AboutSection(book: book),
+            const SizedBox(height: 12),
+            _HighlightSection(book: book),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              // Consume the shared ReviewBloc provided above instead of
+              // creating a second independent instance.
+              child: BookReviewsSection(bookId: book.id, useAncestorBloc: true),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -573,13 +582,9 @@ class _TitleSection extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           // Live rating driven by the real reviews API (averageRating /
-          // totalReviews). Falls back to a neutral "No ratings yet" label
-          // when the book has no reviews instead of a hardcoded value.
-          BlocProvider(
-            create: (_) =>
-                getIt<ReviewBloc>()..add(LoadBookReviews(book.id)),
-            child: const _BookRatingSummary(),
-          ),
+          // totalReviews). Consumes the shared ReviewBloc provided by
+          // _BookDetailContent so it stays in sync with the reviews section.
+          _BookRatingSummary(bookId: book.id),
         ],
       ),
     );
@@ -590,7 +595,9 @@ class _TitleSection extends StatelessWidget {
 /// to [ReviewBloc]. Replaces the previously hardcoded 1-star rating and the
 /// fake "10+ readers loved this" copy.
 class _BookRatingSummary extends StatelessWidget {
-  const _BookRatingSummary();
+  final String bookId;
+
+  const _BookRatingSummary({required this.bookId});
 
   @override
   Widget build(BuildContext context) {
@@ -615,23 +622,78 @@ class _BookRatingSummary extends StatelessWidget {
             ],
           );
         }
-        // No reviews yet (or still loading / errored) — show a neutral label
-        // rather than a misleading hardcoded rating.
-        return const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _StarRating(rating: 0),
-            SizedBox(height: 4),
-            Text(
-              'No ratings yet',
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF555555),
+
+        // Distinct failure state: a request error must NOT be conflated with
+        // "no ratings yet". Offer a lightweight retry.
+        if (state is ReviewError) {
+          return Row(
+            children: [
+              const Icon(Icons.error_outline,
+                  size: 18, color: Color(0xFF999999)),
+              const SizedBox(width: 6),
+              const Text(
+                'Ratings unavailable',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF999999),
+                ),
               ),
-            ),
-          ],
-        );
+              const SizedBox(width: 4),
+              InkWell(
+                onTap: () =>
+                    context.read<ReviewBloc>().add(LoadBookReviews(bookId)),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Text(
+                    'Retry',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2CE07F),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        // "No ratings yet" is reserved ONLY for a successfully-loaded response
+        // with zero reviews. While loading (ReviewLoading/ReviewInitial) show
+        // the same neutral placeholder without any misleading rating value.
+        if (state is ReviewsLoaded) {
+          // Successfully loaded, but totalReviews == 0.
+          return const _NoRatingsYet();
+        }
+
+        // Loading / initial — neutral placeholder, no hardcoded rating.
+        return const _NoRatingsYet();
       },
+    );
+  }
+}
+
+/// Neutral placeholder shown for a successfully-loaded zero-review book (and
+/// while the reviews are still loading). Deliberately distinct from the
+/// [ReviewError] "Ratings unavailable" state.
+class _NoRatingsYet extends StatelessWidget {
+  const _NoRatingsYet();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _StarRating(rating: 0),
+        SizedBox(height: 4),
+        Text(
+          'No ratings yet',
+          style: TextStyle(
+            fontSize: 13,
+            color: Color(0xFF555555),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -10,13 +10,31 @@ import 'package:read_buddy_app/features/reviews/presentation/widgets/review_form
 
 /// A self-contained widget that shows book reviews with average rating.
 /// Embed in any book detail page with: `BookReviewsSection(bookId: bookId)`
+///
+/// By default this creates and owns its own [ReviewBloc]. When embedded in a
+/// page that already provides a shared [ReviewBloc] above it (so the title
+/// rating summary and this section stay in sync), pass
+/// `useAncestorBloc: true` to consume that ancestor bloc instead of creating
+/// a second independent instance. The ancestor is responsible for the initial
+/// `LoadBookReviews` dispatch, so this widget does not re-add it.
 class BookReviewsSection extends StatelessWidget {
   final String bookId;
+  final bool useAncestorBloc;
 
-  const BookReviewsSection({super.key, required this.bookId});
+  const BookReviewsSection({
+    super.key,
+    required this.bookId,
+    this.useAncestorBloc = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (useAncestorBloc) {
+      // Reuse the ReviewBloc already provided by an ancestor. The initial
+      // LoadBookReviews was dispatched by that ancestor, so we must NOT add it
+      // again here to avoid a duplicate load.
+      return _BookReviewsSectionContent(bookId: bookId);
+    }
     return BlocProvider(
       create: (_) => GetIt.instance<ReviewBloc>()..add(LoadBookReviews(bookId)),
       child: _BookReviewsSectionContent(bookId: bookId),

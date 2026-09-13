@@ -257,7 +257,24 @@ class _DonationCard extends StatelessWidget {
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    if (time == null) return;
+    if (time == null || !context.mounted) return;
+
+    // Reject pickup appointments in the past (e.g. today's date + an earlier time).
+    final scheduledDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    if (!scheduledDateTime.isAfter(DateTime.now())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please choose a pickup time in the future.'),
+        ),
+      );
+      return;
+    }
 
     // Backend expects scheduledDate (ISO date) and scheduledTime (string).
     final scheduledDate =

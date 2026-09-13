@@ -87,7 +87,9 @@ class _AdminReturnRequestsPageState extends State<AdminReturnRequestsPage> {
     // Let the admin choose the actual inspection result instead of
     // hardcoding 'good'. Returns null if the admin cancels.
     final result = await _promptInspectionResult();
-    if (result == null) return;
+    // The dialog is awaited, so the State may have been disposed while it was
+    // open. Guard with `mounted` before touching setState on a disposed State.
+    if (result == null || !mounted) return;
 
     setState(() => _loadingIds.add('$requestId-inspect'));
     try {

@@ -81,12 +81,27 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
     try {
       // Normalize the caller's fulfillment method to the backend enum
       // (['DELIVERY', 'PICKUP', 'MEETUP']). The UI sends 'pickup'/'dropoff'.
+      // Only known values are accepted; anything else is rejected rather than
+      // silently coerced to PICKUP.
       final normalized = fulfillmentMethod.trim().toUpperCase();
-      final method = (normalized == 'DROPOFF' ||
-              normalized == 'DROP_OFF' ||
-              normalized == 'DELIVERY')
-          ? 'DELIVERY'
-          : (normalized == 'MEETUP' ? 'MEETUP' : 'PICKUP');
+      final String method;
+      switch (normalized) {
+        case 'PICKUP':
+          method = 'PICKUP';
+          break;
+        case 'DROPOFF':
+        case 'DROP_OFF':
+        case 'DELIVERY':
+          method = 'DELIVERY';
+          break;
+        case 'MEETUP':
+          method = 'MEETUP';
+          break;
+        default:
+          throw ArgumentError(
+            'Unsupported fulfillment method: $fulfillmentMethod',
+          );
+      }
 
       final body = <String, dynamic>{
         'bookId': bookId,

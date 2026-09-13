@@ -74,7 +74,7 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _handleGoogleSignIn() {
-    context.read<GoogleSignInBloc>().add(const GoogleSignInRequested());
+    context.read<GoogleSignInBloc>().add(const GoogleLoginRequested());
   }
 
   // Navigation methods
@@ -137,12 +137,37 @@ class _SignInScreenState extends State<SignInScreen> {
           },
         ),
         BlocListener<GoogleSignInBloc, GoogleSignInState>(
-          listener: (context, state) {
-            // The Google bloc fetches the account's name/email; the app has no
-            // direct Google login, so route to Sign Up where the same shared
-            // bloc state pre-fills the form (user sets a password to finish).
-            if (state is GoogleSignUpDataFetched) {
-              Navigator.pushReplacementNamed(context, '/signup');
+          listener: (context, state) async {
+            // Real Google authentication: establish a session exactly like a
+            // normal login (persist user + tokens, then route by role/onboarding).
+            if (state is GoogleSignInAuthenticated) {
+              UiUtils.showSuccessSnackBar(
+                context,
+                message: 'Welcome, ${state.user.name}!',
+              );
+
+              final secureStorage = getIt<SecureStorageUtil>();
+              await secureStorage.saveUser(state.user);
+              await secureStorage.saveTokens(
+                accessToken: state.user.accessToken,
+                refreshToken: state.user.refreshToken,
+              );
+              await AppPreferences.setLoggedIn(true);
+
+              if (!context.mounted) return;
+              context.read<ProfileBloc>().add(LoadProfileEvent());
+              if (state.user.role == 'admin') {
+                Navigator.pushReplacementNamed(context, '/admin');
+              } else if (state.user.onboardingCompleted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OnboardingQuestionnaire(),
+                  ),
+                );
+              }
             } else if (state is GoogleSignInFailure) {
               UiUtils.showErrorSnackBar(
                 context,

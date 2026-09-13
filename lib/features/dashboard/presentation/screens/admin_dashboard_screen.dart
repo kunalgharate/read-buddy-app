@@ -209,10 +209,43 @@ class _AdminDashboardBodyState extends State<_AdminDashboardBody> {
       ),
     ];
 
+    // The horizontal quick-stats boxes are their own navigation destinations
+    // (distinct titles/routes from the grid tiles). They are only rendered in
+    // the dedicated row when NOT searching, so previously searching for e.g.
+    // "New Users" or "Books Donated" found nothing. Model them as tiles too so
+    // they are discoverable via search while still keeping their live counts.
+    final quickStatTiles = <_DashboardTile>[
+      _DashboardTile(
+        title: 'Books Donated',
+        count: counts['donations'] ?? 0,
+        icon: Icons.card_giftcard,
+        route: '/admin-donations',
+      ),
+      _DashboardTile(
+        title: 'Books Request',
+        count: counts['requests'] ?? 0,
+        icon: Icons.list_alt,
+        route: '/admin-book-requests',
+      ),
+      _DashboardTile(
+        title: 'New Users',
+        count: counts['users'] ?? 0,
+        icon: Icons.people,
+        route: '/admin-users',
+      ),
+    ];
+
     final query = _searchQuery.trim().toLowerCase();
+    // When searching, include the quick-stat destinations in the searchable
+    // set so every dashboard navigation box is findable. When not searching,
+    // they are shown in their dedicated horizontal row instead (below) and are
+    // therefore excluded here to avoid duplicates.
+    final searchableTiles = query.isEmpty
+        ? allTiles
+        : [...allTiles, ...quickStatTiles];
     final filteredTiles = query.isEmpty
         ? allTiles
-        : allTiles
+        : searchableTiles
             .where((t) => t.title.toLowerCase().contains(query))
             .toList();
 
