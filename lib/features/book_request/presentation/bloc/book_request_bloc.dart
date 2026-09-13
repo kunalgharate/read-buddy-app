@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/book_request_entity.dart';
 import '../../domain/usecases/get_book_detail.dart';
 import '../../domain/usecases/create_book_request.dart';
 import '../../domain/usecases/get_library_details.dart';
@@ -88,18 +89,36 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   ) async {
     emit(PickupScheduling());
     try {
-      final updated = await schedulePickup(event.details);
       if (event.isReturn) {
-        // Persist the chosen return method (DROP_OFF / PICKUP) so return
-        // details render correctly. Falls back to a status update if the
-        // method is unknown.
+        // RETURN FLOW: the backend initiate-return endpoint requires the
+        // request to still be in 'delivered' status. Calling schedule-pickup
+        // first would flip the status to 'pickup_scheduled' and make
+        // initiate-return fail (400). So for returns we call initiate-return
+        // directly with the chosen method (DROP_OFF / PICKUP), which is the
+        // only call that correctly transitions the request to 'returning'.
         final method = event.returnMethod;
         if (method != null && method.isNotEmpty) {
           await initiateReturn(event.details.requestId, method);
         } else {
           await updateRequestStatus(event.details.requestId, 'returning');
         }
+        // Reflect the requested return without an extra fetch. The
+        // PickupScheduled listener only uses this to show a confirmation
+        // message and pop, so a minimal entity is sufficient.
+        emit(PickupScheduled(
+          BookRequestEntity(
+            id: event.details.requestId,
+            status: 'returning',
+            fulfillmentMethod: '',
+            paymentStatus: '',
+            requestDate: '',
+            returnMethod: method,
+          ),
+        ));
+        return;
       }
+
+      final updated = await schedulePickup(event.details);
       emit(PickupScheduled(updated));
     } catch (e) {
       emit(PickupScheduleError(e.toString().replaceFirst('Exception: ', '')));

@@ -7,6 +7,7 @@ import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../questionaries/presentations/pages/onboarding_questionaire.dart';
+import '../blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../blocs/sign_in/sign_in_bloc.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -72,6 +73,10 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() => _obscurePassword = !_obscurePassword);
   }
 
+  void _handleGoogleSignIn() {
+    context.read<GoogleSignInBloc>().add(const GoogleLoginRequested());
+  }
+
   // Navigation methods
   void _navigateToSignUp() =>
       Navigator.pushReplacementNamed(context, '/signup');
@@ -80,9 +85,11 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SignInBloc, SignInState>(
-      listener: (context, state) async {
-        if (state is SignInSuccess) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SignInBloc, SignInState>(
+          listener: (context, state) async {
+            if (state is SignInSuccess) {
           UiUtils.showSuccessSnackBar(
             context,
             message: 'Welcome back, ${state.user.name}!',
@@ -127,7 +134,49 @@ class _SignInScreenState extends State<SignInScreen> {
             );
           }
         }
-      },
+          },
+        ),
+        BlocListener<GoogleSignInBloc, GoogleSignInState>(
+          listener: (context, state) async {
+            // Real Google authentication: establish a session exactly like a
+            // normal login (persist user + tokens, then route by role/onboarding).
+            if (state is GoogleSignInAuthenticated) {
+              UiUtils.showSuccessSnackBar(
+                context,
+                message: 'Welcome, ${state.user.name}!',
+              );
+
+              final secureStorage = getIt<SecureStorageUtil>();
+              await secureStorage.saveUser(state.user);
+              await secureStorage.saveTokens(
+                accessToken: state.user.accessToken,
+                refreshToken: state.user.refreshToken,
+              );
+              await AppPreferences.setLoggedIn(true);
+
+              if (!context.mounted) return;
+              context.read<ProfileBloc>().add(LoadProfileEvent());
+              if (state.user.role == 'admin') {
+                Navigator.pushReplacementNamed(context, '/admin');
+              } else if (state.user.onboardingCompleted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OnboardingQuestionnaire(),
+                  ),
+                );
+              }
+            } else if (state is GoogleSignInFailure) {
+              UiUtils.showErrorSnackBar(
+                context,
+                message: state.errorMessage,
+              );
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
@@ -155,6 +204,10 @@ class _SignInScreenState extends State<SignInScreen> {
                         _buildForgotPasswordLink(),
                         const SizedBox(height: 32.0),
                         _buildSignInButton(),
+                        const SizedBox(height: 20.0),
+                        _buildGoogleDivider(),
+                        const SizedBox(height: 20.0),
+                        _buildGoogleSignInButton(),
                         const Spacer(),
                         _buildSignUpPrompt(),
                         const Spacer(),
@@ -320,6 +373,62 @@ class _SignInScreenState extends State<SignInScreen> {
                     style:
                         TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
                   ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGoogleDivider() {
+    return Row(
+      children: [
+        const Expanded(child: Divider()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'or',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 14.0,
+            ),
+          ),
+        ),
+        const Expanded(child: Divider()),
+      ],
+    );
+  }
+
+  Widget _buildGoogleSignInButton() {
+    return BlocBuilder<GoogleSignInBloc, GoogleSignInState>(
+      builder: (context, state) {
+        final isLoading = state is GoogleSignInLoading;
+        return SizedBox(
+          width: double.infinity,
+          height: 56.0,
+          child: OutlinedButton.icon(
+            onPressed: isLoading ? null : _handleGoogleSignIn,
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: Theme.of(context).dividerColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+            icon: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.g_mobiledata_rounded,
+                    size: 28, color: Color(0xFF4285F4)),
+            label: Text(
+              isLoading ? 'Loading...' : 'Continue with Google',
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
           ),
         );
       },

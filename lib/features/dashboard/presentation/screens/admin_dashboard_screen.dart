@@ -56,11 +56,19 @@ class _AdminDashboardBody extends StatefulWidget {
 
 class _AdminDashboardBodyState extends State<_AdminDashboardBody> {
   late Future<Map<String, int>> _countsFuture;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _countsFuture = _fetchDashboardCounts();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<Map<String, int>> _fetchDashboardCounts() async {
@@ -136,144 +144,217 @@ class _AdminDashboardBodyState extends State<_AdminDashboardBody> {
   }
 
   Widget _buildDashboardContent(Map<String, int> counts) {
+    // Build the full set of navigation tiles as data so they can be filtered
+    // by the search box. Each entry carries its title, count and destination.
+    final allTiles = <_DashboardTile>[
+      _DashboardTile(
+        title: 'Categories',
+        count: counts['categories'] ?? 0,
+        icon: Icons.category,
+        route: '/category',
+      ),
+      _DashboardTile(
+        title: 'Books',
+        count: counts['books'] ?? 0,
+        icon: Icons.book,
+        route: '/books',
+      ),
+      _DashboardTile(
+        title: 'Donations',
+        count: counts['donations'] ?? 0,
+        icon: Icons.card_giftcard,
+        route: '/donated-books',
+      ),
+      _DashboardTile(
+        title: 'Request',
+        count: counts['requests'] ?? 0,
+        icon: Icons.list_alt,
+        route: '/admin-book-requests',
+      ),
+      _DashboardTile(
+        title: 'Users',
+        count: counts['users'] ?? 0,
+        icon: Icons.people,
+        route: '/admin-users',
+      ),
+      const _DashboardTile(
+        title: 'Banner',
+        count: 0,
+        icon: Icons.image,
+        route: '/banner',
+      ),
+      const _DashboardTile(
+        title: 'Questions',
+        count: 0,
+        icon: Icons.quiz,
+        route: '/questions',
+      ),
+      const _DashboardTile(
+        title: 'Upcoming Pickups',
+        count: 0,
+        icon: Icons.local_shipping_outlined,
+        route: '/admin-upcoming-pickups',
+      ),
+      const _DashboardTile(
+        title: 'Libraries',
+        count: 0,
+        icon: Icons.local_library,
+        route: '/libraries',
+      ),
+      const _DashboardTile(
+        title: 'Returns',
+        count: 0,
+        icon: Icons.assignment_return,
+        route: '/admin-return-requests',
+      ),
+    ];
+
+    // The horizontal quick-stats boxes are their own navigation destinations
+    // (distinct titles/routes from the grid tiles). They are only rendered in
+    // the dedicated row when NOT searching, so previously searching for e.g.
+    // "New Users" or "Books Donated" found nothing. Model them as tiles too so
+    // they are discoverable via search while still keeping their live counts.
+    final quickStatTiles = <_DashboardTile>[
+      _DashboardTile(
+        title: 'Books Donated',
+        count: counts['donations'] ?? 0,
+        icon: Icons.card_giftcard,
+        route: '/admin-donations',
+      ),
+      _DashboardTile(
+        title: 'Books Request',
+        count: counts['requests'] ?? 0,
+        icon: Icons.list_alt,
+        route: '/admin-book-requests',
+      ),
+      _DashboardTile(
+        title: 'New Users',
+        count: counts['users'] ?? 0,
+        icon: Icons.people,
+        route: '/admin-users',
+      ),
+    ];
+
+    final query = _searchQuery.trim().toLowerCase();
+    // When searching, include the quick-stat destinations in the searchable
+    // set so every dashboard navigation box is findable. When not searching,
+    // they are shown in their dedicated horizontal row instead (below) and are
+    // therefore excluded here to avoid duplicates.
+    final searchableTiles = query.isEmpty
+        ? allTiles
+        : [...allTiles, ...quickStatTiles];
+    final filteredTiles = query.isEmpty
+        ? allTiles
+        : searchableTiles
+            .where((t) => t.title.toLowerCase().contains(query))
+            .toList();
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const TextField(
+          TextField(
+            controller: _searchController,
+            onChanged: (value) => setState(() => _searchQuery = value),
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search),
               hintText: 'Search',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _searchQuery = '');
+                      },
+                    )
+                  : null,
             ),
           ),
           const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                DashboardBoxWidget(
-                  title: 'Books Donated',
-                  count: counts['donations'] ?? 0,
-                  color: Colors.grey,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/admin-donations');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Books Request',
-                  count: counts['requests'] ?? 0,
-                  color: Colors.redAccent,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/admin-book-requests');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'New Users',
-                  count: counts['users'] ?? 0,
-                  color: Colors.lightBlue,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/admin-users');
-                  },
-                ),
-              ],
+          // The horizontal quick-stats row is only shown when not searching
+          // so search results stay focused on the matching tiles.
+          if (query.isEmpty) ...[
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  DashboardBoxWidget(
+                    title: 'Books Donated',
+                    count: counts['donations'] ?? 0,
+                    color: Colors.grey,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-donations');
+                    },
+                  ),
+                  DashboardBoxWidget(
+                    title: 'Books Request',
+                    count: counts['requests'] ?? 0,
+                    color: Colors.redAccent,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-book-requests');
+                    },
+                  ),
+                  DashboardBoxWidget(
+                    title: 'New Users',
+                    count: counts['users'] ?? 0,
+                    color: Colors.lightBlue,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-users');
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
+          ],
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              childAspectRatio: 0.85,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              children: [
-                DashboardBoxWidget(
-                  title: 'Categories',
-                  count: counts['categories'] ?? 0,
-                  icon: Icons.category,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/category');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Books',
-                  count: counts['books'] ?? 0,
-                  icon: Icons.book,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/books');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Donations',
-                  count: counts['donations'] ?? 0,
-                  icon: Icons.card_giftcard,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/donated-books');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Request',
-                  count: counts['requests'] ?? 0,
-                  icon: Icons.list_alt,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/admin-book-requests');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Users',
-                  count: counts['users'] ?? 0,
-                  icon: Icons.people,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/admin-users');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Banner',
-                  count: 0,
-                  icon: Icons.image,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/banner');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Questions',
-                  count: 0,
-                  icon: Icons.quiz,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/questions');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Upcoming Pickups',
-                  count: 0,
-                  icon: Icons.local_shipping_outlined,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/admin-book-requests');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Libraries',
-                  count: 0,
-                  icon: Icons.local_library,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/libraries');
-                  },
-                ),
-                DashboardBoxWidget(
-                  title: 'Returns',
-                  count: 0,
-                  icon: Icons.assignment_return,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/admin-return-requests');
-                  },
-                ),
-              ],
-            ),
+            child: filteredTiles.isEmpty
+                ? Center(
+                    child: Text(
+                      'No matches for "$_searchQuery"',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : GridView.count(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.85,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    children: filteredTiles
+                        .map(
+                          (tile) => DashboardBoxWidget(
+                            title: tile.title,
+                            count: tile.count,
+                            icon: tile.icon,
+                            onPressed: () {
+                              Navigator.of(context).pushNamed(tile.route);
+                            },
+                          ),
+                        )
+                        .toList(),
+                  ),
           ),
         ],
       ),
     );
   }
+}
+
+/// Simple data holder for a dashboard navigation tile so the grid can be
+/// filtered by the search box.
+class _DashboardTile {
+  final String title;
+  final int count;
+  final IconData icon;
+  final String route;
+
+  const _DashboardTile({
+    required this.title,
+    required this.count,
+    required this.icon,
+    required this.route,
+  });
 }
