@@ -84,7 +84,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  // ─── PUT /users/update-user-info ──────────────────────────────────────────
+  // ─── PATCH /users/update-user-info ─────────────────────────────────────────
 
   Future<void> _onUpdateProfileField(
     UpdateProfileFieldEvent event,

@@ -15,8 +15,8 @@ class VerifyEmailEvent extends SignUpEvent {
 }
 
 class ResendVerificationEmailEvent extends SignUpEvent {
-  final Map<String, dynamic> userData;
-  ResendVerificationEmailEvent(this.userData);
+  final String email;
+  ResendVerificationEmailEvent(this.email);
 }
 
 /// Resends the registration OTP using only the email address. Used when the

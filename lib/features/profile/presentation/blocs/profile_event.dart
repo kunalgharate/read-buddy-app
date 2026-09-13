@@ -19,7 +19,7 @@ class UpdateAvatarEvent extends ProfileEvent {
   List<Object?> get props => [avatarName];
 }
 
-/// Triggers PUT /users/update-user-info
+/// Triggers PATCH /users/update-user-info
 class UpdateProfileFieldEvent extends ProfileEvent {
   final String field;
   final String value;

@@ -8,6 +8,6 @@ abstract class ProfileRepository {
   /// PATCH /users/update-avatar
   Future<ProfileUser> updateAvatar(String avatarName);
 
-  /// PUT /users/update-user-info
+  /// PATCH /users/update-user-info
   Future<AppUser> updateProfile({required Map<String, String> profileData});
 }

@@ -99,14 +99,5 @@ class AppUser {
         'userAvatar': userAvatar,
       };
 
-  /// Builds the payload needed to re-trigger the register endpoint,
-  /// which causes the backend to resend the verification OTP for
-  /// unverified accounts.
-  Map<String, dynamic> toResendPayload() => {
-        'name': name,
-        'email': email,
-        'password': password,
-        'phno': phno ?? '',
-        'deviceInfo': {},
-      };
+
 }

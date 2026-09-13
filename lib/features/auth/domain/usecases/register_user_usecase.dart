@@ -1,15 +1,14 @@
 import 'package:injectable/injectable.dart';
 
-import '../entities/app_user.dart';
 import '../repositories/auth_repository.dart';
 
-/// SignIn use case
+/// Register use case — returns the registered email used for the OTP screen.
 @injectable
 class RegisterUserUseCase {
   final AuthRepository repository;
 
   RegisterUserUseCase(this.repository);
 
-  Future<AppUser> call(Map<String, dynamic> data) =>
+  Future<String> call(Map<String, dynamic> data) =>
       repository.registerUser(data);
 }
