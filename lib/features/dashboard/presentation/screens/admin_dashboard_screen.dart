@@ -193,7 +193,7 @@ class _AdminDashboardBodyState extends State<_AdminDashboardBody> {
         title: 'Upcoming Pickups',
         count: 0,
         icon: Icons.local_shipping_outlined,
-        route: '/admin-book-requests',
+        route: '/admin-upcoming-pickups',
       ),
       const _DashboardTile(
         title: 'Libraries',
