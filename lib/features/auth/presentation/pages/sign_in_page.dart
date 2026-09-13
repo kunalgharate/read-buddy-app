@@ -111,17 +111,15 @@ class _SignInScreenState extends State<SignInScreen> {
             );
           }
         } else if (state is SignInFailure) {
-          final msg = state.errorMessage.toLowerCase();
-          if (msg.contains('verify') && msg.contains('email')) {
+          if (state.isEmailNotVerified) {
+            final email = (state.email?.isNotEmpty == true)
+                ? state.email!
+                : _emailController.text.trim().toLowerCase();
             UiUtils.showErrorSnackBar(
               context,
-              message: 'Please verify your email before signing in.',
-              action: SnackBarAction(
-                label: 'Sign Up',
-                textColor: Colors.white,
-                onPressed: _navigateToSignUp,
-              ),
+              message: 'Please verify your email to continue.',
             );
+            Navigator.pushNamed(context, '/verification', arguments: email);
           } else {
             UiUtils.showErrorSnackBar(
               context,

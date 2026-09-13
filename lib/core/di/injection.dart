@@ -25,8 +25,8 @@ import 'package:read_buddy_app/features/auth/domain/usecases/register_user_useca
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/sign_in_with_google.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/verify_email_usecase.dart';
-import 'package:read_buddy_app/features/auth/domain/usecases/send_otp_usecase.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/resend_register_otp_usecase.dart';
+import 'package:read_buddy_app/features/auth/domain/usecases/send_otp_usecase.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/verify_reset_otp_usecase.dart';
 import 'package:read_buddy_app/features/auth/domain/usecases/change_password_usecase.dart';
 import 'package:read_buddy_app/features/auth/presentation/blocs/google_sign_in/google_sign_in_bloc.dart';
@@ -169,6 +169,7 @@ import '../../features/book_request/domain/usecases/get_library_details.dart';
 import '../../features/book_request/domain/usecases/schedule_pickup.dart';
 import '../../features/book_request/domain/usecases/schedule_delivery.dart';
 import '../../features/book_request/domain/usecases/update_request_status.dart';
+import '../../features/book_request/domain/usecases/initiate_return.dart';
 import '../../features/book_request/domain/usecases/get_upcoming_pickups.dart';
 import '../../features/book_request/domain/usecases/cancel_book_request.dart';
 import '../../features/book_request/presentation/bloc/book_request_bloc.dart';
@@ -479,9 +480,9 @@ void _registerUseCases() {
       () => RegisterUserUseCase(getIt<AuthRepository>()));
   getIt
       .registerLazySingleton(() => VerifyEmailUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => SendOtpUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(
-          () => ResendRegisterOtpUseCase(getIt<AuthRepository>()));
+      () => ResendRegisterOtpUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => SendOtpUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(
       () => VerifyResetOtpUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(
@@ -602,6 +603,8 @@ void _registerUseCases() {
       () => ScheduleDeliveryUsecase(getIt<BookRequestRepository>()));
   getIt.registerLazySingleton(
       () => UpdateRequestStatusUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => InitiateReturnUsecase(getIt<BookRequestRepository>()));
   getIt.registerLazySingleton(
       () => GetUpcomingPickupsUsecase(getIt<BookRequestRepository>()));
 
@@ -733,6 +736,7 @@ void _registerBlocs() {
         schedulePickup: getIt<SchedulePickupUsecase>(),
         scheduleDelivery: getIt<ScheduleDeliveryUsecase>(),
         updateRequestStatus: getIt<UpdateRequestStatusUsecase>(),
+        initiateReturn: getIt<InitiateReturnUsecase>(),
       ));
   getIt.registerFactory(() => MyRequestsBloc(
         getMyBookRequests: getIt<GetMyBookRequestsUsecase>(),

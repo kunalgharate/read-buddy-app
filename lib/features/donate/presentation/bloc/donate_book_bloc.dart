@@ -84,6 +84,16 @@ class DonateBookBloc extends Bloc<DonateBookEvent, DonateBookState> {
     try {
       await _createBookDonation(event.request);
       if (kDebugMode) print('✅ [DonateBookBloc] Donation Created Successfully');
+      // Option B: Prime is NOT granted at submit time. The backend auto-grants
+      // Prime only when the donation reaches its RECEIPT milestone
+      // (DROP_OFF -> 'completed'; PICKUP -> 'picked_up'/'delivered'), which is
+      // performed server-side by a librarian/admin — the app does not control
+      // that transition. So we intentionally do NOT refresh the user profile here.
+      //
+      // TODO(prime-refresh): The user's Prime status can change asynchronously
+      // once the librarian confirms receipt. Trigger ProfileBloc.RefreshProfileEvent
+      // when the donation-tracking screen observes the donation entering a
+      // granting status (server-driven), or on the next profile/home load.
       emit(BookDonationCreated());
     } catch (error) {
       if (kDebugMode) print('❌ [DonateBookBloc] Donation Failed: $error');

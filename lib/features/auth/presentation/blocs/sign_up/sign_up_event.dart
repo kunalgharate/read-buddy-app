@@ -18,3 +18,10 @@ class ResendVerificationEmailEvent extends SignUpEvent {
   final String email;
   ResendVerificationEmailEvent(this.email);
 }
+
+/// Resends the registration OTP using only the email address. Used when the
+/// verification screen is reached from login (no full registration payload).
+class ResendRegisterOtpEvent extends SignUpEvent {
+  final String email;
+  ResendRegisterOtpEvent(this.email);
+}

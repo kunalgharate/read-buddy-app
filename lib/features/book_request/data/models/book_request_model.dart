@@ -10,6 +10,10 @@ class BookRequestModel extends BookRequestEntity {
     required super.requestDate,
     super.dueDate,
     super.returnDate,
+    super.returnMethod,
+    super.returnBranchId,
+    super.returnScheduledDate,
+    super.returnScheduledSlot,
     super.returnPaymentStatus,
     super.returnCondition,
     super.bookId,
@@ -72,6 +76,15 @@ class BookRequestModel extends BookRequestEntity {
       requestDate: json['requestDate'] ?? json['createdAt'] ?? '',
       dueDate: json['dueDate'],
       returnDate: json['returnDate'],
+      returnMethod: json['returnMethod'],
+      // returnBranchId may be a plain id String or a populated object
+      returnBranchId: json['returnBranchId'] is Map<String, dynamic>
+          ? (json['returnBranchId'] as Map<String, dynamic>)['_id'] as String?
+          : (json['returnBranchId'] is String
+              ? json['returnBranchId'] as String
+              : null),
+      returnScheduledDate: json['returnScheduledDate'],
+      returnScheduledSlot: json['returnScheduledSlot'],
       returnPaymentStatus: json['returnPaymentStatus'],
       returnCondition: json['returnCondition'],
       // book fields — only populated when bookId is a full object

@@ -221,6 +221,9 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
               pickupTime: timeStr,
             ),
             isReturn: widget.isReturn,
+            returnMethod: widget.isReturn
+                ? (_selectedTab == 1 ? 'DROP_OFF' : 'PICKUP')
+                : null,
           ),
         );
   }

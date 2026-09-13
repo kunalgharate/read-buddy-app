@@ -21,9 +21,12 @@ import 'package:read_buddy_app/core/utils/app_bloc_observer.dart';
 import 'package:read_buddy_app/core/widgets/connectivity_wrapper.dart';
 import 'package:read_buddy_app/core/widgets/session_expired_dialog.dart';
 import 'package:read_buddy_app/core/theme/theme_notifier.dart';
+import 'package:read_buddy_app/core/theme/locale_notifier.dart';
 import 'package:read_buddy_app/core/services/city_notifier.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/routes/app_router.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:read_buddy_app/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +43,7 @@ void main() async {
   await configureDependencies();
   await ConnectivityService.instance.init();
   await ThemeNotifier.instance.init();
+  await LocaleNotifier.instance.init();
   // Initialize city selection (loads from prefs or attempts GPS)
   CityNotifier.instance.init(); // fire-and-forget; UI handles loading state
   Bloc.observer = AppBlocObserver();
@@ -111,11 +115,22 @@ class _MyAppState extends State<MyApp> {
       ],
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: ThemeNotifier.instance,
-        builder: (context, themeMode, _) => MaterialApp(
+        builder: (context, themeMode, _) =>
+            ValueListenableBuilder<Locale>(
+          valueListenable: LocaleNotifier.instance,
+          builder: (context, locale, __) => MaterialApp(
           title: 'Read Buddy',
           debugShowCheckedModeBanner: false,
           navigatorKey: _navigatorKey,
           themeMode: themeMode,
+          locale: locale,
+          supportedLocales: LocaleNotifier.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
               seedColor: AppColors.primary,
@@ -218,6 +233,7 @@ class _MyAppState extends State<MyApp> {
               ),
             );
           },
+          ),
         ),
       ),
     );

@@ -10,9 +10,9 @@ abstract class AuthRemoteDataSource {
       {required String email, required String password});
   Future<String> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
+  Future<void> resendRegisterOtp(String email);
   Future<AppUserModel> signInWithGoogle({required String token});
   Future<void> sendOtp(String email);
-  Future<void> resendRegisterOtp(String email);
   Future<void> verifyResetOtp(String email, String otp);
   Future<void> changePassword(String email, String code, String newPassword);
 }
@@ -252,6 +252,45 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<void> resendRegisterOtp(String email) async {
+    if (kDebugMode) {
+      print('🌐 AuthRemoteDataSource: Resending register OTP to $email');
+    }
+
+    final hasInternet = await NetworkUtils.hasInternetConnection();
+    if (!hasInternet) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ApiConstants.resendRegisterOtp),
+        type: DioExceptionType.connectionError,
+        message: 'No internet connection available',
+      );
+    }
+
+    try {
+      final response = await _dio.post(
+        ApiConstants.resendRegisterOtp,
+        data: {'email': email.trim().toLowerCase()},
+      );
+
+      if (kDebugMode) {
+        print(
+            '🌐 AuthRemoteDataSource: Register OTP resent ${response.statusCode}');
+      }
+
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Failed to resend verification code',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<AppUserModel> signInWithGoogle({required String token}) async {
     if (kDebugMode) {
       print('🌐 AuthRemoteDataSource: Starting Google sign-in API call');
@@ -401,67 +440,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           response: response,
           message: 'Password change failed',
         );
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> resendRegisterOtp(String email) async {
-    if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Resending register OTP to $email');
-    }
-
-    final hasInternet = await NetworkUtils.hasInternetConnection();
-    if (!hasInternet) {
-      throw DioException(
-        requestOptions: RequestOptions(path: ApiConstants.resendRegisterOtp),
-        type: DioExceptionType.connectionError,
-        message: 'No internet connection available',
-      );
-    }
-
-    try {
-      final response = await _dio.post(
-        ApiConstants.resendRegisterOtp,
-        data: {'email': email.trim().toLowerCase()},
-      );
-
-      if (kDebugMode) {
-        print(
-            '🌐 AuthRemoteDataSource: Resend register OTP status: ${response.statusCode}');
-      }
-
-      if (response.statusCode != ApiConstants.success &&
-          response.statusCode != ApiConstants.created) {
-        throw DioException(
-          requestOptions: response.requestOptions,
-          response: response,
-          message: 'Failed to resend verification email',
-        );
-      }
-
-      // Some backends answer 200 with an explicit "already verified and
-      // registered" body instead of an error status. Match the exact
-      // signature so the user is redirected to Sign In rather than left
-      // waiting for an OTP that will never arrive.
-      final responseData = response.data;
-      if (responseData is Map<String, dynamic>) {
-        final message = (responseData['message'] ?? responseData['error'] ?? '')
-            .toString()
-            .toLowerCase();
-        if (message.contains('already verified and registered')) {
-          throw DioException(
-            requestOptions: response.requestOptions,
-            response: Response(
-              requestOptions: response.requestOptions,
-              statusCode: ApiConstants.forbidden,
-              data: responseData,
-            ),
-            message: 'user already registered',
-          );
-        }
       }
     } catch (e) {
       rethrow;

@@ -257,6 +257,14 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               backgroundColor: const Color(0xFF00C853),
             ),
           );
+        } else if (state is RegisterOtpResent) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Verification code re-sent to ${widget.email ?? ''}'),
+              backgroundColor: const Color(0xFF00C853),
+            ),
+          );
         } else if (state is SignUpError) {
           // Errors from the signup form are owned by the SignUpScreen below.
           if (state.source == SignUpErrorSource.register) return;

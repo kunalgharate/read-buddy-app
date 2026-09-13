@@ -136,10 +136,20 @@ class _DeliveredRequestDetailPageState
                 _InfoRow('Pickup Address', widget.request.pickupAddress!),
             ],
 
-            // Delivery details
-            if (widget.request.deliveryAddress != null) ...[
+            // Delivery details — original borrow delivery, hidden once a
+            // return has been initiated (return details shown below instead)
+            if (widget.request.deliveryAddress != null &&
+                widget.request.returnMethod == null) ...[
               const SizedBox(height: 4),
               _InfoRow('Delivery Address', widget.request.deliveryAddress!),
+            ],
+
+            // Return details — driven by returnMethod (mirrors web ShowReturnDetails)
+            if (widget.request.returnMethod != null) ...[
+              const SizedBox(height: 16),
+              const _SectionTitle('Return Details'),
+              const SizedBox(height: 10),
+              ..._buildReturnDetails(widget.request),
             ],
 
             // Shipment tracking — shown for shipping/delivered/returning
@@ -268,8 +278,53 @@ class _DeliveredRequestDetailPageState
     );
   }
 
-  Widget _coverPlaceholder() => Container(
-        width: 100,
+  /// Builds return detail rows based on [returnMethod].
+  /// Mirrors the web ShowReturnDetails: DROP_OFF shows the drop-off branch +
+  /// 'Free' payment; PICKUP shows the pickup address + real payment status.
+  List<Widget> _buildReturnDetails(BookRequestEntity r) {
+    final isDropOff = r.returnMethod == 'DROP_OFF';
+    final rows = <Widget>[
+      _InfoRow('Return Method', isDropOff ? 'Drop Off' : 'Pickup'),
+      _InfoRow('Return Status', _capitalize(r.status)),
+      _InfoRow('Payment Status', _returnPaymentLabel(r.returnPaymentStatus)),
+    ];
+
+    if (r.returnScheduledDate != null) {
+      rows.add(_InfoRow('Scheduled Date', _fmtDate(r.returnScheduledDate)));
+    }
+    if (r.returnScheduledSlot != null && r.returnScheduledSlot!.isNotEmpty) {
+      rows.add(_InfoRow('Time Slot', r.returnScheduledSlot!));
+    }
+
+    if (isDropOff) {
+      // Show the drop-off library branch (not the home delivery address)
+      rows.add(_InfoRow(
+        'Return Branch',
+        (r.returnBranchId != null && r.returnBranchId!.isNotEmpty)
+            ? 'Library branch'
+            : 'Return library branch details unavailable',
+      ));
+    } else {
+      // Home pickup — show pickup address
+      if (r.pickupAddress != null && r.pickupAddress!.isNotEmpty) {
+        rows.add(_InfoRow('Pickup Address', r.pickupAddress!));
+      }
+    }
+    return rows;
+  }
+
+  String _returnPaymentLabel(String? status) {
+    switch (status) {
+      case 'PAID':
+        return 'Paid';
+      case 'FREE':
+        return 'Free';
+      default:
+        return 'Pending';
+    }
+  }
+
+  Widget _coverPlaceholder() => Container(        width: 100,
         height: 140,
         decoration: BoxDecoration(
           color: const Color(0xFFF0F0F0),

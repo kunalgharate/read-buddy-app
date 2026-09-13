@@ -44,19 +44,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> sendOtp(String email) async {
-    if (kDebugMode) print('📦 AuthRepository: Sending OTP to $email');
+  Future<void> resendRegisterOtp(String email) async {
+    if (kDebugMode) {
+      print('📦 AuthRepository: Resending register OTP to $email');
+    }
     try {
-      await remoteDataSource.sendOtp(email);
+      await remoteDataSource.resendRegisterOtp(email);
     } catch (e) {
       rethrow;
     }
   }
+
   @override
-  Future<void> resendRegisterOtp(String email) async {
-    if (kDebugMode) print('📦 AuthRepository: Resending register OTP to $email');
+  Future<void> sendOtp(String email) async {
+    if (kDebugMode) print('📦 AuthRepository: Sending OTP to $email');
     try {
-      await remoteDataSource.resendRegisterOtp(email);
+      await remoteDataSource.sendOtp(email);
     } catch (e) {
       rethrow;
     }

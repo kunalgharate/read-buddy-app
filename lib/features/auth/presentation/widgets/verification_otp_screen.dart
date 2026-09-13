@@ -93,6 +93,13 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
   @override
   Widget build(BuildContext context) {
     return BlocListener<SignInBloc, SignInState>(
+      // Only react to states produced while this screen is active — prevents a
+      // stale SignInFailure from a prior action (login, etc.) on the shared
+      // global SignInBloc from flashing a red error the moment we mount.
+      listenWhen: (previous, current) =>
+          current is OtpVerifiedSuccess ||
+          current is OtpSentSuccess ||
+          (current is SignInFailure && previous is SignInLoading),
       listener: (context, state) async {
         if (state is OtpVerifiedSuccess) {
           await getIt<SecureStorageUtil>().saveForgotPasswordSession(
@@ -203,9 +210,22 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: () => context
-                        .read<SignInBloc>()
-                        .add(SendOtpRequested(widget.email)),
+                    onTap: () {
+                      if (widget.email.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Missing email. Please restart the password reset from the Forgot Password screen.',
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                      context
+                          .read<SignInBloc>()
+                          .add(SendOtpRequested(widget.email));
+                    },
                     child: const Text(
                       'Resend code',
                       style: TextStyle(

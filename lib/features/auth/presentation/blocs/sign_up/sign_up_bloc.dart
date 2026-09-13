@@ -24,6 +24,7 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     on<RegisterUserEvent>(_onRegisterUser);
     on<VerifyEmailEvent>(_onVerifyEmail);
     on<ResendVerificationEmailEvent>(_onResendVerificationEmail);
+    on<ResendRegisterOtpEvent>(_onResendRegisterOtp);
   }
 
   Future<void> _onRegisterUser(
@@ -84,6 +85,20 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
         isUserAlreadyExists: isUserExists,
         source: SignUpErrorSource.resend,
       ));
+    }
+  }
+
+  Future<void> _onResendRegisterOtp(
+    ResendRegisterOtpEvent event,
+    Emitter<SignUpState> emit,
+  ) async {
+    // Don't emit loading — keep the OTP screen visible during resend.
+    try {
+      await _resendRegisterOtpUseCase(event.email);
+      emit(RegisterOtpResent(event.email));
+    } catch (error) {
+      final errorMessage = ErrorHandler.getErrorMessage(error);
+      emit(SignUpError(message: errorMessage));
     }
   }
 }
