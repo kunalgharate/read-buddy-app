@@ -3,10 +3,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
-import '../../domain/usecases/update_request_status.dart';
+import '../../domain/entities/request_payment_intent.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
@@ -55,19 +56,92 @@ class _BookOrderViewState extends State<_BookOrderView> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
+  late final Razorpay _razorpay;
+  RequestPaymentIntent? _paymentIntent;
+
+  /// True when the delivery fee was already paid (backend `paymentStatus`).
+  /// In that case the delivery step goes straight to place-order without
+  /// re-opening the checkout (the backend rejects duplicate payments).
+  bool get _alreadyPaid =>
+      widget.request.paymentStatus.toUpperCase() == 'PAID';
+
+  String get _deliveryFeeLabel {
+  if (_paymentIntent != null) {
+    return 'Pay ₹${_paymentIntent!.amount ~/ 100}';
+  }
+  return _alreadyPaid ? 'Place Order' : 'Proceed to Pay';
+}
+
   @override
   void initState() {
     super.initState();
     _currentTab = widget.initialTab;
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onPaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onPaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _onExternalWallet);
   }
 
   @override
   void dispose() {
+    _razorpay.clear();
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
     _pincodeController.dispose();
     super.dispose();
+  }
+
+  void _openCheckout(RequestPaymentIntent intent) {
+    final options = {
+      'key': intent.razorpayKey,
+      'amount': intent.amount.toString(),
+      'currency': intent.currency,
+      'order_id': intent.orderId,
+      'name': 'ReadBuddy',
+      'description': 'Delivery Fee — Book Delivery',
+      'prefill': {
+        'contact': _phoneController.text.trim(),
+        'name': _nameController.text.trim(),
+      },
+      'theme': {'color': '#2CE07F'},
+    };
+    _razorpay.open(options);
+  }
+
+  Future<void> _onPaymentSuccess(PaymentSuccessResponse response) async {
+    context.read<BookRequestBloc>().add(
+          CompleteDeliveryPayment(
+            requestId: widget.request.id,
+            name: _nameController.text.trim(),
+            phone: _phoneController.text.trim(),
+            address: _addressController.text.trim(),
+            pincode: _pincodeController.text.trim(),
+            preferredDate: _formatDate(_selectedDate!),
+            preferredTime: _formatTime(_selectedTime!),
+            paymentId: response.paymentId ?? '',
+            orderId: response.orderId ?? _paymentIntent?.orderId ?? '',
+            signature: response.signature ?? '',
+          ),
+        );
+  }
+
+  void _onPaymentError(PaymentFailureResponse response) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Payment failed: ${response.message ?? 'Please try again'}',
+        ),
+      ),
+    );
+  }
+
+  void _onExternalWallet(ExternalWalletResponse response) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('External wallet: ${response.walletName}')),
+    );
   }
 
   String get _appBarTitle =>
@@ -117,6 +191,10 @@ class _BookOrderViewState extends State<_BookOrderView> {
           }
           if (state is DeliveryScheduled) {
             setState(() => _currentTab = 1);
+          }
+          if (state is PaymentIntentReady) {
+            setState(() => _paymentIntent = state.intent);
+            _openCheckout(state.intent);
           }
           if (state is DeliveryPaymentDone) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -264,19 +342,29 @@ class _BookOrderViewState extends State<_BookOrderView> {
                                     ),
                                   );
                             } else {
-                              context.read<BookRequestBloc>().add(
-                                    ConfirmDeliveryPayment(
-                                      requestId: widget.request.id,
-                                      name: _nameController.text.trim(),
-                                      phone: _phoneController.text.trim(),
-                                      address: _addressController.text.trim(),
-                                      pincode: _pincodeController.text.trim(),
-                                      preferredDate:
-                                          _formatDate(_selectedDate!),
-                                      preferredTime:
-                                          _formatTime(_selectedTime!),
-                                    ),
-                                  );
+                              // Tab 2: pay the delivery fee, or place the
+                              // order directly when it was already paid.
+                              if (_alreadyPaid) {
+                                context.read<BookRequestBloc>().add(
+                                      ConfirmDeliveryPayment(
+                                        requestId: widget.request.id,
+                                        name: _nameController.text.trim(),
+                                        phone: _phoneController.text.trim(),
+                                        address: _addressController.text.trim(),
+                                        pincode: _pincodeController.text.trim(),
+                                        preferredDate:
+                                            _formatDate(_selectedDate!),
+                                        preferredTime:
+                                            _formatTime(_selectedTime!),
+                                      ),
+                                    );
+                              } else {
+                                context
+                                    .read<BookRequestBloc>()
+                                    .add(CreateDeliveryPayment(
+                                      widget.request.id,
+                                    ));
+                              }
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -298,7 +386,9 @@ class _BookOrderViewState extends State<_BookOrderView> {
                             ),
                           )
                         : Text(
-                            _currentTab == 0 ? 'Proceed' : 'Proceed to Pay',
+                            _currentTab == 0
+                                ? 'Proceed'
+                                : _deliveryFeeLabel,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -309,55 +399,6 @@ class _BookOrderViewState extends State<_BookOrderView> {
                 },
               ),
             ),
-            if (_currentTab == 1) ...[
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton(
-                  onPressed: () async {
-                    try {
-                      await getIt<UpdateRequestStatusUsecase>()(
-                        widget.request.id,
-                        'shipping',
-                      );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Order placed! Your book is on its way 🚚'),
-                            backgroundColor: Color(0xFF2CE07F),
-                          ),
-                        );
-                        Navigator.of(context)
-                            .popUntil((route) => route.isFirst);
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Test Pay failed: $e')),
-                        );
-                      }
-                    }
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF052E44),
-                    side:
-                        const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    'Test Pay',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),

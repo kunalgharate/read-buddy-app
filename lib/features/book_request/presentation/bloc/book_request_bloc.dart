@@ -7,6 +7,8 @@ import '../../domain/usecases/schedule_pickup.dart';
 import '../../domain/usecases/schedule_delivery.dart';
 import '../../domain/usecases/update_request_status.dart';
 import '../../domain/usecases/initiate_return.dart';
+import '../../domain/usecases/create_book_request_payment.dart';
+import '../../domain/usecases/verify_book_request_payment.dart';
 import 'book_request_event.dart';
 import 'book_request_state.dart';
 
@@ -18,6 +20,8 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   final ScheduleDeliveryUsecase scheduleDelivery;
   final UpdateRequestStatusUsecase updateRequestStatus;
   final InitiateReturnUsecase initiateReturn;
+  final CreateBookRequestPaymentUsecase createBookRequestPayment;
+  final VerifyBookRequestPaymentUsecase verifyBookRequestPayment;
 
   BookRequestBloc({
     required this.getBookDetail,
@@ -27,6 +31,8 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
     required this.scheduleDelivery,
     required this.updateRequestStatus,
     required this.initiateReturn,
+    required this.createBookRequestPayment,
+    required this.verifyBookRequestPayment,
   }) : super(BookRequestInitial()) {
     on<LoadBookDetail>(_onLoadBookDetail);
     on<CreateBookRequest>(_onCreateBookRequest);
@@ -34,6 +40,8 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
     on<SchedulePickup>(_onSchedulePickup);
     on<ScheduleDelivery>(_onScheduleDelivery);
     on<ConfirmDeliveryPayment>(_onConfirmDeliveryPayment);
+    on<CreateDeliveryPayment>(_onCreateDeliveryPayment);
+    on<CompleteDeliveryPayment>(_onCompleteDeliveryPayment);
   }
 
   Future<void> _onLoadBookDetail(
@@ -140,6 +148,52 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   ) async {
     emit(DeliveryPaymentLoading());
     try {
+      await scheduleDelivery(
+        requestId: event.requestId,
+        name: event.name,
+        phone: event.phone,
+        address: event.address,
+        pincode: event.pincode,
+        preferredDate: event.preferredDate,
+        preferredTime: event.preferredTime,
+      );
+      emit(DeliveryPaymentDone());
+    } catch (e) {
+      emit(DeliveryError(e.toString().replaceFirst('Exception: ', '')));
+    }
+  }
+
+  // Create the Razorpay order for the ₹25 delivery fee. The resulting
+  // PaymentIntentReady state carries the key/order details the checkout UI
+  // needs. Amounts come from the server response — never hardcoded here.
+  Future<void> _onCreateDeliveryPayment(
+    CreateDeliveryPayment event,
+    Emitter<BookRequestState> emit,
+  ) async {
+    emit(DeliveryPaymentLoading());
+    try {
+      final intent = await createBookRequestPayment(event.requestId);
+      emit(PaymentIntentReady(intent));
+    } catch (e) {
+      emit(DeliveryError(e.toString().replaceFirst('Exception: ', '')));
+    }
+  }
+
+  // Razorpay returned a successful payment: verify it server-side, then move
+  // the request to shipping via deliver-to-me. Order matters — the backend
+  // checks paymentStatus before accepting the delivery details.
+  Future<void> _onCompleteDeliveryPayment(
+    CompleteDeliveryPayment event,
+    Emitter<BookRequestState> emit,
+  ) async {
+    emit(DeliveryPaymentLoading());
+    try {
+      await verifyBookRequestPayment(
+        event.requestId,
+        paymentId: event.paymentId,
+        orderId: event.orderId,
+        signature: event.signature,
+      );
       await scheduleDelivery(
         requestId: event.requestId,
         name: event.name,

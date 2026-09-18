@@ -78,3 +78,33 @@ class ConfirmDeliveryPayment extends BookRequestEvent {
     this.amount = 8000,
   });
 }
+
+class CreateDeliveryPayment extends BookRequestEvent {
+  final String requestId;
+  CreateDeliveryPayment(this.requestId);
+}
+
+class CompleteDeliveryPayment extends BookRequestEvent {
+  final String requestId;
+  final String name;
+  final String phone;
+  final String address;
+  final String pincode;
+  final String preferredDate;
+  final String preferredTime;
+  final String paymentId;
+  final String orderId;
+  final String signature;
+  CompleteDeliveryPayment({
+    required this.requestId,
+    required this.name,
+    required this.phone,
+    required this.address,
+    required this.pincode,
+    required this.preferredDate,
+    required this.preferredTime,
+    required this.paymentId,
+    required this.orderId,
+    required this.signature,
+  });
+}

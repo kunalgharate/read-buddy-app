@@ -2,6 +2,7 @@ import '../../domain/entities/book_detail_entity.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
 import '../../domain/entities/pickup_details_entity.dart';
+import '../../domain/entities/request_payment_intent.dart';
 import '../../domain/repositories/book_request_repository.dart';
 import '../datasources/book_request_remote_datasource.dart';
 
@@ -105,5 +106,19 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
       {String? returnBranchId}) async {
     return await remoteDataSource.initiateReturn(id, returnMethod,
         returnBranchId: returnBranchId);
+  }
+
+  @override
+  Future<RequestPaymentIntent> createBookRequestPayment(String id) async {
+    return await remoteDataSource.createBookRequestPayment(id);
+  }
+
+  @override
+  Future<void> verifyBookRequestPayment(String id,
+      {required String paymentId,
+      required String orderId,
+      required String signature}) async {
+    return await remoteDataSource.verifyBookRequestPayment(id,
+        paymentId: paymentId, orderId: orderId, signature: signature);
   }
 }
