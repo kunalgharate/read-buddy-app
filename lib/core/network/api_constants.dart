@@ -67,6 +67,10 @@ class ApiConstants {
   static String get v1BookRequests => '$baseUrl/v1/book-requests';
   static String get getAllBookRequests => '$baseUrl/bookrequests';
   static String get bookRequests => '$baseUrl/bookrequests';
+  static String bookRequestPayment(String id) =>
+      '$v1BookRequests/$id/payment';
+  static String bookRequestPaymentVerify(String id) =>
+      '$v1BookRequests/$id/payment/verify';
 
   // Library endpoints
   static String get libraryDetails => '$baseUrl/v1/libraries/details';

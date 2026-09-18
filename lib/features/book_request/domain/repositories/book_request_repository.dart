@@ -2,6 +2,7 @@ import '../entities/book_detail_entity.dart';
 import '../entities/book_request_entity.dart';
 import '../entities/library_entity.dart';
 import '../entities/pickup_details_entity.dart';
+import '../entities/request_payment_intent.dart';
 
 abstract class BookRequestRepository {
   Future<BookDetailEntity> getBookById(String id);
@@ -34,4 +35,9 @@ abstract class BookRequestRepository {
       String preferredTime);
   Future<void> initiateReturn(String id, String returnMethod,
       {String? returnBranchId});
+  Future<RequestPaymentIntent> createBookRequestPayment(String id);
+  Future<void> verifyBookRequestPayment(String id,
+      {required String paymentId,
+      required String orderId,
+      required String signature});
 }

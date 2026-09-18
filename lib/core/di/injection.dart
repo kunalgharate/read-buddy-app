@@ -172,6 +172,8 @@ import '../../features/book_request/domain/usecases/update_request_status.dart';
 import '../../features/book_request/domain/usecases/initiate_return.dart';
 import '../../features/book_request/domain/usecases/get_upcoming_pickups.dart';
 import '../../features/book_request/domain/usecases/cancel_book_request.dart';
+import '../../features/book_request/domain/usecases/create_book_request_payment.dart';
+import '../../features/book_request/domain/usecases/verify_book_request_payment.dart';
 import '../../features/book_request/presentation/bloc/book_request_bloc.dart';
 import '../../features/book_request/presentation/bloc/my_requests_bloc.dart';
 import '../../features/book_request/presentation/bloc/admin_requests_bloc.dart';
@@ -607,6 +609,10 @@ void _registerUseCases() {
       () => InitiateReturnUsecase(getIt<BookRequestRepository>()));
   getIt.registerLazySingleton(
       () => GetUpcomingPickupsUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => CreateBookRequestPaymentUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => VerifyBookRequestPaymentUsecase(getIt<BookRequestRepository>()));
 
   // Question CRUD (Admin)
   getIt.registerLazySingleton(() => question_crud_use_cases.GetQuestions(
@@ -737,6 +743,8 @@ void _registerBlocs() {
         scheduleDelivery: getIt<ScheduleDeliveryUsecase>(),
         updateRequestStatus: getIt<UpdateRequestStatusUsecase>(),
         initiateReturn: getIt<InitiateReturnUsecase>(),
+        createBookRequestPayment: getIt<CreateBookRequestPaymentUsecase>(),
+        verifyBookRequestPayment: getIt<VerifyBookRequestPaymentUsecase>(),
       ));
   getIt.registerFactory(() => MyRequestsBloc(
         getMyBookRequests: getIt<GetMyBookRequestsUsecase>(),
