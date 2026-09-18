@@ -40,9 +40,9 @@ class AddressModel extends AddressEntity {
       city: city,
       state: state,
       pincode: pincode,
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
-      isDefault: json['isDefault'] as bool? ?? false,
+      latitude: _asDouble(json['latitude']),
+      longitude: _asDouble(json['longitude']),
+      isDefault: _asBool(json['isDefault']),
     );
   }
 
@@ -59,4 +59,15 @@ class AddressModel extends AddressEntity {
         'longitude': longitude,
         'isDefault': isDefault,
       };
+}
+
+double _asDouble(dynamic value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+bool _asBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  return value?.toString().toLowerCase() == 'true';
 }

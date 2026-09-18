@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
@@ -210,6 +211,45 @@ class _AddressForm extends StatefulWidget {
 }
 
 class _AddressFormState extends State<_AddressForm> {
+  static const List<String> _indiaStates = [
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
+    'Andaman and Nicobar Islands',
+    'Chandigarh',
+    'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi',
+    'Jammu and Kashmir',
+    'Ladakh',
+    'Lakshadweep',
+    'Puducherry',
+  ];
+
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameCtrl;
   late final TextEditingController _phoneCtrl;
@@ -223,6 +263,21 @@ class _AddressFormState extends State<_AddressForm> {
   double _lat = 0;
   double _lng = 0;
   bool _fetchingLocation = false;
+  bool _showStateList = false;
+
+  List<String> get _filteredStates {
+    final query = _stateCtrl.text.trim().toLowerCase();
+    if (query.isEmpty) return _indiaStates;
+    return _indiaStates.where((s) => s.toLowerCase().contains(query)).toList();
+  }
+
+  void _selectState(String state) {
+    setState(() {
+      _stateCtrl.text = state;
+      _showStateList = false;
+    });
+    FocusScope.of(context).unfocus();
+  }
 
   @override
   void initState() {
@@ -352,27 +407,32 @@ class _AddressFormState extends State<_AddressForm> {
               const SizedBox(height: 12),
               _field(_nameCtrl, 'Recipient Name *', validator: _required),
               const SizedBox(height: 10),
-              _field(_phoneCtrl, 'Phone *',
-                  keyboard: TextInputType.phone, validator: _required),
+              _field(
+                _phoneCtrl,
+                'Phone *',
+                keyboard: TextInputType.phone,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                maxLength: 10,
+                validator: _phone,
+              ),
               const SizedBox(height: 10),
               _field(_line1Ctrl, 'Flat / House / Building *',
                   validator: _required),
               const SizedBox(height: 10),
               _field(_line2Ctrl, 'Street / Area'),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                      child: _field(_cityCtrl, 'City *', validator: _required)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                      child:
-                          _field(_stateCtrl, 'State *', validator: _required)),
-                ],
-              ),
+              _field(_cityCtrl, 'City *', validator: _required),
               const SizedBox(height: 10),
-              _field(_pincodeCtrl, 'Pincode *',
-                  keyboard: TextInputType.number, validator: _required),
+              _stateField(),
+              const SizedBox(height: 10),
+              _field(
+                _pincodeCtrl,
+                'Pincode *',
+                keyboard: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                maxLength: 6,
+                validator: _pincode,
+              ),
               const SizedBox(height: 10),
               // Location
               TextButton.icon(
@@ -422,13 +482,18 @@ class _AddressFormState extends State<_AddressForm> {
     String label, {
     TextInputType? keyboard,
     String? Function(String?)? validator,
+    List<TextInputFormatter>? inputFormatters,
+    int? maxLength,
   }) {
     return TextFormField(
       controller: ctrl,
       keyboardType: keyboard,
       validator: validator,
+      inputFormatters: inputFormatters,
+      maxLength: maxLength,
       decoration: InputDecoration(
         labelText: label,
+        counterText: '',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -436,6 +501,84 @@ class _AddressFormState extends State<_AddressForm> {
     );
   }
 
+  Widget _stateField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextFormField(
+          controller: _stateCtrl,
+          validator: _state,
+          onTap: () {
+            if (!_showStateList) {
+              setState(() => _showStateList = true);
+            }
+          },
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: 'State *',
+            counterText: '',
+            suffixIcon: Icon(
+              _showStateList ? Icons.expand_less : Icons.expand_more,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
+        ),
+        if (_showStateList)
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            margin: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _filteredStates.length,
+              itemBuilder: (context, i) => ListTile(
+                dense: true,
+                title: Text(_filteredStates[i],
+                    style: const TextStyle(fontSize: 14)),
+                selected: _filteredStates[i] == _stateCtrl.text,
+                selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
+                onTap: () => _selectState(_filteredStates[i]),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  String? _phone(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Phone number is required';
+    if (!RegExp(r'^[0-9]{10}$').hasMatch(v.trim())) {
+      return 'Phone number must have 10 digits only';
+    }
+    return null;
+  }
+
+  String? _pincode(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Pincode is required';
+    if (!RegExp(r'^[0-9]{6}$').hasMatch(v.trim())) {
+      return 'Pincode must have 6 digits only';
+    }
+    return null;
+  }
+
   String? _required(String? v) =>
       v == null || v.trim().isEmpty ? 'Required' : null;
+
+  String? _state(String? v) {
+    if (v == null || v.trim().isEmpty) return 'State is required';
+    final t = v.trim();
+    final lower = t.toLowerCase();
+    final isCanonical = _indiaStates.any((s) => s.toLowerCase() == lower);
+    final isAbbreviation = RegExp(r'^[a-z]{2,3}$').hasMatch(lower);
+    final isLegacy = widget.existing?.state.trim().toLowerCase() == lower;
+    if (isCanonical || isAbbreviation || isLegacy) return null;
+    return 'Please select a state from the list';
+  }
 }
