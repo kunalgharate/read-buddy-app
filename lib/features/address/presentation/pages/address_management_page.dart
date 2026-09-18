@@ -268,9 +268,7 @@ class _AddressFormState extends State<_AddressForm> {
   List<String> get _filteredStates {
     final query = _stateCtrl.text.trim().toLowerCase();
     if (query.isEmpty) return _indiaStates;
-    return _indiaStates
-        .where((s) => s.toLowerCase().contains(query))
-        .toList();
+    return _indiaStates.where((s) => s.toLowerCase().contains(query)).toList();
   }
 
   void _selectState(String state) {
@@ -509,17 +507,13 @@ class _AddressFormState extends State<_AddressForm> {
       children: [
         TextFormField(
           controller: _stateCtrl,
-          validator: _required,
+          validator: _state,
           onTap: () {
             if (!_showStateList) {
               setState(() => _showStateList = true);
             }
           },
-          onChanged: (_) {
-            if (!_showStateList) {
-              setState(() => _showStateList = true);
-            }
-          },
+          onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
             labelText: 'State *',
             counterText: '',
@@ -546,7 +540,8 @@ class _AddressFormState extends State<_AddressForm> {
               itemCount: _filteredStates.length,
               itemBuilder: (context, i) => ListTile(
                 dense: true,
-                title: Text(_filteredStates[i], style: const TextStyle(fontSize: 14)),
+                title: Text(_filteredStates[i],
+                    style: const TextStyle(fontSize: 14)),
                 selected: _filteredStates[i] == _stateCtrl.text,
                 selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
                 onTap: () => _selectState(_filteredStates[i]),
@@ -575,4 +570,15 @@ class _AddressFormState extends State<_AddressForm> {
 
   String? _required(String? v) =>
       v == null || v.trim().isEmpty ? 'Required' : null;
+
+  String? _state(String? v) {
+    if (v == null || v.trim().isEmpty) return 'State is required';
+    final t = v.trim();
+    final lower = t.toLowerCase();
+    final isCanonical = _indiaStates.any((s) => s.toLowerCase() == lower);
+    final isAbbreviation = RegExp(r'^[a-z]{2,3}$').hasMatch(lower);
+    final isLegacy = widget.existing?.state.trim().toLowerCase() == lower;
+    if (isCanonical || isAbbreviation || isLegacy) return null;
+    return 'Please select a state from the list';
+  }
 }

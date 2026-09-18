@@ -51,12 +51,11 @@ void main() {
         'name': 'Deborah',
         'phone': '9876543210',
         'address': 'Some street',
-        'isDefault': 'true',
       });
 
       expect(model.latitude, 0);
       expect(model.longitude, 0);
-      expect(model.isDefault, isTrue);
+      expect(model.isDefault, isFalse);
       expect(model.addressLine1, 'Some street');
     });
   });

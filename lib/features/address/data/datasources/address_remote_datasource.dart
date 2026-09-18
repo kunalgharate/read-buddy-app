@@ -38,7 +38,7 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
   @override
   Future<AddressModel> createAddress(Map<String, dynamic> data) async {
     final response = await _dio.post(ApiConstants.addresses, data: data);
-    return _buildModel(response.data, data);
+    return buildAddressModel(response.data, data);
   }
 
   @override
@@ -52,28 +52,37 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
     );
     final fallback = Map<String, dynamic>.from(data)
       ..putIfAbsent('_id', () => id);
-    return _buildModel(response.data, fallback);
-  }
-
-  /// Extracts an address map from any server response shape. Falls back to
-  /// [fallback] when the response only carries a message or is not a map, so a
-  /// successful save never fails on parsing.
-  AddressModel _buildModel(dynamic responseData, Map<String, dynamic> fallback) {
-    if (responseData is Map) {
-      final nested =
-          responseData['address'] ?? responseData['data'] ?? responseData;
-      if (nested is Map &&
-          (nested.containsKey('_id') ||
-              nested.containsKey('addressLine1') ||
-              nested.containsKey('label'))) {
-        return AddressModel.fromJson(Map<String, dynamic>.from(nested));
-      }
-    }
-    return AddressModel.fromJson(fallback);
+    return buildAddressModel(response.data, fallback);
   }
 
   @override
   Future<void> deleteAddress(String id) async {
     await _dio.delete('${ApiConstants.addresses}/$id');
   }
+}
+
+/// Extracts an address map from any server response shape and falls back to
+/// [fallback] when the response only carries a message or is not a map, so a
+/// successful save never fails on parsing.
+AddressModel buildAddressModel(
+    dynamic responseData, Map<String, dynamic> fallback) {
+  return AddressModel.fromJson(_asAddressMap(responseData) ?? fallback);
+}
+
+/// Returns the address document map from a response body, or `null` when the
+/// body is not an address payload (e.g. a plain message).
+Map<String, dynamic>? _asAddressMap(dynamic responseData) {
+  if (responseData is! Map) return null;
+  final address = responseData['address'];
+  final data = responseData['data'];
+  if (address is Map) return Map<String, dynamic>.from(address);
+  if (data is Map) return Map<String, dynamic>.from(data);
+  if (responseData.containsKey('_id') ||
+      responseData.containsKey('addressLine1') ||
+      responseData.containsKey('addressLine2') ||
+      responseData.containsKey('label') ||
+      responseData.containsKey('city')) {
+    return Map<String, dynamic>.from(responseData);
+  }
+  return null;
 }
