@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:read_buddy_app/core/theme/theme_notifier.dart';
 import 'package:read_buddy_app/core/theme/locale_notifier.dart';
+import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -100,16 +102,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
-          _SectionHeader(title: l10n.membership),
-          ListTile(
-            leading:
-                const Icon(Icons.workspace_premium, color: Color(0xFF2CE07F)),
-            title: Text(l10n.readBuddyPrime),
-            subtitle: Text(l10n.readBuddyPrimeSubtitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.pushNamed(context, '/subscription'),
+          BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, profileState) {
+              final isKnownNonPrime =
+                  profileState is ProfileLoaded && !profileState.user.isPrime;
+              if (!isKnownNonPrime) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionHeader(title: l10n.membership),
+                  ListTile(
+                    leading: const Icon(Icons.workspace_premium,
+                        color: Color(0xFF2CE07F)),
+                    title: Text(l10n.readBuddyPrime),
+                    subtitle: Text(l10n.readBuddyPrimeSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.pushNamed(context, '/subscription'),
+                  ),
+                  const Divider(),
+                ],
+              );
+            },
           ),
-          const Divider(),
           _SectionHeader(title: l10n.appearance),
           ValueListenableBuilder<ThemeMode>(
             valueListenable: ThemeNotifier.instance,
