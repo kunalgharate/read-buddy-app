@@ -10,6 +10,7 @@ void main() {
     environment: Environment.prod,
     baseUrl: ProdConfig.baseUrl,
     appName: ProdConfig.appName,
+    googleServerClientId: ProdConfig.googleServerClientId,
   );
   app.main();
 }

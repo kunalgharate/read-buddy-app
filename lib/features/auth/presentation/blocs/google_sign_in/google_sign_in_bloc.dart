@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../../core/config/app_config.dart';
 import '../../../../../core/utils/error_handler.dart';
 import '../../../domain/entities/app_user.dart';
 import '../../../domain/usecases/sign_in_with_google.dart';
@@ -41,9 +42,7 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
     emit(GoogleSignInLoading());
 
     try {
-      final googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
+      final googleSignIn = _buildGoogleSignIn();
 
       // Sign out first to force account picker
       await googleSignIn.signOut();
@@ -84,9 +83,7 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
     emit(GoogleSignInLoading());
 
     try {
-      final googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
+      final googleSignIn = _buildGoogleSignIn();
 
       // Sign out first to force the account picker.
       await googleSignIn.signOut();
@@ -128,6 +125,22 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
     } catch (e) {
       emit(GoogleSignInFailure(ErrorHandler.getErrorMessage(e)));
     }
+  }
+
+  /// Builds a GoogleSignIn configured with the backend Web client ID as
+  /// `serverClientId`, so the plugin returns an idToken with the audience the
+  /// backend verifies (backend GOOGLE_CLIENT_ID). Falls back to no
+  /// serverClientId if not configured (id token won't be backend-verifiable).
+  GoogleSignIn _buildGoogleSignIn() {
+    final serverClientId = AppConfig.isInitialized
+        ? AppConfig.instance.googleServerClientId
+        : '';
+    final valid = serverClientId.isNotEmpty &&
+        !serverClientId.startsWith('PASTE_');
+    return GoogleSignIn(
+      scopes: const ['email', 'profile'],
+      serverClientId: valid ? serverClientId : null,
+    );
   }
 
   String _mapPlatformError(PlatformException e) {

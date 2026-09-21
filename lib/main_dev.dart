@@ -9,6 +9,7 @@ void main() {
     environment: Environment.dev,
     baseUrl: DevConfig.baseUrl,
     appName: DevConfig.appName,
+    googleServerClientId: DevConfig.googleServerClientId,
   );
   app.main();
 }

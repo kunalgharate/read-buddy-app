@@ -8,11 +8,13 @@ class AppConfig {
   final Environment environment;
   final String baseUrl;
   final String appName;
+  final String googleServerClientId;
 
   AppConfig._({
     required this.environment,
     required this.baseUrl,
     required this.appName,
+    required this.googleServerClientId,
   });
 
   static bool get isInitialized => _instance != null;
@@ -29,11 +31,13 @@ class AppConfig {
     required Environment environment,
     required String baseUrl,
     required String appName,
+    String googleServerClientId = '',
   }) {
     _instance = AppConfig._(
       environment: environment,
       baseUrl: baseUrl,
       appName: appName,
+      googleServerClientId: googleServerClientId,
     );
   }
 
