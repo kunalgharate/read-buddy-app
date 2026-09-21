@@ -12,66 +12,18 @@ import '../../../domain/usecases/sign_in_with_google.dart';
 part 'google_sign_in_event.dart';
 part 'google_sign_in_state.dart';
 
-/// This BLoC handles two distinct Google flows:
-///
-///  1. [GoogleLoginRequested] (LOGIN screen) — performs REAL authentication:
-///     it obtains the Google ID token and exchanges it with the backend via
-///     the [SignInWithGoogle] use case, which auto-registers or logs the user
-///     in and returns session tokens. On success it emits
-///     [GoogleSignInAuthenticated] carrying the authenticated [AppUser] so the
-///     caller can persist tokens and navigate like a normal login.
-///
-///  2. [GoogleSignInRequested] (SIGN-UP screen) — fetches only the account's
-///     name/email so the sign-up form can be pre-filled; the user still sets a
-///     password to finish. This emits [GoogleSignUpDataFetched] and is kept for
-///     backward compatibility with the sign-up page.
+/// Handles Google **sign-in** (real authentication):
+/// [GoogleLoginRequested] obtains the Google ID token and exchanges it with
+/// the backend via the [SignInWithGoogle] use case, which auto-registers or
+/// logs the user in and returns session tokens. On success it emits
+/// [GoogleSignInAuthenticated] carrying the authenticated [AppUser] so the
+/// caller can persist tokens and navigate like a normal login.
 @injectable
 class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
   final SignInWithGoogle _signInWithGoogle;
 
   GoogleSignInBloc(this._signInWithGoogle) : super(GoogleSignInInitial()) {
-    on<GoogleSignInRequested>(_onGoogleSignInRequested);
     on<GoogleLoginRequested>(_onGoogleLoginRequested);
-  }
-
-  /// SIGN-UP pre-fill path — fetches name/email only (no authentication).
-  Future<void> _onGoogleSignInRequested(
-    GoogleSignInRequested event,
-    Emitter<GoogleSignInState> emit,
-  ) async {
-    emit(GoogleSignInLoading());
-
-    try {
-      final googleSignIn = _buildGoogleSignIn();
-
-      // Sign out first to force account picker
-      await googleSignIn.signOut();
-
-      final account = await googleSignIn.signIn();
-      if (account == null) {
-        emit(const GoogleSignInFailure("Sign-up cancelled"));
-        return;
-      }
-
-      // Extract profile data from Google account
-      final name = account.displayName ?? '';
-      final email = account.email;
-
-      // Emit success first — disconnect is best-effort cleanup
-      emit(GoogleSignUpDataFetched(name: name, email: email));
-
-      // Best-effort disconnect — don't let failures override the success state
-      try {
-        await googleSignIn.disconnect();
-      } catch (_) {
-        // Ignore disconnect errors; the data is already fetched
-      }
-    } on PlatformException catch (e) {
-      emit(GoogleSignInFailure(_mapPlatformError(e)));
-    } catch (e) {
-      emit(const GoogleSignInFailure(
-          "Could not access Google account. Please try again."));
-    }
   }
 
   /// LOGIN path — real authentication against the backend using the Google
