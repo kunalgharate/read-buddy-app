@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:read_buddy_app/core/config/app_config.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/donate/data/datasources/donate_remote_datasource.dart';
@@ -95,45 +96,7 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         debugPrint('💳 [Razorpay] VERIFY SUCCESS | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId}');
       }
 
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Row(
-              children: [
-                Icon(Icons.star, color: Colors.amber, size: 28),
-                SizedBox(width: 8),
-                Expanded(child: Text('Welcome to Prime! 🎉')),
-              ],
-            ),
-            content: const Text(
-              'Your Prime Membership is now active for 1 year.\n\n'
-              'You now have full access to:\n'
-              '• Borrow physical books\n'
-              '• Read eBooks\n'
-              '• Listen to Audiobooks\n'
-              '• Watch Videobooks\n\n'
-              'Thank you for supporting ReadBuddy!',
-            ),
-            actions: [
-              FilledButton(
-                onPressed: () {
-                  // Refresh profile so home screen knows user is now Prime
-                  context.read<ProfileBloc>().add(LoadProfileEvent());
-                  Navigator.pop(ctx);
-                  Navigator.pop(context, true);
-                },
-                style:
-                    FilledButton.styleFrom(backgroundColor: AppColors.primary),
-                child: const Text('Start Exploring'),
-              ),
-            ],
-          ),
-        );
-      }
+      if (mounted) _showPrimeSuccessDialog();
     } catch (e) {
       if (kDebugMode) {
         final orderId = (response.orderId ?? _currentOrderId ?? '');
@@ -145,6 +108,75 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
           SnackBar(content: Text('Payment verification failed: $e')),
         );
       }
+    }
+  }
+
+  void _showPrimeSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.star, color: Colors.amber, size: 28),
+            SizedBox(width: 8),
+            Expanded(child: Text('Welcome to Prime! 🎉')),
+          ],
+        ),
+        content: const Text(
+          'Your Prime Membership is now active for 1 year.\n\n'
+          'You now have full access to:\n'
+          '• Borrow physical books\n'
+          '• Read eBooks\n'
+          '• Listen to Audiobooks\n'
+          '• Watch Videobooks\n\n'
+          'Thank you for supporting ReadBuddy!',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              // Refresh profile so home screen knows user is now Prime
+              context.read<ProfileBloc>().add(LoadProfileEvent());
+              Navigator.pop(ctx);
+              Navigator.pop(context, true);
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            child: const Text('Start Exploring'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// DEV/TEST ONLY: completes the Prime flow WITHOUT a real Razorpay
+  /// transaction, using the backend's non-production demo bypass
+  /// (razorpay_signature = 'demo_bypass'). Mirrors the web frontend's demo
+  /// fallback so QA/automation can exercise the Prime membership flow.
+  /// Never shown in prod builds (gated by AppConfig.isDev).
+  Future<void> _completeTestPayment() async {
+    setState(() => _processing = true);
+    try {
+      final datasource = getIt<DonateRemoteDataSource>();
+      // Initiate a real order so we have a valid order id to verify against.
+      final result = await datasource.initiateMoneyDonation(_selectedPlan);
+      final orderId = result['orderId'] as String;
+
+      await datasource.verifyMoneyDonation(
+        razorpayOrderId: orderId,
+        razorpayPaymentId: 'pay_demo_success_99',
+        razorpaySignature: 'demo_bypass',
+        amount: _selectedPlan,
+      );
+      if (mounted) _showPrimeSuccessDialog();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Test payment failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processing = false);
     }
   }
 
@@ -336,6 +368,28 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                       ),
               ),
             ),
+
+            // DEV/TEST ONLY — complete the Prime flow without a real Razorpay
+            // transaction (backend demo bypass). Never shown in prod builds.
+            if (AppConfig.isInitialized && AppConfig.instance.isDev) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: _processing ? null : _completeTestPayment,
+                  icon: const Icon(Icons.bolt, size: 18),
+                  label: const Text('Complete payment (TEST)'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Terms and pricing note
