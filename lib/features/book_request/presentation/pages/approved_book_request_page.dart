@@ -1,8 +1,14 @@
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../../../../core/config/app_config.dart';
+import '../../../../core/di/injection.dart';
+import '../../../profile/presentation/blocs/profile_bloc.dart';
+import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
-import 'book_order_page.dart';
 import 'collect_from_library_page.dart';
 
 class ApprovedBookRequestPage extends StatefulWidget {
@@ -23,11 +29,124 @@ class ApprovedBookRequestPage extends StatefulWidget {
 
 class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   late int _selectedTab;
+  late final Razorpay _razorpay;
+  bool _paying = false;
+  bool _paid = false;
 
   @override
   void initState() {
     super.initState();
     _selectedTab = widget.initialTab;
+    _paid = widget.request.paymentStatus.toUpperCase() == 'PAID' ||
+        widget.request.paymentStatus.toUpperCase() == 'FREE';
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onDeliveryPaid);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onDeliveryPayError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  // Creates the ₹25 delivery order and opens Razorpay checkout.
+  Future<void> _payDeliveryFee() async {
+    setState(() => _paying = true);
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      final res = await ds.createDeliveryPaymentOrder(widget.request.id);
+      final order = res['order'] as Map;
+      _razorpay.open({
+        'key': res['keyId'],
+        'amount': order['amount'],
+        'currency': order['currency'] ?? 'INR',
+        'order_id': order['id'],
+        'name': 'ReadBuddy',
+        'description': 'Delivery Fee',
+        'prefill': const {},
+        'theme': {'color': '#2CE07F'},
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to start payment: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _onDeliveryPaid(PaymentSuccessResponse response) async {
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      await ds.verifyDeliveryPayment(
+        widget.request.id,
+        paymentId: response.paymentId ?? '',
+        orderId: response.orderId ?? '',
+        signature: response.signature ?? '',
+      );
+      if (!mounted) return;
+      setState(() {
+        _paying = false;
+        _paid = true;
+      });
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment successful! Your book will be shipped.'),
+          backgroundColor: Color(0xFF2CE07F),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment verification failed: $e')),
+        );
+      }
+    }
+  }
+
+  void _onDeliveryPayError(PaymentFailureResponse response) {
+    if (!mounted) return;
+    setState(() => _paying = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Payment failed: ${response.message ?? 'Try again'}')),
+    );
+  }
+
+  // DEV/TEST ONLY: complete the ₹25 fee via the backend demo bypass (no card).
+  Future<void> _payDeliveryFeeTest() async {
+    setState(() => _paying = true);
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      final res = await ds.createDeliveryPaymentOrder(widget.request.id);
+      final order = res['order'] as Map;
+      await ds.verifyDeliveryPayment(
+        widget.request.id,
+        paymentId: 'pay_demo_success_99',
+        orderId: order['id'] as String,
+        signature: 'demo_bypass',
+      );
+      if (!mounted) return;
+      setState(() {
+        _paying = false;
+        _paid = true;
+      });
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment successful! (test)')),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Test payment failed: $e')),
+        );
+      }
+    }
   }
 
   String _formatDate(String? dateStr) {
@@ -232,36 +351,85 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                       ),
                     ),
                   ] else ...[
-                    // User chose delivery — show delivery/order details
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BookOrderPage(request: req),
-                          ),
+                    // User chose delivery — ₹25 delivery fee (address was
+                    // already provided at request time; no re-entry needed).
+                    if (_paid) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2CE07F).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFF2CE07F)),
                         ),
-                        icon: const Icon(Icons.local_shipping,
-                            color: AppColors.textPrimary),
-                        label: const Text(
-                          'View Delivery Details',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.check_circle,
+                                color: Color(0xFF2CE07F), size: 22),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Delivery fee paid — your book will be shipped soon.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2CE07F),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      ),
+                    ] else ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: _paying ? null : _payDeliveryFee,
+                          icon: _paying
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      color: AppColors.textPrimary,
+                                      strokeWidth: 2),
+                                )
+                              : const Icon(Icons.payment,
+                                  color: AppColors.textPrimary),
+                          label: Text(
+                            _paying ? 'Processing…' : 'Pay ₹25 Delivery Fee',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2CE07F),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      // DEV/TEST ONLY — complete the ₹25 fee without a real card.
+                      if (kDebugMode ||
+                          (AppConfig.isInitialized &&
+                              AppConfig.instance.isDev)) ...[
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: OutlinedButton.icon(
+                            onPressed: _paying ? null : _payDeliveryFeeTest,
+                            icon: const Icon(Icons.bolt, size: 18),
+                            label: const Text('Pay ₹25 (TEST)'),
+                          ),
+                        ),
+                      ],
+                    ],
                   ],
                 ],
               ),

@@ -6,7 +6,6 @@ import '../../domain/entities/book_request_entity.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/my_requests_bloc.dart';
 import '../pages/approved_book_request_page.dart';
-import '../pages/book_order_page.dart';
 import '../pages/book_request_success_page.dart';
 import '../pages/collect_from_library_page.dart';
 import '../pages/delivered_request_detail_page.dart';
@@ -327,7 +326,10 @@ class _RequestCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => BookOrderPage(request: enriched),
+                builder: (_) => ApprovedBookRequestPage(
+                  request: enriched,
+                  initialTab: 0,
+                ),
               ),
             );
           } else {
