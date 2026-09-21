@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// A single section within a legal document.
 class LegalSection {
@@ -80,11 +81,16 @@ class LegalPage extends StatelessWidget {
             if (contactEmail != null) ...[
               Text(contactIntro, style: bodyStyle),
               const SizedBox(height: 4),
-              SelectableText(
-                contactEmail!,
-                style: bodyStyle.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
+              InkWell(
+                onTap: () => _launchEmail(context, contactEmail!),
+                child: Text(
+                  contactEmail!,
+                  style: bodyStyle.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    decorationColor: theme.colorScheme.primary,
+                  ),
                 ),
               ),
             ],
@@ -93,5 +99,24 @@ class LegalPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Opens the device's default email app with the address in the To field.
+  Future<void> _launchEmail(BuildContext context, String email) async {
+    final uri = Uri(scheme: 'mailto', path: email);
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open email app. Email: $email')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open email app. Email: $email')),
+        );
+      }
+    }
   }
 }
