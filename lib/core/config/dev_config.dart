@@ -6,12 +6,10 @@ class DevConfig {
       'https://readbuddy-server-b54k.onrender.com/api';
   static const String appName = 'ReadBuddy Dev';
 
-  /// Google OAuth **Web client ID** (from Google Cloud Console → Credentials).
-  /// This MUST be the same client ID the backend verifies against
-  /// (backend env GOOGLE_CLIENT_ID). It's passed to GoogleSignIn as
-  /// `serverClientId` so the plugin returns an idToken with the correct
-  /// audience for backend verification.
-  /// <<< PASTE YOUR WEB CLIENT ID HERE (ends with .apps.googleusercontent.com) >>>
+  /// Google OAuth **Web client ID** — MUST equal the backend env
+  /// GOOGLE_CLIENT_ID (the token audience the backend verifies). Passed to
+  /// GoogleSignIn as `serverClientId` so the plugin returns a backend-verifiable
+  /// idToken.
   static const String googleServerClientId =
-      'PASTE_WEB_CLIENT_ID.apps.googleusercontent.com';
+      '740720099305-1i0mhiop2816irdg5i93nk8ihmn84h4q.apps.googleusercontent.com';
 }
