@@ -57,6 +57,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
       final res = await ds.createDeliveryPaymentOrder(widget.request.id);
+      if (!mounted) return;
       final order = res['order'] as Map;
       _razorpay.open({
         'key': res['keyId'],
@@ -125,6 +126,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
       final res = await ds.createDeliveryPaymentOrder(widget.request.id);
+      if (!mounted) return;
       final order = res['order'] as Map;
       await ds.verifyDeliveryPayment(
         widget.request.id,
