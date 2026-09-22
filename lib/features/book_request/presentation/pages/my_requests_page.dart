@@ -235,7 +235,7 @@ class _RequestList extends StatelessWidget {
   }
 }
 
-class _RequestCard extends StatelessWidget {
+class _RequestCard extends StatefulWidget {
   final BookRequestEntity request;
   final bool isCompleted;
   final bool isCancelling;
@@ -245,6 +245,62 @@ class _RequestCard extends StatelessWidget {
     this.isCompleted = false,
     this.isCancelling = false,
   });
+
+  @override
+  State<_RequestCard> createState() => _RequestCardState();
+}
+
+class _RequestCardState extends State<_RequestCard> {
+  String? _fetchedTitle;
+  String? _fetchedCover;
+  String? _fetchedFormat;
+
+  @override
+  void initState() {
+    super.initState();
+    _maybeEnrichBook();
+  }
+
+  // Web-parity: if the request came back without populated book details
+  // (title/cover missing) but has a bookId, fetch the book so the card shows
+  // the real name/image instead of "Unknown Book".
+  Future<void> _maybeEnrichBook() async {
+    final r = widget.request;
+    final hasTitle = (r.bookTitle ?? '').isNotEmpty;
+    final hasCover = (r.bookCoverUrl ?? '').isNotEmpty;
+    if (hasTitle && hasCover) return;
+    if (r.bookId == null || r.bookId!.isEmpty) return;
+    try {
+      final book = await di.getIt<BookRequestRemoteDataSource>()
+          .getBookById(r.bookId!);
+      if (!mounted) return;
+      setState(() {
+        _fetchedTitle = book.title;
+        _fetchedCover = book.coverImageUrl;
+        _fetchedFormat = book.format;
+      });
+    } catch (_) {
+      // leave fallbacks; card still renders with placeholder + 'Unknown Book'
+    }
+  }
+
+  // Effective book fields (populated value first, then fetched fallback).
+  String get _title =>
+      (widget.request.bookTitle?.isNotEmpty == true)
+          ? widget.request.bookTitle!
+          : (_fetchedTitle ?? 'Unknown Book');
+  String? get _cover =>
+      (widget.request.bookCoverUrl?.isNotEmpty == true)
+          ? widget.request.bookCoverUrl
+          : _fetchedCover;
+  String? get _format =>
+      (widget.request.bookFormat?.isNotEmpty == true)
+          ? widget.request.bookFormat
+          : _fetchedFormat;
+
+  BookRequestEntity get request => widget.request;
+  bool get isCompleted => widget.isCompleted;
+  bool get isCancelling => widget.isCancelling;
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +365,12 @@ class _RequestCard extends StatelessWidget {
         }
         if (context.mounted) {
           final method = enriched.fulfillmentMethod.toLowerCase();
-          if (method == 'pickup') {
+          final paymentStatus = enriched.paymentStatus.toUpperCase();
+          final isDelivery = method == 'dropoff' ||
+              method == 'drop_off' ||
+              method == 'delivery' ||
+              method == 'shipping';
+          if (paymentStatus == 'FREE') {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -319,10 +380,7 @@ class _RequestCard extends StatelessWidget {
                 ),
               ),
             );
-          } else if (method == 'dropoff' ||
-              method == 'drop_off' ||
-              method == 'delivery' ||
-              method == 'shipping') {
+          } else if (paymentStatus == 'PAID' || isDelivery) {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -366,10 +424,9 @@ class _RequestCard extends StatelessWidget {
                   // Book cover
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: request.bookCoverUrl != null &&
-                            request.bookCoverUrl!.isNotEmpty
+                    child: _cover != null && _cover!.isNotEmpty
                         ? CachedNetworkImage(
-                            imageUrl: request.bookCoverUrl!,
+                            imageUrl: _cover!,
                             width: 90,
                             height: 100,
                             fit: BoxFit.cover,
@@ -391,7 +448,7 @@ class _RequestCard extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                request.bookTitle ?? 'Unknown Book',
+                                _title,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -403,15 +460,18 @@ class _RequestCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             _statusChip(request.status),
+                            if (_showPaymentStatus) ...[
+                              const SizedBox(width: 6),
+                              _paymentChip(request.paymentStatus),
+                            ],
                           ],
                         ),
                         const SizedBox(height: 4),
 
                         // Book type (format) as plain text
-                        if (request.bookFormat != null &&
-                            request.bookFormat!.isNotEmpty)
+                        if (_format != null && _format!.isNotEmpty)
                           Text(
-                            _capitalize(request.bookFormat!),
+                            _capitalize(_format!),
                             style: const TextStyle(
                               fontSize: 13,
                               color: Color(0xFF555555),
@@ -640,6 +700,14 @@ class _RequestCard extends StatelessWidget {
     );
   }
 
+  bool get _showPaymentStatus {
+    final status = request.status.toLowerCase();
+    final isApproved = status == 'approved' || status == 'accepted';
+    final paymentStatus = request.paymentStatus.toUpperCase();
+    return isApproved &&
+        (paymentStatus == 'PAID' || paymentStatus == 'FREE');
+  }
+
   Widget _statusChip(String status) {
     final label = _capitalize(status);
     Color bg;
@@ -698,6 +766,45 @@ class _RequestCard extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _paymentChip(String paymentStatus) {
+    final paid = paymentStatus.toUpperCase() == 'PAID';
+    final free = paymentStatus.toUpperCase() == 'FREE';
+    final label = paid
+        ? 'Paid'
+        : free
+            ? 'Free'
+            : '';
+    if (label.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: paid
+            ? const Color(0xFFE8F5E9)
+            : const Color(0xFFE3F2FD),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            paid ? Icons.paid_outlined : Icons.local_library_outlined,
+            size: 11,
+            color: paid ? const Color(0xFF4CAF50) : Colors.blue,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: paid ? const Color(0xFF4CAF50) : Colors.blue,
             ),
           ),
         ],

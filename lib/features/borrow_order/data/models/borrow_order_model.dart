@@ -13,16 +13,32 @@ class OrderBookItemModel extends OrderBookItem {
   });
 
   factory OrderBookItemModel.fromJson(Map<String, dynamic> json) {
+    // Each order item is a BookRequest doc whose `bookId` is populated to a
+    // book object { _id, title, author, coverImageUrl, price, pages }. Read the
+    // book fields from that nested object, falling back to any flat fields for
+    // backward compatibility.
+    final book = json['bookId'] is Map<String, dynamic>
+        ? json['bookId'] as Map<String, dynamic>
+        : null;
+
+    final rawPrice = book?['price'] ?? json['bookPrice'] ?? 0;
+    final rawPages = book?['pages'] ?? json['bookPages'] ?? 0;
+
     return OrderBookItemModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      bookId: json['bookId']?.toString() ?? '',
-      bookTitle: json['bookTitle']?.toString() ?? '',
-      bookAuthor: json['bookAuthor']?.toString() ?? '',
-      bookCoverUrl: json['bookCoverUrl']?.toString() ?? '',
-      bookPrice: (json['bookPrice'] ?? 0).toDouble(),
-      bookPages: json['bookPages'] is int
-          ? json['bookPages'] as int
-          : int.tryParse(json['bookPages']?.toString() ?? '0') ?? 0,
+      bookId: book?['_id']?.toString() ??
+          (json['bookId'] is String ? json['bookId'] as String : ''),
+      bookTitle:
+          (book?['title'] ?? json['bookTitle'])?.toString() ?? 'Unknown Book',
+      bookAuthor: (book?['author'] ?? json['bookAuthor'])?.toString() ?? '',
+      bookCoverUrl:
+          (book?['coverImageUrl'] ?? json['bookCoverUrl'])?.toString() ?? '',
+      bookPrice: (rawPrice is num)
+          ? rawPrice.toDouble()
+          : double.tryParse(rawPrice.toString()) ?? 0,
+      bookPages: rawPages is int
+          ? rawPages
+          : int.tryParse(rawPages.toString()) ?? 0,
       status: json['status']?.toString() ?? 'pending',
     );
   }

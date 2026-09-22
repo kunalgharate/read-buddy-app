@@ -6,6 +6,7 @@ import '../models/book_request_model.dart';
 import '../models/library_model.dart';
 import '../../domain/entities/library_entity.dart';
 import '../../domain/entities/pickup_details_entity.dart';
+import '../../domain/entities/request_payment_intent.dart';
 
 abstract class BookRequestRemoteDataSource {
   Future<BookDetailModel> getBookById(String id);
@@ -50,6 +51,12 @@ abstract class BookRequestRemoteDataSource {
     required String orderId,
     required String signature,
   });
+
+  Future<RequestPaymentIntent> createBookRequestPayment(String id);
+  Future<void> verifyBookRequestPayment(String id,
+      {required String paymentId,
+      required String orderId,
+      required String signature});
 }
 
 class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
@@ -461,6 +468,39 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
+  Future<RequestPaymentIntent> createBookRequestPayment(String id) async {
+    try {
+      final response = await dio.post(ApiConstants.bookRequestPayment(id));
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw Exception('Failed to create payment');
+      }
+      final data = response.data;
+      final Map order = data is Map && data['order'] is Map
+          ? data['order'] as Map
+          : const {};
+      final amount = order['amount'];
+      return RequestPaymentIntent(
+        razorpayKey: data is Map ? (data['keyId'] as String? ?? '') : '',
+        orderId: order['id'] as String? ?? '',
+        amount: amount is num ? amount.toInt() : 0,
+        currency: order['currency'] as String? ?? 'INR',
+        bookRequestId:
+            data is Map ? (data['bookRequestId'] as String? ?? id) : id,
+      );
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error'])
+              as String?
+          : null;
+      throw Exception(
+          serverMsg ?? 'Failed to initiate payment. Please try again.');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> verifyDeliveryPayment(
     String id, {
     required String paymentId,
@@ -486,6 +526,36 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
               as String?
           : null;
       throw Exception(serverMsg ?? 'Delivery payment verification failed');
+    }
+  }
+
+  @override
+  Future<void> verifyBookRequestPayment(String id,
+      {required String paymentId,
+      required String orderId,
+      required String signature}) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.bookRequestPaymentVerify(id),
+        data: {
+          'paymentId': paymentId,
+          'orderId': orderId,
+          'signature': signature,
+        },
+      );
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw Exception('Failed to verify payment');
+      }
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error'])
+              as String?
+          : null;
+      throw Exception(
+          serverMsg ?? 'Payment verification failed. Please try again.');
+    } catch (e) {
+      rethrow;
     }
   }
 }

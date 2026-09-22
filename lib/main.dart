@@ -37,6 +37,7 @@ void main() async {
       environment: Environment.dev,
       baseUrl: DevConfig.baseUrl,
       appName: DevConfig.appName,
+      googleServerClientId: DevConfig.googleServerClientId,
     );
   }
 

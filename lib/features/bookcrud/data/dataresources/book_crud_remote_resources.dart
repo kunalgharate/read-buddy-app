@@ -229,8 +229,12 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
   Future<List<BookCrudModel>> searchBooks(String query) async {
     try {
       print("🔍 Searching books $query");
+      // Aligned with the web frontend: GET /books/search?q=<term>
+      // (returns { data: [...] }). Replaces the legacy /searchbook/search/:query
+      // path endpoint which had a 3-char minimum and a different response shape.
       final response = await dio.get(
-        "${ApiConstants.searchBooks}/${Uri.encodeComponent(query)}",
+        '${ApiConstants.books}/search',
+        queryParameters: {'q': query},
       );
 
       if (response.statusCode != ApiConstants.success) {
