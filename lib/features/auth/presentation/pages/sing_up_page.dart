@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/ui_utils.dart';
-import '../blocs/google_sign_in/google_sign_in_bloc.dart';
 import '../blocs/sign_up/sign_up_bloc.dart';
 import '../widgets/custom_button_widget.dart';
 
@@ -22,7 +21,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _phoneController = TextEditingController();
 
   bool _obscurePassword = true;
-  bool _emailFromGoogle = false; // Track if email was pre-filled from Google
 
   @override
   void dispose() {
@@ -97,10 +95,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  void _handleGoogleSignUp() {
-    context.read<GoogleSignInBloc>().add(const GoogleSignInRequested());
-  }
-
   void _navigateToSignIn() {
     Navigator.pushReplacementNamed(context, '/signin');
   }
@@ -147,28 +141,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             }
           },
         ),
-        BlocListener<GoogleSignInBloc, GoogleSignInState>(
-          listener: (context, state) {
-            if (state is GoogleSignUpDataFetched) {
-              // Pre-fill form with Google account data
-              setState(() {
-                _nameController.text = state.name;
-                _emailController.text = state.email;
-                _emailFromGoogle = true;
-              });
-              UiUtils.showSuccessSnackBar(
-                context,
-                message:
-                    'Google account loaded! Please set a password to continue.',
-              );
-            } else if (state is GoogleSignInFailure) {
-              UiUtils.showErrorSnackBar(
-                context,
-                message: state.errorMessage,
-              );
-            }
-          },
-        ),
       ],
       child: BlocBuilder<SignUpBloc, SignUpState>(
         builder: (context, state) {
@@ -192,29 +164,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Google Sign-Up button
-                      _buildGoogleSignUpButton(),
-                      const SizedBox(height: 20),
-
-                      // Divider
-                      const Row(
-                        children: [
-                          Expanded(child: Divider()),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              'or sign up with email',
-                              style: TextStyle(
-                                color: AppColors.textHint,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                          Expanded(child: Divider()),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
 
                       // Name
                       const Text(
@@ -253,23 +202,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _emailController,
                         validator: _validateEmail,
                         keyboardType: TextInputType.emailAddress,
-                        readOnly: _emailFromGoogle,
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: _emailFromGoogle
-                              ? Theme.of(context)
-                                  .disabledColor
-                                  .withValues(alpha: 0.1)
-                              : Theme.of(context).colorScheme.surface,
+                          fillColor: Theme.of(context).colorScheme.surface,
                           hintText: 'Enter Email ID',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           prefixIcon: const Icon(Icons.email_outlined),
-                          suffixIcon: _emailFromGoogle
-                              ? const Icon(Icons.check_circle,
-                                  color: AppColors.primary, size: 20)
-                              : null,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -377,43 +317,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildGoogleSignUpButton() {
-    return BlocBuilder<GoogleSignInBloc, GoogleSignInState>(
-      builder: (context, state) {
-        final isLoading = state is GoogleSignInLoading;
-        return SizedBox(
-          width: double.infinity,
-          height: 52.0,
-          child: OutlinedButton.icon(
-            onPressed: isLoading ? null : _handleGoogleSignUp,
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.border),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            icon: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.g_mobiledata_rounded,
-                    size: 28, color: Color(0xFF4285F4)),
-            label: Text(
-              isLoading ? 'Loading...' : 'Sign up with Google',
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }
