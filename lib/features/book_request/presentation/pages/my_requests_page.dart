@@ -385,7 +385,7 @@ class _RequestCardState extends State<_RequestCard> {
               ),
             );
           } else if (paymentStatus == 'PAID' || isDelivery) {
-            Navigator.push(
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => ApprovedBookRequestPage(
@@ -394,8 +394,13 @@ class _RequestCardState extends State<_RequestCard> {
                 ),
               ),
             );
+            // Reload so any payment made on the detail page (e.g. the ₹25
+            // delivery fee) is reflected in the list and on re-open.
+            if (context.mounted) {
+              context.read<MyRequestsBloc>().add(LoadMyRequests());
+            }
           } else {
-            Navigator.push(
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => ApprovedBookRequestPage(
@@ -404,6 +409,9 @@ class _RequestCardState extends State<_RequestCard> {
                 ),
               ),
             );
+            if (context.mounted) {
+              context.read<MyRequestsBloc>().add(LoadMyRequests());
+            }
           }
         }
       };
