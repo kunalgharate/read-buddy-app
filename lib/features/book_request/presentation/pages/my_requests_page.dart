@@ -310,7 +310,12 @@ class _RequestCard extends StatelessWidget {
         }
         if (context.mounted) {
           final method = enriched.fulfillmentMethod.toLowerCase();
-          if (method == 'pickup') {
+          final paymentStatus = enriched.paymentStatus.toUpperCase();
+          final isDelivery = method == 'dropoff' ||
+              method == 'drop_off' ||
+              method == 'delivery' ||
+              method == 'shipping';
+          if (paymentStatus == 'FREE') {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -320,10 +325,7 @@ class _RequestCard extends StatelessWidget {
                 ),
               ),
             );
-          } else if (method == 'dropoff' ||
-              method == 'drop_off' ||
-              method == 'delivery' ||
-              method == 'shipping') {
+          } else if (paymentStatus == 'PAID' || isDelivery) {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -401,6 +403,10 @@ class _RequestCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             _statusChip(request.status),
+                            if (_showPaymentStatus) ...[
+                              const SizedBox(width: 6),
+                              _paymentChip(request.paymentStatus),
+                            ],
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -638,6 +644,14 @@ class _RequestCard extends StatelessWidget {
     );
   }
 
+  bool get _showPaymentStatus {
+    final status = request.status.toLowerCase();
+    final isApproved = status == 'approved' || status == 'accepted';
+    final paymentStatus = request.paymentStatus.toUpperCase();
+    return isApproved &&
+        (paymentStatus == 'PAID' || paymentStatus == 'FREE');
+  }
+
   Widget _statusChip(String status) {
     final label = _capitalize(status);
     Color bg;
@@ -696,6 +710,45 @@ class _RequestCard extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _paymentChip(String paymentStatus) {
+    final paid = paymentStatus.toUpperCase() == 'PAID';
+    final free = paymentStatus.toUpperCase() == 'FREE';
+    final label = paid
+        ? 'Paid'
+        : free
+            ? 'Free'
+            : '';
+    if (label.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: paid
+            ? const Color(0xFFE8F5E9)
+            : const Color(0xFFE3F2FD),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            paid ? Icons.paid_outlined : Icons.local_library_outlined,
+            size: 11,
+            color: paid ? const Color(0xFF4CAF50) : Colors.blue,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: paid ? const Color(0xFF4CAF50) : Colors.blue,
             ),
           ),
         ],

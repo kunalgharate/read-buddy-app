@@ -1,6 +1,7 @@
 import '../../domain/entities/book_detail_entity.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
+import '../../domain/entities/request_payment_intent.dart';
 
 abstract class BookRequestState {}
 
@@ -60,6 +61,11 @@ class DeliveryScheduled extends BookRequestState {}
 class DeliveryPaymentLoading extends BookRequestState {}
 
 class DeliveryPaymentDone extends BookRequestState {}
+
+class PaymentIntentReady extends BookRequestState {
+  final RequestPaymentIntent intent;
+  PaymentIntentReady(this.intent);
+}
 
 class DeliveryError extends BookRequestState {
   final String message;
