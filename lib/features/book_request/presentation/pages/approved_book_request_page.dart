@@ -181,6 +181,15 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   @override
   Widget build(BuildContext context) {
     final req = widget.request;
+    // Canonical stored values are DELIVERY / PICKUP / MEETUP (see backend
+    // BookRequest enum); we also accept legacy/UI-origin delivery variants.
+    final method = req.fulfillmentMethod.trim().toUpperCase();
+    final isPickup = method == 'PICKUP';
+    final isDelivery = method == 'DELIVERY' ||
+        method == 'DROPOFF' ||
+        method == 'DROP_OFF' ||
+        method == 'SHIPPING';
+    final isMeetup = method == 'MEETUP';
 
     return Scaffold(
       appBar: AppBar(
@@ -316,7 +325,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                   const SizedBox(height: 20),
 
                   // Show action based on fulfillment method chosen during request
-                  if (req.fulfillmentMethod.toUpperCase() == 'PICKUP') ...[
+                  if (isPickup) ...[
                     // User chose pickup — show library details
                     SizedBox(
                       width: double.infinity,
@@ -352,7 +361,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                         ),
                       ),
                     ),
-                  ] else ...[
+                  ] else if (isDelivery) ...[
                     // User chose delivery — ₹25 delivery fee (address was
                     // already provided at request time; no re-entry needed).
                     if (_paid) ...[
@@ -441,6 +450,41 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                         ),
                       ],
                     ],
+                  ] else if (isMeetup) ...[
+                    // In-person meetup — no delivery fee; coordinate directly.
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2CE07F).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFF2CE07F)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.handshake_outlined,
+                            color: Color(0xFF2CE07F),
+                            size: 22,
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'In-person meetup — no delivery fee. '
+                              'Coordinate the handover with the donor.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ],
               ),
