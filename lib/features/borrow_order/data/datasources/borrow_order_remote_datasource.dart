@@ -112,8 +112,9 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
 
     return list
         .whereType<Map>()
-        .map((json) =>
-            BorrowOrderModel.fromJson(Map<String, dynamic>.from(json)))
+        .map(
+          (json) => BorrowOrderModel.fromJson(Map<String, dynamic>.from(json)),
+        )
         .toList();
   }
 

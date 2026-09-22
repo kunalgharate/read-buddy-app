@@ -17,12 +17,13 @@ class DonatedBookDetailPage extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimaryColor(context)),
+          icon: Icon(
+            Icons.arrow_back,
+            color: AppColors.textPrimaryColor(context),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -91,12 +92,21 @@ class DonatedBookDetailPage extends StatelessWidget {
                       children: [
                         _buildSectionTitle('Donation Info'),
                         const SizedBox(height: 16),
-                        _buildDetailRow(Icons.person_outline, 'Donor',
-                            book.donorName.isNotEmpty ? book.donorName : 'You'),
-                        _buildDetailRow(Icons.calendar_today_outlined,
-                            'Donated on', _formatDate(book.createdAt)),
-                        _buildDetailRow(Icons.confirmation_number_outlined,
-                            'Donation ID', book.id ?? 'N/A'),
+                        _buildDetailRow(
+                          Icons.person_outline,
+                          'Donor',
+                          book.donorName.isNotEmpty ? book.donorName : 'You',
+                        ),
+                        _buildDetailRow(
+                          Icons.calendar_today_outlined,
+                          'Donated on',
+                          _formatDate(book.createdAt),
+                        ),
+                        _buildDetailRow(
+                          Icons.confirmation_number_outlined,
+                          'Donation ID',
+                          book.id ?? 'N/A',
+                        ),
                       ],
                     ),
                   ),
@@ -191,12 +201,21 @@ class DonatedBookDetailPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildInfoItem(Icons.menu_book, 'Format',
-            book.format.isEmpty ? 'Physical' : book.format),
-        _buildInfoItem(Icons.language, 'Language',
-            book.language.isEmpty ? 'English' : book.language),
         _buildInfoItem(
-            Icons.star_outline, 'Condition', 'Good'), // condition not in entity
+          Icons.menu_book,
+          'Format',
+          book.format.isEmpty ? 'Physical' : book.format,
+        ),
+        _buildInfoItem(
+          Icons.language,
+          'Language',
+          book.language.isEmpty ? 'English' : book.language,
+        ),
+        _buildInfoItem(
+          Icons.star_outline,
+          'Condition',
+          'Good',
+        ), // condition not in entity
       ],
     );
   }
@@ -221,7 +240,10 @@ class DonatedBookDetailPage extends StatelessWidget {
         Text(
           value,
           style: GoogleFonts.poppins(
-              fontSize: 13, fontWeight: FontWeight.w600, color: _textDark),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: _textDark,
+          ),
         ),
       ],
     );
@@ -251,7 +273,9 @@ class DonatedBookDetailPage extends StatelessWidget {
               Text(
                 label,
                 style: GoogleFonts.poppins(
-                    fontSize: 12, color: const Color(0xFF7A9BB5)),
+                  fontSize: 12,
+                  color: const Color(0xFF7A9BB5),
+                ),
               ),
               Text(
                 value,
@@ -283,7 +307,7 @@ class DonatedBookDetailPage extends StatelessWidget {
         'Sep',
         'Oct',
         'Nov',
-        'Dec'
+        'Dec',
       ];
       return '${date.day} ${months[date.month - 1]}, ${date.year}';
     } catch (_) {

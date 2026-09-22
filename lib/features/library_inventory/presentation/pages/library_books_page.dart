@@ -67,14 +67,20 @@ class _LibraryBooksView extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.library_books_outlined,
-                        size: 48, color: AppColors.textHint),
+                    Icon(
+                      Icons.library_books_outlined,
+                      size: 48,
+                      color: AppColors.textHint,
+                    ),
                     SizedBox(height: 12),
-                    Text('No books added to this library yet.',
-                        style: TextStyle(color: AppColors.textSecondary)),
-                    Text('Use "Add Book" on the library detail page.',
-                        style:
-                            TextStyle(fontSize: 12, color: AppColors.textHint)),
+                    Text(
+                      'No books added to this library yet.',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                    Text(
+                      'Use "Add Book" on the library detail page.',
+                      style: TextStyle(fontSize: 12, color: AppColors.textHint),
+                    ),
                   ],
                 ),
               );
@@ -220,8 +226,11 @@ class _InventoryCard extends StatelessWidget {
                   onPressed: () => _showUpdateDialog(context),
                 ),
                 IconButton(
-                  icon:
-                      const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 20,
+                    color: Colors.red,
+                  ),
                   tooltip: 'Remove',
                   onPressed: () => _confirmDelete(context),
                 ),
@@ -242,14 +251,14 @@ class _InventoryCard extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
+        style:
+            TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
       ),
     );
   }
 
   void _showUpdateDialog(BuildContext context) {
-    final controller =
-        TextEditingController(text: item.totalCopies.toString());
+    final controller = TextEditingController(text: item.totalCopies.toString());
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

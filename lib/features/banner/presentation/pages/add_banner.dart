@@ -118,7 +118,7 @@ class _AddBannerState extends State<AddBanner> {
                                             color: Colors.black26,
                                             blurRadius: 3,
                                             offset: Offset(1, 1),
-                                          )
+                                          ),
                                         ],
                                       ),
                                       padding: const EdgeInsets.all(4),
@@ -144,12 +144,16 @@ class _AddBannerState extends State<AddBanner> {
                   },
                   validator: BookFormValidator.validateBannerTypes,
                   decoratorProps: const DropDownDecoratorProps(
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey)),
-                          hintText: 'Select Banner Type')),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      hintText: 'Select Banner Type',
+                    ),
+                  ),
                   items: (f, cs) => ["Ads", "Banner", "Donation", "Info"],
                   popupProps: const PopupProps.menu(fit: FlexFit.loose),
                 ),
@@ -190,8 +194,8 @@ class _AddBannerState extends State<AddBanner> {
                       if (selectedImages.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content:
-                                  Text('Please upload at least one image')),
+                            content: Text('Please upload at least one image'),
+                          ),
                         );
                         return;
                       }
@@ -206,35 +210,39 @@ class _AddBannerState extends State<AddBanner> {
                         // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text("The URL domain is not reachable")),
+                            content: Text("The URL domain is not reachable"),
+                          ),
                         );
                         return; // stop execution if not reachable
                       }
 
                       // ignore: use_build_context_synchronously
-                      context.read<BannerBloc>().add(CreateBannerEvent(
-                            title: bannerTitleController.text,
-                            link: bannerLinkController.text.isNotEmpty
-                                ? bannerLinkController.text
-                                : null,
-                            description: bannerDescriptionController.text,
-                            // bannerDescriptionController.text.isNotEmpty
-                            //     ? bannerDescriptionController.text
-                            //     : null,
-                            bannerType: bannerTypeController.text,
-                            bannerImage: File(selectedImages[0]!.path),
-                          ));
+                      context.read<BannerBloc>().add(
+                            CreateBannerEvent(
+                              title: bannerTitleController.text,
+                              link: bannerLinkController.text.isNotEmpty
+                                  ? bannerLinkController.text
+                                  : null,
+                              description: bannerDescriptionController.text,
+                              // bannerDescriptionController.text.isNotEmpty
+                              //     ? bannerDescriptionController.text
+                              //     : null,
+                              bannerType: bannerTypeController.text,
+                              bannerImage: File(selectedImages[0]!.path),
+                            ),
+                          );
 
                       // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text('Banner submitted successfully!')),
+                          content: Text('Banner submitted successfully!'),
+                        ),
                       );
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                     }
                   },
-                )
+                ),
               ],
             ),
           ),
@@ -307,8 +315,10 @@ class _AddBannerState extends State<AddBanner> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                'Failed to pick image: ${e.toString().replaceAll('Exception: ', '')}')),
+          content: Text(
+            'Failed to pick image: ${e.toString().replaceAll('Exception: ', '')}',
+          ),
+        ),
       );
     }
   }

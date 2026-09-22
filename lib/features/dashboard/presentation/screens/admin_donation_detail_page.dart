@@ -93,9 +93,7 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: _textDark),
@@ -169,10 +167,13 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: const BorderSide(
-                                        color: Color(0xFF7A9BB5)),
+                                      color: Color(0xFF7A9BB5),
+                                    ),
                                   ),
                                   contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 12),
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
                                 ),
                                 items: _statusOptions.map((status) {
                                   return DropdownMenuItem(
@@ -211,15 +212,22 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
                         _buildSectionTitle('Donation Info'),
                         const SizedBox(height: 16),
                         _buildDetailRow(
-                            Icons.person_outline,
-                            'Donor',
-                            widget.book.donorName.isNotEmpty
-                                ? widget.book.donorName
-                                : 'You'),
-                        _buildDetailRow(Icons.calendar_today_outlined,
-                            'Donated on', _formatDate(widget.book.createdAt)),
-                        _buildDetailRow(Icons.confirmation_number_outlined,
-                            'Donation ID', widget.book.id ?? 'N/A'),
+                          Icons.person_outline,
+                          'Donor',
+                          widget.book.donorName.isNotEmpty
+                              ? widget.book.donorName
+                              : 'You',
+                        ),
+                        _buildDetailRow(
+                          Icons.calendar_today_outlined,
+                          'Donated on',
+                          _formatDate(widget.book.createdAt),
+                        ),
+                        _buildDetailRow(
+                          Icons.confirmation_number_outlined,
+                          'Donation ID',
+                          widget.book.id ?? 'N/A',
+                        ),
                       ],
                     ),
                   ),
@@ -331,10 +339,16 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildInfoItem(Icons.menu_book, 'Format',
-            widget.book.format.isEmpty ? 'Physical' : widget.book.format),
-        _buildInfoItem(Icons.language, 'Language',
-            widget.book.language.isEmpty ? 'English' : widget.book.language),
+        _buildInfoItem(
+          Icons.menu_book,
+          'Format',
+          widget.book.format.isEmpty ? 'Physical' : widget.book.format,
+        ),
+        _buildInfoItem(
+          Icons.language,
+          'Language',
+          widget.book.language.isEmpty ? 'English' : widget.book.language,
+        ),
         _buildInfoItem(Icons.star_outline, 'Condition', 'Good'),
       ],
     );
@@ -360,7 +374,10 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
         Text(
           value,
           style: GoogleFonts.poppins(
-              fontSize: 13, fontWeight: FontWeight.w600, color: _textDark),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: _textDark,
+          ),
         ),
       ],
     );
@@ -390,7 +407,9 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
               Text(
                 label,
                 style: GoogleFonts.poppins(
-                    fontSize: 12, color: const Color(0xFF7A9BB5)),
+                  fontSize: 12,
+                  color: const Color(0xFF7A9BB5),
+                ),
               ),
               Text(
                 value,
@@ -422,7 +441,7 @@ class _AdminDonationDetailPageState extends State<AdminDonationDetailPage> {
         'Sep',
         'Oct',
         'Nov',
-        'Dec'
+        'Dec',
       ];
       return '${date.day} ${months[date.month - 1]}, ${date.year}';
     } catch (_) {

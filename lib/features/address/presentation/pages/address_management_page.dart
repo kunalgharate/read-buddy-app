@@ -139,7 +139,9 @@ class _AddressCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
@@ -416,8 +418,11 @@ class _AddressFormState extends State<_AddressForm> {
                 validator: _phone,
               ),
               const SizedBox(height: 10),
-              _field(_line1Ctrl, 'Flat / House / Building *',
-                  validator: _required),
+              _field(
+                _line1Ctrl,
+                'Flat / House / Building *',
+                validator: _required,
+              ),
               const SizedBox(height: 10),
               _field(_line2Ctrl, 'Street / Area'),
               const SizedBox(height: 10),
@@ -540,8 +545,10 @@ class _AddressFormState extends State<_AddressForm> {
               itemCount: _filteredStates.length,
               itemBuilder: (context, i) => ListTile(
                 dense: true,
-                title: Text(_filteredStates[i],
-                    style: const TextStyle(fontSize: 14)),
+                title: Text(
+                  _filteredStates[i],
+                  style: const TextStyle(fontSize: 14),
+                ),
                 selected: _filteredStates[i] == _stateCtrl.text,
                 selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
                 onTap: () => _selectState(_filteredStates[i]),

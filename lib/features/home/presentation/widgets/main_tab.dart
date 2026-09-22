@@ -106,14 +106,18 @@ class _MainTabView extends StatelessWidget {
 
           if (state is HomeError) {
             return Center(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(state.message, textAlign: TextAlign.center),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => context.read<HomeBloc>().add(LoadHomeData()),
-                  child: const Text('Retry'),
-                ),
-              ]),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(state.message, textAlign: TextAlign.center),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () =>
+                        context.read<HomeBloc>().add(LoadHomeData()),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
             );
           }
 
@@ -144,7 +148,8 @@ class _MainTabView extends StatelessWidget {
 
                     const SizedBox(height: 32),
                     _MonthlyStatsCard(
-                        dataSource: getIt<HomeRemoteDataSource>()),
+                      dataSource: getIt<HomeRemoteDataSource>(),
+                    ),
                     const SizedBox(height: 16),
                   ],
                 ),
@@ -225,37 +230,44 @@ class _BannerSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Get Prime Membership',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          height: 1.35,
-                        )),
                     const Text(
-                        'Donate a book or buy membership to unlock all features.',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        )),
+                      'Get Prime Membership',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        height: 1.35,
+                      ),
+                    ),
+                    const Text(
+                      'Donate a book or buy membership to unlock all features.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 8),
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF3DAA6E),
                         borderRadius: BorderRadius.circular(24),
                       ),
-                      child: const Text('Get Prime',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          )),
+                      child: const Text(
+                        'Get Prime',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -267,10 +279,12 @@ class _BannerSection extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: trendingCover?.isNotEmpty == true
-                      ? Image.network(trendingCover!,
+                      ? Image.network(
+                          trendingCover!,
                           width: 115,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _coverPlaceholder())
+                          errorBuilder: (_, __, ___) => _coverPlaceholder(),
+                        )
                       : _coverPlaceholder(),
                 ),
               ),
@@ -357,8 +371,11 @@ class _BannerCarouselState extends State<_BannerCarousel> {
                         errorBuilder: (_, __, ___) => Container(
                           color: const Color(0xFF03405B),
                           child: const Center(
-                            child: Icon(Icons.image_not_supported,
-                                color: Colors.white38, size: 40),
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: Colors.white38,
+                              size: 40,
+                            ),
                           ),
                         ),
                       ),
@@ -464,7 +481,11 @@ class _CityBooksSection extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Icon(Icons.location_off, size: 40, color: AppColors.textMutedColor(context)),
+                  Icon(
+                    Icons.location_off,
+                    size: 40,
+                    color: AppColors.textMutedColor(context),
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Select your city to see available books',
@@ -509,7 +530,11 @@ class _CityBooksSection extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.menu_book, size: 40, color: AppColors.textMutedColor(context)),
+                        Icon(
+                          Icons.menu_book,
+                          size: 40,
+                          color: AppColors.textMutedColor(context),
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           'No books available in $city yet',
@@ -544,12 +569,19 @@ class _CityBooksSection extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(state.message, textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.textSecondaryColor(context), fontSize: 13)),
+                      Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.textSecondaryColor(context),
+                          fontSize: 13,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       TextButton(
-                        onPressed: () => context.read<LibraryInventoryBloc>()
-                          .add(BrowseCityBooks(city: city)),
+                        onPressed: () => context
+                            .read<LibraryInventoryBloc>()
+                            .add(BrowseCityBooks(city: city)),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -560,8 +592,9 @@ class _CityBooksSection extends StatelessWidget {
 
             // Initial state — trigger load
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.read<LibraryInventoryBloc>()
-                .add(BrowseCityBooks(city: city));
+              context
+                  .read<LibraryInventoryBloc>()
+                  .add(BrowseCityBooks(city: city));
             });
             return const SizedBox.shrink();
           },
@@ -795,23 +828,30 @@ class _BookSectionState extends State<_BookSection> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(widget.title,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  )),
+              Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
               GestureDetector(
                 onTap: _scrollToEnd,
-                child: Row(children: [
-                  Text('See All',
+                child: Row(
+                  children: [
+                    Text(
+                      'See All',
                       style: TextStyle(
-                          fontSize: 13,
-                          color: textColor,
-                          fontWeight: FontWeight.w500)),
-                  const SizedBox(width: 2),
-                  Icon(Icons.arrow_forward_ios, size: 11, color: textColor),
-                ]),
+                        fontSize: 13,
+                        color: textColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(Icons.arrow_forward_ios, size: 11, color: textColor),
+                  ],
+                ),
               ),
             ],
           ),
@@ -859,9 +899,10 @@ class _BookCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4)),
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Column(
@@ -873,11 +914,13 @@ class _BookCard extends StatelessWidget {
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(14)),
                   child: book.coverImageUrl?.isNotEmpty == true
-                      ? Image.network(book.coverImageUrl!,
+                      ? Image.network(
+                          book.coverImageUrl!,
                           height: 170,
                           width: 140,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _imgPlaceholder())
+                          errorBuilder: (_, __, ___) => _imgPlaceholder(),
+                        )
                       : _imgPlaceholder(),
                 ),
                 Positioned(
@@ -892,21 +935,26 @@ class _BookCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(book.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimaryColor(context),
-                      )),
+                  Text(
+                    book.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryColor(context),
+                    ),
+                  ),
                   const SizedBox(height: 3),
-                  Text(book.subtitle ?? book.author,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textMutedColor(context))),
+                  Text(
+                    book.subtitle ?? book.author,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMutedColor(context),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -952,13 +1000,15 @@ class _FormatBadge extends StatelessWidget {
         color: color.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(5),
       ),
-      child: Text(label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
-          )),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.2,
+        ),
+      ),
     );
   }
 }
@@ -995,9 +1045,10 @@ class _MonthlyStatsCardState extends State<_MonthlyStatsCard> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.07),
-                blurRadius: 12,
-                offset: const Offset(0, 4)),
+              color: Colors.black.withValues(alpha: 0.07),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: FutureBuilder<MonthlyStatsModel>(
@@ -1005,41 +1056,48 @@ class _MonthlyStatsCardState extends State<_MonthlyStatsCard> {
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
               return const SizedBox(
-                  height: 100,
-                  child:
-                      Center(child: CircularProgressIndicator(strokeWidth: 2)));
+                height: 100,
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              );
             }
             if (snap.hasError) {
               return const SizedBox(
-                  height: 100,
-                  child: Center(child: Text('Could not load stats')));
+                height: 100,
+                child: Center(child: Text('Could not load stats')),
+              );
             }
 
             final s = snap.data!;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('This Month',
-                    style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimaryColor(context))),
+                Text(
+                  'This Month',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimaryColor(context),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _StatItem(
-                        icon: Icons.menu_book_outlined,
-                        value: s.donatedBooks,
-                        label: 'Book Donated'),
+                      icon: Icons.menu_book_outlined,
+                      value: s.donatedBooks,
+                      label: 'Book Donated',
+                    ),
                     _StatItem(
-                        icon: Icons.person_outline,
-                        value: s.newUsers,
-                        label: 'New Users'),
+                      icon: Icons.person_outline,
+                      value: s.newUsers,
+                      label: 'New Users',
+                    ),
                     _StatItem(
-                        icon: Icons.local_shipping_outlined,
-                        value: s.deliveredBooks,
-                        label: 'Deliveries'),
+                      icon: Icons.local_shipping_outlined,
+                      value: s.deliveredBooks,
+                      label: 'Deliveries',
+                    ),
                   ],
                 ),
               ],
@@ -1055,8 +1113,11 @@ class _StatItem extends StatelessWidget {
   final IconData icon;
   final int value;
   final String label;
-  const _StatItem(
-      {required this.icon, required this.value, required this.label});
+  const _StatItem({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1064,17 +1125,23 @@ class _StatItem extends StatelessWidget {
       children: [
         Icon(icon, size: 32, color: AppColors.textPrimaryColor(context)),
         const SizedBox(height: 8),
-        Text('$value',
-            style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimaryColor(context))),
+        Text(
+          '$value',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimaryColor(context),
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(label,
-            style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondaryColor(context),
-                fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondaryColor(context),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }
@@ -1240,8 +1307,11 @@ class _ContinueReadingCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(_formatIcon(item.format),
-                          size: 14, color: AppColors.primary),
+                      Icon(
+                        _formatIcon(item.format),
+                        size: 14,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(width: 5),
                       Text(
                         _formatActionLabel(item.format),
@@ -1288,8 +1358,11 @@ class _ContinueReadingCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios,
-                size: 15, color: AppColors.textMutedColor(context)),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 15,
+              color: AppColors.textMutedColor(context),
+            ),
           ],
         ),
       ),

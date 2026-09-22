@@ -267,9 +267,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
         },
         builder: (context, state) {
           return Scaffold(
-      
             appBar: AppBar(
-        
               elevation: 0,
               leading: IconButton(
                 icon:
@@ -289,7 +287,8 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               child: state is BookRequestCreating
                   ? const Center(
                       child:
-                          CircularProgressIndicator(color: Color(0xFF2CE07F)))
+                          CircularProgressIndicator(color: Color(0xFF2CE07F)),
+                    )
                   : _currentStep == 0
                       ? _buildStep1()
                       : _buildStep2(context),
@@ -352,8 +351,11 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
           // Contact Info
           const _SectionLabel('Contact Information'),
           const SizedBox(height: 12),
-          _textField(_nameController, 'Full Name',
-              prefixIcon: Icons.person_outline),
+          _textField(
+            _nameController,
+            'Full Name',
+            prefixIcon: Icons.person_outline,
+          ),
           const SizedBox(height: 12),
           _textField(
             _phoneController,
@@ -414,8 +416,11 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.location_off,
-                        color: Colors.amber, size: 32),
+                    const Icon(
+                      Icons.location_off,
+                      color: Colors.amber,
+                      size: 32,
+                    ),
                     const SizedBox(height: 8),
                     const Text(
                       'No libraries nearby or in your city',
@@ -500,11 +505,13 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
         ),
         child: Column(
           children: [
-            Icon(icon,
-                size: 32,
-                color: isSelected
-                    ? const Color(0xFF2CE07F)
-                    : const Color(0xFF999999)),
+            Icon(
+              icon,
+              size: 32,
+              color: isSelected
+                  ? const Color(0xFF2CE07F)
+                  : const Color(0xFF999999),
+            ),
             const SizedBox(height: 8),
             Text(
               label,
@@ -556,7 +563,9 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             _confirmRow('Name', _nameController.text.trim()),
             _confirmRow('Phone', _phoneController.text.trim()),
             _confirmRow(
-                'Method', isDropoff ? 'Delivery' : 'Pickup from Library'),
+              'Method',
+              isDropoff ? 'Delivery' : 'Pickup from Library',
+            ),
             if (isDropoff) ...[
               _confirmRow('Address', _addressController.text.trim()),
               _confirmRow('PIN Code', _pincodeController.text.trim()),
@@ -841,8 +850,11 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
                 ),
               if (isSelected) ...[
                 const SizedBox(width: 8),
-                const Icon(Icons.check_circle,
-                    color: Color(0xFF2CE07F), size: 22),
+                const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF2CE07F),
+                  size: 22,
+                ),
               ],
             ],
           ),

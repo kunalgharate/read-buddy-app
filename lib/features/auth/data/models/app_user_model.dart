@@ -32,7 +32,8 @@ class AppUserModel extends AppUser {
       print('👤 AppUserModel: Parsed user id: ${user['_id'] ?? user['id']}');
       print('👤 AppUserModel: isEmailVerified: ${user['isEmailVerified']}');
       print(
-          '👤 AppUserModel: onboardingCompleted: ${user['onboardingCompleted']}');
+        '👤 AppUserModel: onboardingCompleted: ${user['onboardingCompleted']}',
+      );
     }
 
     return AppUserModel(

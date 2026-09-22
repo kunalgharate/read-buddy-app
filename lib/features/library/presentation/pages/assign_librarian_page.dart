@@ -108,8 +108,11 @@ class _AssignLibrarianView extends StatelessWidget {
                     ),
                     isThreeLine: true,
                     trailing: IconButton(
-                      icon: const Icon(Icons.person_remove,
-                          color: Colors.red, size: 20),
+                      icon: const Icon(
+                        Icons.person_remove,
+                        color: Colors.red,
+                        size: 20,
+                      ),
                       tooltip: 'Unassign',
                       onPressed: () => _confirmUnassign(
                         context,

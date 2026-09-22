@@ -90,50 +90,50 @@ class _SignInScreenState extends State<SignInScreen> {
         BlocListener<SignInBloc, SignInState>(
           listener: (context, state) async {
             if (state is SignInSuccess) {
-          UiUtils.showSuccessSnackBar(
-            context,
-            message: 'Welcome back, ${state.user.name}!',
-          );
+              UiUtils.showSuccessSnackBar(
+                context,
+                message: 'Welcome back, ${state.user.name}!',
+              );
 
-          final secureStorage = getIt<SecureStorageUtil>();
-          await secureStorage.saveUser(state.user);
-          await secureStorage.saveTokens(
-            accessToken: state.user.accessToken,
-            refreshToken: state.user.refreshToken,
-          );
-          await AppPreferences.setLoggedIn(true);
+              final secureStorage = getIt<SecureStorageUtil>();
+              await secureStorage.saveUser(state.user);
+              await secureStorage.saveTokens(
+                accessToken: state.user.accessToken,
+                refreshToken: state.user.refreshToken,
+              );
+              await AppPreferences.setLoggedIn(true);
 
-          if (!context.mounted) return;
-          context.read<ProfileBloc>().add(LoadProfileEvent());
-          if (state.user.role == 'admin') {
-            Navigator.pushReplacementNamed(context, '/admin');
-          } else if (state.user.onboardingCompleted) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const OnboardingQuestionnaire(),
-              ),
-            );
-          }
-        } else if (state is SignInFailure) {
-          if (state.isEmailNotVerified) {
-            final email = (state.email?.isNotEmpty == true)
-                ? state.email!
-                : _emailController.text.trim().toLowerCase();
-            UiUtils.showErrorSnackBar(
-              context,
-              message: 'Please verify your email to continue.',
-            );
-            Navigator.pushNamed(context, '/verification', arguments: email);
-          } else {
-            UiUtils.showErrorSnackBar(
-              context,
-              message: state.errorMessage,
-            );
-          }
-        }
+              if (!context.mounted) return;
+              context.read<ProfileBloc>().add(LoadProfileEvent());
+              if (state.user.role == 'admin') {
+                Navigator.pushReplacementNamed(context, '/admin');
+              } else if (state.user.onboardingCompleted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OnboardingQuestionnaire(),
+                  ),
+                );
+              }
+            } else if (state is SignInFailure) {
+              if (state.isEmailNotVerified) {
+                final email = (state.email?.isNotEmpty == true)
+                    ? state.email!
+                    : _emailController.text.trim().toLowerCase();
+                UiUtils.showErrorSnackBar(
+                  context,
+                  message: 'Please verify your email to continue.',
+                );
+                Navigator.pushNamed(context, '/verification', arguments: email);
+              } else {
+                UiUtils.showErrorSnackBar(
+                  context,
+                  message: state.errorMessage,
+                );
+              }
+            }
           },
         ),
         BlocListener<GoogleSignInBloc, GoogleSignInState>(
@@ -299,8 +299,9 @@ class _SignInScreenState extends State<SignInScreen> {
     return InputDecoration(
       hintText: hintText,
       hintStyle: TextStyle(
-          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-          fontSize: 18.0),
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+        fontSize: 18.0,
+      ),
       filled: true,
       fillColor: colorScheme.surface,
       contentPadding:
@@ -356,7 +357,8 @@ class _SignInScreenState extends State<SignInScreen> {
               backgroundColor: _primaryColor,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
               elevation: 0,
             ),
             child: isLoading
@@ -419,8 +421,11 @@ class _SignInScreenState extends State<SignInScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.g_mobiledata_rounded,
-                    size: 28, color: Color(0xFF4285F4)),
+                : const Icon(
+                    Icons.g_mobiledata_rounded,
+                    size: 28,
+                    color: Color(0xFF4285F4),
+                  ),
             label: Text(
               isLoading ? 'Loading...' : 'Continue with Google',
               style: TextStyle(
@@ -442,8 +447,9 @@ class _SignInScreenState extends State<SignInScreen> {
         Text(
           "Don't have an account? ",
           style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 16.0),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 16.0,
+          ),
         ),
         TextButton(
           onPressed: _navigateToSignUp,

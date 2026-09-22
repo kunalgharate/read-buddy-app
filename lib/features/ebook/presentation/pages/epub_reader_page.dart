@@ -49,8 +49,7 @@ class _EpubReaderPageState extends State<EpubReaderPage> {
   String _currentCfi = '';
   Timer? _saveDebounce;
 
-  bool get _trackProgress =>
-      widget.bookId != null && widget.bookId!.isNotEmpty;
+  bool get _trackProgress => widget.bookId != null && widget.bookId!.isNotEmpty;
 
   @override
   void initState() {

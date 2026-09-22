@@ -71,40 +71,49 @@ class BookDetailVariantCubit extends Cubit<BookDetailVariantState> {
     bool hasActiveRequest = false;
     try {
       final requests = await _requestDataSource.getMyBookRequests();
-      hasActiveRequest = requests.any((r) =>
-          r.bookId == bookId &&
-          (r.status == 'pending' ||
-              r.status == 'approved' ||
-              r.status == 'scheduled' ||
-              r.status == 'in_transit'));
+      hasActiveRequest = requests.any(
+        (r) =>
+            r.bookId == bookId &&
+            (r.status == 'pending' ||
+                r.status == 'approved' ||
+                r.status == 'scheduled' ||
+                r.status == 'in_transit'),
+      );
     } catch (_) {}
 
     if (inlineVariants.isNotEmpty) {
-      emit(BookDetailVariantState(
-        variants: inlineVariants,
-        isLoading: false,
-        selectedLanguage: inlineVariants.first.language,
-        isInWishlist: isInWishlist,
-        hasActiveRequest: hasActiveRequest,
-      ));
+      emit(
+        BookDetailVariantState(
+          variants: inlineVariants,
+          isLoading: false,
+          selectedLanguage: inlineVariants.first.language,
+          isInWishlist: isInWishlist,
+          hasActiveRequest: hasActiveRequest,
+        ),
+      );
       return;
     }
 
     try {
       final variants = await _repository.getVariantsForBook(bookId);
-      emit(BookDetailVariantState(
-        variants: variants,
-        isLoading: false,
-        selectedLanguage: variants.isNotEmpty ? variants.first.language : null,
-        isInWishlist: isInWishlist,
-        hasActiveRequest: hasActiveRequest,
-      ));
+      emit(
+        BookDetailVariantState(
+          variants: variants,
+          isLoading: false,
+          selectedLanguage:
+              variants.isNotEmpty ? variants.first.language : null,
+          isInWishlist: isInWishlist,
+          hasActiveRequest: hasActiveRequest,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(
-        isLoading: false,
-        isInWishlist: isInWishlist,
-        hasActiveRequest: hasActiveRequest,
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isInWishlist: isInWishlist,
+          hasActiveRequest: hasActiveRequest,
+        ),
+      );
     }
   }
 

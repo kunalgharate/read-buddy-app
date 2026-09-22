@@ -65,7 +65,9 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
 /// [fallback] when the response only carries a message or is not a map, so a
 /// successful save never fails on parsing.
 AddressModel buildAddressModel(
-    dynamic responseData, Map<String, dynamic> fallback) {
+  dynamic responseData,
+  Map<String, dynamic> fallback,
+) {
   return AddressModel.fromJson(_asAddressMap(responseData) ?? fallback);
 }
 

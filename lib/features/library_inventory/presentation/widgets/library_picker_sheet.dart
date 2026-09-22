@@ -113,26 +113,30 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
       final options = <_LibraryOption>[];
       for (final lib in cityBook.libraries) {
         if (lib.availableCopies > 0) {
-          options.add(_LibraryOption(
-            libraryId: lib.libraryId,
-            libraryName: lib.libraryName,
-            formatType: lib.formatType,
-            availableCopies: lib.availableCopies,
-            totalCopies: lib.totalCopies,
-          ));
+          options.add(
+            _LibraryOption(
+              libraryId: lib.libraryId,
+              libraryName: lib.libraryName,
+              formatType: lib.formatType,
+              availableCopies: lib.availableCopies,
+              totalCopies: lib.totalCopies,
+            ),
+          );
         }
       }
 
       // Also add out-of-stock libraries (disabled)
       for (final lib in cityBook.libraries) {
         if (lib.availableCopies <= 0) {
-          options.add(_LibraryOption(
-            libraryId: lib.libraryId,
-            libraryName: lib.libraryName,
-            formatType: lib.formatType,
-            availableCopies: 0,
-            totalCopies: lib.totalCopies,
-          ));
+          options.add(
+            _LibraryOption(
+              libraryId: lib.libraryId,
+              libraryName: lib.libraryName,
+              formatType: lib.formatType,
+              availableCopies: 0,
+              totalCopies: lib.totalCopies,
+            ),
+          );
         }
       }
 
@@ -316,12 +320,13 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
               ),
             )
           else
-            ..._options.map((opt) => _LibraryOptionTile(
-                  option: opt,
-                  onTap: opt.availableCopies > 0
-                      ? () => _selectLibrary(opt)
-                      : null,
-                )),
+            ..._options.map(
+              (opt) => _LibraryOptionTile(
+                option: opt,
+                onTap:
+                    opt.availableCopies > 0 ? () => _selectLibrary(opt) : null,
+              ),
+            ),
 
           const SizedBox(height: 8),
         ],

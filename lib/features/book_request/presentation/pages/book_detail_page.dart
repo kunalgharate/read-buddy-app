@@ -32,15 +32,16 @@ class BookDetailPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-            create: (_) =>
-                getIt<BookRequestBloc>()..add(LoadBookDetail(bookId))),
+          create: (_) => getIt<BookRequestBloc>()..add(LoadBookDetail(bookId)),
+        ),
         BlocProvider(
-            create: (_) => BookDetailVariantCubit(
-                  getIt<VariantRepository>(),
-                  getIt<BookRequestRemoteDataSource>(),
-                  getIt<Dio>(),
-                  const FlutterSecureStorage(),
-                )),
+          create: (_) => BookDetailVariantCubit(
+            getIt<VariantRepository>(),
+            getIt<BookRequestRemoteDataSource>(),
+            getIt<Dio>(),
+            const FlutterSecureStorage(),
+          ),
+        ),
       ],
       child: const _BookDetailView(),
     );
@@ -146,8 +147,10 @@ class _BookDetailContent extends StatelessWidget {
                   return const Padding(
                     padding: EdgeInsets.all(16),
                     child: Center(
-                        child: CircularProgressIndicator(
-                            color: Color(0xFF2CE07F))),
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF2CE07F),
+                      ),
+                    ),
                   );
                 }
                 return _LanguageAndActions(book: book);
@@ -203,11 +206,14 @@ class _LanguageAndActions extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Available in',
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF042153))),
+              const Text(
+                'Available in',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF042153),
+                ),
+              ),
               const SizedBox(height: 10),
               SizedBox(
                 height: 36,
@@ -224,7 +230,9 @@ class _LanguageAndActions extends StatelessWidget {
                           .selectLanguage(lang),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 7),
+                          horizontal: 16,
+                          vertical: 7,
+                        ),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? const Color(0xFF042153)
@@ -261,7 +269,9 @@ class _LanguageAndActions extends StatelessWidget {
   }
 
   Widget _buildActionButtons(
-      BuildContext context, BookVariantEntity? selectedVariant) {
+    BuildContext context,
+    BookVariantEntity? selectedVariant,
+  ) {
     if (selectedVariant == null) return const SizedBox.shrink();
     final cubitState = context.read<BookDetailVariantCubit>().state;
     final buttons = <Widget>[];
@@ -275,101 +285,118 @@ class _LanguageAndActions extends StatelessWidget {
 
     if (hasFormat('ebook')) {
       final format = getFormat('ebook');
-      buttons.add(_actionBtn(
-        icon: Icons.chrome_reader_mode_rounded,
-        label: 'Read',
-        color: const Color(0xFF0D9488),
-        onTap: () {
-          if (!_checkPrimeOrPrompt(context)) return;
-          if (format?.fileUrl != null) {
-            final url = format!.fileUrl!;
-            Navigator.pushNamed(
-              context,
-              url.toLowerCase().contains('.epub')
-                  ? '/epub-reader'
-                  : '/pdf-reader',
-              arguments: {
-                'url': url,
-                'title': book.title,
-                'language': cubitState.selectedLanguage ?? 'en',
-                'bookId': book.id,
-                'coverImageUrl': book.coverImageUrl,
-                'author': book.author,
-              },
-            );
-          }
-        },
-      ));
+      buttons.add(
+        _actionBtn(
+          icon: Icons.chrome_reader_mode_rounded,
+          label: 'Read',
+          color: const Color(0xFF0D9488),
+          onTap: () {
+            if (!_checkPrimeOrPrompt(context)) return;
+            if (format?.fileUrl != null) {
+              final url = format!.fileUrl!;
+              Navigator.pushNamed(
+                context,
+                url.toLowerCase().contains('.epub')
+                    ? '/epub-reader'
+                    : '/pdf-reader',
+                arguments: {
+                  'url': url,
+                  'title': book.title,
+                  'language': cubitState.selectedLanguage ?? 'en',
+                  'bookId': book.id,
+                  'coverImageUrl': book.coverImageUrl,
+                  'author': book.author,
+                },
+              );
+            }
+          },
+        ),
+      );
     }
 
     if (hasFormat('audiobook')) {
       final format = getFormat('audiobook');
-      buttons.add(_actionBtn(
-        icon: Icons.headphones_rounded,
-        label: 'Listen',
-        color: const Color(0xFFD97706),
-        onTap: () {
-          if (!_checkPrimeOrPrompt(context)) return;
-          if (format != null && format.parts.isNotEmpty) {
-            final audioBook = AudioBook(
-              id: book.id,
-              title: book.title,
-              author: book.author,
-              coverUrl: book.coverImageUrl,
-              tracks: format.parts
-                  .where((p) => p.audioUrl != null && p.audioUrl!.isNotEmpty)
-                  .map((p) => AudioBookTrack(
+      buttons.add(
+        _actionBtn(
+          icon: Icons.headphones_rounded,
+          label: 'Listen',
+          color: const Color(0xFFD97706),
+          onTap: () {
+            if (!_checkPrimeOrPrompt(context)) return;
+            if (format != null && format.parts.isNotEmpty) {
+              final audioBook = AudioBook(
+                id: book.id,
+                title: book.title,
+                author: book.author,
+                coverUrl: book.coverImageUrl,
+                tracks: format.parts
+                    .where((p) => p.audioUrl != null && p.audioUrl!.isNotEmpty)
+                    .map(
+                      (p) => AudioBookTrack(
                         id: '${book.id}_${p.partNumber}',
                         title: p.title,
                         trackNumber: p.partNumber,
                         url: p.audioUrl!,
                         duration: Duration(seconds: p.duration),
-                      ))
-                  .toList(),
-              totalDuration: Duration(seconds: format.totalDuration ?? 0),
-            );
-            Navigator.pushNamed(context, '/audiobook-player',
-                arguments: audioBook);
-          }
-        },
-      ));
+                      ),
+                    )
+                    .toList(),
+                totalDuration: Duration(seconds: format.totalDuration ?? 0),
+              );
+              Navigator.pushNamed(
+                context,
+                '/audiobook-player',
+                arguments: audioBook,
+              );
+            }
+          },
+        ),
+      );
     }
 
     if (hasFormat('videobook')) {
       final format = getFormat('videobook');
-      buttons.add(_actionBtn(
-        icon: Icons.play_circle_rounded,
-        label: 'Watch',
-        color: const Color(0xFF7C3AED),
-        onTap: () {
-          if (!_checkPrimeOrPrompt(context)) return;
-          if (format != null && format.parts.isNotEmpty) {
-            final videoParts = format.parts
-                .where((p) => p.videoUrl != null && p.videoUrl!.isNotEmpty)
-                .toList();
-            if (videoParts.isNotEmpty) {
-              Navigator.pushNamed(context, '/videobook-player', arguments: {
-                'bookTitle': book.title,
-                'parts': videoParts,
-                'bookId': book.id,
-                'coverImageUrl': book.coverImageUrl,
-              });
+      buttons.add(
+        _actionBtn(
+          icon: Icons.play_circle_rounded,
+          label: 'Watch',
+          color: const Color(0xFF7C3AED),
+          onTap: () {
+            if (!_checkPrimeOrPrompt(context)) return;
+            if (format != null && format.parts.isNotEmpty) {
+              final videoParts = format.parts
+                  .where((p) => p.videoUrl != null && p.videoUrl!.isNotEmpty)
+                  .toList();
+              if (videoParts.isNotEmpty) {
+                Navigator.pushNamed(
+                  context,
+                  '/videobook-player',
+                  arguments: {
+                    'bookTitle': book.title,
+                    'parts': videoParts,
+                    'bookId': book.id,
+                    'coverImageUrl': book.coverImageUrl,
+                  },
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('No video chapters available'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                    content: Text('No video chapters available'),
-                    behavior: SnackBarBehavior.floating),
+                  content: Text('No video content available'),
+                  behavior: SnackBarBehavior.floating,
+                ),
               );
             }
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('No video content available'),
-                  behavior: SnackBarBehavior.floating),
-            );
-          }
-        },
-      ));
+          },
+        ),
+      );
     }
 
     if (buttons.isEmpty) return const SizedBox.shrink();
@@ -400,11 +427,14 @@ class _LanguageAndActions extends StatelessWidget {
           children: [
             Icon(icon, color: Colors.white, size: 18),
             const SizedBox(width: 6),
-            Text(label,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13)),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
           ],
         ),
       ),
@@ -628,8 +658,11 @@ class _BookRatingSummary extends StatelessWidget {
         if (state is ReviewError) {
           return Row(
             children: [
-              const Icon(Icons.error_outline,
-                  size: 18, color: Color(0xFF999999)),
+              const Icon(
+                Icons.error_outline,
+                size: 18,
+                color: Color(0xFF999999),
+              ),
               const SizedBox(width: 6),
               const Text(
                 'Ratings unavailable',
@@ -994,7 +1027,9 @@ class _BottomRequestBarState extends State<_BottomRequestBar> {
                         ? 'Already Requested'
                         : 'Add to Borrow Cart',
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
           ),
         ),

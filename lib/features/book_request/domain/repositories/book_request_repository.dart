@@ -26,18 +26,24 @@ abstract class BookRequestRepository {
   Future<BookRequestEntity> getRequestDetails(String id);
   Future<void> updateRequestStatus(String id, String status);
   Future<void> scheduleDelivery(
-      String id,
-      String name,
-      String phone,
-      String address,
-      String pincode,
-      String preferredDate,
-      String preferredTime);
-  Future<void> initiateReturn(String id, String returnMethod,
-      {String? returnBranchId});
+    String id,
+    String name,
+    String phone,
+    String address,
+    String pincode,
+    String preferredDate,
+    String preferredTime,
+  );
+  Future<void> initiateReturn(
+    String id,
+    String returnMethod, {
+    String? returnBranchId,
+  });
   Future<RequestPaymentIntent> createBookRequestPayment(String id);
-  Future<void> verifyBookRequestPayment(String id,
-      {required String paymentId,
-      required String orderId,
-      required String signature});
+  Future<void> verifyBookRequestPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+  });
 }

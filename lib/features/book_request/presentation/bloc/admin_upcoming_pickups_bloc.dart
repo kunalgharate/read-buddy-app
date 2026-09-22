@@ -70,9 +70,11 @@ class AdminUpcomingPickupsBloc
         emit(UpcomingPickupsLoaded(pickups));
       }
     } catch (e) {
-      emit(UpcomingPickupsError(
-        e.toString().replaceFirst('Exception: ', ''),
-      ));
+      emit(
+        UpcomingPickupsError(
+          e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
     }
   }
 }

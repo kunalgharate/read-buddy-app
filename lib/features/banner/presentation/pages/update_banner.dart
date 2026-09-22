@@ -82,18 +82,24 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                 },
                 validator: BookFormValidator.validateBannerTypes,
                 decoratorProps: const DropDownDecoratorProps(
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey)),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey)),
-                        hintText: 'Select Banner Type')),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    hintText: 'Select Banner Type',
+                  ),
+                ),
                 items: (f, cs) => ["Ads", "Banner", "Donation", "Info"],
                 popupProps: const PopupProps.menu(fit: FlexFit.loose),
               ),
               const SizedBox(height: 16),
-              const Text('Banner Description (Optional)',
-                  style: TextStyles.labelStyle),
+              const Text(
+                'Banner Description (Optional)',
+                style: TextStyles.labelStyle,
+              ),
               MyTextField(
                 controller: descriptionController,
                 hintText: "Enter Banner Description",
@@ -103,8 +109,10 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 16),
-              const Text('Banner Link (Optional)',
-                  style: TextStyles.labelStyle),
+              const Text(
+                'Banner Link (Optional)',
+                style: TextStyles.labelStyle,
+              ),
               MyTextField(
                 controller: linkController,
                 hintText: "Enter Banner Link",
@@ -143,8 +151,8 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                                           fit: BoxFit.cover,
                                           placeholder: (context, url) =>
                                               const Center(
-                                                  child:
-                                                      CircularProgressIndicator()),
+                                            child: CircularProgressIndicator(),
+                                          ),
                                           errorWidget: (context, url, error) =>
                                               const Icon(Icons.error),
                                         )
@@ -178,7 +186,7 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
                                           color: Colors.black26,
                                           blurRadius: 3,
                                           offset: Offset(1, 1),
-                                        )
+                                        ),
                                       ],
                                     ),
                                     padding: const EdgeInsets.all(4),
@@ -233,16 +241,18 @@ class _UpdateBannerPageState extends State<UpdateBanner> {
       //   final imageFile = File(selectedImages.first!.path);
       // }
 
-      context.read<BannerBloc>().add(UpdateBannerEvent(
-            id: widget.banner.id ?? "",
-            title: titleController.text,
-            link: linkController.text.isNotEmpty ? linkController.text : "",
-            description: descriptionController.text,
-            bannerType: bannerTypeController.text,
-            bannerImage: selectedImages.isNotEmpty
-                ? File(selectedImages.first!.path)
-                : File(images.first),
-          ));
+      context.read<BannerBloc>().add(
+            UpdateBannerEvent(
+              id: widget.banner.id ?? "",
+              title: titleController.text,
+              link: linkController.text.isNotEmpty ? linkController.text : "",
+              description: descriptionController.text,
+              bannerType: bannerTypeController.text,
+              bannerImage: selectedImages.isNotEmpty
+                  ? File(selectedImages.first!.path)
+                  : File(images.first),
+            ),
+          );
 
       Navigator.pop(context);
     }

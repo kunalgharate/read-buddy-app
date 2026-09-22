@@ -18,12 +18,12 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
   final CreateBannerUsecase createBannerUsecase;
   final UpdateBannerUsecase updateBannerUsecase;
   final DeleteBannerUsecase deleteBannerUsecase;
-  BannerBloc(
-      {required this.getBannerUsecase,
-      required this.createBannerUsecase,
-      required this.updateBannerUsecase,
-      required this.deleteBannerUsecase})
-      : super(BannerInitial()) {
+  BannerBloc({
+    required this.getBannerUsecase,
+    required this.createBannerUsecase,
+    required this.updateBannerUsecase,
+    required this.deleteBannerUsecase,
+  }) : super(BannerInitial()) {
     on<GetBannerListEvent>(_onGetBanners);
     on<CreateBannerEvent>(_onCreateBanner);
     on<UpdateBannerEvent>(_onUpdateBanner);
@@ -31,7 +31,9 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
   }
 
   Future<void> _onGetBanners(
-      GetBannerListEvent event, Emitter<BannerState> emit) async {
+    GetBannerListEvent event,
+    Emitter<BannerState> emit,
+  ) async {
     _currentTypeFilter = event.typeFilter;
     emit(BannerLoading());
     try {
@@ -39,9 +41,11 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
 
       final filteredBanners = _currentTypeFilter != null
           ? banners
-              .where((b) =>
-                  b.bannerType.toLowerCase() ==
-                  _currentTypeFilter!.toLowerCase())
+              .where(
+                (b) =>
+                    b.bannerType.toLowerCase() ==
+                    _currentTypeFilter!.toLowerCase(),
+              )
               .toList()
           : banners;
 
@@ -52,7 +56,9 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
   }
 
   Future<void> _onCreateBanner(
-      CreateBannerEvent event, Emitter<BannerState> emit) async {
+    CreateBannerEvent event,
+    Emitter<BannerState> emit,
+  ) async {
     emit(BannerLoading());
     try {
       await createBannerUsecase.call(
@@ -69,7 +75,9 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
   }
 
   Future<void> _onUpdateBanner(
-      UpdateBannerEvent event, Emitter<BannerState> emit) async {
+    UpdateBannerEvent event,
+    Emitter<BannerState> emit,
+  ) async {
     emit(BannerLoading());
     try {
       await updateBannerUsecase.call(
@@ -87,7 +95,9 @@ class BannerBloc extends Bloc<BannerEvent, BannerState> {
   }
 
   Future<void> _onDeleteBanner(
-      DeleteBannerEvent event, Emitter<BannerState> emit) async {
+    DeleteBannerEvent event,
+    Emitter<BannerState> emit,
+  ) async {
     emit(BannerLoading());
     try {
       await deleteBannerUsecase.call(id: event.id);

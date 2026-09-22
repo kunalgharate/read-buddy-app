@@ -45,11 +45,13 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
       // Fetch previously saved preferences and pre-select answers
       final saved = await getQuestionsUseCase.repository.getSavedPreferences();
 
-      emit(OnboardingQuestionsLoaded(
-        questions: questions,
-        currentIndex: 0,
-        answers: saved,
-      ));
+      emit(
+        OnboardingQuestionsLoaded(
+          questions: questions,
+          currentIndex: 0,
+          answers: saved,
+        ),
+      );
     } catch (e) {
       emit(OnboardingError('Failed to load questions: ${e.toString()}'));
     }

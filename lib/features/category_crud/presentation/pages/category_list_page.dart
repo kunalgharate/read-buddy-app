@@ -50,7 +50,9 @@ class _CategoryListPageState extends State<CategoryListPage> {
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
                         return _buildCategoryCard(
-                            state.categories[index], context);
+                          state.categories[index],
+                          context,
+                        );
                       },
                     );
                   } else if (state is CategoryError) {
@@ -69,8 +71,10 @@ class _CategoryListPageState extends State<CategoryListPage> {
         shape: const CircleBorder(),
         tooltip: 'Add Category',
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const AddCategory()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddCategory()),
+          );
         },
         child: const Icon(Icons.add, color: Color(0xFF052E44), size: 28),
       ),
@@ -80,50 +84,52 @@ class _CategoryListPageState extends State<CategoryListPage> {
 
   void updateDialog(CategoryEntity category) async {
     await showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        builder: (ctx) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.edit, color: Color(0xFF052E44)),
-                  title: const Text('Edit Category'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => UpdateCategoryPage(category: category),
-                      ),
-                    );
-                  },
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit, color: Color(0xFF052E44)),
+                title: const Text('Edit Category'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UpdateCategoryPage(category: category),
+                    ),
+                  );
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text(
+                  'Delete Category',
+                  style: TextStyle(color: Colors.red),
                 ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text('Delete Category',
-                      style: TextStyle(color: Colors.red)),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _confirmDelete(category.id);
-                  },
-                ),
-              ],
-            ),
-          );
-        });
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _confirmDelete(category.id);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _confirmDelete(String id) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-  
         title: const Text(
           'Delete Category',
           style:
@@ -136,8 +142,10 @@ class _CategoryListPageState extends State<CategoryListPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF052E44))),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF052E44)),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -147,7 +155,8 @@ class _CategoryListPageState extends State<CategoryListPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6)),
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
@@ -235,8 +244,11 @@ class _CategoryListPageState extends State<CategoryListPage> {
             ),
             IconButton(
               onPressed: () => updateDialog(category),
-              icon: const Icon(Icons.more_vert,
-                  size: 20, color: Color(0xFF141414)),
+              icon: const Icon(
+                Icons.more_vert,
+                size: 20,
+                color: Color(0xFF141414),
+              ),
             ),
           ],
         ),

@@ -82,11 +82,14 @@ class _AddBookPage2State extends State<AddBookPage2> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Book Condition',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color.fromARGB(255, 4, 33, 83))),
+              const Text(
+                'Book Condition',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
+              ),
               const SizedBox(height: 16),
 
               /// ✅ Book Condition Dropdown
@@ -98,10 +101,13 @@ class _AddBookPage2State extends State<AddBookPage2> {
                 },
                 validator: BookFormValidator.validateLanguage,
                 decoratorProps: const DropDownDecoratorProps(
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey)),
-                        hintText: 'Select Condition')),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    hintText: 'Select Condition',
+                  ),
+                ),
                 items: (f, cs) => ['new', 'like_new', 'used_good', 'used_poor'],
                 popupProps: const PopupProps.menu(fit: FlexFit.loose),
               ),
@@ -118,11 +124,14 @@ class _AddBookPage2State extends State<AddBookPage2> {
               ),
               const SizedBox(height: 40),
 
-              const Text('Book Sources Information',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color.fromARGB(255, 4, 33, 83))),
+              const Text(
+                'Book Sources Information',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
+              ),
               const SizedBox(height: 16),
 
               /// ✅ Owner Name
@@ -161,13 +170,15 @@ class _AddBookPage2State extends State<AddBookPage2> {
                     itemCount: BookValueItems.locationsuggestions.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text(BookValueItems
-                            .locationsuggestions[index].description),
+                        title: Text(
+                          BookValueItems.locationsuggestions[index].description,
+                        ),
                         onTap: () {
                           locationController.text = BookValueItems
                               .locationsuggestions[index].description;
                           setState(
-                              () => BookValueItems.locationsuggestions.clear());
+                            () => BookValueItems.locationsuggestions.clear(),
+                          );
                         },
                       );
                     },
@@ -216,7 +227,8 @@ class _AddBookPage2State extends State<AddBookPage2> {
                       if (selectedImages.length >= 5) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('Maximum 5 images allowed')),
+                            content: Text('Maximum 5 images allowed'),
+                          ),
                         );
                       } else {
                         dialogpermission();
@@ -316,10 +328,12 @@ class _AddBookPage2State extends State<AddBookPage2> {
               Wrap(
                 spacing: 6,
                 children: _tags
-                    .map((tag) => Chip(
-                          label: Text(tag),
-                          onDeleted: () => _removeTag(tag),
-                        ))
+                    .map(
+                      (tag) => Chip(
+                        label: Text(tag),
+                        onDeleted: () => _removeTag(tag),
+                      ),
+                    )
                     .toList(),
               ),
               const SizedBox(height: 24),
@@ -334,8 +348,10 @@ class _AddBookPage2State extends State<AddBookPage2> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text("Done",
-                    style: TextStyle(color: Color.fromARGB(255, 4, 33, 83))),
+                child: const Text(
+                  "Done",
+                  style: TextStyle(color: Color.fromARGB(255, 4, 33, 83)),
+                ),
               ),
               const SizedBox(height: 30),
             ],
@@ -376,7 +392,7 @@ class _AddBookPage2State extends State<AddBookPage2> {
                     color: Colors.black26,
                     blurRadius: 3,
                     offset: Offset(1, 1),
-                  )
+                  ),
                 ],
               ),
               padding: const EdgeInsets.all(4),

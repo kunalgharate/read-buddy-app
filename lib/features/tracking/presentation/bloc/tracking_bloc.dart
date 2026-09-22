@@ -76,8 +76,12 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     } catch (e) {
       if (previous is TrackingLoaded) {
         // Keep showing the last good data; surface the error transiently.
-        emit(TrackingRefreshError(
-            previous.shipment, ErrorHandler.getErrorMessage(e)));
+        emit(
+          TrackingRefreshError(
+            previous.shipment,
+            ErrorHandler.getErrorMessage(e),
+          ),
+        );
         emit(previous);
       } else {
         emit(TrackingError(ErrorHandler.getErrorMessage(e)));

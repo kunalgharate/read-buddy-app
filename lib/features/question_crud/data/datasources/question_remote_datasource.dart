@@ -40,8 +40,11 @@ class QuestionRemoteDataSource {
             : 'multiSelection',
       };
 
-      await _dio.post('$baseUrl/question',
-          data: requestData, options: await _authOptions);
+      await _dio.post(
+        '$baseUrl/question',
+        data: requestData,
+        options: await _authOptions,
+      );
     } catch (e) {
       throw Exception('Failed to add question: $e');
     }
@@ -58,8 +61,11 @@ class QuestionRemoteDataSource {
             : 'multiSelection',
       };
 
-      await _dio.put('$baseUrl/question/${question.id}',
-          data: requestData, options: await _authOptions);
+      await _dio.put(
+        '$baseUrl/question/${question.id}',
+        data: requestData,
+        options: await _authOptions,
+      );
     } catch (e) {
       throw Exception('Failed to update question: $e');
     }

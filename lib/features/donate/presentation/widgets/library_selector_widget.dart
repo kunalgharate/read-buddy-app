@@ -225,8 +225,11 @@ class _LibraryTile extends StatelessWidget {
             // Check mark
             if (isSelected) ...[
               const SizedBox(width: 8),
-              const Icon(Icons.check_circle,
-                  color: AppColors.primary, size: 22),
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.primary,
+                size: 22,
+              ),
             ],
           ],
         ),

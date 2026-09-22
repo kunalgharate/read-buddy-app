@@ -204,9 +204,13 @@ class _AddBookPageState extends State<AddBookPage> {
         appBar: widget.onContinue != null
             ? null
             : AppBar(
-                title: const Text('Add Book',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Color(0xFF042153))),
+                title: const Text(
+                  'Add Book',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF042153),
+                  ),
+                ),
                 centerTitle: true,
               ),
         body: Stack(
@@ -294,14 +298,18 @@ class _AddBookPageState extends State<AddBookPage> {
                         spacing: 6,
                         runSpacing: 4,
                         children: _tags
-                            .map((tag) => Chip(
-                                  label: Text(tag,
-                                      style: const TextStyle(fontSize: 12)),
-                                  deleteIcon: const Icon(Icons.close, size: 16),
-                                  onDeleted: () => _removeTag(tag),
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ))
+                            .map(
+                              (tag) => Chip(
+                                label: Text(
+                                  tag,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                deleteIcon: const Icon(Icons.close, size: 16),
+                                onDeleted: () => _removeTag(tag),
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                              ),
+                            )
                             .toList(),
                       ),
                     ],
@@ -325,10 +333,12 @@ class _AddBookPageState extends State<AddBookPage> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: Image.file(_coverImage!,
-                                        width: double.infinity,
-                                        height: 200,
-                                        fit: BoxFit.cover),
+                                    child: Image.file(
+                                      _coverImage!,
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                   Positioned(
                                     top: 8,
@@ -342,8 +352,11 @@ class _AddBookPageState extends State<AddBookPage> {
                                           color: Colors.white,
                                           shape: BoxShape.circle,
                                         ),
-                                        child: const Icon(Icons.close,
-                                            color: Colors.red, size: 18),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.red,
+                                          size: 18,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -352,13 +365,19 @@ class _AddBookPageState extends State<AddBookPage> {
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.cloud_upload_outlined,
-                                      size: 40, color: Colors.grey.shade400),
+                                  Icon(
+                                    Icons.cloud_upload_outlined,
+                                    size: 40,
+                                    color: Colors.grey.shade400,
+                                  ),
                                   const SizedBox(height: 8),
-                                  Text('Tap to upload cover image',
-                                      style: TextStyle(
-                                          color: Colors.grey.shade500,
-                                          fontSize: 13)),
+                                  Text(
+                                    'Tap to upload cover image',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 13,
+                                    ),
+                                  ),
                                 ],
                               ),
                       ),
@@ -382,13 +401,18 @@ class _AddBookPageState extends State<AddBookPage> {
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
                               )
-                            : const Text('Add Book',
+                            : const Text(
+                                'Add Book',
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16)),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -410,11 +434,14 @@ class _AddBookPageState extends State<AddBookPage> {
   Widget _label(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(text,
-          style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 15,
-              color: Color(0xFF042153))),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 15,
+          color: Color(0xFF042153),
+        ),
+      ),
     );
   }
 }

@@ -218,7 +218,8 @@ class _LibraryCard extends StatelessWidget {
                   PopupMenuItem(
                     value: 'toggle_super',
                     child: Text(
-                        library.isSuperLibrary ? 'Remove Super' : 'Make Super'),
+                      library.isSuperLibrary ? 'Remove Super' : 'Make Super',
+                    ),
                   ),
                   const PopupMenuItem(
                     value: 'delete',

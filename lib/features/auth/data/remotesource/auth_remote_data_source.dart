@@ -6,8 +6,10 @@ import '../../../../core/utils/network_utils.dart';
 import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AppUserModel> signIn(
-      {required String email, required String password});
+  Future<AppUserModel> signIn({
+    required String email,
+    required String password,
+  });
   Future<String> registerUser(Map<String, dynamic> data);
   Future<AppUserModel> verifyEmail(String email, String code);
   Future<void> resendRegisterOtp(String email);
@@ -274,7 +276,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 AuthRemoteDataSource: Register OTP resent ${response.statusCode}');
+          '🌐 AuthRemoteDataSource: Register OTP resent ${response.statusCode}',
+        );
       }
 
       if (response.statusCode != ApiConstants.success &&
@@ -306,7 +309,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 AuthRemoteDataSource: Google sign-in response status: ${response.statusCode}');
+          '🌐 AuthRemoteDataSource: Google sign-in response status: ${response.statusCode}',
+        );
       }
 
       if (response.statusCode == ApiConstants.success) {
@@ -323,7 +327,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         // Log only the error type, not the message, to avoid leaking any
         // request payload or credentials from the exception.
         print(
-            '🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
+          '🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})',
+        );
       }
       rethrow;
     }
@@ -405,7 +410,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> changePassword(
-      String email, String code, String newPassword) async {
+    String email,
+    String code,
+    String newPassword,
+  ) async {
     if (kDebugMode) {
       print('🌐 AuthRemoteDataSource: Changing password for $email');
     }
@@ -431,7 +439,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 AuthRemoteDataSource: Password changed ${response.statusCode}');
+          '🌐 AuthRemoteDataSource: Password changed ${response.statusCode}',
+        );
       }
 
       if (response.statusCode != ApiConstants.success) {

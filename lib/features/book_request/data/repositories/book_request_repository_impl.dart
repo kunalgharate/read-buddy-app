@@ -63,8 +63,10 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   }
 
   @override
-  Future<void> declineBookRequest(String id,
-      {String reason = 'Request declined'}) async {
+  Future<void> declineBookRequest(
+    String id, {
+    String reason = 'Request declined',
+  }) async {
     return await remoteDataSource.declineBookRequest(id, reason: reason);
   }
 
@@ -90,22 +92,36 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
 
   @override
   Future<void> scheduleDelivery(
-      String id,
-      String name,
-      String phone,
-      String address,
-      String pincode,
-      String preferredDate,
-      String preferredTime) async {
+    String id,
+    String name,
+    String phone,
+    String address,
+    String pincode,
+    String preferredDate,
+    String preferredTime,
+  ) async {
     return await remoteDataSource.scheduleDelivery(
-        id, name, phone, address, pincode, preferredDate, preferredTime);
+      id,
+      name,
+      phone,
+      address,
+      pincode,
+      preferredDate,
+      preferredTime,
+    );
   }
 
   @override
-  Future<void> initiateReturn(String id, String returnMethod,
-      {String? returnBranchId}) async {
-    return await remoteDataSource.initiateReturn(id, returnMethod,
-        returnBranchId: returnBranchId);
+  Future<void> initiateReturn(
+    String id,
+    String returnMethod, {
+    String? returnBranchId,
+  }) async {
+    return await remoteDataSource.initiateReturn(
+      id,
+      returnMethod,
+      returnBranchId: returnBranchId,
+    );
   }
 
   @override
@@ -114,11 +130,17 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   }
 
   @override
-  Future<void> verifyBookRequestPayment(String id,
-      {required String paymentId,
-      required String orderId,
-      required String signature}) async {
-    return await remoteDataSource.verifyBookRequestPayment(id,
-        paymentId: paymentId, orderId: orderId, signature: signature);
+  Future<void> verifyBookRequestPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+  }) async {
+    return await remoteDataSource.verifyBookRequestPayment(
+      id,
+      paymentId: paymentId,
+      orderId: orderId,
+      signature: signature,
+    );
   }
 }

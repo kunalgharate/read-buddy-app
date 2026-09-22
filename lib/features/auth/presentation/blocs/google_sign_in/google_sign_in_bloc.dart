@@ -51,8 +51,11 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
       final idToken = auth.idToken;
 
       if (idToken == null || idToken.isEmpty) {
-        emit(const GoogleSignInFailure(
-            "Could not verify your Google account. Please try again."));
+        emit(
+          const GoogleSignInFailure(
+            "Could not verify your Google account. Please try again.",
+          ),
+        );
         // Best-effort cleanup so a retry re-prompts the picker.
         try {
           await googleSignIn.disconnect();
@@ -61,8 +64,7 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
       }
 
       // Exchange the ID token for an authenticated session (tokens included).
-      final user =
-          await _signInWithGoogle(SignInGoogleParams(token: idToken));
+      final user = await _signInWithGoogle(SignInGoogleParams(token: idToken));
 
       emit(GoogleSignInAuthenticated(user));
 
@@ -84,11 +86,10 @@ class GoogleSignInBloc extends Bloc<GoogleSignInEvent, GoogleSignInState> {
   /// backend verifies (backend GOOGLE_CLIENT_ID). Falls back to no
   /// serverClientId if not configured (id token won't be backend-verifiable).
   GoogleSignIn _buildGoogleSignIn() {
-    final serverClientId = AppConfig.isInitialized
-        ? AppConfig.instance.googleServerClientId
-        : '';
-    final valid = serverClientId.isNotEmpty &&
-        !serverClientId.startsWith('PASTE_');
+    final serverClientId =
+        AppConfig.isInitialized ? AppConfig.instance.googleServerClientId : '';
+    final valid =
+        serverClientId.isNotEmpty && !serverClientId.startsWith('PASTE_');
     return GoogleSignIn(
       scopes: const ['email', 'profile'],
       serverClientId: valid ? serverClientId : null,

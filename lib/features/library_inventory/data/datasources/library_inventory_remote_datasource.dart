@@ -86,8 +86,10 @@ class LibraryInventoryRemoteDataSourceImpl
     final data = response.data;
     final list = (data['inventory'] as List?) ?? [];
     return list
-        .map((json) =>
-            LibraryInventoryModel.fromJson(json as Map<String, dynamic>))
+        .map(
+          (json) =>
+              LibraryInventoryModel.fromJson(json as Map<String, dynamic>),
+        )
         .toList();
   }
 

@@ -22,9 +22,7 @@ class _DonatedBooksPageState extends State<DonatedBooksPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF052E44)),
@@ -78,7 +76,9 @@ class _DonatedBooksPageState extends State<DonatedBooksPage> {
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     itemCount: state.donatedBooks.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) =>

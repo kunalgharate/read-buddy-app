@@ -42,12 +42,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         print('✅ HomeBloc: All sections loaded | isPrime: $isPrime');
       }
 
-      emit(HomeLoaded(
-        latestBooks: results[0],
-        trendingBooks: results[1],
-        isPrime: isPrime,
-        recommendedBooks: recommended,
-      ));
+      emit(
+        HomeLoaded(
+          latestBooks: results[0],
+          trendingBooks: results[1],
+          isPrime: isPrime,
+          recommendedBooks: recommended,
+        ),
+      );
     } catch (e) {
       if (kDebugMode) {
         print('❌ HomeBloc: Error → $e');

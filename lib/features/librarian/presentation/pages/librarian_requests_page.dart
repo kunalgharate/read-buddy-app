@@ -68,8 +68,10 @@ class _RequestsView extends StatelessWidget {
                   children: [
                     Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
                     SizedBox(height: 12),
-                    Text('No book requests yet',
-                        style: TextStyle(color: Colors.grey, fontSize: 16)),
+                    Text(
+                      'No book requests yet',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
                   ],
                 ),
               );
@@ -168,8 +170,10 @@ class _RequestCard extends StatelessWidget {
               children: [
                 const Icon(Icons.person_outline, size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text(userName.toString(),
-                    style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                Text(
+                  userName.toString(),
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                ),
               ],
             ),
             if (status == 'pending') ...[

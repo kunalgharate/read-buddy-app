@@ -137,8 +137,10 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
   // Removed inline markDelivered as it's now in the detail page.
 
   // ─── Parse helper ────────────────────────────────────────────────────────────
-  List<DonatedBooksModel> _parseDonations(dynamic data,
-      {bool isSingle = false}) {
+  List<DonatedBooksModel> _parseDonations(
+    dynamic data, {
+    bool isSingle = false,
+  }) {
     try {
       if (data is List) {
         return data
@@ -153,7 +155,9 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
         }
         if (data.containsKey('donation')) {
           return [
-            DonatedBooksModel.fromJson(data['donation'] as Map<String, dynamic>)
+            DonatedBooksModel.fromJson(
+              data['donation'] as Map<String, dynamic>,
+            ),
           ];
         }
         if (isSingle) {
@@ -172,9 +176,7 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF052E44)),
@@ -269,11 +271,15 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
                   const Spacer(),
                   TextButton.icon(
                     onPressed: _fetchAllDonations,
-                    icon: const Icon(Icons.refresh,
-                        size: 16, color: Color(0xFF052E44)),
-                    label: const Text('Refresh',
-                        style:
-                            TextStyle(color: Color(0xFF052E44), fontSize: 12)),
+                    icon: const Icon(
+                      Icons.refresh,
+                      size: 16,
+                      color: Color(0xFF052E44),
+                    ),
+                    label: const Text(
+                      'Refresh',
+                      style: TextStyle(color: Color(0xFF052E44), fontSize: 12),
+                    ),
                   ),
                 ],
               ),
@@ -310,7 +316,8 @@ class _AdminDonationsPageState extends State<AdminDonationsPage>
               ElevatedButton(
                 onPressed: _fetchAllDonations,
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF052E44)),
+                  backgroundColor: const Color(0xFF052E44),
+                ),
                 child:
                     const Text('Retry', style: TextStyle(color: Colors.white)),
               ),

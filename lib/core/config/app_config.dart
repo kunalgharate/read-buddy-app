@@ -22,7 +22,8 @@ class AppConfig {
   static AppConfig get instance {
     if (_instance == null) {
       throw StateError(
-          'AppConfig.init() must be called before accessing instance');
+        'AppConfig.init() must be called before accessing instance',
+      );
     }
     return _instance!;
   }

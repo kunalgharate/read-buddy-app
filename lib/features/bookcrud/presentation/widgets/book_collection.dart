@@ -78,8 +78,11 @@ class BooksCollection extends StatelessWidget {
                       height: 120,
                       width: 100,
                       color: const Color(0xFF042153),
-                      child: const Icon(Icons.menu_book_rounded,
-                          size: 32, color: Colors.white30),
+                      child: const Icon(
+                        Icons.menu_book_rounded,
+                        size: 32,
+                        color: Colors.white30,
+                      ),
                     ),
             ),
             const SizedBox(width: 8),
@@ -120,14 +123,15 @@ class BooksCollection extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                          onPressed: () {
-                            updatedialog(context, bookcollection);
-                          },
-                          icon: const Icon(
-                            Icons.more_vert,
-                            size: 24,
-                            color: Colors.black,
-                          ))
+                        onPressed: () {
+                          updatedialog(context, bookcollection);
+                        },
+                        icon: const Icon(
+                          Icons.more_vert,
+                          size: 24,
+                          color: Colors.black,
+                        ),
+                      ),
                     ],
                   ),
                   Wrap(
@@ -135,72 +139,92 @@ class BooksCollection extends StatelessWidget {
                     runSpacing: 4,
                     children: [
                       TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          child: Text(
-                            _resolveCategoryName(context),
-                            style: const TextStyle(
-                                color: Color.fromARGB(255, 6, 86, 150)),
-                          )),
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        child: Text(
+                          _resolveCategoryName(context),
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 6, 86, 150),
+                          ),
+                        ),
+                      ),
                       TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          child: Text(
-                            bookcollection.format,
-                            style: const TextStyle(
-                                color: Color.fromARGB(255, 6, 86, 150)),
-                          )),
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        child: Text(
+                          bookcollection.format,
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 6, 86, 150),
+                          ),
+                        ),
+                      ),
                       TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/book-variants',
-                              arguments:
-                                  BookCrudModel.fromEntity(bookcollection),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                              backgroundColor: const Color(0xFFE8F0FF),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.translate,
-                                  size: 14, color: Color(0xFF1565C0)),
-                              SizedBox(width: 4),
-                              Text(
-                                "Variants",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xFF1565C0),
-                                    fontWeight: FontWeight.bold),
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/book-variants',
+                            arguments: BookCrudModel.fromEntity(bookcollection),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: const Color(0xFFE8F0FF),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.translate,
+                              size: 14,
+                              color: Color(0xFF1565C0),
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              "Variants",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF1565C0),
+                                fontWeight: FontWeight.bold,
                               ),
-                            ],
-                          )),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(
                     height: 20,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -231,11 +255,13 @@ void updatedialog(BuildContext context, BookCrudEntity book) async {
                 Navigator.pop(context);
                 print("Your book id is ${book.id}");
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => UpdateBookStepper(
-                              bookId: book.id ?? "",
-                            )));
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UpdateBookStepper(
+                      bookId: book.id ?? "",
+                    ),
+                  ),
+                );
                 // Optional: close bottom sheet
               },
             ),

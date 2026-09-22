@@ -260,10 +260,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           final alreadyAdded =
               _ebookFiles.any((f) => f.fileName == platformFile.name);
           if (!alreadyAdded) {
-            _ebookFiles.add(PickedFileItem(
-              file: file,
-              fileName: platformFile.name,
-            ));
+            _ebookFiles.add(
+              PickedFileItem(
+                file: file,
+                fileName: platformFile.name,
+              ),
+            );
           }
         }
       });
@@ -326,10 +328,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
   void _addAudioPart() {
     setState(() {
-      _audioParts.add(AudioPartMeta(
-        partNumber: _audioParts.length + 1,
-        title: '',
-      ));
+      _audioParts.add(
+        AudioPartMeta(
+          partNumber: _audioParts.length + 1,
+          title: '',
+        ),
+      );
     });
   }
 
@@ -348,10 +352,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
   void _addVideoPart() {
     setState(() {
-      _videoParts.add(AudioPartMeta(
-        partNumber: _videoParts.length + 1,
-        title: '',
-      ));
+      _videoParts.add(
+        AudioPartMeta(
+          partNumber: _videoParts.length + 1,
+          title: '',
+        ),
+      );
     });
   }
 
@@ -385,20 +391,26 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
     if (!_hasHardcover && !_hasEbook && !_hasAudiobook && !_hasVideobook) {
       _showSnackBar(
-          'Please select at least one format option', Colors.orangeAccent);
+        'Please select at least one format option',
+        Colors.orangeAccent,
+      );
       return;
     }
 
     if (_hasEbook && _ebookFiles.isEmpty && !_ebookExistsOnServer) {
-      _showSnackBar('Please select at least one E-Book file (PDF/EPUB)',
-          Colors.orangeAccent);
+      _showSnackBar(
+        'Please select at least one E-Book file (PDF/EPUB)',
+        Colors.orangeAccent,
+      );
       return;
     }
 
     if (_hasAudiobook) {
       if (_audioParts.isEmpty) {
         _showSnackBar(
-            'Please add at least one audio part', Colors.orangeAccent);
+          'Please add at least one audio part',
+          Colors.orangeAccent,
+        );
         return;
       }
       // Only require files for NEW parts (not ones already on server)
@@ -406,14 +418,18 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           _audioParts.where((p) => !p.isFromServer && p.file == null).toList();
       if (newPartsWithoutFiles.isNotEmpty) {
         _showSnackBar(
-            'Please select audio files for new parts', Colors.orangeAccent);
+          'Please select audio files for new parts',
+          Colors.orangeAccent,
+        );
         return;
       }
       final missingTitles =
           _audioParts.where((p) => p.title.trim().isEmpty).toList();
       if (missingTitles.isNotEmpty) {
         _showSnackBar(
-            'Please enter titles for all audio parts', Colors.orangeAccent);
+          'Please enter titles for all audio parts',
+          Colors.orangeAccent,
+        );
         return;
       }
     }
@@ -421,59 +437,73 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
     if (_hasVideobook) {
       if (_videoParts.isEmpty) {
         _showSnackBar(
-            'Please add at least one video part', Colors.orangeAccent);
+          'Please add at least one video part',
+          Colors.orangeAccent,
+        );
         return;
       }
       final newPartsWithoutFiles =
           _videoParts.where((p) => !p.isFromServer && p.file == null).toList();
       if (newPartsWithoutFiles.isNotEmpty) {
         _showSnackBar(
-            'Please select video files for new parts', Colors.orangeAccent);
+          'Please select video files for new parts',
+          Colors.orangeAccent,
+        );
         return;
       }
       final missingTitles =
           _videoParts.where((p) => p.title.trim().isEmpty).toList();
       if (missingTitles.isNotEmpty) {
         _showSnackBar(
-            'Please enter titles for all video parts', Colors.orangeAccent);
+          'Please enter titles for all video parts',
+          Colors.orangeAccent,
+        );
         return;
       }
     }
 
     final List<LocalBookFormat> formats = [];
     if (_hasHardcover) {
-      formats.add(LocalBookFormat(
-        type: 'hardcover',
-        isbn: _isbnController.text.trim(),
-        copies: int.tryParse(_copiesController.text.trim()) ?? 1,
-        available: _hardcoverAvailable,
-      ));
+      formats.add(
+        LocalBookFormat(
+          type: 'hardcover',
+          isbn: _isbnController.text.trim(),
+          copies: int.tryParse(_copiesController.text.trim()) ?? 1,
+          available: _hardcoverAvailable,
+        ),
+      );
     }
     if (_hasEbook) {
-      formats.add(LocalBookFormat(
-        type: 'ebook',
-        ebookFiles: List.from(_ebookFiles),
-      ));
+      formats.add(
+        LocalBookFormat(
+          type: 'ebook',
+          ebookFiles: List.from(_ebookFiles),
+        ),
+      );
     }
     if (_hasAudiobook) {
-      formats.add(LocalBookFormat(
-        type: 'audiobook',
-        audioParts: List.from(_audioParts),
-        audioFiles: _audioParts
-            .where((p) => p.file != null)
-            .map((p) => p.file!)
-            .toList(),
-      ));
+      formats.add(
+        LocalBookFormat(
+          type: 'audiobook',
+          audioParts: List.from(_audioParts),
+          audioFiles: _audioParts
+              .where((p) => p.file != null)
+              .map((p) => p.file!)
+              .toList(),
+        ),
+      );
     }
     if (_hasVideobook) {
-      formats.add(LocalBookFormat(
-        type: 'videobook',
-        videoParts: List.from(_videoParts),
-        videoFiles: _videoParts
-            .where((p) => p.file != null)
-            .map((p) => p.file!)
-            .toList(),
-      ));
+      formats.add(
+        LocalBookFormat(
+          type: 'videobook',
+          videoParts: List.from(_videoParts),
+          videoFiles: _videoParts
+              .where((p) => p.file != null)
+              .map((p) => p.file!)
+              .toList(),
+        ),
+      );
     }
 
     final newVariant = LocalBookVariant(
@@ -539,8 +569,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               if (!pf.file.existsSync()) {
                 filesValid = false;
                 _showSnackBar(
-                    'File "${pf.fileName}" expired. Please re-select it.',
-                    Colors.redAccent);
+                  'File "${pf.fileName}" expired. Please re-select it.',
+                  Colors.redAccent,
+                );
                 break;
               }
             }
@@ -551,8 +582,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               if (p.file != null && !p.file!.file.existsSync()) {
                 filesValid = false;
                 _showSnackBar(
-                    'Audio file "${p.file!.fileName}" expired. Please re-select.',
-                    Colors.redAccent);
+                  'Audio file "${p.file!.fileName}" expired. Please re-select.',
+                  Colors.redAccent,
+                );
                 break;
               }
             }
@@ -563,8 +595,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               if (p.file != null && !p.file!.file.existsSync()) {
                 filesValid = false;
                 _showSnackBar(
-                    'Video file "${p.file!.fileName}" expired. Please re-select.',
-                    Colors.redAccent);
+                  'Video file "${p.file!.fileName}" expired. Please re-select.',
+                  Colors.redAccent,
+                );
                 break;
               }
             }
@@ -587,8 +620,12 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
         for (final f in localVariant.formats) {
           if (f.type == 'ebook' && f.ebookFiles.isNotEmpty) {
             ebookFiles = f.ebookFiles.map((pf) => pf.file).toList();
-            formats.add(BookFormatEntity(
-                type: 'ebook', donorId: localVariant.donatorInfo));
+            formats.add(
+              BookFormatEntity(
+                type: 'ebook',
+                donorId: localVariant.donatorInfo,
+              ),
+            );
           } else if (f.type == 'audiobook' &&
               f.audioParts.any((p) => p.file != null)) {
             audioParts = f.audioParts
@@ -597,16 +634,21 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 .toList();
             final parts = f.audioParts
                 .where((p) => p.file != null)
-                .map((p) => MediaPartEntity(
-                      partNumber: p.partNumber,
-                      title: p.title,
-                      duration: 0,
-                    ))
+                .map(
+                  (p) => MediaPartEntity(
+                    partNumber: p.partNumber,
+                    title: p.title,
+                    duration: 0,
+                  ),
+                )
                 .toList();
-            formats.add(BookFormatEntity(
+            formats.add(
+              BookFormatEntity(
                 type: 'audiobook',
                 donorId: localVariant.donatorInfo,
-                parts: parts));
+                parts: parts,
+              ),
+            );
           } else if (f.type == 'videobook' &&
               f.videoParts.any((p) => p.file != null)) {
             videoParts = f.videoParts
@@ -615,25 +657,32 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 .toList();
             final parts = f.videoParts
                 .where((p) => p.file != null)
-                .map((p) => MediaPartEntity(
-                      partNumber: p.partNumber,
-                      title: p.title,
-                      duration: 0,
-                    ))
+                .map(
+                  (p) => MediaPartEntity(
+                    partNumber: p.partNumber,
+                    title: p.title,
+                    duration: 0,
+                  ),
+                )
                 .toList();
-            formats.add(BookFormatEntity(
+            formats.add(
+              BookFormatEntity(
                 type: 'videobook',
                 donorId: localVariant.donatorInfo,
-                parts: parts));
+                parts: parts,
+              ),
+            );
           } else if (f.type == 'hardcover' || f.type == 'paperback') {
             // Physical books — always include (no files needed)
-            formats.add(BookFormatEntity(
-              type: f.type,
-              donorId: localVariant.donatorInfo,
-              isbn: f.isbn,
-              copies: f.copies,
-              availableCopies: (f.available == true) ? (f.copies ?? 1) : 0,
-            ));
+            formats.add(
+              BookFormatEntity(
+                type: f.type,
+                donorId: localVariant.donatorInfo,
+                isbn: f.isbn,
+                copies: f.copies,
+                availableCopies: (f.available == true) ? (f.copies ?? 1) : 0,
+              ),
+            );
           }
         }
 
@@ -652,23 +701,29 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             if (f.type == 'ebook' && f.ebookFiles.isNotEmpty) {
               if (hasServerFormatId) {
                 // Add ebook files to existing format
-                variantBloc.add(AddPartsToFormatEvent(
-                  variantId: localVariant.existingVariantId!,
-                  formatId: f.id!,
-                  bookId: bookId,
-                  ebookFiles: f.ebookFiles.map((pf) => pf.file).toList(),
-                ));
+                variantBloc.add(
+                  AddPartsToFormatEvent(
+                    variantId: localVariant.existingVariantId!,
+                    formatId: f.id!,
+                    bookId: bookId,
+                    ebookFiles: f.ebookFiles.map((pf) => pf.file).toList(),
+                  ),
+                );
               } else {
                 // New ebook format — use AddFormatEvent
-                variantBloc.add(AddFormatEvent(
-                  localVariant.existingVariantId!,
-                  bookId,
-                  [
-                    BookFormatEntity(
-                        type: 'ebook', donorId: localVariant.donatorInfo)
-                  ],
-                  ebookFiles: f.ebookFiles.map((pf) => pf.file).toList(),
-                ));
+                variantBloc.add(
+                  AddFormatEvent(
+                    localVariant.existingVariantId!,
+                    bookId,
+                    [
+                      BookFormatEntity(
+                        type: 'ebook',
+                        donorId: localVariant.donatorInfo,
+                      ),
+                    ],
+                    ebookFiles: f.ebookFiles.map((pf) => pf.file).toList(),
+                  ),
+                );
               }
             } else if (f.type == 'audiobook') {
               final newParts = f.audioParts
@@ -678,35 +733,42 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
               final audioFiles = newParts.map((p) => p.file!.file).toList();
               final parts = newParts
-                  .map((p) => MediaPartEntity(
-                        partNumber: p.partNumber,
-                        title: p.title,
-                        duration: 0,
-                      ))
+                  .map(
+                    (p) => MediaPartEntity(
+                      partNumber: p.partNumber,
+                      title: p.title,
+                      duration: 0,
+                    ),
+                  )
                   .toList();
 
               if (hasServerFormatId) {
                 // Add parts to existing audiobook format
-                variantBloc.add(AddPartsToFormatEvent(
-                  variantId: localVariant.existingVariantId!,
-                  formatId: f.id!,
-                  bookId: bookId,
-                  parts: parts,
-                  audioParts: audioFiles,
-                ));
+                variantBloc.add(
+                  AddPartsToFormatEvent(
+                    variantId: localVariant.existingVariantId!,
+                    formatId: f.id!,
+                    bookId: bookId,
+                    parts: parts,
+                    audioParts: audioFiles,
+                  ),
+                );
               } else {
                 // New audiobook format
-                variantBloc.add(AddFormatEvent(
-                  localVariant.existingVariantId!,
-                  bookId,
-                  [
-                    BookFormatEntity(
+                variantBloc.add(
+                  AddFormatEvent(
+                    localVariant.existingVariantId!,
+                    bookId,
+                    [
+                      BookFormatEntity(
                         type: 'audiobook',
                         donorId: localVariant.donatorInfo,
-                        parts: parts)
-                  ],
-                  audioParts: audioFiles,
-                ));
+                        parts: parts,
+                      ),
+                    ],
+                    audioParts: audioFiles,
+                  ),
+                );
               }
             } else if (f.type == 'videobook') {
               final newParts = f.videoParts
@@ -716,53 +778,62 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
 
               final videoFiles = newParts.map((p) => p.file!.file).toList();
               final parts = newParts
-                  .map((p) => MediaPartEntity(
-                        partNumber: p.partNumber,
-                        title: p.title,
-                        duration: 0,
-                      ))
+                  .map(
+                    (p) => MediaPartEntity(
+                      partNumber: p.partNumber,
+                      title: p.title,
+                      duration: 0,
+                    ),
+                  )
                   .toList();
 
               if (hasServerFormatId) {
                 // Add parts to existing videobook format
-                variantBloc.add(AddPartsToFormatEvent(
-                  variantId: localVariant.existingVariantId!,
-                  formatId: f.id!,
-                  bookId: bookId,
-                  parts: parts,
-                  videoParts: videoFiles,
-                ));
+                variantBloc.add(
+                  AddPartsToFormatEvent(
+                    variantId: localVariant.existingVariantId!,
+                    formatId: f.id!,
+                    bookId: bookId,
+                    parts: parts,
+                    videoParts: videoFiles,
+                  ),
+                );
               } else {
                 // New videobook format
-                variantBloc.add(AddFormatEvent(
-                  localVariant.existingVariantId!,
-                  bookId,
-                  [
-                    BookFormatEntity(
+                variantBloc.add(
+                  AddFormatEvent(
+                    localVariant.existingVariantId!,
+                    bookId,
+                    [
+                      BookFormatEntity(
                         type: 'videobook',
                         donorId: localVariant.donatorInfo,
-                        parts: parts)
-                  ],
-                  videoParts: videoFiles,
-                ));
+                        parts: parts,
+                      ),
+                    ],
+                    videoParts: videoFiles,
+                  ),
+                );
               }
             } else if (f.type == 'hardcover' || f.type == 'paperback') {
               // Physical format — only add if new (not already on server)
               if (!hasServerFormatId) {
-                variantBloc.add(AddFormatEvent(
-                  localVariant.existingVariantId!,
-                  bookId,
-                  [
-                    BookFormatEntity(
-                      type: f.type,
-                      donorId: localVariant.donatorInfo,
-                      isbn: f.isbn,
-                      copies: f.copies,
-                      availableCopies:
-                          (f.available == true) ? (f.copies ?? 1) : 0,
-                    )
-                  ],
-                ));
+                variantBloc.add(
+                  AddFormatEvent(
+                    localVariant.existingVariantId!,
+                    bookId,
+                    [
+                      BookFormatEntity(
+                        type: f.type,
+                        donorId: localVariant.donatorInfo,
+                        isbn: f.isbn,
+                        copies: f.copies,
+                        availableCopies:
+                            (f.available == true) ? (f.copies ?? 1) : 0,
+                      ),
+                    ],
+                  ),
+                );
               }
             }
           }
@@ -776,12 +847,14 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             formats: formats,
           );
 
-          variantBloc.add(CreateVariantEvent(
-            variant,
-            ebookFiles: ebookFiles,
-            audioParts: audioParts,
-            videoParts: videoParts,
-          ));
+          variantBloc.add(
+            CreateVariantEvent(
+              variant,
+              ebookFiles: ebookFiles,
+              audioParts: audioParts,
+              videoParts: videoParts,
+            ),
+          );
         }
       }
 
@@ -807,7 +880,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Variant'),
         content: Text(
-            'Are you sure you want to delete the "${variant.language}" variant? This action cannot be undone.'),
+          'Are you sure you want to delete the "${variant.language}" variant? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -857,27 +931,40 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               final formats = entity.formats.map((f) {
                 if (f.type == 'ebook') {
                   return LocalBookFormat(
-                      type: f.type, id: f.id, ebookFiles: []);
+                    type: f.type,
+                    id: f.id,
+                    ebookFiles: [],
+                  );
                 } else if (f.type == 'audiobook') {
                   final parts = f.parts
-                      .map((p) => AudioPartMeta(
-                            partNumber: p.partNumber,
-                            title: p.title,
-                            isFromServer: true,
-                          ))
+                      .map(
+                        (p) => AudioPartMeta(
+                          partNumber: p.partNumber,
+                          title: p.title,
+                          isFromServer: true,
+                        ),
+                      )
                       .toList();
                   return LocalBookFormat(
-                      type: f.type, id: f.id, audioParts: parts);
+                    type: f.type,
+                    id: f.id,
+                    audioParts: parts,
+                  );
                 } else if (f.type == 'videobook') {
                   final parts = f.parts
-                      .map((p) => AudioPartMeta(
-                            partNumber: p.partNumber,
-                            title: p.title,
-                            isFromServer: true,
-                          ))
+                      .map(
+                        (p) => AudioPartMeta(
+                          partNumber: p.partNumber,
+                          title: p.title,
+                          isFromServer: true,
+                        ),
+                      )
                       .toList();
                   return LocalBookFormat(
-                      type: f.type, id: f.id, videoParts: parts);
+                    type: f.type,
+                    id: f.id,
+                    videoParts: parts,
+                  );
                 } else {
                   return LocalBookFormat(
                     type: f.type,
@@ -889,13 +976,15 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 }
               }).toList();
 
-              _variants.add(LocalBookVariant(
-                language: entity.language,
-                formats: formats,
-                donatorInfo: entity.donorId,
-                donatorName: entity.donorName,
-                existingVariantId: entity.id,
-              ));
+              _variants.add(
+                LocalBookVariant(
+                  language: entity.language,
+                  formats: formats,
+                  donatorInfo: entity.donorId,
+                  donatorName: entity.donorName,
+                  existingVariantId: entity.id,
+                ),
+              );
             }
           });
         } else if (state is VariantCreated) {
@@ -951,19 +1040,25 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 color: Colors.grey[100],
                 boxShadow: const [
                   BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 4,
-                      offset: Offset(0, 2))
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
                 ],
               ),
               child: widget.bookCrudModel.coversingleImage != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.file(widget.bookCrudModel.coversingleImage!,
-                          fit: BoxFit.cover),
+                      child: Image.file(
+                        widget.bookCrudModel.coversingleImage!,
+                        fit: BoxFit.cover,
+                      ),
                     )
-                  : const Icon(Icons.book_rounded,
-                      color: Colors.grey, size: 30),
+                  : const Icon(
+                      Icons.book_rounded,
+                      color: Colors.grey,
+                      size: 30,
+                    ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -980,26 +1075,29 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     child: const Text(
                       'PARENT BOOK METADATA',
                       style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 9,
-                          color: Color(0xFF042153)),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 9,
+                        color: Color(0xFF042153),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     widget.bookCrudModel.title,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Color(0xFF042153)),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Color(0xFF042153),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'By ${widget.bookCrudModel.author}',
                     style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500),
+                      color: Colors.grey[600],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -1021,9 +1119,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             const Text(
               'Language Variants',
               style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF042153)),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF042153),
+              ),
             ),
             ElevatedButton.icon(
               onPressed: () => setState(() => _isAddingOrEditing = true),
@@ -1032,16 +1131,20 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 elevation: 1,
               ),
               icon:
                   const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-              label: const Text('Add Variant',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14)),
+              label: const Text(
+                'Add Variant',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ],
         ),
@@ -1057,13 +1160,17 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   side: BorderSide(color: Colors.grey.shade300, width: 1.5),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Back',
-                    style: TextStyle(
-                        color: Color(0xFF042153),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15)),
+                child: const Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Color(0xFF042153),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -1074,7 +1181,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   backgroundColor: Colors.orange[800],
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 1,
                 ),
                 child: _isSubmitting
@@ -1082,12 +1190,18 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : const Text('Save Draft',
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Save Draft',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15)),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
               ),
             ),
             const SizedBox(width: 12),
@@ -1098,7 +1212,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   backgroundColor: Colors.green,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 1,
                 ),
                 child: _isSubmitting
@@ -1106,12 +1221,18 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : const Text('Publish',
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Publish',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15)),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -1153,9 +1274,10 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         ? 'Edit Language Variant'
                         : 'Add Language Variant',
                     style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF042153)),
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF042153),
+                    ),
                   ),
                 ],
               ),
@@ -1191,7 +1313,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               if (_hasHardcover) ...[
                 const Divider(height: 32),
                 _buildSectionTitle(
-                    'Hardcover Details', const Color(0xFF4F46E5)),
+                  'Hardcover Details',
+                  const Color(0xFF4F46E5),
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _isbnController,
@@ -1199,7 +1323,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     labelText: 'Hardcover ISBN Number *',
                     prefixIcon: const Icon(Icons.qr_code_rounded, size: 20),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   validator: (val) =>
                       _hasHardcover && (val == null || val.isEmpty)
@@ -1210,9 +1335,13 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Instantly Available for Requests',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500, fontSize: 13)),
+                    const Text(
+                      'Instantly Available for Requests',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
                     Switch(
                       value: _hardcoverAvailable,
                       onChanged: (val) =>
@@ -1226,7 +1355,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               if (_hasEbook) ...[
                 const Divider(height: 32),
                 _buildSectionTitle(
-                    'E-Book Files (PDF / EPUB)', const Color(0xFF0D9488)),
+                  'E-Book Files (PDF / EPUB)',
+                  const Color(0xFF0D9488),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   'Upload one or more files. Multiple formats ensure availability.',
@@ -1265,7 +1396,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     foregroundColor: const Color(0xFFD97706),
                     side: const BorderSide(color: Color(0xFFD97706)),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ],
@@ -1274,7 +1406,9 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
               if (_hasVideobook) ...[
                 const Divider(height: 32),
                 _buildSectionTitle(
-                    'Videobook Parts (MP4 / WEBM)', const Color(0xFF7C3AED)),
+                  'Videobook Parts (MP4 / WEBM)',
+                  const Color(0xFF7C3AED),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   'Add parts (chapters) and attach a video file to each.',
@@ -1291,7 +1425,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     foregroundColor: const Color(0xFF7C3AED),
                     side: const BorderSide(color: Color(0xFF7C3AED)),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ],
@@ -1302,25 +1437,39 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                 children: [
                   TextButton(
                     onPressed: _resetForm,
-                    child: const Text('Cancel',
-                        style: TextStyle(
-                            color: Colors.grey, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF042153),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     onPressed: _saveVariant,
-                    icon: const Icon(Icons.check_rounded,
-                        color: Colors.white, size: 18),
-                    label: const Text('Save Variant',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold)),
+                    icon: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    label: const Text(
+                      'Save Variant',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1350,7 +1499,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             color: const Color(0xFF0D9488).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: const Color(0xFF0D9488).withValues(alpha: 0.2)),
+              color: const Color(0xFF0D9488).withValues(alpha: 0.2),
+            ),
           ),
           child: Row(
             children: [
@@ -1360,29 +1510,42 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   color: const Color(0xFF0D9488).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.description_rounded,
-                    color: Color(0xFF0D9488), size: 18),
+                child: const Icon(
+                  Icons.description_rounded,
+                  color: Color(0xFF0D9488),
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.fileName,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Color(0xFF042153)),
-                        overflow: TextOverflow.ellipsis),
-                    Text('Format: $ext',
-                        style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade600)),
+                    Text(
+                      item.fileName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Color(0xFF042153),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Format: $ext',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
                   ],
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded,
-                    color: Colors.redAccent, size: 20),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.redAccent,
+                  size: 20,
+                ),
                 onPressed: () => _removeEbookFile(index),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -1412,7 +1575,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             color: const Color(0xFFD97706).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: const Color(0xFFD97706).withValues(alpha: 0.2)),
+              color: const Color(0xFFD97706).withValues(alpha: 0.2),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1429,15 +1593,19 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     child: Text(
                       'Part ${part.partNumber}',
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Color(0xFFD97706)),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        color: Color(0xFFD97706),
+                      ),
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded,
-                        color: Colors.redAccent, size: 18),
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.redAccent,
+                      size: 18,
+                    ),
                     onPressed: () => _removeAudioPart(index),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -1451,7 +1619,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   labelText: 'Part Title *',
                   hintText: 'e.g. Introduction, Chapter 1...',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                   isDense: true,
@@ -1512,8 +1681,11 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         ),
                       ),
                       if (part.file != null || part.isFromServer)
-                        const Icon(Icons.check_circle_rounded,
-                            color: Colors.green, size: 16),
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.green,
+                          size: 16,
+                        ),
                     ],
                   ),
                 ),
@@ -1543,7 +1715,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
             color: const Color(0xFF7C3AED).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: const Color(0xFF7C3AED).withValues(alpha: 0.2)),
+              color: const Color(0xFF7C3AED).withValues(alpha: 0.2),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1560,15 +1733,19 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                     child: Text(
                       'Part ${part.partNumber}',
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: Color(0xFF7C3AED)),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        color: Color(0xFF7C3AED),
+                      ),
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded,
-                        color: Colors.redAccent, size: 18),
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.redAccent,
+                      size: 18,
+                    ),
                     onPressed: () => _removeVideoPart(index),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -1582,7 +1759,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   labelText: 'Part Title *',
                   hintText: 'e.g. Introduction, Chapter 1...',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                   isDense: true,
@@ -1640,8 +1818,11 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         ),
                       ),
                       if (part.file != null)
-                        const Icon(Icons.check_circle_rounded,
-                            color: Colors.green, size: 16),
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.green,
+                          size: 16,
+                        ),
                     ],
                   ),
                 ),
@@ -1737,7 +1918,7 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       color: activeColor.withValues(alpha: 0.12),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
-                    )
+                    ),
                   ]
                 : [],
           ),
@@ -1755,9 +1936,11 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                           : Colors.grey.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon,
-                        color: selected ? activeColor : Colors.grey.shade500,
-                        size: 24),
+                    child: Icon(
+                      icon,
+                      color: selected ? activeColor : Colors.grey.shade500,
+                      size: 24,
+                    ),
                   ),
                   if (selected)
                     Positioned(
@@ -1766,24 +1949,34 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       child: Container(
                         padding: const EdgeInsets.all(2),
                         decoration: const BoxDecoration(
-                            color: Colors.white, shape: BoxShape.circle),
-                        child: Icon(Icons.check_circle,
-                            color: activeColor, size: 16),
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.check_circle,
+                          color: activeColor,
+                          size: 16,
+                        ),
                       ),
                     ),
                 ],
               ),
               const SizedBox(height: 12),
-              Text(title,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: selected ? activeColor : Colors.grey.shade800),
-                  textAlign: TextAlign.center),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: selected ? activeColor : Colors.grey.shade800,
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 4),
-              Text(subtitle,
-                  style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
-                  textAlign: TextAlign.center),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -1811,17 +2004,25 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           width: double.infinity,
           child: Column(
             children: [
-              Icon(Icons.cloud_upload_outlined,
-                  size: 32, color: accentColor.withValues(alpha: 0.7)),
+              Icon(
+                Icons.cloud_upload_outlined,
+                size: 32,
+                color: accentColor.withValues(alpha: 0.7),
+              ),
               const SizedBox(height: 8),
-              Text(label,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: accentColor)),
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: accentColor,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(subLabel,
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+              Text(
+                subLabel,
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+              ),
             ],
           ),
         ),
@@ -1849,18 +2050,26 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                   color: Colors.green.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.translate_rounded,
-                    size: 36, color: Colors.green),
+                child: const Icon(
+                  Icons.translate_rounded,
+                  size: 36,
+                  color: Colors.green,
+                ),
               ),
               const SizedBox(height: 12),
-              const Text('No language variants added yet',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Color(0xFF042153))),
+              const Text(
+                'No language variants added yet',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Color(0xFF042153),
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('Add at least one variant before publishing.',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+              Text(
+                'Add at least one variant before publishing.',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+              ),
             ],
           ),
         ),
@@ -1904,27 +2113,39 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         color: Colors.blue.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.language_rounded,
-                          color: Colors.blue, size: 16),
+                      child: const Icon(
+                        Icons.language_rounded,
+                        color: Colors.blue,
+                        size: 16,
+                      ),
                     ),
                     const SizedBox(width: 10),
-                    Text(variant.language.toUpperCase(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Color(0xFF042153))),
+                    Text(
+                      variant.language.toUpperCase(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF042153),
+                      ),
+                    ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.edit_outlined,
-                          color: Colors.blue, size: 20),
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
                       onPressed: () => _startEdit(index),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
                     const SizedBox(width: 14),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded,
-                          color: Colors.redAccent, size: 20),
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Colors.redAccent,
+                        size: 20,
+                      ),
                       onPressed: () => _confirmDeleteVariant(index),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -1971,7 +2192,8 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                         color: accentColor.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: accentColor.withValues(alpha: 0.12)),
+                          color: accentColor.withValues(alpha: 0.12),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -1981,18 +2203,24 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(format.type.toUpperCase(),
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 11,
-                                        color: accentColor)),
+                                Text(
+                                  format.type.toUpperCase(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    color: accentColor,
+                                  ),
+                                ),
                                 const SizedBox(height: 2),
-                                Text(details,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade700),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2),
+                                Text(
+                                  details,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
                               ],
                             ),
                           ),
@@ -2100,15 +2328,19 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
           controller: _donorSearchController,
           decoration: InputDecoration(
             hintText: 'Type 3+ characters to search users...',
-            prefixIcon: const Icon(Icons.person_search_rounded,
-                color: Colors.grey, size: 20),
+            prefixIcon: const Icon(
+              Icons.person_search_rounded,
+              color: Colors.grey,
+              size: 20,
+            ),
             suffixIcon: _isDonorSearching
                 ? const Padding(
                     padding: EdgeInsets.all(12),
                     child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2)),
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   )
                 : null,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -2157,17 +2389,26 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
                       child: Text(
                         user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Color(0xFF042153)),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Color(0xFF042153),
+                        ),
                       ),
                     ),
-                    title: Text(user.name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 13)),
-                    subtitle: Text(user.email,
-                        style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade600)),
+                    title: Text(
+                      user.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    subtitle: Text(
+                      user.email,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
                     onTap: () => _selectDonor(user),
                   );
                 },
@@ -2182,17 +2423,21 @@ class _AddBookVariantsSectionState extends State<AddBookVariantsSection> {
   // ─── Helpers ───────────────────────────────────────────────────────────
 
   Widget _buildLabel(String text) {
-    return Text(text,
-        style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: Color(0xFF042153)));
+    return Text(
+      text,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 14,
+        color: Color(0xFF042153),
+      ),
+    );
   }
 
   Widget _buildSectionTitle(String text, Color color) {
-    return Text(text,
-        style:
-            TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: color));
+    return Text(
+      text,
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: color),
+    );
   }
 
   InputDecoration _inputDecoration({
@@ -2273,10 +2518,12 @@ class _DashedRectPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final path = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Radius.circular(borderRadius),
-      ));
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          Radius.circular(borderRadius),
+        ),
+      );
 
     for (final metric in path.computeMetrics()) {
       double start = 0.0;

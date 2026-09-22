@@ -114,8 +114,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   _SectionHeader(title: l10n.membership),
                   ListTile(
-                    leading: const Icon(Icons.workspace_premium,
-                        color: Color(0xFF2CE07F)),
+                    leading: const Icon(
+                      Icons.workspace_premium,
+                      color: Color(0xFF2CE07F),
+                    ),
                     title: Text(l10n.readBuddyPrime),
                     subtitle: Text(l10n.readBuddyPrimeSubtitle),
                     trailing: const Icon(Icons.chevron_right),

@@ -40,15 +40,17 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       final errorMessage = ErrorHandler.getErrorMessage(error);
       final isUserExists = ErrorHandler.isUserAlreadyExists(error);
 
-      emit(SignUpError(
-        message: isUserExists
-            ? 'This email is already registered. Please sign in instead.'
-            : (errorMessage.isNotEmpty
-                ? errorMessage
-                : 'Registration failed. Please try again.'),
-        isUserAlreadyExists: isUserExists,
-        source: SignUpErrorSource.register,
-      ));
+      emit(
+        SignUpError(
+          message: isUserExists
+              ? 'This email is already registered. Please sign in instead.'
+              : (errorMessage.isNotEmpty
+                  ? errorMessage
+                  : 'Registration failed. Please try again.'),
+          isUserAlreadyExists: isUserExists,
+          source: SignUpErrorSource.register,
+        ),
+      );
     }
   }
 
@@ -63,10 +65,12 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       emit(SignUpUserVerified(user));
     } catch (error) {
       final errorMessage = ErrorHandler.getErrorMessage(error);
-      emit(SignUpError(
-        message: errorMessage,
-        source: SignUpErrorSource.verifyEmail,
-      ));
+      emit(
+        SignUpError(
+          message: errorMessage,
+          source: SignUpErrorSource.verifyEmail,
+        ),
+      );
     }
   }
 
@@ -80,11 +84,13 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     } catch (error) {
       final errorMessage = ErrorHandler.getErrorMessage(error);
       final isUserExists = ErrorHandler.isUserAlreadyExists(error);
-      emit(SignUpError(
-        message: errorMessage,
-        isUserAlreadyExists: isUserExists,
-        source: SignUpErrorSource.resend,
-      ));
+      emit(
+        SignUpError(
+          message: errorMessage,
+          isUserAlreadyExists: isUserExists,
+          source: SignUpErrorSource.resend,
+        ),
+      );
     }
   }
 

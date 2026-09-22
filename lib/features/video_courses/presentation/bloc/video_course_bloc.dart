@@ -134,11 +134,13 @@ class VideoCourseBloc extends Bloc<VideoCourseEvent, VideoCourseState> {
         isCompleted: event.completed || (base?.isCompleted ?? false),
         watchedSeconds: event.watchedSeconds,
       );
-      emit(VideoLessonProgressUpdated(
-        updated,
-        event.courseId,
-        completed: event.completed,
-      ));
+      emit(
+        VideoLessonProgressUpdated(
+          updated,
+          event.courseId,
+          completed: event.completed,
+        ),
+      );
     } catch (e) {
       emit(VideoCourseError(ErrorHandler.getErrorMessage(e)));
     }

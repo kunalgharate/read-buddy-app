@@ -36,9 +36,8 @@ class OrderBookItemModel extends OrderBookItem {
       bookPrice: (rawPrice is num)
           ? rawPrice.toDouble()
           : double.tryParse(rawPrice.toString()) ?? 0,
-      bookPages: rawPages is int
-          ? rawPages
-          : int.tryParse(rawPages.toString()) ?? 0,
+      bookPages:
+          rawPages is int ? rawPages : int.tryParse(rawPages.toString()) ?? 0,
       status: json['status']?.toString() ?? 'pending',
     );
   }
@@ -89,7 +88,8 @@ class BorrowOrderModel extends BorrowOrderEntity {
   factory BorrowOrderModel.fromJson(Map<String, dynamic> json) {
     final bookRequestsList = (json['bookRequests'] as List? ?? [])
         .map(
-            (item) => OrderBookItemModel.fromJson(item as Map<String, dynamic>))
+          (item) => OrderBookItemModel.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
 
     return BorrowOrderModel(
@@ -159,9 +159,11 @@ class BorrowOrderModel extends BorrowOrderEntity {
   Map<String, dynamic> toJson() => {
         'id': id,
         'bookRequests': bookRequests
-            .map((item) => item is OrderBookItemModel
-                ? item.toJson()
-                : OrderBookItemModel.fromEntity(item).toJson())
+            .map(
+              (item) => item is OrderBookItemModel
+                  ? item.toJson()
+                  : OrderBookItemModel.fromEntity(item).toJson(),
+            )
             .toList(),
         'totalBookValue': totalBookValue,
         'budgetLimit': budgetLimit,

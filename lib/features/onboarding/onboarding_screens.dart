@@ -117,7 +117,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => const SignInScreen()),
+                                builder: (_) => const SignInScreen(),
+                              ),
                             );
                           },
                           child: const Text(
@@ -148,7 +149,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           backgroundColor: AppColors.navy,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

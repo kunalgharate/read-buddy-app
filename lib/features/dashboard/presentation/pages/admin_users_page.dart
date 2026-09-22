@@ -143,8 +143,10 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text(
-                  'Librarian assignment cancelled. A library must be selected.')),
+            content: Text(
+              'Librarian assignment cancelled. A library must be selected.',
+            ),
+          ),
         );
       }
       return;
@@ -169,7 +171,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('User made librarian and assigned to library')),
+            content: Text('User made librarian and assigned to library'),
+          ),
         );
         _fetchUsers();
       }
@@ -236,7 +239,10 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   }
 
   Future<void> _patchAction(
-      String userId, String action, String message) async {
+    String userId,
+    String action,
+    String message,
+  ) async {
     try {
       final dio = getIt<Dio>();
       await dio.patch('${ApiConstants.adminUsers}/$userId/$action');
@@ -314,20 +320,28 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
                   children: [
-                    const Icon(Icons.local_library,
-                        color: AppColors.primary, size: 20),
+                    const Icon(
+                      Icons.local_library,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600)),
+                          Text(
+                            name,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                           if (city.isNotEmpty)
-                            Text(city,
-                                style: const TextStyle(
-                                    fontSize: 12, color: AppColors.textHint)),
+                            Text(
+                              city,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textHint,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -476,20 +490,28 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                           ),
                           if (isPrime) ...[
                             const SizedBox(width: 6),
-                            const Icon(Icons.star,
-                                color: Colors.amber, size: 16),
+                            const Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: 16,
+                            ),
                           ],
                           if (isBlocked) ...[
                             const SizedBox(width: 6),
-                            const Icon(Icons.block,
-                                color: Colors.red, size: 14),
+                            const Icon(
+                              Icons.block,
+                              color: Colors.red,
+                              size: 14,
+                            ),
                           ],
                         ],
                       ),
                       Text(
                         email,
                         style: const TextStyle(
-                            fontSize: 12, color: AppColors.textHint),
+                          fontSize: 12,
+                          color: AppColors.textHint,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -520,8 +542,10 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                   children: [
                     Icon(Icons.warning_amber, size: 14, color: Colors.orange),
                     SizedBox(width: 4),
-                    Text('Email not verified',
-                        style: TextStyle(fontSize: 11, color: Colors.orange)),
+                    Text(
+                      'Email not verified',
+                      style: TextStyle(fontSize: 11, color: Colors.orange),
+                    ),
                   ],
                 ),
               ),
@@ -616,7 +640,10 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             Text(
               label,
               style: TextStyle(
-                  fontSize: 11, color: color, fontWeight: FontWeight.w500),
+                fontSize: 11,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),

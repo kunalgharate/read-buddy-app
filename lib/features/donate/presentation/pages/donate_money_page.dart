@@ -49,8 +49,12 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
       final razorpayKey = result['razorpayKey'] as String;
 
       if (kDebugMode) {
-        debugPrint('💳 [Razorpay] Key is TEST mode: ${razorpayKey.startsWith('rzp_test_')}');
-        debugPrint('💳 [Razorpay] Key is LIVE mode: ${razorpayKey.startsWith('rzp_live_')}');
+        debugPrint(
+          '💳 [Razorpay] Key is TEST mode: ${razorpayKey.startsWith('rzp_test_')}',
+        );
+        debugPrint(
+          '💳 [Razorpay] Key is LIVE mode: ${razorpayKey.startsWith('rzp_live_')}',
+        );
         debugPrint('💳 [Razorpay] Amount: $_currentAmount INR');
       }
 
@@ -81,7 +85,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
     if (kDebugMode) {
       final paymentId = response.paymentId ?? '';
       final orderId = response.orderId ?? _currentOrderId ?? '';
-      debugPrint('💳 [Razorpay] PAYMENT_SUCCESS | paymentId=...${paymentId.length > 6 ? paymentId.substring(paymentId.length - 6) : paymentId} | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId}');
+      debugPrint(
+        '💳 [Razorpay] PAYMENT_SUCCESS | paymentId=...${paymentId.length > 6 ? paymentId.substring(paymentId.length - 6) : paymentId} | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId}',
+      );
     }
     try {
       final datasource = getIt<DonateRemoteDataSource>();
@@ -93,7 +99,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
       );
       if (kDebugMode) {
         final orderId = response.orderId ?? _currentOrderId ?? '';
-        debugPrint('💳 [Razorpay] VERIFY SUCCESS | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId}');
+        debugPrint(
+          '💳 [Razorpay] VERIFY SUCCESS | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId}',
+        );
       }
 
       if (mounted) _showPrimeSuccessDialog();
@@ -101,7 +109,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
       if (kDebugMode) {
         final orderId = (response.orderId ?? _currentOrderId ?? '');
         debugPrint(
-            '💳 [Razorpay] VERIFY FAILED | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId} | error=$e');
+          '💳 [Razorpay] VERIFY FAILED | orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId} | error=$e',
+        );
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -183,7 +192,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   void _onPaymentError(PaymentFailureResponse response) {
     if (kDebugMode) {
       debugPrint(
-          '💳 [Razorpay] PAYMENT_ERROR | code=${response.code} (redacted: ${response.message == null ? 'none' : '${response.message!.length} chars'})');
+        '💳 [Razorpay] PAYMENT_ERROR | code=${response.code} (redacted: ${response.message == null ? 'none' : '${response.message!.length} chars'})',
+      );
     }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -262,7 +272,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
             ),
             const SizedBox(height: 12),
             _benefitRow(
-                Icons.menu_book, 'Borrow physical books from libraries'),
+              Icons.menu_book,
+              'Borrow physical books from libraries',
+            ),
             _benefitRow(Icons.chrome_reader_mode, 'Read eBooks (PDF & EPUB)'),
             _benefitRow(Icons.headphones, 'Listen to Audiobooks'),
             _benefitRow(Icons.play_circle, 'Watch Videobooks'),
@@ -356,7 +368,9 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2),
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
                     : Text(
                         'Buy Prime — ₹$_selectedPlan',
@@ -406,8 +420,11 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_outline,
-                          size: 16, color: AppColors.textMutedColor(context)),
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: AppColors.textMutedColor(context),
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -475,10 +492,13 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? Colors.amber.shade700 : AppColors.borderColor(context),
+            color: selected
+                ? Colors.amber.shade700
+                : AppColors.borderColor(context),
             width: selected ? 2 : 1,
           ),
-          color: selected ? Colors.amber.shade50 : AppColors.surfaceColor(context),
+          color:
+              selected ? Colors.amber.shade50 : AppColors.surfaceColor(context),
         ),
         child: Row(
           children: [

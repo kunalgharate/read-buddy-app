@@ -31,7 +31,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   List<BookModel> _parseBookList(dynamic data, String endpoint) {
     if (data is! List) {
       throw Exception(
-          'Unexpected response format from $endpoint: expected a list');
+        'Unexpected response format from $endpoint: expected a list',
+      );
     }
     final results = <BookModel>[];
     for (final e in data) {
@@ -63,7 +64,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 HomeRemoteDataSource: latestBooks status: ${response.statusCode}');
+          '🌐 HomeRemoteDataSource: latestBooks status: ${response.statusCode}',
+        );
       }
 
       if (_isSuccess(response.statusCode)) {
@@ -97,7 +99,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 HomeRemoteDataSource: trendingBooks status: ${response.statusCode}');
+          '🌐 HomeRemoteDataSource: trendingBooks status: ${response.statusCode}',
+        );
       }
 
       if (_isSuccess(response.statusCode)) {

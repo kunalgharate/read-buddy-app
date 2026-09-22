@@ -72,9 +72,7 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -113,18 +111,22 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
       body: BlocConsumer<AdminRequestsBloc, AdminRequestsState>(
         listener: (context, state) {
           if (state is AdminRequestActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(state.message),
-              backgroundColor: const Color(0xFF2CE07F),
-              behavior: SnackBarBehavior.floating,
-            ));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: const Color(0xFF2CE07F),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
           }
           if (state is AdminRequestActionError) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.redAccent,
-              behavior: SnackBarBehavior.floating,
-            ));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.redAccent,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
           }
         },
         builder: (context, state) {
@@ -215,7 +217,6 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-  
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text(
           'Decline Request',
@@ -293,11 +294,13 @@ class _AdminBookRequestsViewState extends State<_AdminBookRequestsView>
   }
 
   void _showDetailSheet(
-      BuildContext context, BookRequestEntity r, String title) {
+    BuildContext context,
+    BookRequestEntity r,
+    String title,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -426,7 +429,9 @@ class _RequestCard extends StatelessWidget {
                     Text(
                       'by ${request.bookAuthor}',
                       style: const TextStyle(
-                          fontSize: 12, color: Color(0xFF888888)),
+                        fontSize: 12,
+                        color: Color(0xFF888888),
+                      ),
                     ),
                   const SizedBox(height: 6),
                   // Status chip + action buttons
@@ -436,7 +441,9 @@ class _RequestCard extends StatelessWidget {
                             height: 28,
                             width: 28,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2.5, color: Color(0xFF2CE07F)),
+                              strokeWidth: 2.5,
+                              color: Color(0xFF2CE07F),
+                            ),
                           )
                         : Row(
                             children: [
@@ -540,17 +547,29 @@ class _DetailSheet extends StatelessWidget {
                     ),
                   ),
                   if (request.bookAuthor != null)
-                    Text('by ${request.bookAuthor}',
-                        style: const TextStyle(
-                            fontSize: 13, color: Color(0xFF888888))),
+                    Text(
+                      'by ${request.bookAuthor}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF888888),
+                      ),
+                    ),
                   if (request.bookFormat != null)
-                    Text(_capitalize(request.bookFormat!),
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF888888))),
+                    Text(
+                      _capitalize(request.bookFormat!),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF888888),
+                      ),
+                    ),
                   if (request.bookCondition != null)
-                    Text('Condition: ${_capitalize(request.bookCondition!)}',
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF888888))),
+                    Text(
+                      'Condition: ${_capitalize(request.bookCondition!)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF888888),
+                      ),
+                    ),
                   const SizedBox(height: 6),
                   _StatusChip(status: request.status),
                 ],
@@ -564,25 +583,33 @@ class _DetailSheet extends StatelessWidget {
         const SizedBox(height: 16),
 
         // User details
-        const Text('User Details',
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF052E44))),
+        const Text(
+          'User Details',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF052E44),
+          ),
+        ),
         const SizedBox(height: 10),
         _DetailTile(
-            label: 'Name', value: request.userName ?? request.userId ?? '—'),
+          label: 'Name',
+          value: request.userName ?? request.userId ?? '—',
+        ),
         if (request.userEmail != null)
           _DetailTile(label: 'Email', value: request.userEmail!),
 
         // Rejection reason
         if (request.rejectionReason != null) ...[
           const SizedBox(height: 8),
-          const Text('Rejection Reason',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.redAccent)),
+          const Text(
+            'Rejection Reason',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.redAccent,
+            ),
+          ),
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
@@ -602,11 +629,14 @@ class _DetailSheet extends StatelessWidget {
         if (request.deliveryName != null ||
             request.deliveryAddress != null) ...[
           const SizedBox(height: 8),
-          const Text('Delivery Details',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF052E44))),
+          const Text(
+            'Delivery Details',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF052E44),
+            ),
+          ),
           const SizedBox(height: 10),
           if (request.deliveryName != null)
             _DetailTile(label: 'Name', value: request.deliveryName!),
@@ -618,11 +648,14 @@ class _DetailSheet extends StatelessWidget {
             _DetailTile(label: 'Pincode', value: request.deliveryPincode!),
           if (request.deliveryPreferredDate != null)
             _DetailTile(
-                label: 'Preferred Date',
-                value: _fmtDate(request.deliveryPreferredDate)),
+              label: 'Preferred Date',
+              value: _fmtDate(request.deliveryPreferredDate),
+            ),
           if (request.deliveryPreferredTime != null)
             _DetailTile(
-                label: 'Preferred Time', value: request.deliveryPreferredTime!),
+              label: 'Preferred Time',
+              value: request.deliveryPreferredTime!,
+            ),
         ],
 
         // Pickup details — only after approved
@@ -630,11 +663,14 @@ class _DetailSheet extends StatelessWidget {
             (request.pickupUserName != null ||
                 request.pickupPhone != null)) ...[
           const SizedBox(height: 8),
-          const Text('Pickup Details',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF052E44))),
+          const Text(
+            'Pickup Details',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF052E44),
+            ),
+          ),
           const SizedBox(height: 10),
           if (request.pickupUserName != null)
             _DetailTile(label: 'Pickup Name', value: request.pickupUserName!),
@@ -646,17 +682,24 @@ class _DetailSheet extends StatelessWidget {
 
         // Dates
         const SizedBox(height: 8),
-        const Text('Dates',
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF052E44))),
+        const Text(
+          'Dates',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF052E44),
+          ),
+        ),
         const SizedBox(height: 10),
         _DetailTile(
-            label: 'Request Date', value: _fmtDate(request.requestDate)),
+          label: 'Request Date',
+          value: _fmtDate(request.requestDate),
+        ),
         if (request.pickupDate != null)
           _DetailTile(
-              label: 'Pickup Date', value: _fmtDate(request.pickupDate)),
+            label: 'Pickup Date',
+            value: _fmtDate(request.pickupDate),
+          ),
         if (request.pickupTime != null)
           _DetailTile(label: 'Pickup Time', value: request.pickupTime!),
         if (request.dueDate != null)
@@ -667,11 +710,14 @@ class _DetailSheet extends StatelessWidget {
             request.status.toLowerCase() == 'returned') ...[
           if (request.returnDate != null)
             _DetailTile(
-                label: 'Return Date', value: _fmtDate(request.returnDate)),
+              label: 'Return Date',
+              value: _fmtDate(request.returnDate),
+            ),
           if (request.returnCondition != null)
             _DetailTile(
-                label: 'Return Condition',
-                value: _capitalize(request.returnCondition!)),
+              label: 'Return Condition',
+              value: _capitalize(request.returnCondition!),
+            ),
         ],
       ],
     );
@@ -689,8 +735,10 @@ class _StatusUpdateButton extends StatelessWidget {
   final String requestId;
   final String currentStatus;
 
-  const _StatusUpdateButton(
-      {required this.requestId, required this.currentStatus});
+  const _StatusUpdateButton({
+    required this.requestId,
+    required this.currentStatus,
+  });
 
   List<(String, String)> get _options {
     switch (currentStatus.toLowerCase()) {
@@ -718,12 +766,18 @@ class _StatusUpdateButton extends StatelessWidget {
           .read<AdminRequestsBloc>()
           .add(UpdateRequestStatus(requestId, status)),
       itemBuilder: (_) => options
-          .map((o) => PopupMenuItem(
-                value: o.$1,
-                child: Text(o.$2,
-                    style: const TextStyle(
-                        fontSize: 13, color: Color(0xFF052E44))),
-              ))
+          .map(
+            (o) => PopupMenuItem(
+              value: o.$1,
+              child: Text(
+                o.$2,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF052E44),
+                ),
+              ),
+            ),
+          )
           .toList(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -734,8 +788,10 @@ class _StatusUpdateButton extends StatelessWidget {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Update',
-                style: TextStyle(fontSize: 12, color: Color(0xFF444444))),
+            Text(
+              'Update',
+              style: TextStyle(fontSize: 12, color: Color(0xFF444444)),
+            ),
             SizedBox(width: 4),
             Icon(Icons.keyboard_arrow_down, size: 16, color: Color(0xFF444444)),
           ],
@@ -759,16 +815,20 @@ class _DetailTile extends StatelessWidget {
         children: [
           SizedBox(
             width: 130,
-            child: Text(label,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF888888))),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF888888)),
+            ),
           ),
           Expanded(
-            child: Text(value,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                )),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
         ],
       ),
@@ -780,8 +840,11 @@ class _CoverImage extends StatelessWidget {
   final String? url;
   final double width;
   final double height;
-  const _CoverImage(
-      {required this.url, required this.width, required this.height});
+  const _CoverImage({
+    required this.url,
+    required this.width,
+    required this.height,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -842,9 +905,14 @@ class _StatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
-      child: Text(label,
-          style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -899,11 +967,14 @@ class _FormatBadge extends StatelessWidget {
         color: const Color(0xFF2CE07F),
         borderRadius: BorderRadius.circular(5),
       ),
-      child: Text(label,
-          style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF052E44))),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF052E44),
+        ),
+      ),
     );
   }
 }
@@ -924,11 +995,14 @@ class _OutlineBtn extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         minimumSize: const Size(0, 34),
       ),
-      child: Text(label,
-          style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF262626))),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF262626),
+        ),
+      ),
     );
   }
 }
@@ -949,11 +1023,14 @@ class _FilledBtn extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         minimumSize: const Size(0, 34),
       ),
-      child: Text(label,
-          style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF052E44))),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF052E44),
+        ),
+      ),
     );
   }
 }
@@ -971,8 +1048,10 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(icon, size: 60, color: Colors.grey.shade300),
           const SizedBox(height: 12),
-          Text(message,
-              style: const TextStyle(color: Colors.grey, fontSize: 15)),
+          Text(
+            message,
+            style: const TextStyle(color: Colors.grey, fontSize: 15),
+          ),
         ],
       ),
     );
@@ -992,16 +1071,19 @@ class _ErrorView extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline, size: 48, color: Colors.grey),
           const SizedBox(height: 12),
-          Text(message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey)),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.grey),
+          ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2CE07F),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child:
                 const Text('Retry', style: TextStyle(color: Color(0xFF052E44))),
@@ -1028,7 +1110,7 @@ String _fmtDate(String? s) {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     return '${dt.day} ${m[dt.month - 1]} ${dt.year}';
   } catch (_) {

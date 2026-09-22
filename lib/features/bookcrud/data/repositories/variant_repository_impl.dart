@@ -79,7 +79,9 @@ class VariantRepositoryImpl implements VariantRepository {
 
   @override
   Future<BookVariantEntity> updateVariant(
-      String variantId, Map<String, dynamic> data) async {
+    String variantId,
+    Map<String, dynamic> data,
+  ) async {
     // No PATCH endpoint exists on the backend. For now, fetch and return
     // the current state. Actual updates are done via addPartsToFormat or
     // addFormatsToVariant.
@@ -93,7 +95,9 @@ class VariantRepositoryImpl implements VariantRepository {
 
   @override
   Future<void> removeFormatFromVariant(
-      String variantId, String formatId) async {
+    String variantId,
+    String formatId,
+  ) async {
     await remoteDataSource.removeFormatFromVariant(variantId, formatId);
   }
 
@@ -127,6 +131,9 @@ class VariantRepositoryImpl implements VariantRepository {
     int partNumber,
   ) async {
     await remoteDataSource.deletePartFromFormat(
-        variantId, formatId, partNumber);
+      variantId,
+      formatId,
+      partNumber,
+    );
   }
 }

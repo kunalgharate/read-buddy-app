@@ -10,7 +10,8 @@ class BookReportService {
 
   Future<void> report({
     required String bookId,
-    required String reason, // copyright | inappropriate | incorrect_info | broken_content | other
+    required String
+        reason, // copyright | inappropriate | incorrect_info | broken_content | other
     String? details,
     String? contactEmail,
   }) async {

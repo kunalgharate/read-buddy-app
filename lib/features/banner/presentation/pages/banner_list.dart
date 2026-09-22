@@ -21,9 +21,7 @@ class _BannersListState extends State<BannersList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         title: const Text('Banners'),
         centerTitle: true,
       ),
@@ -34,35 +32,38 @@ class _BannersListState extends State<BannersList> {
             const SizedBox(
               height: 40,
             ),
-            Expanded(child: BlocBuilder<BannerBloc, BannerState>(
-              builder: (context, state) {
-                switch (state) {
-                  case BannerLoading():
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  case BannerLoaded(:final banners):
-                    return ListView.builder(
+            Expanded(
+              child: BlocBuilder<BannerBloc, BannerState>(
+                builder: (context, state) {
+                  switch (state) {
+                    case BannerLoading():
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    case BannerLoaded(:final banners):
+                      return ListView.builder(
                         //physics: const NeverScrollableScrollPhysics(),
                         itemCount: banners.length,
                         itemBuilder: (context, index) {
                           final banner = banners[index];
 
                           return BannerCollection(banner: banner);
-                        });
-                  case BannerError(:final message):
-                    return Center(
-                      child: Text(message),
-                    );
+                        },
+                      );
+                    case BannerError(:final message):
+                      return Center(
+                        child: Text(message),
+                      );
 
-                  default:
-                    return const SizedBox.shrink();
-                }
-              },
-            )),
+                    default:
+                      return const SizedBox.shrink();
+                  }
+                },
+              ),
+            ),
             const SizedBox(
               height: 50,
-            )
+            ),
           ],
         ),
       ),
@@ -71,8 +72,10 @@ class _BannersListState extends State<BannersList> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         tooltip: 'Add Banner',
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const AddBanner()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddBanner()),
+          );
         },
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(

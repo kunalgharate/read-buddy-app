@@ -39,7 +39,11 @@ class CityLocationBar extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.location_on, size: 20, color: AppColors.primary),
+                const Icon(
+                  Icons.location_on,
+                  size: 20,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -124,7 +128,9 @@ class _CityPickerSheetState extends State<_CityPickerSheet> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Could not detect location. Please enable GPS or type your city.'),
+          content: Text(
+            'Could not detect location. Please enable GPS or type your city.',
+          ),
         ),
       );
     }
@@ -190,7 +196,8 @@ class _CityPickerSheetState extends State<_CityPickerSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [

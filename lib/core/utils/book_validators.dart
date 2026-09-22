@@ -117,7 +117,8 @@ class BookFormValidator {
     if (value == null || value.trim().isEmpty) {
       return 'Category is required';
     } else if (!BookValueItems.bookCategories.any(
-        (category) => category.name.toLowerCase() == value.toLowerCase())) {
+      (category) => category.name.toLowerCase() == value.toLowerCase(),
+    )) {
       print(BookValueItems.bookCategories);
       return "Select a valid category";
     }

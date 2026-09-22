@@ -127,7 +127,9 @@ class _DashboardContent extends StatelessWidget {
                     if (library.isSuperLibrary)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.amber,
                           borderRadius: BorderRadius.circular(8),
@@ -146,14 +148,19 @@ class _DashboardContent extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.location_on,
-                        color: Colors.white70, size: 14),
+                    const Icon(
+                      Icons.location_on,
+                      color: Colors.white70,
+                      size: 14,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         library.address.fullAddress,
                         style: const TextStyle(
-                            color: Colors.white70, fontSize: 12),
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -162,13 +169,18 @@ class _DashboardContent extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.access_time,
-                          color: Colors.white70, size: 14),
+                      const Icon(
+                        Icons.access_time,
+                        color: Colors.white70,
+                        size: 14,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         library.openHours,
                         style: const TextStyle(
-                            color: Colors.white70, fontSize: 12),
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

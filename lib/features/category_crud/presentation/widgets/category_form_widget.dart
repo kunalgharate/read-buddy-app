@@ -52,9 +52,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF052E44)),
@@ -114,7 +112,9 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 14),
+                      horizontal: 12,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black54),
                       borderRadius: BorderRadius.circular(5),
@@ -131,8 +131,10 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                                 : Colors.black26,
                           ),
                         ),
-                        const Icon(Icons.keyboard_arrow_down,
-                            color: Colors.black54),
+                        const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.black54,
+                        ),
                       ],
                     ),
                   ),
@@ -231,10 +233,15 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                       onTap: () => setState(() => _pickedImage = null),
                       child: Container(
                         decoration: const BoxDecoration(
-                            color: Colors.white, shape: BoxShape.circle),
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
                         padding: const EdgeInsets.all(4),
-                        child: const Icon(Icons.close,
-                            color: Colors.red, size: 18),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.red,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ),
@@ -262,10 +269,15 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                           onTap: _pickImage,
                           child: Container(
                             decoration: const BoxDecoration(
-                                color: Colors.white, shape: BoxShape.circle),
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
                             padding: const EdgeInsets.all(6),
-                            child: const Icon(Icons.edit,
-                                color: Color(0xFF052E44), size: 18),
+                            child: const Icon(
+                              Icons.edit,
+                              color: Color(0xFF052E44),
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
@@ -277,13 +289,18 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.cloud_upload_outlined,
-                          size: 48, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 48,
+                        color: Colors.grey.shade400,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         'Tap to upload image',
                         style: TextStyle(
-                            color: Colors.grey.shade500, fontSize: 13),
+                          color: Colors.grey.shade500,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -296,13 +313,15 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSubmitting = true);
     if (_isEdit) {
-      context.read<CategoryBloc>().add(UpdateCategoryEvent(
-            id: widget.existing!.id,
-            title: _titleController.text.trim(),
-            description: _descriptionController.text.trim(),
-            parentCategoryId: _selectedParent?.id,
-            image: _pickedImage != null ? File(_pickedImage!.path) : null,
-          ));
+      context.read<CategoryBloc>().add(
+            UpdateCategoryEvent(
+              id: widget.existing!.id,
+              title: _titleController.text.trim(),
+              description: _descriptionController.text.trim(),
+              parentCategoryId: _selectedParent?.id,
+              image: _pickedImage != null ? File(_pickedImage!.path) : null,
+            ),
+          );
     } else {
       if (_pickedImage == null) {
         setState(() => _isSubmitting = false);
@@ -311,12 +330,14 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
         );
         return;
       }
-      context.read<CategoryBloc>().add(AddCategoryEvent(
-            title: _titleController.text.trim(),
-            description: _descriptionController.text.trim(),
-            parentCategoryId: _selectedParent?.id,
-            image: File(_pickedImage!.path),
-          ));
+      context.read<CategoryBloc>().add(
+            AddCategoryEvent(
+              title: _titleController.text.trim(),
+              description: _descriptionController.text.trim(),
+              parentCategoryId: _selectedParent?.id,
+              image: File(_pickedImage!.path),
+            ),
+          );
     }
   }
 

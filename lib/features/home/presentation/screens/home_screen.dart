@@ -54,8 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _currentIndex,
         children: [
           MainTab(
-              onDonatePressed: () =>
-                  Navigator.pushNamed(context, '/donate-money')),
+            onDonatePressed: () =>
+                Navigator.pushNamed(context, '/donate-money'),
+          ),
           const CategoryTab(),
           const DonationTab(),
           const ProfileScreen(),
@@ -92,8 +93,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   const CircleAvatar(
                     radius: 30,
                     backgroundColor: AppColors.primary,
-                    child: Icon(Icons.local_library,
-                        color: Colors.white, size: 28),
+                    child: Icon(
+                      Icons.local_library,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(

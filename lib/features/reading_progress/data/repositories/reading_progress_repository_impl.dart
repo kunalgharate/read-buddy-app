@@ -23,7 +23,9 @@ class ReadingProgressRepositoryImpl implements ReadingProgressRepository {
     try {
       await _remote.saveProgress(model);
     } catch (e) {
-      if (kDebugMode) print('⚠️ remote saveProgress failed (cached locally): $e');
+      if (kDebugMode) {
+        print('⚠️ remote saveProgress failed (cached locally): $e');
+      }
     }
   }
 

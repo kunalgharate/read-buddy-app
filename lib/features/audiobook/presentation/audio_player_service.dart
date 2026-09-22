@@ -71,37 +71,41 @@ class AudioPlayerService {
   void _updateMediaItem() {
     if (_currentBook == null || _audioHandler == null) return;
     final track = _currentBook!.tracks[_currentTrackIndex];
-    _audioHandler!.mediaItem.add(MediaItem(
-      id: track.url,
-      title: track.title,
-      album: _currentBook!.title,
-      artist: _currentBook!.author,
-      artUri: _currentBook!.coverUrl.isNotEmpty
-          ? Uri.parse(_currentBook!.coverUrl)
-          : null,
-      duration: track.duration,
-    ));
+    _audioHandler!.mediaItem.add(
+      MediaItem(
+        id: track.url,
+        title: track.title,
+        album: _currentBook!.title,
+        artist: _currentBook!.author,
+        artUri: _currentBook!.coverUrl.isNotEmpty
+            ? Uri.parse(_currentBook!.coverUrl)
+            : null,
+        duration: track.duration,
+      ),
+    );
   }
 
   void _updatePlaybackState() {
     if (_audioHandler == null) return;
-    _audioHandler!.playbackState.add(PlaybackState(
-      controls: [
-        MediaControl.skipToPrevious,
-        player.playing ? MediaControl.pause : MediaControl.play,
-        MediaControl.skipToNext,
-      ],
-      systemActions: const {
-        MediaAction.seek,
-        MediaAction.seekForward,
-        MediaAction.seekBackward,
-      },
-      androidCompactActionIndices: const [0, 1, 2],
-      processingState: _mapProcessingState(player.processingState),
-      playing: player.playing,
-      updatePosition: player.position,
-      speed: _speed,
-    ));
+    _audioHandler!.playbackState.add(
+      PlaybackState(
+        controls: [
+          MediaControl.skipToPrevious,
+          player.playing ? MediaControl.pause : MediaControl.play,
+          MediaControl.skipToNext,
+        ],
+        systemActions: const {
+          MediaAction.seek,
+          MediaAction.seekForward,
+          MediaAction.seekBackward,
+        },
+        androidCompactActionIndices: const [0, 1, 2],
+        processingState: _mapProcessingState(player.processingState),
+        playing: player.playing,
+        updatePosition: player.position,
+        speed: _speed,
+      ),
+    );
   }
 
   AudioProcessingState _mapProcessingState(ProcessingState state) {
@@ -124,7 +128,8 @@ class AudioPlayerService {
     if (_audioHandler == null) await init();
 
     debugPrint(
-        '🎵 AudioPlayerService.play: ${book.title}, tracks: ${book.tracks.length}');
+      '🎵 AudioPlayerService.play: ${book.title}, tracks: ${book.tracks.length}',
+    );
     _currentBook = book;
 
     // Defer notifier update to avoid triggering rebuild during build phase
@@ -262,10 +267,12 @@ class AudioPlayerService {
     _currentBook = null;
     _bookNotifier.value = null;
     _completionSub?.cancel();
-    _audioHandler?.playbackState.add(PlaybackState(
-      processingState: AudioProcessingState.idle,
-      playing: false,
-    ));
+    _audioHandler?.playbackState.add(
+      PlaybackState(
+        processingState: AudioProcessingState.idle,
+        playing: false,
+      ),
+    );
   }
 
   Future<void> _saveState() async {
@@ -289,11 +296,9 @@ class AudioPlayerService {
       final trackDur = book.tracks[trackIndex].duration.inSeconds;
       // Approximate overall percentage across the whole audiobook.
       final perTrack = totalTracks > 0 ? 100.0 / totalTracks : 0.0;
-      final withinTrack = trackDur > 0
-          ? (position.inSeconds / trackDur).clamp(0.0, 1.0)
-          : 0.0;
-      final percentage =
-          (trackIndex * perTrack) + (withinTrack * perTrack);
+      final withinTrack =
+          trackDur > 0 ? (position.inSeconds / trackDur).clamp(0.0, 1.0) : 0.0;
+      final percentage = (trackIndex * perTrack) + (withinTrack * perTrack);
 
       await getIt<SaveReadingProgress>()(
         ReadingProgressEntity(

@@ -38,7 +38,8 @@ class BookCrudDetailPage extends StatelessWidget {
                             color: const Color(0xFF042153),
                             child: const Center(
                               child: CircularProgressIndicator(
-                                  color: Colors.white),
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           errorWidget: (_, __, ___) => _placeholderCover(),
@@ -78,10 +79,11 @@ class BookCrudDetailPage extends StatelessWidget {
                           Text(
                             'by ${book.author}',
                             style: TextStyle(
-                                color: Colors.white.withAlpha(210),
-                                fontSize: 14),
+                              color: Colors.white.withAlpha(210),
+                              fontSize: 14,
+                            ),
                           ),
-                        ]
+                        ],
                       ],
                     ),
                   ),
@@ -112,15 +114,17 @@ class BookCrudDetailPage extends StatelessWidget {
                       label: const Text(
                         'Add / Manage Variants',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF042153),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 3,
                       ),
                     ),
@@ -154,13 +158,16 @@ class BookCrudDetailPage extends StatelessWidget {
                             color: Colors.black.withAlpha(15),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
-                          )
+                          ),
                         ],
                       ),
                       child: Text(
                         book.description,
                         style: TextStyle(
-                            fontSize: 14, color: Colors.grey[800], height: 1.6),
+                          fontSize: 14,
+                          color: Colors.grey[800],
+                          height: 1.6,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -180,28 +187,36 @@ class BookCrudDetailPage extends StatelessWidget {
                             color: Colors.black.withAlpha(15),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
-                          )
+                          ),
                         ],
                       ),
                       child: Wrap(
                         spacing: 8,
                         runSpacing: 6,
                         children: book.tags
-                            .map((tag) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEEF2FF),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: const Color(0xFF6366F1)),
+                            .map(
+                              (tag) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEEF2FF),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: const Color(0xFF6366F1),
                                   ),
-                                  child: Text(tag,
-                                      style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF4338CA),
-                                          fontWeight: FontWeight.w500)),
-                                ))
+                                ),
+                                child: Text(
+                                  tag,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF4338CA),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            )
                             .toList(),
                       ),
                     ),
@@ -238,7 +253,7 @@ class BookCrudDetailPage extends StatelessWidget {
             color: Colors.black.withAlpha(15),
             blurRadius: 8,
             offset: const Offset(0, 2),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -254,15 +269,19 @@ class BookCrudDetailPage extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.language_rounded,
-                    color: Color(0xFF042153), size: 18),
+                const Icon(
+                  Icons.language_rounded,
+                  color: Color(0xFF042153),
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   variant.language.toUpperCase(),
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Color(0xFF042153)),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Color(0xFF042153),
+                  ),
                 ),
                 const Spacer(),
                 Text(
@@ -324,13 +343,17 @@ class BookCrudDetailPage extends StatelessWidget {
                 Text(
                   format.type.toUpperCase(),
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 11, color: color),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    color: color,
+                  ),
                 ),
                 if (subtitle.isNotEmpty) ...[
                   const SizedBox(height: 2),
-                  Text(subtitle,
-                      style:
-                          TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                  ),
                 ],
               ],
             ),
@@ -386,11 +409,14 @@ class BookCrudDetailPage extends StatelessWidget {
   Widget _sectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Text(title,
-          style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF042153))),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF042153),
+        ),
+      ),
     );
   }
 
@@ -406,7 +432,7 @@ class BookCrudDetailPage extends StatelessWidget {
             color: Colors.black.withAlpha(15),
             blurRadius: 8,
             offset: const Offset(0, 2),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -415,7 +441,7 @@ class BookCrudDetailPage extends StatelessWidget {
             filtered[i],
             if (i < filtered.length - 1)
               Divider(height: 1, color: Colors.grey.shade100, indent: 52),
-          ]
+          ],
         ],
       ),
     );
@@ -434,17 +460,23 @@ class BookCrudDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey[500],
-                        fontWeight: FontWeight.w500)),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(value,
-                    style: TextStyle(
-                        fontSize: 14,
-                        color: valueColor ?? Colors.grey[850],
-                        fontWeight: FontWeight.w500)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: valueColor ?? Colors.grey[850],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),

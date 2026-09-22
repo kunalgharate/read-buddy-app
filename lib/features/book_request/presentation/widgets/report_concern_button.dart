@@ -120,30 +120,35 @@ class _ReportSheetState extends State<_ReportSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Report a concern',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          const Text(
+            'Report a concern',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 6),
           Text(
             'If you believe this book infringes copyright or violates our policies, let us know. Our team is notified immediately.',
             style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 16),
-          const Text('Reason',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          const Text(
+            'Reason',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
             initialValue: _reason,
             isExpanded: true,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             ),
             items: _reasons.entries
-                .map((e) => DropdownMenuItem(
+                .map(
+                  (e) => DropdownMenuItem(
                     value: e.key,
-                    child: Text(e.value,
-                        overflow: TextOverflow.ellipsis)))
+                    child: Text(e.value, overflow: TextOverflow.ellipsis),
+                  ),
+                )
                 .toList(),
             onChanged: (v) => setState(() => _reason = v ?? 'copyright'),
           ),

@@ -19,16 +19,21 @@ class SearchLocationRemoteResourcesImpl extends SearchLocationRemoteResources {
     try {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
 
-      final response = await dio.get("${ApiConstants.olaMap}=$query",
-          options: Options(headers: {
+      final response = await dio.get(
+        "${ApiConstants.olaMap}=$query",
+        options: Options(
+          headers: {
             'Authorization': 'Bearer $token',
-          }));
+          },
+        ),
+      );
       BookValueItems.locationsuggestions.clear();
       print("Ola Map Api   -----$query");
       print(response.data);
       if (response.statusCode != 200) {
         throw Exception(
-            'Failed to load locations. Status code: ${response.statusCode}');
+          'Failed to load locations. Status code: ${response.statusCode}',
+        );
       } else {
         final List<dynamic> payload = response.data['suggestions'];
         return payload.map((location) {

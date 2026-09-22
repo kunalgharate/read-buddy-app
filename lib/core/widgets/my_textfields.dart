@@ -23,26 +23,27 @@ class MyTextField extends StatelessWidget {
   final int maxlines;
   final bool digitsOnly;
 
-  const MyTextField(
-      {super.key,
-      required this.controller,
-      required this.hintText,
-      this.enable,
-      required this.obscureText,
-      required this.keyboardType,
-      this.suffixIcon,
-      this.length,
-      this.onTap,
-      this.type,
-      this.prefixIcon,
-      this.validator,
-      this.focusNode,
-      this.errorMsg,
-      this.onChanged,
-      this.isReadOnly = false,
-      this.isContentPadding = true,
-      this.maxlines = 1,
-      this.digitsOnly = false});
+  const MyTextField({
+    super.key,
+    required this.controller,
+    required this.hintText,
+    this.enable,
+    required this.obscureText,
+    required this.keyboardType,
+    this.suffixIcon,
+    this.length,
+    this.onTap,
+    this.type,
+    this.prefixIcon,
+    this.validator,
+    this.focusNode,
+    this.errorMsg,
+    this.onChanged,
+    this.isReadOnly = false,
+    this.isContentPadding = true,
+    this.maxlines = 1,
+    this.digitsOnly = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,9 +90,10 @@ class MyTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
-          borderSide: const BorderSide(color: Colors.grey
-              //color: Theme.of(context).colorScheme.primary, width: 2
-              ),
+          borderSide: const BorderSide(
+            color: Colors.grey,
+            //color: Theme.of(context).colorScheme.primary, width: 2
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
@@ -99,9 +101,9 @@ class MyTextField extends StatelessWidget {
         ),
         hintText: hintText,
         hintStyle: const TextStyle(
-            fontSize: 16,
-            color: Colors
-                .black26), //Theme.of(context).inputDecorationTheme.hintStyle,
+          fontSize: 16,
+          color: Colors.black26,
+        ), //Theme.of(context).inputDecorationTheme.hintStyle,
         errorText: errorMsg,
         contentPadding: isContentPadding
             ? const EdgeInsets.symmetric(vertical: 5, horizontal: 5)

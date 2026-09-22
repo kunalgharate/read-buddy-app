@@ -181,7 +181,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       case 'email':
         return {
           'error':
-              'Email address cannot be changed. It\'s your primary account identifier.'
+              'Email address cannot be changed. It\'s your primary account identifier.',
         };
 
       case 'gender':

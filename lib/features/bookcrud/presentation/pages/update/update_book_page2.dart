@@ -23,11 +23,12 @@ class UpdateBookPage2 extends StatefulWidget {
   final BookCrudModel bookCrudModel;
   final String id;
 
-  const UpdateBookPage2(
-      {super.key,
-      required this.onBack,
-      required this.bookCrudModel,
-      required this.id});
+  const UpdateBookPage2({
+    super.key,
+    required this.onBack,
+    required this.bookCrudModel,
+    required this.id,
+  });
 
   @override
   State<UpdateBookPage2> createState() => _UpdateBookPage2State();
@@ -111,20 +112,21 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
     final matchedUser = BookValueItems.usersList.firstWhere(
       (user) => user.id == book.ownerId,
       orElse: () => UserEntity(
-          id: book.ownerId,
-          name: book.ownerName ?? "unkonwnn",
-          userRole: '',
-          isEmailVerified: true,
-          email: '',
-          authType: '',
-          socialId: '',
-          phone: '',
-          pincode: '',
-          city: '',
-          isPrime: false,
-          membershipExpires: null,
-          finesDue: 0,
-          badges: []),
+        id: book.ownerId,
+        name: book.ownerName ?? "unkonwnn",
+        userRole: '',
+        isEmailVerified: true,
+        email: '',
+        authType: '',
+        socialId: '',
+        phone: '',
+        pincode: '',
+        city: '',
+        isPrime: false,
+        membershipExpires: null,
+        finesDue: 0,
+        badges: [],
+      ),
     );
     selectedUser = matchedUser;
     ownerIdController.text = matchedUser.name;
@@ -147,9 +149,10 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
               const Text(
                 'Book Condition',
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               const SizedBox(height: 16),
               MyTextField(
@@ -173,9 +176,10 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
               const Text(
                 'Book Sources Information',
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               const SizedBox(height: 16),
               const Text('Owner Name', style: _labelStyle),
@@ -259,7 +263,8 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                     height: 180,
                                     fit: BoxFit.cover,
                                     placeholder: (context, url) => const Center(
-                                        child: CircularProgressIndicator()),
+                                      child: CircularProgressIndicator(),
+                                    ),
                                     errorWidget: (context, url, error) =>
                                         const Icon(Icons.error),
                                   ),
@@ -298,7 +303,8 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                       if (images.length + selectedImages.length >= 5) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('Maximum 5 images allowed')),
+                            content: Text('Maximum 5 images allowed'),
+                          ),
                         );
                       } else {
                         dialogpermission();
@@ -345,8 +351,8 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                       height: 180,
                                       placeholder: (context, url) =>
                                           const Center(
-                                              child:
-                                                  CircularProgressIndicator()),
+                                        child: CircularProgressIndicator(),
+                                      ),
                                       errorWidget: (context, url, error) =>
                                           const Icon(Icons.error),
                                       fit: BoxFit.cover,
@@ -371,7 +377,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                             color: Colors.black26,
                                             blurRadius: 3,
                                             offset: Offset(1, 1),
-                                          )
+                                          ),
                                         ],
                                       ),
                                       padding: const EdgeInsets.all(5),
@@ -421,7 +427,7 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                                             color: Colors.black26,
                                             blurRadius: 3,
                                             offset: Offset(1, 1),
-                                          )
+                                          ),
                                         ],
                                       ),
                                       padding: const EdgeInsets.all(5),
@@ -470,10 +476,12 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
               Wrap(
                 spacing: 6,
                 children: _tags
-                    .map((tag) => Chip(
-                          label: Text(tag),
-                          onDeleted: () => _removeTag(tag),
-                        ))
+                    .map(
+                      (tag) => Chip(
+                        label: Text(tag),
+                        onDeleted: () => _removeTag(tag),
+                      ),
+                    )
                     .toList(),
               ),
               const SizedBox(height: 24),
@@ -485,7 +493,8 @@ class _UpdateBookPage2State extends State<UpdateBookPage2> {
                       !tagController.text.endsWith(' ')) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('Please press space to add your tag')),
+                        content: Text('Please press space to add your tag'),
+                      ),
                     );
                     return;
                   }
@@ -713,7 +722,7 @@ Widget _buildCloseButton() {
           color: Colors.black26,
           blurRadius: 3,
           offset: Offset(1, 1),
-        )
+        ),
       ],
     ),
     padding: const EdgeInsets.all(5),

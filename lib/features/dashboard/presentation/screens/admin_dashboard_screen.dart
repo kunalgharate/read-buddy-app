@@ -240,9 +240,8 @@ class _AdminDashboardBodyState extends State<_AdminDashboardBody> {
     // set so every dashboard navigation box is findable. When not searching,
     // they are shown in their dedicated horizontal row instead (below) and are
     // therefore excluded here to avoid duplicates.
-    final searchableTiles = query.isEmpty
-        ? allTiles
-        : [...allTiles, ...quickStatTiles];
+    final searchableTiles =
+        query.isEmpty ? allTiles : [...allTiles, ...quickStatTiles];
     final filteredTiles = query.isEmpty
         ? allTiles
         : searchableTiles

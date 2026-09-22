@@ -55,9 +55,11 @@ class TtsService {
   Future<void> init(String languageCode) async {
     _languageCode = _normalizeLanguageCode(languageCode);
     debugPrint(
-        '[TTS] init() called with raw languageCode: "$languageCode" → normalized: "$_languageCode"');
+      '[TTS] init() called with raw languageCode: "$languageCode" → normalized: "$_languageCode"',
+    );
     debugPrint(
-        '[TTS] Will use Gnani AI: ${_gnaniLanguages.contains(_languageCode)}');
+      '[TTS] Will use Gnani AI: ${_gnaniLanguages.contains(_languageCode)}',
+    );
 
     // Always init flutter_tts as fallback
     final locale = _flutterTtsLanguageMap[languageCode] ?? 'en-US';
@@ -187,10 +189,12 @@ class TtsService {
         result.add(chunk);
       } else {
         for (var i = 0; i < chunk.length; i += maxLength) {
-          result.add(chunk.substring(
-            i,
-            (i + maxLength).clamp(0, chunk.length),
-          ));
+          result.add(
+            chunk.substring(
+              i,
+              (i + maxLength).clamp(0, chunk.length),
+            ),
+          );
         }
       }
     }
@@ -225,8 +229,10 @@ class TtsService {
 
       request.headers.set('Content-Type', 'application/json; charset=utf-8');
       request.headers.set('Content-Length', bodyBytes.length.toString());
-      request.headers.set('X-API-Key-ID',
-          'vach_1ytE2CY5X2OrSqddsJvAvu3O4wNoWFIjyldHw67WjXqEK25XwvpaxAfJLV2491K9cnYPB6bMdulN5N56eaRxQCrnvsO1agNC_784090b017d414bbe6dd034cd399f0c8');
+      request.headers.set(
+        'X-API-Key-ID',
+        'vach_1ytE2CY5X2OrSqddsJvAvu3O4wNoWFIjyldHw67WjXqEK25XwvpaxAfJLV2491K9cnYPB6bMdulN5N56eaRxQCrnvsO1agNC_784090b017d414bbe6dd034cd399f0c8',
+      );
 
       request.add(bodyBytes);
       final response = await request.close();
@@ -248,7 +254,8 @@ class TtsService {
         final errorBytes = await _collectResponseBytes(response);
         final errorBody = utf8.decode(errorBytes, allowMalformed: true);
         debugPrint(
-            '[TTS-Gnani] ❌ API error ${response.statusCode}: $errorBody');
+          '[TTS-Gnani] ❌ API error ${response.statusCode}: $errorBody',
+        );
         return null;
       }
     } catch (e) {
@@ -343,7 +350,8 @@ class TtsService {
   Future<void> setLanguage(String languageCode) async {
     _languageCode = _normalizeLanguageCode(languageCode);
     debugPrint(
-        '[TTS] setLanguage() called: "$languageCode" → normalized: "$_languageCode"');
+      '[TTS] setLanguage() called: "$languageCode" → normalized: "$_languageCode"',
+    );
     final locale = _flutterTtsLanguageMap[_languageCode] ?? 'en-US';
     await _flutterTts.setLanguage(locale);
   }

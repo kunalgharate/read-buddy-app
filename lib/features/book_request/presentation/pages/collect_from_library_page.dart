@@ -316,9 +316,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -444,8 +442,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                                 if (widget.isReturn && _selectedTab == 0) ...[
                                   const Spacer(),
                                   GestureDetector(
-                                    onTap: () => setState(() =>
-                                        _isEditingAddress = !_isEditingAddress),
+                                    onTap: () => setState(
+                                      () => _isEditingAddress =
+                                          !_isEditingAddress,
+                                    ),
                                     child: Text(
                                       _isEditingAddress
                                           ? 'Done'
@@ -529,7 +529,8 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                               if (state is LibraryDetailsLoading) {
                                 return const Center(
                                   child: CircularProgressIndicator(
-                                      color: Color(0xFF2CE07F)),
+                                    color: Color(0xFF2CE07F),
+                                  ),
                                 );
                               }
                               if (state is LibraryDetailsLoaded) {
@@ -537,9 +538,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                               }
                               if (state is LibraryDetailsError) {
                                 return Center(
-                                  child: Text(state.message,
-                                      style:
-                                          const TextStyle(color: Colors.grey)),
+                                  child: Text(
+                                    state.message,
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
                                 );
                               }
                               return const SizedBox.shrink();
@@ -557,7 +559,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
       bottomNavigationBar: _showingConfirmation
           ? Padding(
               padding: EdgeInsets.fromLTRB(
-                  16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
+                16,
+                12,
+                16,
+                MediaQuery.of(context).padding.bottom + 16,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -609,7 +615,9 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textPrimary,
                         side: const BorderSide(
-                            color: Color(0xFFCCCCCC), width: 1.5),
+                          color: Color(0xFFCCCCCC),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -628,7 +636,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
             )
           : Padding(
               padding: EdgeInsets.fromLTRB(
-                  16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
+                16,
+                12,
+                16,
+                MediaQuery.of(context).padding.bottom + 16,
+              ),
               child: SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -879,8 +891,11 @@ class _LibraryCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: const Color(0xFFCCCCCC)),
                 ),
-                child: const Icon(Icons.location_city,
-                    size: 26, color: Color(0xFF888888)),
+                child: const Icon(
+                  Icons.location_city,
+                  size: 26,
+                  color: Color(0xFF888888),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -902,14 +917,20 @@ class _LibraryCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 16, color: Color(0xFF888888)),
+              const Icon(
+                Icons.location_on_outlined,
+                size: 16,
+                color: Color(0xFF888888),
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   library.address.fullAddress,
                   style: const TextStyle(
-                      fontSize: 13, color: Color(0xFF555555), height: 1.4),
+                    fontSize: 13,
+                    color: Color(0xFF555555),
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
@@ -920,8 +941,11 @@ class _LibraryCard extends StatelessWidget {
           // ── Phone ─────────────────────────────────────────────────
           Row(
             children: [
-              const Icon(Icons.phone_outlined,
-                  size: 16, color: Color(0xFF888888)),
+              const Icon(
+                Icons.phone_outlined,
+                size: 16,
+                color: Color(0xFF888888),
+              ),
               const SizedBox(width: 8),
               Text(
                 library.contactNumber,
@@ -935,8 +959,11 @@ class _LibraryCard extends StatelessWidget {
           // ── Hours ─────────────────────────────────────────────────
           Row(
             children: [
-              const Icon(Icons.access_time_outlined,
-                  size: 16, color: Color(0xFF888888)),
+              const Icon(
+                Icons.access_time_outlined,
+                size: 16,
+                color: Color(0xFF888888),
+              ),
               const SizedBox(width: 8),
               Text(
                 library.openHours,

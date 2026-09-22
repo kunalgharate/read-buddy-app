@@ -29,9 +29,13 @@ class ReadingProgressLocalDataSourceImpl
       final prefs = await _prefs;
       final withTime = progress.lastReadAt == null
           ? ReadingProgressModel.fromEntity(
-              progress.copyWith(lastReadAt: DateTime.now()))
+              progress.copyWith(lastReadAt: DateTime.now()),
+            )
           : progress;
-      await prefs.setString(_key(progress.bookId), jsonEncode(withTime.toJson()));
+      await prefs.setString(
+        _key(progress.bookId),
+        jsonEncode(withTime.toJson()),
+      );
 
       // Maintain an ordered index of bookIds (most-recent first).
       final index = prefs.getStringList(_indexKey) ?? <String>[];
@@ -50,7 +54,8 @@ class ReadingProgressLocalDataSourceImpl
       final raw = prefs.getString(_key(bookId));
       if (raw == null) return null;
       return ReadingProgressModel.fromJson(
-          Map<String, dynamic>.from(jsonDecode(raw) as Map));
+        Map<String, dynamic>.from(jsonDecode(raw) as Map),
+      );
     } catch (e) {
       if (kDebugMode) print('⚠️ local getProgress failed: $e');
       return null;

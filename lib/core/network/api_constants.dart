@@ -67,8 +67,7 @@ class ApiConstants {
   static String get v1BookRequests => '$baseUrl/v1/book-requests';
   static String get getAllBookRequests => '$baseUrl/bookrequests';
   static String get bookRequests => '$baseUrl/bookrequests';
-  static String bookRequestPayment(String id) =>
-      '$v1BookRequests/$id/payment';
+  static String bookRequestPayment(String id) => '$v1BookRequests/$id/payment';
   static String bookRequestPaymentVerify(String id) =>
       '$v1BookRequests/$id/payment/verify';
 
@@ -135,8 +134,10 @@ class ApiConstants {
 
   // Library Inventory
   static String get libraryInventory => '$baseUrl/v1/library-inventory';
-  static String get libraryInventoryBrowse => '$baseUrl/v1/library-inventory/browse';
-  static String libraryInventoryById(String id) => '$baseUrl/v1/library-inventory/$id';
+  static String get libraryInventoryBrowse =>
+      '$baseUrl/v1/library-inventory/browse';
+  static String libraryInventoryById(String id) =>
+      '$baseUrl/v1/library-inventory/$id';
 
   // Admin User Management
   static String get adminUsers => '$baseUrl/admin/users';

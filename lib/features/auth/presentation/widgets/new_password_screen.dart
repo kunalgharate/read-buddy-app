@@ -59,11 +59,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       return;
     }
 
-    context.read<SignInBloc>().add(ChangePasswordRequested(
-          email: _email!,
-          code: _otp!,
-          newPassword: password,
-        ));
+    context.read<SignInBloc>().add(
+          ChangePasswordRequested(
+            email: _email!,
+            code: _otp!,
+            newPassword: password,
+          ),
+        );
   }
 
   void _showError(String msg) {

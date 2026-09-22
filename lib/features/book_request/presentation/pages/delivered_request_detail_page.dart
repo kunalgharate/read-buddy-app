@@ -81,7 +81,9 @@ class _DeliveredRequestDetailPageState
                         Text(
                           'by ${widget.request.bookAuthor}',
                           style: const TextStyle(
-                              fontSize: 13, color: Color(0xFF888888)),
+                            fontSize: 13,
+                            color: Color(0xFF888888),
+                          ),
                         ),
                       ],
                       if (widget.request.bookFormat != null) ...[
@@ -89,7 +91,9 @@ class _DeliveredRequestDetailPageState
                         Text(
                           _capitalize(widget.request.bookFormat!),
                           style: const TextStyle(
-                              fontSize: 13, color: Color(0xFF555555)),
+                            fontSize: 13,
+                            color: Color(0xFF555555),
+                          ),
                         ),
                       ],
                       const SizedBox(height: 8),
@@ -231,7 +235,9 @@ class _DeliveredRequestDetailPageState
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF052E44),
                               side: const BorderSide(
-                                  color: Color(0xFFCCCCCC), width: 1.5),
+                                color: Color(0xFFCCCCCC),
+                                width: 1.5,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -298,12 +304,14 @@ class _DeliveredRequestDetailPageState
 
     if (isDropOff) {
       // Show the drop-off library branch (not the home delivery address)
-      rows.add(_InfoRow(
-        'Return Branch',
-        (r.returnBranchId != null && r.returnBranchId!.isNotEmpty)
-            ? 'Library branch'
-            : 'Return library branch details unavailable',
-      ));
+      rows.add(
+        _InfoRow(
+          'Return Branch',
+          (r.returnBranchId != null && r.returnBranchId!.isNotEmpty)
+              ? 'Library branch'
+              : 'Return library branch details unavailable',
+        ),
+      );
     } else {
       // Home pickup — show pickup address
       if (r.pickupAddress != null && r.pickupAddress!.isNotEmpty) {
@@ -324,7 +332,8 @@ class _DeliveredRequestDetailPageState
     }
   }
 
-  Widget _coverPlaceholder() => Container(        width: 100,
+  Widget _coverPlaceholder() => Container(
+        width: 100,
         height: 140,
         decoration: BoxDecoration(
           color: const Color(0xFFF0F0F0),
@@ -370,16 +379,20 @@ class _InfoRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 130,
-            child: Text(label,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF888888))),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF888888)),
+            ),
           ),
           Expanded(
-            child: Text(value,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                )),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
         ],
       ),
@@ -440,7 +453,7 @@ String _fmtDate(String? s) {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     return '${dt.day} ${m[dt.month - 1]} ${dt.year}';
   } catch (_) {

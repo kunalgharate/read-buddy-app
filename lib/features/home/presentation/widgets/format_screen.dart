@@ -383,8 +383,11 @@ class _RazorpayBottomSheetState extends State<RazorpayBottomSheet> {
           // Info text
           Row(
             children: [
-              Icon(Icons.info_outline,
-                  size: size.width * 0.032, color: const Color(0xFF7A9BB5)),
+              Icon(
+                Icons.info_outline,
+                size: size.width * 0.032,
+                color: const Color(0xFF7A9BB5),
+              ),
               const SizedBox(width: 4),
               Text(
                 'You can add up to ₹1,99,999.00',

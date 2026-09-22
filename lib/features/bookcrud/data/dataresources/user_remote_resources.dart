@@ -22,14 +22,19 @@ class UserRemoteResourcesImpl extends UserRemoteResources {
   Future<List<UserEntity>> getusersList() async {
     try {
       final token = await getIt<SecureStorageUtil>().getAccessToken();
-      final response = await dio.get(ApiConstants.users,
-          options: Options(headers: {
+      final response = await dio.get(
+        ApiConstants.users,
+        options: Options(
+          headers: {
             'Authorization': 'Bearer $token',
-          }));
+          },
+        ),
+      );
       BookValueItems.usersList.clear();
       if (response.statusCode != 200) {
         throw Exception(
-            'Failed to load books. Status code: ${response.statusCode}');
+          'Failed to load books. Status code: ${response.statusCode}',
+        );
       }
 
       print("📚 users list");
@@ -67,7 +72,8 @@ class UserRemoteResourcesImpl extends UserRemoteResources {
 
       if (response.statusCode != 200) {
         throw Exception(
-            'Failed to search users. Status: ${response.statusCode}');
+          'Failed to search users. Status: ${response.statusCode}',
+        );
       }
 
       final data = response.data;

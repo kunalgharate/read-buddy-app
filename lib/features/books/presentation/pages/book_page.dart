@@ -27,7 +27,7 @@ class _BookPageState extends State<BookPage> {
     'Fiction',
     'Non Fiction',
     'Biography',
-    'Comics'
+    'Comics',
   ];
 
   final Set<String> selectedCategories = {'All'};
@@ -54,14 +54,17 @@ class _BookPageState extends State<BookPage> {
                 );
               },
               icon: const Icon(Icons.category, size: 18, color: Colors.white),
-              label: const Text('+ Category',
-                  style: TextStyle(color: Colors.white)),
+              label: const Text(
+                '+ Category',
+                style: TextStyle(color: Colors.white),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 minimumSize: const Size(20, 40),
               ),
             ),
@@ -71,18 +74,22 @@ class _BookPageState extends State<BookPage> {
             child: ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MultiBlocProvider(
-                              providers: [
-                                BlocProvider(
-                                    create: (_) => getIt<BookCrudBloc>()),
-                                BlocProvider(create: (_) => getIt<UserCubit>()),
-                                BlocProvider(
-                                    create: (_) => getIt<LocationCubit>()),
-                              ],
-                              child: const BooksListPage(),
-                            )));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (_) => getIt<BookCrudBloc>(),
+                        ),
+                        BlocProvider(create: (_) => getIt<UserCubit>()),
+                        BlocProvider(
+                          create: (_) => getIt<LocationCubit>(),
+                        ),
+                      ],
+                      child: const BooksListPage(),
+                    ),
+                  ),
+                );
               },
               icon: const Icon(Icons.book, size: 18, color: Colors.white),
               label:
@@ -92,7 +99,8 @@ class _BookPageState extends State<BookPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 minimumSize: const Size(20, 40),
               ),
             ),
@@ -105,24 +113,29 @@ class _BookPageState extends State<BookPage> {
           children: [
             TextField(
               decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'Search any Books',
-                  filled: true,
-                  fillColor: const Color(0xFFF1F1F1),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(color: Colors.grey)),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(color: Colors.grey)),
-                  suffixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(onPressed: () {}, icon: const Icon(Icons.mic)),
-                      IconButton(
-                          onPressed: () {}, icon: const Icon(Icons.qr_code))
-                    ],
-                  )),
+                prefixIcon: const Icon(Icons.search),
+                hintText: 'Search any Books',
+                filled: true,
+                fillColor: const Color(0xFFF1F1F1),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(onPressed: () {}, icon: const Icon(Icons.mic)),
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.qr_code),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(
               height: 10,
@@ -158,7 +171,6 @@ class _BookPageState extends State<BookPage> {
                       color: isSelected ? Colors.green : Colors.grey.shade300,
                     ),
                   ),
-            
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.green : Colors.black,
                   ),
@@ -173,17 +185,19 @@ class _BookPageState extends State<BookPage> {
                       return Column(
                         children: [
                           ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) => BlocProvider(
-                                              create: (_) =>
-                                                  getIt<BookCrudBloc>(),
-                                              child: const BookStepper(),
-                                            )));
-                              },
-                              child: const Text("Add Book")),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider(
+                                    create: (_) => getIt<BookCrudBloc>(),
+                                    child: const BookStepper(),
+                                  ),
+                                ),
+                              );
+                            },
+                            child: const Text("Add Book"),
+                          ),
                           const Center(child: Text('No books loaded.')),
                         ],
                       );
@@ -194,7 +208,8 @@ class _BookPageState extends State<BookPage> {
                     case BookLoaded(:final books):
                       return GridView.builder(
                         padding: const EdgeInsets.only(
-                            bottom: 80), // 👈 Add space for bottom nav
+                          bottom: 80,
+                        ), // 👈 Add space for bottom nav
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,

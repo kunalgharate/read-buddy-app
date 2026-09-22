@@ -44,11 +44,14 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
       final user = await _signIn(params);
       emit(SignInSuccess(user));
     } catch (error) {
-      emit(SignInFailure(
-        ErrorHandler.getErrorMessage(error),
-        isEmailNotVerified: ErrorHandler.isEmailNotVerified(error),
-        email: ErrorHandler.extractEmail(error) ?? event.email.trim().toLowerCase(),
-      ));
+      emit(
+        SignInFailure(
+          ErrorHandler.getErrorMessage(error),
+          isEmailNotVerified: ErrorHandler.isEmailNotVerified(error),
+          email: ErrorHandler.extractEmail(error) ??
+              event.email.trim().toLowerCase(),
+        ),
+      );
     }
   }
 

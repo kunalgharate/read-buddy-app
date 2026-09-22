@@ -167,8 +167,8 @@ class _DonationTabContent extends StatelessWidget {
                   // Only show Buy Prime once the profile has loaded, and only
                   // for non-prime users. While loading or on error we hide the
                   // button so we never prompt a payment based on unknown state.
-                  final isKnownNonPrime =
-                      profileState is ProfileLoaded && !profileState.user.isPrime;
+                  final isKnownNonPrime = profileState is ProfileLoaded &&
+                      !profileState.user.isPrime;
                   if (!isKnownNonPrime) {
                     return const SizedBox.shrink();
                   }
@@ -180,9 +180,7 @@ class _DonationTabContent extends StatelessWidget {
                       final result =
                           await Navigator.pushNamed(context, '/donate-money');
                       if (result == true && context.mounted) {
-                        context
-                            .read<DonateBookBloc>()
-                            .add(LoadDonationStats());
+                        context.read<DonateBookBloc>().add(LoadDonationStats());
                       }
                     },
                   );
@@ -400,8 +398,8 @@ class _BookStatusSection extends StatelessWidget {
                         category: book.categoryName ?? '',
                         donorName: 'You',
                         coverImageUrl: book.coverImageUrl ?? '',
-                        createdAt: book.createdAt ??
-                            DateTime.now().toIso8601String(),
+                        createdAt:
+                            book.createdAt ?? DateTime.now().toIso8601String(),
                         language: 'English',
                       ),
                     );
@@ -533,4 +531,3 @@ class _ImpactCard extends StatelessWidget {
     );
   }
 }
-

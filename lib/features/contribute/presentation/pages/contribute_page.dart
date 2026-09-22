@@ -195,7 +195,8 @@ class _ContributePageState extends State<ContributePage> {
               color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.2)),
+                color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+              ),
             ),
             child: const Row(
               children: [
@@ -361,7 +362,9 @@ class _ContributePageState extends State<ContributePage> {
             Text(
               '(Soon)',
               style: TextStyle(
-                  fontSize: 10, color: AppColors.textMutedColor(context)),
+                fontSize: 10,
+                color: AppColors.textMutedColor(context),
+              ),
             ),
           ],
         ],
@@ -479,7 +482,10 @@ class _ContributePageState extends State<ContributePage> {
           const SizedBox(width: 10),
           Text(
             text,
-            style: TextStyle(fontSize: 13, color: AppColors.textPrimaryColor(context)),
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textPrimaryColor(context),
+            ),
           ),
         ],
       ),
@@ -524,7 +530,8 @@ class _ContributePageState extends State<ContributePage> {
                   Row(
                     children: [
                       Expanded(
-                        child: _impactCard(context,
+                        child: _impactCard(
+                          context,
                           icon: Icons.menu_book,
                           label: 'Books Donated',
                           value: '$booksDonated',
@@ -534,7 +541,8 @@ class _ContributePageState extends State<ContributePage> {
                       const SizedBox(width: 12),
                       if (!isPrime) ...[
                         Expanded(
-                          child: _impactCard(context,
+                          child: _impactCard(
+                            context,
                             icon: Icons.attach_money,
                             label: 'Money Donated',
                             value: '\u20B9$moneyDonated',
@@ -544,7 +552,8 @@ class _ContributePageState extends State<ContributePage> {
                         const SizedBox(width: 12),
                       ],
                       Expanded(
-                        child: _impactCard(context,
+                        child: _impactCard(
+                          context,
                           icon: Icons.emoji_events,
                           label: 'Donor Badge',
                           value: isPrime ? 'Prime' : 'None',
@@ -592,7 +601,9 @@ class _ContributePageState extends State<ContributePage> {
           Text(
             label,
             style: TextStyle(
-                fontSize: 11, color: AppColors.textSecondaryColor(context)),
+              fontSize: 11,
+              color: AppColors.textSecondaryColor(context),
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -635,7 +646,8 @@ class _ContributePageState extends State<ContributePage> {
                 if (state.stats.bookStatusList.isEmpty) {
                   return _buildEmptySection(context, 'No books donated yet.');
                 }
-                final items = allBooksSorted(state.stats.bookStatusList).take(5).toList();
+                final items =
+                    allBooksSorted(state.stats.bookStatusList).take(5).toList();
                 return Column(
                   children: items.map((d) {
                     return Container(
@@ -654,8 +666,11 @@ class _ContributePageState extends State<ContributePage> {
                               color: AppColors.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.menu_book,
-                                color: AppColors.primary, size: 20),
+                            child: const Icon(
+                              Icons.menu_book,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -677,7 +692,8 @@ class _ContributePageState extends State<ContributePage> {
                                   '${d.format} \u2022 ${d.categoryName ?? ''}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textSecondaryColor(context),
+                                    color:
+                                        AppColors.textSecondaryColor(context),
                                   ),
                                 ),
                               ],
@@ -696,7 +712,9 @@ class _ContributePageState extends State<ContributePage> {
                     padding: const EdgeInsets.all(32),
                     child: Text(
                       state.message,
-                      style: TextStyle(color: AppColors.textSecondaryColor(context)),
+                      style: TextStyle(
+                        color: AppColors.textSecondaryColor(context),
+                      ),
                     ),
                   ),
                 );
@@ -757,8 +775,9 @@ class _ContributePageState extends State<ContributePage> {
                         ),
                         const SizedBox(height: 12),
                         OutlinedButton.icon(
-                          onPressed: () =>
-                              context.read<ContributeCubit>().loadMoneyDonations(),
+                          onPressed: () => context
+                              .read<ContributeCubit>()
+                              .loadMoneyDonations(),
                           icon: const Icon(Icons.refresh, size: 18),
                           label: const Text('Retry'),
                         ),
@@ -814,8 +833,11 @@ class _ContributePageState extends State<ContributePage> {
                                   .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.attach_money,
-                                color: Color(0xFFF59E0B), size: 20),
+                            child: const Icon(
+                              Icons.attach_money,
+                              color: Color(0xFFF59E0B),
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -835,7 +857,8 @@ class _ContributePageState extends State<ContributePage> {
                                   _formatDate(d.createdAt),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textSecondaryColor(context),
+                                    color:
+                                        AppColors.textSecondaryColor(context),
                                   ),
                                 ),
                               ],
@@ -868,13 +891,18 @@ class _ContributePageState extends State<ContributePage> {
         padding: const EdgeInsets.all(32),
         child: Column(
           children: [
-            Icon(Icons.inbox_outlined,
-                size: 40, color: AppColors.textMutedColor(context)),
+            Icon(
+              Icons.inbox_outlined,
+              size: 40,
+              color: AppColors.textMutedColor(context),
+            ),
             const SizedBox(height: 10),
             Text(
               message,
-              style:
-                  TextStyle(fontSize: 13, color: AppColors.textSecondaryColor(context)),
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondaryColor(context),
+              ),
             ),
           ],
         ),

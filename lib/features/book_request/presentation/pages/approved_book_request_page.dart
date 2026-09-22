@@ -1,8 +1,14 @@
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../../../../core/config/app_config.dart';
+import '../../../../core/di/injection.dart';
+import '../../../profile/presentation/blocs/profile_bloc.dart';
+import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
-import 'book_order_page.dart';
 import 'collect_from_library_page.dart';
 
 class ApprovedBookRequestPage extends StatefulWidget {
@@ -23,11 +29,136 @@ class ApprovedBookRequestPage extends StatefulWidget {
 
 class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   late int _selectedTab;
+  late final Razorpay _razorpay;
+  bool _paying = false;
+  bool _paid = false;
+
+  // Contract: paymentStatus enum is PENDING | PAID | FREE. The ₹25 delivery
+  // fee is payable only in the active-unpaid state (PENDING). Used to gate
+  // createDeliveryPaymentOrder so it can't be reached for any other value.
+  bool get _isPayable =>
+      widget.request.paymentStatus.trim().toUpperCase() == 'PENDING';
 
   @override
   void initState() {
     super.initState();
     _selectedTab = widget.initialTab;
+    _paid = widget.request.paymentStatus.toUpperCase() == 'PAID' ||
+        widget.request.paymentStatus.toUpperCase() == 'FREE';
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onDeliveryPaid);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onDeliveryPayError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  // Creates the ₹25 delivery order and opens Razorpay checkout.
+  Future<void> _payDeliveryFee() async {
+    if (!_isPayable) return;
+    setState(() => _paying = true);
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      final res = await ds.createDeliveryPaymentOrder(widget.request.id);
+      if (!mounted) return;
+      final order = res['order'] as Map;
+      _razorpay.open({
+        'key': res['keyId'],
+        'amount': order['amount'],
+        'currency': order['currency'] ?? 'INR',
+        'order_id': order['id'],
+        'name': 'ReadBuddy',
+        'description': 'Delivery Fee',
+        'prefill': const {},
+        'theme': {'color': '#2CE07F'},
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to start payment: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _onDeliveryPaid(PaymentSuccessResponse response) async {
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      await ds.verifyDeliveryPayment(
+        widget.request.id,
+        paymentId: response.paymentId ?? '',
+        orderId: response.orderId ?? '',
+        signature: response.signature ?? '',
+      );
+      if (!mounted) return;
+      setState(() {
+        _paying = false;
+        _paid = true;
+      });
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment successful! Your book will be shipped.'),
+          backgroundColor: Color(0xFF2CE07F),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment verification failed: $e')),
+        );
+      }
+    }
+  }
+
+  void _onDeliveryPayError(PaymentFailureResponse response) {
+    if (!mounted) return;
+    setState(() => _paying = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Payment failed: ${response.message ?? 'Try again'}'),
+      ),
+    );
+  }
+
+  // DEV/TEST ONLY: complete the ₹25 fee via the backend demo bypass (no card).
+  Future<void> _payDeliveryFeeTest() async {
+    if (!_isPayable) return;
+    setState(() => _paying = true);
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      final res = await ds.createDeliveryPaymentOrder(widget.request.id);
+      if (!mounted) return;
+      final order = res['order'] as Map;
+      await ds.verifyDeliveryPayment(
+        widget.request.id,
+        paymentId: 'pay_demo_success_99',
+        orderId: order['id'] as String,
+        signature: 'demo_bypass',
+      );
+      if (!mounted) return;
+      setState(() {
+        _paying = false;
+        _paid = true;
+      });
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment successful! (test)')),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Test payment failed: $e')),
+        );
+      }
+    }
   }
 
   String _formatDate(String? dateStr) {
@@ -47,7 +178,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
       'September',
       'October',
       'November',
-      'December'
+      'December',
     ];
     return '${dt.day} ${months[dt.month]} ${dt.year}';
   }
@@ -60,11 +191,23 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   @override
   Widget build(BuildContext context) {
     final req = widget.request;
+    // Canonical stored values are DELIVERY / PICKUP / MEETUP (see backend
+    // BookRequest enum); we also accept legacy/UI-origin delivery variants.
+    final method = req.fulfillmentMethod.trim().toUpperCase();
+    final isPickup = method == 'PICKUP';
+    final isDelivery = method == 'DELIVERY' ||
+        method == 'DROPOFF' ||
+        method == 'DROP_OFF' ||
+        method == 'SHIPPING';
+    final isMeetup = method == 'MEETUP';
+    // Payment contract: paymentStatus enum is PENDING | PAID | FREE.
+    // The ₹25 delivery fee is payable ONLY for the active-unpaid state
+    // (PENDING). PAID/FREE/missing/unrecognized are all non-payable, so
+    // createDeliveryPaymentOrder can never be reached for them.
+    final canPay = _isPayable;
 
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
@@ -197,7 +340,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                   const SizedBox(height: 20),
 
                   // Show action based on fulfillment method chosen during request
-                  if (req.fulfillmentMethod.toUpperCase() == 'PICKUP') ...[
+                  if (isPickup) ...[
                     // User chose pickup — show library details
                     SizedBox(
                       width: double.infinity,
@@ -212,8 +355,10 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                             ),
                           ),
                         ),
-                        icon: const Icon(Icons.local_library,
-                            color: AppColors.textPrimary),
+                        icon: const Icon(
+                          Icons.local_library,
+                          color: AppColors.textPrimary,
+                        ),
                         label: const Text(
                           'View Pickup Details',
                           style: TextStyle(
@@ -231,35 +376,151 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                         ),
                       ),
                     ),
-                  ] else ...[
-                    // User chose delivery — show delivery/order details
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BookOrderPage(request: req),
+                  ] else if (isDelivery) ...[
+                    // User chose delivery — ₹25 delivery fee (address was
+                    // already provided at request time; no re-entry needed).
+                    if (_paid) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              const Color(0xFF2CE07F).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFF2CE07F)),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: Color(0xFF2CE07F),
+                              size: 22,
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Delivery fee paid — your book will be shipped soon.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else if (canPay) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: _paying ? null : _payDeliveryFee,
+                          icon: _paying
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.textPrimary,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.payment,
+                                  color: AppColors.textPrimary,
+                                ),
+                          label: Text(
+                            _paying ? 'Processing…' : 'Pay ₹25 Delivery Fee',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2CE07F),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                        icon: const Icon(Icons.local_shipping,
-                            color: AppColors.textPrimary),
-                        label: const Text(
-                          'View Delivery Details',
+                      ),
+                      // DEV/TEST ONLY — complete the ₹25 fee without a real card.
+                      if (kDebugMode ||
+                          (AppConfig.isInitialized &&
+                              AppConfig.instance.isDev)) ...[
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: OutlinedButton.icon(
+                            onPressed: _paying ? null : _payDeliveryFeeTest,
+                            icon: const Icon(Icons.bolt, size: 18),
+                            label: const Text('Pay ₹25 (TEST)'),
+                          ),
+                        ),
+                      ],
+                    ] else ...[
+                      // Non-payable payment status (not PENDING/PAID/FREE):
+                      // do not expose the ₹25 payment control.
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F0),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE0E0E0)),
+                        ),
+                        child: const Text(
+                          'Delivery payment is not available for this request.',
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2CE07F),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      ),
+                    ],
+                  ] else if (isMeetup) ...[
+                    // In-person meetup — no delivery fee; coordinate directly.
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2CE07F).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFF2CE07F)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.handshake_outlined,
+                            color: Color(0xFF2CE07F),
+                            size: 22,
                           ),
-                        ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'In-person meetup — no delivery fee. '
+                              'Coordinate the handover with the donor.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

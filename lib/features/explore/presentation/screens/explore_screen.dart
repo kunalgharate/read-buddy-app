@@ -58,8 +58,10 @@ class _ExploreView extends StatelessWidget {
                           onPressed: () => context
                               .read<ExploreBloc>()
                               .add(const SelectCategory(null)),
-                          icon: const Icon(Icons.arrow_back,
-                              color: Color(0xFF03405B)),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Color(0xFF03405B),
+                          ),
                         ),
                         const Text(
                           'Explore',
@@ -83,13 +85,15 @@ class _ExploreView extends StatelessWidget {
                           mainAxisSpacing: 16,
                         ),
                         itemCount: state.sections
-                            .firstWhere((s) =>
-                                s.category.id == state.selectedCategoryId)
+                            .firstWhere(
+                              (s) => s.category.id == state.selectedCategoryId,
+                            )
                             .books
                             .length,
                         itemBuilder: (context, index) {
                           final section = state.sections.firstWhere(
-                              (s) => s.category.id == state.selectedCategoryId);
+                            (s) => s.category.id == state.selectedCategoryId,
+                          );
                           return ExploreBookCard(book: section.books[index]);
                         },
                       ),
@@ -123,49 +127,58 @@ class _ExploreView extends StatelessWidget {
                                       state.parentCategories[index];
                                   return Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                          color: Colors.grey.shade200),
+                                        color: Colors.grey.shade200,
+                                      ),
                                     ),
                                     child: Text(
                                       category.title,
                                       style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   );
                                 },
                               ),
                             ),
                             const SizedBox(height: 24),
-                            ...state.sections.map((section) => Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SectionHeader(
-                                      title: section.category.title,
-                                      onSeeAll: () {
-                                        context.read<ExploreBloc>().add(
+                            ...state.sections.map(
+                              (section) => Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SectionHeader(
+                                    title: section.category.title,
+                                    onSeeAll: () {
+                                      context.read<ExploreBloc>().add(
                                             SelectCategory(
-                                                section.category.id));
-                                      },
-                                    ),
-                                    const SizedBox(height: 12),
-                                    SizedBox(
-                                      height: 200,
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: section.books.length,
-                                        itemBuilder: (context, index) =>
-                                            ExploreBookCard(
-                                                book: section.books[index]),
+                                              section.category.id,
+                                            ),
+                                          );
+                                    },
+                                  ),
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    height: 200,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: section.books.length,
+                                      itemBuilder: (context, index) =>
+                                          ExploreBookCard(
+                                        book: section.books[index],
                                       ),
                                     ),
-                                    const SizedBox(height: 16),
-                                  ],
-                                )),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                              ),
+                            ),
                             const SizedBox(height: 80),
                           ],
                         ),

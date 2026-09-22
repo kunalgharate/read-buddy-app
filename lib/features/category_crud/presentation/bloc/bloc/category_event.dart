@@ -16,11 +16,12 @@ class AddCategoryEvent extends CategoryEvent {
   final String? parentCategoryId;
   final File image;
 
-  const AddCategoryEvent(
-      {required this.title,
-      required this.description,
-      this.parentCategoryId,
-      required this.image});
+  const AddCategoryEvent({
+    required this.title,
+    required this.description,
+    this.parentCategoryId,
+    required this.image,
+  });
 
   @override
   List<Object?> get props => [title, description, parentCategoryId, image];

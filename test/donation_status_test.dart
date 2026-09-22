@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:read_buddy_app/features/donate/domain/entities/donation_stats.dart';
 import 'package:read_buddy_app/features/donate/presentation/widgets/donation_status.dart'
-    show DonationStatusInfo, allBooksSorted, confirmedBooksSorted, resolveDonationStatus;
+    show
+        DonationStatusInfo,
+        allBooksSorted,
+        confirmedBooksSorted,
+        resolveDonationStatus;
 
 void main() {
   group('resolveDonationStatus', () {
@@ -31,7 +35,13 @@ void main() {
     });
 
     test('maps completed statuses to Completed and counts', () {
-      for (final s in ['completed', 'done', 'delivered', 'success', 'received']) {
+      for (final s in [
+        'completed',
+        'done',
+        'delivered',
+        'success',
+        'received',
+      ]) {
         final r = resolved(s);
         expect(r.label, 'Completed');
         expect(r.confirmed, isTrue);
@@ -126,7 +136,10 @@ void main() {
         item('new', 'completed', createdAt: '2026-01-10'),
         item('mid', 'completed', createdAt: '2026-01-05'),
       ];
-      expect(confirmedBooksSorted(items).map((b) => b.id), ['new', 'mid', 'old']);
+      expect(
+        confirmedBooksSorted(items).map((b) => b.id),
+        ['new', 'mid', 'old'],
+      );
     });
 
     test('returns empty list when nothing is confirmed', () {

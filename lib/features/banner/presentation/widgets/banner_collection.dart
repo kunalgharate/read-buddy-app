@@ -56,28 +56,29 @@ class BannerCollection extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             RichText(
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                text: TextSpan(
-                                  children: [
-                                    const TextSpan(
-                                      text: "Title:",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              text: TextSpan(
+                                children: [
+                                  const TextSpan(
+                                    text: "Title:",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
                                     ),
-                                    TextSpan(
-                                      text: banner.title,
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  ],
-                                )),
+                                  ),
+                                  TextSpan(
+                                    text: banner.title,
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             const SizedBox(height: 4),
                             RichText(
                               maxLines: 2,
@@ -107,14 +108,15 @@ class BannerCollection extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                          onPressed: () {
-                            updatedialog(context, banner);
-                          },
-                          icon: const Icon(
-                            Icons.more_vert,
-                            size: 25,
-                            color: Colors.black,
-                          ))
+                        onPressed: () {
+                          updatedialog(context, banner);
+                        },
+                        icon: const Icon(
+                          Icons.more_vert,
+                          size: 25,
+                          color: Colors.black,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(
@@ -124,30 +126,31 @@ class BannerCollection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       RichText(
-                          text: TextSpan(
-                        children: [
-                          const TextSpan(
-                            text: "BannerType:",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                        text: TextSpan(
+                          children: [
+                            const TextSpan(
+                              text: "BannerType:",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          TextSpan(
-                            text: banner.bannerType,
-                            style: const TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
+                            TextSpan(
+                              text: banner.bannerType,
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
-                      )),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(
                     height: 20,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -178,11 +181,13 @@ void updatedialog(BuildContext context, BannerEntity banner) async {
                 Navigator.pop(context);
                 print("Your book id is $banner");
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => UpdateBanner(
-                              banner: banner,
-                            )));
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UpdateBanner(
+                      banner: banner,
+                    ),
+                  ),
+                );
                 // Optional: close bottom sheet
               },
             ),
