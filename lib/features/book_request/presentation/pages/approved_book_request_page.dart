@@ -33,6 +33,12 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   bool _paying = false;
   bool _paid = false;
 
+  // Contract: paymentStatus enum is PENDING | PAID | FREE. The ₹25 delivery
+  // fee is payable only in the active-unpaid state (PENDING). Used to gate
+  // createDeliveryPaymentOrder so it can't be reached for any other value.
+  bool get _isPayable =>
+      widget.request.paymentStatus.trim().toUpperCase() == 'PENDING';
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +59,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
 
   // Creates the ₹25 delivery order and opens Razorpay checkout.
   Future<void> _payDeliveryFee() async {
+    if (!_isPayable) return;
     setState(() => _paying = true);
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
@@ -122,6 +129,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
 
   // DEV/TEST ONLY: complete the ₹25 fee via the backend demo bypass (no card).
   Future<void> _payDeliveryFeeTest() async {
+    if (!_isPayable) return;
     setState(() => _paying = true);
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
@@ -192,6 +200,11 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
         method == 'DROP_OFF' ||
         method == 'SHIPPING';
     final isMeetup = method == 'MEETUP';
+    // Payment contract: paymentStatus enum is PENDING | PAID | FREE.
+    // The ₹25 delivery fee is payable ONLY for the active-unpaid state
+    // (PENDING). PAID/FREE/missing/unrecognized are all non-payable, so
+    // createDeliveryPaymentOrder can never be reached for them.
+    final canPay = _isPayable;
 
     return Scaffold(
       appBar: AppBar(
@@ -400,7 +413,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                           ],
                         ),
                       ),
-                    ] else ...[
+                    ] else if (canPay) ...[
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -451,6 +464,29 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                           ),
                         ),
                       ],
+                    ] else ...[
+                      // Non-payable payment status (not PENDING/PAID/FREE):
+                      // do not expose the ₹25 payment control.
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F0),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE0E0E0)),
+                        ),
+                        child: const Text(
+                          'Delivery payment is not available for this request.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
                     ],
                   ] else if (isMeetup) ...[
                     // In-person meetup — no delivery fee; coordinate directly.
