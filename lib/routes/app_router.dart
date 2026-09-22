@@ -93,7 +93,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const AdminBookRequestsPage());
       case '/admin-upcoming-pickups':
         return MaterialPageRoute(
-            builder: (_) => const AdminUpcomingPickupsPage());
+          builder: (_) => const AdminUpcomingPickupsPage(),
+        );
       case '/book':
         return MaterialPageRoute(builder: (_) => const BookPage());
       case '/onboarding':
@@ -115,7 +116,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const ChangePasswordPage());
       case '/admin-return-requests':
         return MaterialPageRoute(
-            builder: (_) => const AdminReturnRequestsPage());
+          builder: (_) => const AdminReturnRequestsPage(),
+        );
       case '/admin':
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
       case '/admin-users':
@@ -165,7 +167,8 @@ class AppRouter {
       case '/verification':
         final email = settings.arguments as String?;
         return MaterialPageRoute(
-            builder: (_) => EmailVerificationScreen(email: email));
+          builder: (_) => EmailVerificationScreen(email: email),
+        );
       case '/book-variants':
         final book = settings.arguments as BookCrudModel;
         return MaterialPageRoute(
@@ -342,10 +345,16 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
             create: (_) => getIt<VideoCourseBloc>()
-              ..add(LoadVideoLesson(
-                  courseId: args['courseId']!, lessonId: args['lessonId']!)),
+              ..add(
+                LoadVideoLesson(
+                  courseId: args['courseId']!,
+                  lessonId: args['lessonId']!,
+                ),
+              ),
             child: VideoLessonPage(
-                courseId: args['courseId']!, lessonId: args['lessonId']!),
+              courseId: args['courseId']!,
+              lessonId: args['lessonId']!,
+            ),
           ),
         );
       case '/tracking':

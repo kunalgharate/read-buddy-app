@@ -36,17 +36,21 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
         final categoryBooks =
             books.where((b) => b.categoryId == category.id).toList();
         if (categoryBooks.isNotEmpty) {
-          sections.add(ExploreCategory(
-            category: category,
-            books: categoryBooks,
-          ));
+          sections.add(
+            ExploreCategory(
+              category: category,
+              books: categoryBooks,
+            ),
+          );
         }
       }
 
-      emit(ExploreLoaded(
-        parentCategories: parentCategories,
-        sections: sections,
-      ));
+      emit(
+        ExploreLoaded(
+          parentCategories: parentCategories,
+          sections: sections,
+        ),
+      );
     } catch (e) {
       emit(ExploreError(e.toString()));
     }
@@ -58,11 +62,13 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
   ) {
     if (state is ExploreLoaded) {
       final currentState = state as ExploreLoaded;
-      emit(ExploreLoaded(
-        parentCategories: currentState.parentCategories,
-        sections: currentState.sections,
-        selectedCategoryId: event.categoryId,
-      ));
+      emit(
+        ExploreLoaded(
+          parentCategories: currentState.parentCategories,
+          sections: currentState.sections,
+          selectedCategoryId: event.categoryId,
+        ),
+      );
     }
   }
 }

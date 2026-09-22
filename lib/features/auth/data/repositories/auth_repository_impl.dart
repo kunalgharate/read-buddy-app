@@ -11,8 +11,10 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<AppUser> signIn(
-      {required String email, required String password}) async {
+  Future<AppUser> signIn({
+    required String email,
+    required String password,
+  }) async {
     try {
       return await remoteDataSource.signIn(email: email, password: password);
     } catch (e) {
@@ -77,7 +79,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> changePassword(
-      String email, String code, String newPassword) async {
+    String email,
+    String code,
+    String newPassword,
+  ) async {
     if (kDebugMode) print('📦 AuthRepository: Changing password for $email');
     try {
       await remoteDataSource.changePassword(email, code, newPassword);

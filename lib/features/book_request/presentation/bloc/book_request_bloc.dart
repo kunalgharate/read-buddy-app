@@ -113,16 +113,18 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
         // Reflect the requested return without an extra fetch. The
         // PickupScheduled listener only uses this to show a confirmation
         // message and pop, so a minimal entity is sufficient.
-        emit(PickupScheduled(
-          BookRequestEntity(
-            id: event.details.requestId,
-            status: 'returning',
-            fulfillmentMethod: '',
-            paymentStatus: '',
-            requestDate: '',
-            returnMethod: method,
+        emit(
+          PickupScheduled(
+            BookRequestEntity(
+              id: event.details.requestId,
+              status: 'returning',
+              fulfillmentMethod: '',
+              paymentStatus: '',
+              requestDate: '',
+              returnMethod: method,
+            ),
           ),
-        ));
+        );
         return;
       }
 

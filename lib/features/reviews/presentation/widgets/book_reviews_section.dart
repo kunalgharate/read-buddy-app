@@ -173,8 +173,11 @@ class _BookReviewsSectionContent extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              Icon(Icons.error_outline,
-                  size: 48, color: AppColors.textMutedColor(context)),
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppColors.textMutedColor(context),
+              ),
               const SizedBox(height: 8),
               Text(
                 'Could not load reviews',
@@ -289,18 +292,22 @@ class _BookReviewsSectionContent extends StatelessWidget {
       initialComment: initialComment,
       onSubmit: ({required int rating, required String comment}) {
         if (reviewId != null) {
-          bloc.add(UpdateReviewEvent(
-            id: reviewId,
-            bookId: bookId,
-            rating: rating,
-            comment: comment,
-          ));
+          bloc.add(
+            UpdateReviewEvent(
+              id: reviewId,
+              bookId: bookId,
+              rating: rating,
+              comment: comment,
+            ),
+          );
         } else {
-          bloc.add(CreateReviewEvent(
-            bookId: bookId,
-            rating: rating,
-            comment: comment,
-          ));
+          bloc.add(
+            CreateReviewEvent(
+              bookId: bookId,
+              rating: rating,
+              comment: comment,
+            ),
+          );
         }
       },
     );

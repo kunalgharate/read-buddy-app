@@ -18,7 +18,7 @@ String monthName(int m) {
     'Sep',
     'Oct',
     'Nov',
-    'Dec'
+    'Dec',
   ];
   return names[m];
 }

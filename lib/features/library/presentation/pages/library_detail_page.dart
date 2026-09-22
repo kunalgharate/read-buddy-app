@@ -79,8 +79,9 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
         content: Text('Remove "$userName" from this library?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -197,7 +198,9 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                       if (lib.isSuperLibrary)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.amber.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
@@ -263,7 +266,7 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                     libraryId: lib.id,
                     libraryName: lib.name,
                   );
-                  if (result != null && mounted) {
+                  if (result != null && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Book added to library!')),
                     );
@@ -312,8 +315,11 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                 ),
                 child: const Column(
                   children: [
-                    Icon(Icons.people_outline,
-                        size: 40, color: AppColors.textHint),
+                    Icon(
+                      Icons.people_outline,
+                      size: 40,
+                      color: AppColors.textHint,
+                    ),
                     SizedBox(height: 8),
                     Text(
                       'No librarians assigned yet',
@@ -327,14 +333,16 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                 ),
               )
             else
-              ...(_librarians.map((lib) => _LibrarianTile(
-                    name: lib['name'] ?? '',
-                    email: lib['email'] ?? '',
-                    onRemove: () => _unassignLibrarian(
-                      lib['_id'] ?? '',
-                      lib['name'] ?? '',
-                    ),
-                  ))),
+              ...(_librarians.map(
+                (lib) => _LibrarianTile(
+                  name: lib['name'] ?? '',
+                  email: lib['email'] ?? '',
+                  onRemove: () => _unassignLibrarian(
+                    lib['_id'] ?? '',
+                    lib['name'] ?? '',
+                  ),
+                ),
+              )),
           ],
         ),
       ),
@@ -397,11 +405,17 @@ class _LibrarianTile extends StatelessWidget {
             ),
           ),
         ),
-        title: Text(name,
-            style: const TextStyle(
-                fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-        subtitle: Text(email,
-            style: const TextStyle(fontSize: 12, color: AppColors.textHint)),
+        title: Text(
+          name,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        subtitle: Text(
+          email,
+          style: const TextStyle(fontSize: 12, color: AppColors.textHint),
+        ),
         trailing: IconButton(
           icon: const Icon(Icons.person_remove, color: Colors.red, size: 20),
           tooltip: 'Remove',
@@ -514,10 +528,14 @@ class _UserSearchSheetState extends State<_UserSearchSheet> {
                       ),
                     ),
                     title: Text(name),
-                    subtitle: Text('$email • $role',
-                        style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(Icons.add_circle_outline,
-                        color: AppColors.primary),
+                    subtitle: Text(
+                      '$email • $role',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    trailing: const Icon(
+                      Icons.add_circle_outline,
+                      color: AppColors.primary,
+                    ),
                     onTap: () => widget.onUserSelected(user),
                   );
                 },

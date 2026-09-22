@@ -62,15 +62,14 @@ class _BookOrderViewState extends State<_BookOrderView> {
   /// True when the delivery fee was already paid (backend `paymentStatus`).
   /// In that case the delivery step goes straight to place-order without
   /// re-opening the checkout (the backend rejects duplicate payments).
-  bool get _alreadyPaid =>
-      widget.request.paymentStatus.toUpperCase() == 'PAID';
+  bool get _alreadyPaid => widget.request.paymentStatus.toUpperCase() == 'PAID';
 
   String get _deliveryFeeLabel {
-  if (_paymentIntent != null) {
-    return 'Pay ₹${_paymentIntent!.amount ~/ 100}';
+    if (_paymentIntent != null) {
+      return 'Pay ₹${_paymentIntent!.amount ~/ 100}';
+    }
+    return _alreadyPaid ? 'Place Order' : 'Proceed to Pay';
   }
-  return _alreadyPaid ? 'Place Order' : 'Proceed to Pay';
-}
 
   @override
   void initState() {
@@ -161,9 +160,7 @@ class _BookOrderViewState extends State<_BookOrderView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -269,24 +266,27 @@ class _BookOrderViewState extends State<_BookOrderView> {
                                   pincode.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content:
-                                          Text('Please fill in all fields')),
+                                    content: Text('Please fill in all fields'),
+                                  ),
                                 );
                                 return;
                               }
                               if (phone.length != 10) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text(
-                                          'Phone number must be exactly 10 digits')),
+                                    content: Text(
+                                      'Phone number must be exactly 10 digits',
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
                               if (address.length < 10) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content:
-                                          Text('Please enter a valid address')),
+                                    content:
+                                        Text('Please enter a valid address'),
+                                  ),
                                 );
                                 return;
                               }
@@ -307,24 +307,30 @@ class _BookOrderViewState extends State<_BookOrderView> {
                               if (pincode.length != 6 || pincode[0] == '0') {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text(
-                                          'Please enter a valid 6-digit pincode')),
+                                    content: Text(
+                                      'Please enter a valid 6-digit pincode',
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
                               if (_selectedDate == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text(
-                                          'Please select a preferred date')),
+                                    content: Text(
+                                      'Please select a preferred date',
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
                               if (_selectedTime == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text(
-                                          'Please select a preferred time')),
+                                    content: Text(
+                                      'Please select a preferred time',
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
@@ -359,11 +365,11 @@ class _BookOrderViewState extends State<_BookOrderView> {
                                       ),
                                     );
                               } else {
-                                context
-                                    .read<BookRequestBloc>()
-                                    .add(CreateDeliveryPayment(
-                                      widget.request.id,
-                                    ));
+                                context.read<BookRequestBloc>().add(
+                                      CreateDeliveryPayment(
+                                        widget.request.id,
+                                      ),
+                                    );
                               }
                             }
                           },
@@ -386,9 +392,7 @@ class _BookOrderViewState extends State<_BookOrderView> {
                             ),
                           )
                         : Text(
-                            _currentTab == 0
-                                ? 'Proceed'
-                                : _deliveryFeeLabel,
+                            _currentTab == 0 ? 'Proceed' : _deliveryFeeLabel,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -459,8 +463,11 @@ class _OrderStepper extends StatelessWidget {
                 ),
                 child: Center(
                   child: isCompleted
-                      ? const Icon(Icons.check,
-                          size: 16, color: Color(0xFF052E44))
+                      ? const Icon(
+                          Icons.check,
+                          size: 16,
+                          color: Color(0xFF052E44),
+                        )
                       : Text(
                           '${stepIndex + 1}',
                           style: TextStyle(

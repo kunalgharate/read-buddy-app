@@ -25,51 +25,57 @@ class DioClient {
     );
 
     // Add interceptors
-    dio.interceptors.add(LogInterceptor(
-      requestHeader: true,
-      requestBody: true,
-      responseHeader: true,
-      responseBody: true,
-      error: true,
-      logPrint: (object) {
-        if (kDebugMode) {
-          print('🌐 API LOG: $object');
-        }
-      },
-    ));
+    dio.interceptors.add(
+      LogInterceptor(
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: true,
+        responseBody: true,
+        error: true,
+        logPrint: (object) {
+          if (kDebugMode) {
+            print('🌐 API LOG: $object');
+          }
+        },
+      ),
+    );
 
     // Add custom interceptor for more detailed logging
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        if (kDebugMode) {
-          print('🚀 REQUEST[${options.method}] => PATH: ${options.path}');
-          print('🚀 REQUEST HEADERS: ${options.headers}');
-          print('🚀 REQUEST DATA: ${options.data}');
-          print('🚀 REQUEST QUERY PARAMS: ${options.queryParameters}');
-        }
-        handler.next(options);
-      },
-      onResponse: (response, handler) {
-        if (kDebugMode) {
-          print(
-              '✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
-          print('✅ RESPONSE DATA: ${response.data}');
-          print('✅ RESPONSE HEADERS: ${response.headers}');
-        }
-        handler.next(response);
-      },
-      onError: (error, handler) {
-        if (kDebugMode) {
-          print(
-              '❌ ERROR[${error.response?.statusCode}] => PATH: ${error.requestOptions.path}');
-          print('❌ ERROR MESSAGE: ${error.message}');
-          print('❌ ERROR RESPONSE: ${error.response?.data}');
-          print('❌ ERROR TYPE: ${error.type}');
-          print('❌ ERROR STACK TRACE: ${error.stackTrace}');
-        }
-        handler.next(error);
-      },
-    ));
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (kDebugMode) {
+            print('🚀 REQUEST[${options.method}] => PATH: ${options.path}');
+            print('🚀 REQUEST HEADERS: ${options.headers}');
+            print('🚀 REQUEST DATA: ${options.data}');
+            print('🚀 REQUEST QUERY PARAMS: ${options.queryParameters}');
+          }
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          if (kDebugMode) {
+            print(
+              '✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
+            );
+            print('✅ RESPONSE DATA: ${response.data}');
+            print('✅ RESPONSE HEADERS: ${response.headers}');
+          }
+          handler.next(response);
+        },
+        onError: (error, handler) {
+          if (kDebugMode) {
+            print(
+              '❌ ERROR[${error.response?.statusCode}] => PATH: ${error.requestOptions.path}',
+            );
+            print('❌ ERROR MESSAGE: ${error.message}');
+            print('❌ ERROR RESPONSE: ${error.response?.data}');
+            print('❌ ERROR TYPE: ${error.type}');
+            print('❌ ERROR STACK TRACE: ${error.stackTrace}');
+          }
+          handler.next(error);
+        },
+      ),
+    );
 
     // Set longer timeout for slow servers (like Render.com free tier)
     dio.options.connectTimeout = const Duration(seconds: 120);
@@ -84,37 +90,41 @@ class DioClient {
     };
 
     // Retry interceptor for timeout and TLS errors
-    dio.interceptors.add(InterceptorsWrapper(
-      onError: (error, handler) async {
-        final shouldRetry = error.type == DioExceptionType.connectionTimeout ||
-            error.type == DioExceptionType.receiveTimeout ||
-            error.type == DioExceptionType.sendTimeout ||
-            _isTlsError(error);
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (error, handler) async {
+          final shouldRetry =
+              error.type == DioExceptionType.connectionTimeout ||
+                  error.type == DioExceptionType.receiveTimeout ||
+                  error.type == DioExceptionType.sendTimeout ||
+                  _isTlsError(error);
 
-        if (shouldRetry) {
-          // Only retry once — check if we already retried
-          final retryCount = error.requestOptions.extra['_retryCount'] ?? 0;
-          if (retryCount < 1) {
-            if (kDebugMode) {
-              print(
-                  '🔄 Retrying request due to ${_isTlsError(error) ? "TLS error" : "timeout"}...');
-            }
-
-            try {
-              error.requestOptions.extra['_retryCount'] = retryCount + 1;
-              final response = await dio.fetch(error.requestOptions);
-              handler.resolve(response);
-              return;
-            } catch (retryError) {
+          if (shouldRetry) {
+            // Only retry once — check if we already retried
+            final retryCount = error.requestOptions.extra['_retryCount'] ?? 0;
+            if (retryCount < 1) {
               if (kDebugMode) {
-                print('🔄 Retry failed: $retryError');
+                print(
+                  '🔄 Retrying request due to ${_isTlsError(error) ? "TLS error" : "timeout"}...',
+                );
+              }
+
+              try {
+                error.requestOptions.extra['_retryCount'] = retryCount + 1;
+                final response = await dio.fetch(error.requestOptions);
+                handler.resolve(response);
+                return;
+              } catch (retryError) {
+                if (kDebugMode) {
+                  print('🔄 Retry failed: $retryError');
+                }
               }
             }
           }
-        }
-        handler.next(error);
-      },
-    ));
+          handler.next(error);
+        },
+      ),
+    );
 
     return dio;
   }

@@ -172,7 +172,10 @@ class _PlayerBody extends StatelessWidget {
   }
 
   void _showPlaylist(
-      BuildContext context, AudioBook book, AudioPlayerService service) {
+    BuildContext context,
+    AudioBook book,
+    AudioPlayerService service,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFFFDFDFD),
@@ -185,11 +188,14 @@ class _PlayerBody extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Playlist',
-                style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textDark)),
+            Text(
+              'Playlist',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textDark,
+              ),
+            ),
             const SizedBox(height: 12),
             Flexible(
               child: ListView.builder(
@@ -207,31 +213,44 @@ class _PlayerBody extends StatelessWidget {
                           backgroundColor: isActive
                               ? AppColors.accent
                               : AppColors.borderLight,
-                          child: Text('${track.trackNumber}',
-                              style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isActive
-                                      ? Colors.white
-                                      : AppColors.textSubtitle)),
+                          child: Text(
+                            '${track.trackNumber}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isActive
+                                  ? Colors.white
+                                  : AppColors.textSubtitle,
+                            ),
+                          ),
                         ),
-                        title: Text(track.title,
-                            style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: isActive
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                color: isActive
-                                    ? AppColors.accent
-                                    : AppColors.textDark)),
-                        subtitle: Text(_fmt(track.duration),
-                            style: GoogleFonts.poppins(
-                                fontSize: 12, color: AppColors.textSubtitle)),
+                        title: Text(
+                          track.title,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight:
+                                isActive ? FontWeight.w600 : FontWeight.w400,
+                            color: isActive
+                                ? AppColors.accent
+                                : AppColors.textDark,
+                          ),
+                        ),
+                        subtitle: Text(
+                          _fmt(track.duration),
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppColors.textSubtitle,
+                          ),
+                        ),
                         trailing: isActive
-                            ? const Icon(Icons.equalizer,
-                                color: AppColors.accent)
-                            : const Icon(Icons.play_circle_outline,
-                                color: AppColors.textMuted),
+                            ? const Icon(
+                                Icons.equalizer,
+                                color: AppColors.accent,
+                              )
+                            : const Icon(
+                                Icons.play_circle_outline,
+                                color: AppColors.textMuted,
+                              ),
                         onTap: () {
                           Navigator.pop(ctx);
                           service.loadTrack(i);
@@ -285,8 +304,11 @@ class _CoverImage extends StatelessWidget {
 
   Widget _placeholder() => Container(
         color: AppColors.accent.withValues(alpha: 0.1),
-        child: const Icon(Icons.headphones_rounded,
-            size: 80, color: AppColors.accent),
+        child: const Icon(
+          Icons.headphones_rounded,
+          size: 80,
+          color: AppColors.accent,
+        ),
       );
 }
 
@@ -326,8 +348,11 @@ class _SeekBar extends StatelessWidget {
                 child: Slider(
                   value: progress.clamp(0.0, 1.0),
                   onChanged: (v) {
-                    service.seekTo(Duration(
-                        milliseconds: (v * duration.inMilliseconds).round()));
+                    service.seekTo(
+                      Duration(
+                        milliseconds: (v * duration.inMilliseconds).round(),
+                      ),
+                    );
                   },
                 ),
               ),
@@ -336,12 +361,20 @@ class _SeekBar extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_fmt(position),
-                        style: GoogleFonts.poppins(
-                            fontSize: 12, color: AppColors.textSubtitle)),
-                    Text(_fmt(duration),
-                        style: GoogleFonts.poppins(
-                            fontSize: 12, color: AppColors.textSubtitle)),
+                    Text(
+                      _fmt(position),
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: AppColors.textSubtitle,
+                      ),
+                    ),
+                    Text(
+                      _fmt(duration),
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: AppColors.textSubtitle,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -396,14 +429,18 @@ class _Controls extends StatelessWidget {
                   width: 64,
                   height: 64,
                   decoration: const BoxDecoration(
-                      color: AppColors.accent, shape: BoxShape.circle),
+                    color: AppColors.accent,
+                    shape: BoxShape.circle,
+                  ),
                   child: isBuffering
                       ? const Center(
                           child: SizedBox(
                             width: 28,
                             height: 28,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 3),
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
                           ),
                         )
                       : IconButton(
@@ -515,12 +552,20 @@ class _SpeedSlider extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('0.5x',
-                      style: GoogleFonts.poppins(
-                          fontSize: 10, color: AppColors.textMuted)),
-                  Text('2.0x',
-                      style: GoogleFonts.poppins(
-                          fontSize: 10, color: AppColors.textMuted)),
+                  Text(
+                    '0.5x',
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  Text(
+                    '2.0x',
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
                 ],
               ),
             ],

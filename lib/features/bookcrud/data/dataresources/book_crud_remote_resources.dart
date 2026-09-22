@@ -27,7 +27,8 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
       if (response.statusCode != ApiConstants.success) {
         throw Exception(
-            'Failed to load books. Status code: ${response.statusCode}');
+          'Failed to load books. Status code: ${response.statusCode}',
+        );
       }
 
       return _parseBookList(response.data);
@@ -61,7 +62,8 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
       if (response.statusCode != 200) {
         throw Exception(
-            '❌ Failed to load book details. Status code: ${response.statusCode}');
+          '❌ Failed to load book details. Status code: ${response.statusCode}',
+        );
       }
 
       print("✅ Book by id  fetched successfully");
@@ -136,7 +138,8 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
       if (response.statusCode != 201 && response.statusCode != 200) {
         throw Exception(
-            '❌ Failed to add book. Status code: ${response.statusCode}');
+          '❌ Failed to add book. Status code: ${response.statusCode}',
+        );
       }
 
       print("✅ Book added successfully.");
@@ -190,7 +193,8 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
       if (response.statusCode != 200) {
         throw Exception(
-            'Failed to update book. Status: ${response.statusCode}');
+          'Failed to update book. Status: ${response.statusCode}',
+        );
       }
     } catch (e) {
       print("❌ Error updating book: $e");
@@ -203,12 +207,14 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
     try {
       print("Deleteing book_id $id");
       final token = await getIt<SecureStorageUtil>().getAccessToken();
-      final response = await dio.delete('${ApiConstants.books}/$id',
-          options: Options(
-            headers: {
-              'Authorization': 'Bearer $token',
-            },
-          ));
+      final response = await dio.delete(
+        '${ApiConstants.books}/$id',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
       print("Deleteing book $token");
       print(response.statusCode);
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -239,7 +245,8 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
 
       if (response.statusCode != ApiConstants.success) {
         throw Exception(
-            'Failed to load books. Status code: ${response.statusCode}');
+          'Failed to load books. Status code: ${response.statusCode}',
+        );
       }
 
       return _parseBookList(response.data);

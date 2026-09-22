@@ -30,7 +30,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onLoadCategories(
-      LoadCategories event, Emitter<CategoryState> emit) async {
+    LoadCategories event,
+    Emitter<CategoryState> emit,
+  ) async {
     print('📂 [CategoryBloc] LoadCategories event received');
     print('📂 [CategoryBloc] Current state: $state');
     emit(CategoryLoading());
@@ -49,7 +51,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onAddCategory(
-      AddCategoryEvent event, Emitter<CategoryState> emit) async {
+    AddCategoryEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     try {
       await addCategory.call(
         title: event.title,
@@ -65,7 +69,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onUpdateCategory(
-      UpdateCategoryEvent event, Emitter<CategoryState> emit) async {
+    UpdateCategoryEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     try {
       await updateCategory(
         id: event.id,
@@ -82,7 +88,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onDeleteCategory(
-      DeleteCategoryEvent event, Emitter<CategoryState> emit) async {
+    DeleteCategoryEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     try {
       await deleteCategory(event.id);
       add(LoadCategories());

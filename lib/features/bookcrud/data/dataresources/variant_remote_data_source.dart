@@ -60,10 +60,12 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
 
   Future<Options> _authOptions({String? contentType}) async {
     final token = await getIt<SecureStorageUtil>().getAccessToken();
-    return Options(headers: {
-      'Authorization': 'Bearer $token',
-      if (contentType != null) 'Content-Type': contentType,
-    });
+    return Options(
+      headers: {
+        'Authorization': 'Bearer $token',
+        if (contentType != null) 'Content-Type': contentType,
+      },
+    );
   }
 
   @override
@@ -71,7 +73,8 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
     final response = await dio.get('${ApiConstants.bookVariants}/book/$bookId');
     if (response.statusCode != 200) {
       throw Exception(
-          'Failed to load variants. Status: ${response.statusCode}');
+        'Failed to load variants. Status: ${response.statusCode}',
+      );
     }
     // Unwrap { "data": [...] } envelope if present
     final rawData = response.data;
@@ -144,24 +147,30 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
 
       for (final file in ebookFiles) {
         final bytes = await file.readAsBytes();
-        formData.files.add(MapEntry(
-          'ebookFiles',
-          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
-        ));
+        formData.files.add(
+          MapEntry(
+            'ebookFiles',
+            MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
+          ),
+        );
       }
       for (final file in audioParts) {
         final bytes = await file.readAsBytes();
-        formData.files.add(MapEntry(
-          'audioParts',
-          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
-        ));
+        formData.files.add(
+          MapEntry(
+            'audioParts',
+            MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
+          ),
+        );
       }
       for (final file in videoParts) {
         final bytes = await file.readAsBytes();
-        formData.files.add(MapEntry(
-          'videoParts',
-          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
-        ));
+        formData.files.add(
+          MapEntry(
+            'videoParts',
+            MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
+          ),
+        );
       }
 
       response = await dio.post(
@@ -173,7 +182,8 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
 
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw Exception(
-          'Failed to create variant. Status: ${response.statusCode}');
+        'Failed to create variant. Status: ${response.statusCode}',
+      );
     }
     final rawData = response.data;
     final json =
@@ -191,20 +201,24 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
     );
     if (response.statusCode != 200) {
       throw Exception(
-          'Failed to delete variant. Status: ${response.statusCode}');
+        'Failed to delete variant. Status: ${response.statusCode}',
+      );
     }
   }
 
   @override
   Future<void> removeFormatFromVariant(
-      String variantId, String formatId) async {
+    String variantId,
+    String formatId,
+  ) async {
     final response = await dio.delete(
       '${ApiConstants.bookVariants}/$variantId/formats/$formatId',
       options: await _authOptions(),
     );
     if (response.statusCode != 200) {
       throw Exception(
-          'Failed to remove format. Status: ${response.statusCode}');
+        'Failed to remove format. Status: ${response.statusCode}',
+      );
     }
   }
 
@@ -257,24 +271,30 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
 
       for (final file in ebookFiles) {
         final bytes = await file.readAsBytes();
-        formData.files.add(MapEntry(
-          'ebookFiles',
-          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
-        ));
+        formData.files.add(
+          MapEntry(
+            'ebookFiles',
+            MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
+          ),
+        );
       }
       for (final file in audioParts) {
         final bytes = await file.readAsBytes();
-        formData.files.add(MapEntry(
-          'audioParts',
-          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
-        ));
+        formData.files.add(
+          MapEntry(
+            'audioParts',
+            MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
+          ),
+        );
       }
       for (final file in videoParts) {
         final bytes = await file.readAsBytes();
-        formData.files.add(MapEntry(
-          'videoParts',
-          MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
-        ));
+        formData.files.add(
+          MapEntry(
+            'videoParts',
+            MultipartFile.fromBytes(bytes, filename: file.path.split('/').last),
+          ),
+        );
       }
 
       response = await dio.post(
@@ -286,7 +306,8 @@ class VariantRemoteDataSourceImpl implements VariantRemoteDataSource {
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception(
-          'Failed to add parts to format. Status: ${response.statusCode}');
+        'Failed to add parts to format. Status: ${response.statusCode}',
+      );
     }
     final rawData = response.data;
     final json =

@@ -45,8 +45,7 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
   int _resumeSeconds = 0; // exact position to seek to on the resumed part
   bool _seekedToResume = false;
 
-  bool get _trackProgress =>
-      widget.bookId != null && widget.bookId!.isNotEmpty;
+  bool get _trackProgress => widget.bookId != null && widget.bookId!.isNotEmpty;
 
   @override
   void initState() {
@@ -96,8 +95,7 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
         totalParts: total,
         positionSeconds: posSec,
         percentage: percentage.clamp(0, 100),
-        completed:
-            _currentPartIndex >= total - 1 && withinPart > 0.98,
+        completed: _currentPartIndex >= total - 1 && withinPart > 0.98,
         lastReadAt: DateTime.now(),
       ),
     );
@@ -271,14 +269,18 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
               child: _loading
                   ? const Center(
                       child:
-                          CircularProgressIndicator(color: AppColors.primary))
+                          CircularProgressIndicator(color: AppColors.primary),
+                    )
                   : _hasError
                       ? Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.error_outline,
-                                  color: Colors.red, size: 48),
+                              const Icon(
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 48,
+                              ),
                               const SizedBox(height: 12),
                               const Text(
                                 'Failed to load video',
@@ -390,12 +392,17 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
                         backgroundColor:
                             isPlaying ? AppColors.primary : Colors.white12,
                         child: isPlaying
-                            ? const Icon(Icons.play_arrow,
-                                color: Colors.white, size: 16)
+                            ? const Icon(
+                                Icons.play_arrow,
+                                color: Colors.white,
+                                size: 16,
+                              )
                             : Text(
                                 '${part.partNumber}',
                                 style: const TextStyle(
-                                    color: Colors.white70, fontSize: 12),
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
                               ),
                       ),
                       title: Text(
@@ -410,7 +417,9 @@ class _VideobookPlayerPageState extends State<VideobookPlayerPage> {
                       trailing: Text(
                         _formatDuration(part.duration),
                         style: const TextStyle(
-                            color: Colors.white54, fontSize: 12),
+                          color: Colors.white54,
+                          fontSize: 12,
+                        ),
                       ),
                       onTap: () => _playPart(index),
                     );

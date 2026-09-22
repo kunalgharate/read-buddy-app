@@ -47,15 +47,19 @@ class _MyRequestsViewState extends State<_MyRequestsView>
   }
 
   List<BookRequestEntity> _pending(List<BookRequestEntity> all) => all
-      .where((r) =>
-          r.status.toLowerCase() != 'delivered' &&
-          r.status.toLowerCase() != 'returned')
+      .where(
+        (r) =>
+            r.status.toLowerCase() != 'delivered' &&
+            r.status.toLowerCase() != 'returned',
+      )
       .toList();
 
   List<BookRequestEntity> _completed(List<BookRequestEntity> all) => all
-      .where((r) =>
-          r.status.toLowerCase() == 'delivered' ||
-          r.status.toLowerCase() == 'returned')
+      .where(
+        (r) =>
+            r.status.toLowerCase() == 'delivered' ||
+            r.status.toLowerCase() == 'returned',
+      )
       .toList();
 
   @override
@@ -63,7 +67,6 @@ class _MyRequestsViewState extends State<_MyRequestsView>
     return Scaffold(
       backgroundColor: const Color(0xFFFDFDFD),
       appBar: AppBar(
-  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF052E44)),
@@ -137,8 +140,10 @@ class _MyRequestsViewState extends State<_MyRequestsView>
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
-                    child: const Text('Retry',
-                        style: TextStyle(color: Color(0xFF052E44))),
+                    child: const Text(
+                      'Retry',
+                      style: TextStyle(color: Color(0xFF052E44)),
+                    ),
                   ),
                 ],
               ),
@@ -216,8 +221,10 @@ class _RequestList extends StatelessWidget {
               color: Colors.grey.shade300,
             ),
             const SizedBox(height: 16),
-            Text(emptyMessage,
-                style: const TextStyle(color: Colors.grey, fontSize: 16)),
+            Text(
+              emptyMessage,
+              style: const TextStyle(color: Colors.grey, fontSize: 16),
+            ),
           ],
         ),
       );
@@ -271,8 +278,8 @@ class _RequestCardState extends State<_RequestCard> {
     if (hasTitle && hasCover) return;
     if (r.bookId == null || r.bookId!.isEmpty) return;
     try {
-      final book = await di.getIt<BookRequestRemoteDataSource>()
-          .getBookById(r.bookId!);
+      final book =
+          await di.getIt<BookRequestRemoteDataSource>().getBookById(r.bookId!);
       if (!mounted) return;
       setState(() {
         _fetchedTitle = book.title;
@@ -285,18 +292,15 @@ class _RequestCardState extends State<_RequestCard> {
   }
 
   // Effective book fields (populated value first, then fetched fallback).
-  String get _title =>
-      (widget.request.bookTitle?.isNotEmpty == true)
-          ? widget.request.bookTitle!
-          : (_fetchedTitle ?? 'Unknown Book');
-  String? get _cover =>
-      (widget.request.bookCoverUrl?.isNotEmpty == true)
-          ? widget.request.bookCoverUrl
-          : _fetchedCover;
-  String? get _format =>
-      (widget.request.bookFormat?.isNotEmpty == true)
-          ? widget.request.bookFormat
-          : _fetchedFormat;
+  String get _title => (widget.request.bookTitle?.isNotEmpty == true)
+      ? widget.request.bookTitle!
+      : (_fetchedTitle ?? 'Unknown Book');
+  String? get _cover => (widget.request.bookCoverUrl?.isNotEmpty == true)
+      ? widget.request.bookCoverUrl
+      : _fetchedCover;
+  String? get _format => (widget.request.bookFormat?.isNotEmpty == true)
+      ? widget.request.bookFormat
+      : _fetchedFormat;
 
   BookRequestEntity get request => widget.request;
   bool get isCompleted => widget.isCompleted;
@@ -506,13 +510,16 @@ class _RequestCardState extends State<_RequestCard> {
                                   onTap: () => _confirmCancel(context),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 4),
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFFEBEB),
                                       borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
-                                          color: const Color(0xFFFF5252)
-                                              .withValues(alpha: 0.4)),
+                                        color: const Color(0xFFFF5252)
+                                            .withValues(alpha: 0.4),
+                                      ),
                                     ),
                                     child: const Text(
                                       'Cancel Request',
@@ -564,7 +571,9 @@ class _RequestCardState extends State<_RequestCard> {
                           const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 6),
+                              horizontal: 8,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFF8E1),
                               borderRadius: BorderRadius.circular(6),
@@ -572,8 +581,11 @@ class _RequestCardState extends State<_RequestCard> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.info_outline,
-                                    size: 13, color: Color(0xFFB07D00)),
+                                const Icon(
+                                  Icons.info_outline,
+                                  size: 13,
+                                  color: Color(0xFFB07D00),
+                                ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
@@ -616,8 +628,10 @@ class _RequestCardState extends State<_RequestCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Not Yet',
-                style: TextStyle(color: Color(0xFF888888))),
+            child: const Text(
+              'Not Yet',
+              style: TextStyle(color: Color(0xFF888888)),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -627,7 +641,9 @@ class _RequestCardState extends State<_RequestCard> {
             child: Text(
               isShipping ? 'Yes, Received' : 'Yes, Collected',
               style: const TextStyle(
-                  color: Color(0xFF052E44), fontWeight: FontWeight.w600),
+                color: Color(0xFF052E44),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -679,9 +695,13 @@ class _RequestCardState extends State<_RequestCard> {
                     CancelRequest(request.id, reason),
                   );
             },
-            child: const Text('Yes, Cancel',
-                style: TextStyle(
-                    color: Color(0xFF052E44), fontWeight: FontWeight.w600)),
+            child: const Text(
+              'Yes, Cancel',
+              style: TextStyle(
+                color: Color(0xFF052E44),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -704,8 +724,7 @@ class _RequestCardState extends State<_RequestCard> {
     final status = request.status.toLowerCase();
     final isApproved = status == 'approved' || status == 'accepted';
     final paymentStatus = request.paymentStatus.toUpperCase();
-    return isApproved &&
-        (paymentStatus == 'PAID' || paymentStatus == 'FREE');
+    return isApproved && (paymentStatus == 'PAID' || paymentStatus == 'FREE');
   }
 
   Widget _statusChip(String status) {
@@ -785,9 +804,7 @@ class _RequestCardState extends State<_RequestCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: paid
-            ? const Color(0xFFE8F5E9)
-            : const Color(0xFFE3F2FD),
+        color: paid ? const Color(0xFFE8F5E9) : const Color(0xFFE3F2FD),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

@@ -113,7 +113,9 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     if (!mounted) return;
     setState(() => _paying = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Payment failed: ${response.message ?? 'Try again'}')),
+      SnackBar(
+        content: Text('Payment failed: ${response.message ?? 'Try again'}'),
+      ),
     );
   }
 
@@ -166,7 +168,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
       'September',
       'October',
       'November',
-      'December'
+      'December',
     ];
     return '${dt.day} ${months[dt.month]} ${dt.year}';
   }
@@ -181,9 +183,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     final req = widget.request;
 
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
@@ -331,8 +331,10 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                             ),
                           ),
                         ),
-                        icon: const Icon(Icons.local_library,
-                            color: AppColors.textPrimary),
+                        icon: const Icon(
+                          Icons.local_library,
+                          color: AppColors.textPrimary,
+                        ),
                         label: const Text(
                           'View Pickup Details',
                           style: TextStyle(
@@ -357,16 +359,22 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 14),
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2CE07F).withValues(alpha: 0.12),
+                          color:
+                              const Color(0xFF2CE07F).withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: const Color(0xFF2CE07F)),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.check_circle,
-                                color: Color(0xFF2CE07F), size: 22),
+                            Icon(
+                              Icons.check_circle,
+                              color: Color(0xFF2CE07F),
+                              size: 22,
+                            ),
                             SizedBox(width: 10),
                             Expanded(
                               child: Text(
@@ -392,11 +400,14 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                                   width: 20,
                                   height: 20,
                                   child: CircularProgressIndicator(
-                                      color: AppColors.textPrimary,
-                                      strokeWidth: 2),
+                                    color: AppColors.textPrimary,
+                                    strokeWidth: 2,
+                                  ),
                                 )
-                              : const Icon(Icons.payment,
-                                  color: AppColors.textPrimary),
+                              : const Icon(
+                                  Icons.payment,
+                                  color: AppColors.textPrimary,
+                                ),
                           label: Text(
                             _paying ? 'Processing…' : 'Pay ₹25 Delivery Fee',
                             style: const TextStyle(

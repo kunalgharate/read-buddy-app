@@ -30,15 +30,19 @@ abstract class BookRequestRemoteDataSource {
   Future<BookRequestModel> getRequestDetails(String id);
   Future<void> updateRequestStatus(String id, String status);
   Future<void> scheduleDelivery(
-      String id,
-      String name,
-      String phone,
-      String address,
-      String pincode,
-      String preferredDate,
-      String preferredTime);
-  Future<void> initiateReturn(String id, String returnMethod,
-      {String? returnBranchId});
+    String id,
+    String name,
+    String phone,
+    String address,
+    String pincode,
+    String preferredDate,
+    String preferredTime,
+  );
+  Future<void> initiateReturn(
+    String id,
+    String returnMethod, {
+    String? returnBranchId,
+  });
 
   /// Creates a ₹25 delivery-fee Razorpay order for an approved DELIVERY
   /// request. Returns { keyId, order, bookRequestId }.
@@ -53,10 +57,12 @@ abstract class BookRequestRemoteDataSource {
   });
 
   Future<RequestPaymentIntent> createBookRequestPayment(String id);
-  Future<void> verifyBookRequestPayment(String id,
-      {required String paymentId,
-      required String orderId,
-      required String signature});
+  Future<void> verifyBookRequestPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+  });
 }
 
 class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
@@ -72,7 +78,7 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   Future<BookDetailModel> getBookById(String id) async {
     try {
       final response = await dio.get('${ApiConstants.books}/$id');
-        if (response.statusCode != ApiConstants.success) {
+      if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load book details');
       }
       final decoded = response.data;
@@ -252,15 +258,18 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
               as String?
           : null;
       throw Exception(
-          serverMsg ?? 'Failed to approve request. Please try again.');
+        serverMsg ?? 'Failed to approve request. Please try again.',
+      );
     } catch (e) {
       rethrow;
     }
   }
 
   @override
-  Future<void> declineBookRequest(String id,
-      {String reason = 'Request declined'}) async {
+  Future<void> declineBookRequest(
+    String id, {
+    String reason = 'Request declined',
+  }) async {
     try {
       final response = await dio.patch(
         '${ApiConstants.v1BookRequests}/$id/reject',
@@ -331,13 +340,14 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
 
   @override
   Future<void> scheduleDelivery(
-      String id,
-      String name,
-      String phone,
-      String address,
-      String pincode,
-      String preferredDate,
-      String preferredTime) async {
+    String id,
+    String name,
+    String phone,
+    String address,
+    String pincode,
+    String preferredDate,
+    String preferredTime,
+  ) async {
     try {
       final response = await dio.post(
         '${ApiConstants.v1BookRequests}/$id/deliver-to-me',
@@ -360,7 +370,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
               as String?
           : null;
       throw Exception(
-          serverMsg ?? 'Failed to schedule delivery. Please try again.');
+        serverMsg ?? 'Failed to schedule delivery. Please try again.',
+      );
     } catch (e) {
       rethrow;
     }
@@ -415,22 +426,28 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       final statusCode = e.response?.statusCode;
       if (statusCode == ApiConstants.notFound) {
         throw Exception(
-            serverMsg ?? 'Book request not found or not eligible for pickup');
+          serverMsg ?? 'Book request not found or not eligible for pickup',
+        );
       }
       if (statusCode == ApiConstants.badRequest) {
         throw Exception(
-            serverMsg ?? 'Invalid pickup details. Please check your input.');
+          serverMsg ?? 'Invalid pickup details. Please check your input.',
+        );
       }
       throw Exception(
-          serverMsg ?? 'Failed to schedule pickup. Please try again.');
+        serverMsg ?? 'Failed to schedule pickup. Please try again.',
+      );
     } catch (e) {
       rethrow;
     }
   }
 
   @override
-  Future<void> initiateReturn(String id, String returnMethod,
-      {String? returnBranchId}) async {
+  Future<void> initiateReturn(
+    String id,
+    String returnMethod, {
+    String? returnBranchId,
+  }) async {
     try {
       final response = await dio.post(
         '${ApiConstants.v1BookRequests}/$id/initiate-return',
@@ -476,9 +493,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
         throw Exception('Failed to create payment');
       }
       final data = response.data;
-      final Map order = data is Map && data['order'] is Map
-          ? data['order'] as Map
-          : const {};
+      final Map order =
+          data is Map && data['order'] is Map ? data['order'] as Map : const {};
       final amount = order['amount'];
       return RequestPaymentIntent(
         razorpayKey: data is Map ? (data['keyId'] as String? ?? '') : '',
@@ -494,7 +510,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
               as String?
           : null;
       throw Exception(
-          serverMsg ?? 'Failed to initiate payment. Please try again.');
+        serverMsg ?? 'Failed to initiate payment. Please try again.',
+      );
     } catch (e) {
       rethrow;
     }
@@ -530,10 +547,12 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<void> verifyBookRequestPayment(String id,
-      {required String paymentId,
-      required String orderId,
-      required String signature}) async {
+  Future<void> verifyBookRequestPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+  }) async {
     try {
       final response = await dio.post(
         ApiConstants.bookRequestPaymentVerify(id),
@@ -553,7 +572,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
               as String?
           : null;
       throw Exception(
-          serverMsg ?? 'Payment verification failed. Please try again.');
+        serverMsg ?? 'Payment verification failed. Please try again.',
+      );
     } catch (e) {
       rethrow;
     }

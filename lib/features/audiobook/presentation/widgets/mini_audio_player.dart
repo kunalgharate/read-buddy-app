@@ -115,8 +115,11 @@ class MiniAudioPlayer extends StatelessWidget {
                 ),
                 // Stop & dismiss
                 IconButton(
-                  icon: const Icon(Icons.close,
-                      color: AppColors.textMuted, size: 20),
+                  icon: const Icon(
+                    Icons.close,
+                    color: AppColors.textMuted,
+                    size: 20,
+                  ),
                   onPressed: service.stop,
                 ),
                 const SizedBox(width: 4),

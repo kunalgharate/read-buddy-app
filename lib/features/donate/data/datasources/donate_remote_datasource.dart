@@ -46,7 +46,8 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 [DonateRemoteDataSource] Sending POST to: ${ApiConstants.createBookDonation}');
+          '🌐 [DonateRemoteDataSource] Sending POST to: ${ApiConstants.createBookDonation}',
+        );
         print('📦 [DonateRemoteDataSource] Payload Data: $data');
       }
 
@@ -57,14 +58,17 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '📡 [DonateRemoteDataSource] Response Status: ${response.statusCode}');
+          '📡 [DonateRemoteDataSource] Response Status: ${response.statusCode}',
+        );
         print('📡 [DonateRemoteDataSource] Response Data: ${response.data}');
       }
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(response.data['error'] ??
-            response.data['message'] ??
-            'Failed to create donation');
+        throw Exception(
+          response.data['error'] ??
+              response.data['message'] ??
+              'Failed to create donation',
+        );
       }
     } catch (e) {
       if (kDebugMode) print('🔥 [DonateRemoteDataSource] Error: $e');

@@ -40,11 +40,13 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     emit(ReviewLoading());
     try {
       final BookReviewsResponse response = await _getBookReviews(event.bookId);
-      emit(ReviewsLoaded(
-        reviews: response.reviews,
-        averageRating: response.averageRating,
-        totalReviews: response.totalReviews,
-      ));
+      emit(
+        ReviewsLoaded(
+          reviews: response.reviews,
+          averageRating: response.averageRating,
+          totalReviews: response.totalReviews,
+        ),
+      );
     } catch (error) {
       emit(ReviewError(ErrorHandler.getErrorMessage(error)));
     }

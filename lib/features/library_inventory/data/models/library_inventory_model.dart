@@ -24,13 +24,18 @@ class LibraryInventoryModel extends LibraryInventoryEntity {
 
     return LibraryInventoryModel(
       id: json['_id']?.toString() ?? '',
-      libraryId: library is Map ? library['_id']?.toString() ?? '' : library?.toString() ?? '',
+      libraryId: library is Map
+          ? library['_id']?.toString() ?? ''
+          : library?.toString() ?? '',
       libraryName: library is Map ? library['name']?.toString() : null,
-      bookId: book is Map ? book['_id']?.toString() ?? '' : book?.toString() ?? '',
+      bookId:
+          book is Map ? book['_id']?.toString() ?? '' : book?.toString() ?? '',
       bookTitle: book is Map ? book['title']?.toString() : null,
       bookAuthor: book is Map ? book['author']?.toString() : null,
       bookCoverUrl: book is Map ? book['coverImageUrl']?.toString() : null,
-      variantId: variant is Map ? variant['_id']?.toString() ?? '' : variant?.toString() ?? '',
+      variantId: variant is Map
+          ? variant['_id']?.toString() ?? ''
+          : variant?.toString() ?? '',
       variantLanguage: variant is Map ? variant['language']?.toString() : null,
       formatType: json['formatType']?.toString() ?? 'hardcover',
       totalCopies: (json['totalCopies'] ?? 0) as int,
@@ -52,8 +57,10 @@ class CityBookModel extends CityBookEntity {
 
   factory CityBookModel.fromJson(Map<String, dynamic> json) {
     final libs = (json['libraries'] as List<dynamic>?)
-            ?.map((l) => CityBookLibraryInfoModel.fromJson(
-                l as Map<String, dynamic>))
+            ?.map(
+              (l) =>
+                  CityBookLibraryInfoModel.fromJson(l as Map<String, dynamic>),
+            )
             .toList() ??
         [];
 

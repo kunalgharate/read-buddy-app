@@ -94,7 +94,9 @@ class _CategoryTabState extends State<CategoryTab> {
                               child: _selectedCategory == null
                                   ? _buildDefaultAllView(categories, books)
                                   : _buildExploreView(
-                                      _selectedCategory!, books),
+                                      _selectedCategory!,
+                                      books,
+                                    ),
                             ),
                           ],
                         );
@@ -165,8 +167,10 @@ class _CategoryTabState extends State<CategoryTab> {
               ],
             ),
             child: IconButton(
-              icon: Icon(Icons.tune,
-                  color: Theme.of(context).colorScheme.onSurface),
+              icon: Icon(
+                Icons.tune,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               onPressed: () {
                 // Future Filter/Sorting implementation
               },
@@ -236,7 +240,9 @@ class _CategoryTabState extends State<CategoryTab> {
 
   // ─── Default All View (Figma Screen 3 - Default category page) ──────────────
   Widget _buildDefaultAllView(
-      List<CategoryEntity> allCategories, List<Book> allBooks) {
+    List<CategoryEntity> allCategories,
+    List<Book> allBooks,
+  ) {
     // Show 'Popular Genres' using all categories (limit to 6 for premium design)
     final popularGenres = allCategories.take(8).toList();
 
@@ -279,7 +285,9 @@ class _CategoryTabState extends State<CategoryTab> {
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(12),
@@ -509,7 +517,9 @@ class _CategoryTabState extends State<CategoryTab> {
                       // Formatted Badge
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: _green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
@@ -606,7 +616,9 @@ class _CategoryTabState extends State<CategoryTab> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: _green.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(4),
@@ -641,7 +653,8 @@ class _CategoryTabState extends State<CategoryTab> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (_) => request_detail.BookDetailPage(bookId: book.id)),
+        builder: (_) => request_detail.BookDetailPage(bookId: book.id),
+      ),
     );
   }
 
@@ -663,7 +676,9 @@ class _CategoryTabState extends State<CategoryTab> {
           Text(
             'No books found',
             style: TextStyle(
-                color: Colors.grey.shade500, fontWeight: FontWeight.w500),
+              color: Colors.grey.shade500,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),

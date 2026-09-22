@@ -378,8 +378,11 @@ class _ReturnRequestCard extends StatelessWidget {
           // User name
           Row(
             children: [
-              const Icon(Icons.person_outline,
-                  size: 14, color: Color(0xFF888888)),
+              const Icon(
+                Icons.person_outline,
+                size: 14,
+                color: Color(0xFF888888),
+              ),
               const SizedBox(width: 4),
               Text(
                 userName,
@@ -392,8 +395,11 @@ class _ReturnRequestCard extends StatelessWidget {
           // Return method
           Row(
             children: [
-              const Icon(Icons.local_shipping_outlined,
-                  size: 14, color: Color(0xFF888888)),
+              const Icon(
+                Icons.local_shipping_outlined,
+                size: 14,
+                color: Color(0xFF888888),
+              ),
               const SizedBox(width: 4),
               Text(
                 'Return method: ${_capitalize(returnMethod)}',
@@ -485,7 +491,6 @@ class _ActionButton extends StatelessWidget {
     );
   }
 }
-
 
 /// Result of the admin inspection dialog: the selected book [condition]
 /// (e.g. good/damaged/lost) and optional inspection [notes].

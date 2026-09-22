@@ -24,9 +24,7 @@ class _AdminUpcomingPickupsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -55,8 +53,11 @@ class _AdminUpcomingPickupsView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.event_available_outlined,
-                      size: 64, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.event_available_outlined,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   const Text(
                     'No upcoming pickups',
@@ -270,7 +271,7 @@ class _PickupCard extends StatelessWidget {
         'Sep',
         'Oct',
         'Nov',
-        'Dec'
+        'Dec',
       ];
       return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
     } catch (_) {

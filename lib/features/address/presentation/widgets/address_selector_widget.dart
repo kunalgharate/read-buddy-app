@@ -209,8 +209,11 @@ class _AddressTile extends StatelessWidget {
                 ),
               ),
               if (isSelected)
-                const Icon(Icons.check_circle,
-                    color: AppColors.primary, size: 22),
+                const Icon(
+                  Icons.check_circle,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
             ],
           ),
         ),

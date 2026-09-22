@@ -98,6 +98,4 @@ class AppUser {
         'wishlist': wishlist,
         'userAvatar': userAvatar,
       };
-
-
 }

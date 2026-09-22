@@ -18,7 +18,8 @@ class ReadingProgressRemoteDataSourceImpl
 
   @override
   Future<ReadingProgressModel> saveProgress(
-      ReadingProgressModel progress) async {
+    ReadingProgressModel progress,
+  ) async {
     final response = await _dio.put(
       ApiConstants.readingProgress,
       data: progress.toJson(),
@@ -38,7 +39,8 @@ class ReadingProgressRemoteDataSourceImpl
     final data = response.data;
     if (data is Map && data['data'] is Map) {
       return ReadingProgressModel.fromJson(
-          Map<String, dynamic>.from(data['data'] as Map));
+        Map<String, dynamic>.from(data['data'] as Map),
+      );
     }
     return null;
   }

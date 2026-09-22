@@ -63,8 +63,7 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
   bool _restored = false;
   Timer? _saveDebounce;
 
-  bool get _trackProgress =>
-      widget.bookId != null && widget.bookId!.isNotEmpty;
+  bool get _trackProgress => widget.bookId != null && widget.bookId!.isNotEmpty;
 
   String get _ttsSpeedLabel {
     final map = <double, String>{

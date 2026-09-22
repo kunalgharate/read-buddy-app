@@ -58,7 +58,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamedAndRemoveUntil(
-                      context, '/sign-in', (route) => false);
+                    context,
+                    '/sign-in',
+                    (route) => false,
+                  );
                 },
                 child: const Text('Go to Sign In'),
               ),
@@ -78,8 +81,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       listener: (context, state) {
         if (state is OtpSentSuccess && !_otpSent) {
           _otpSent = true;
-          Navigator.pushReplacementNamed(context, '/verify-otp',
-              arguments: _email);
+          Navigator.pushReplacementNamed(
+            context,
+            '/verify-otp',
+            arguments: _email,
+          );
         } else if (state is SignInFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -159,7 +165,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           : const Text(
                               'Send Verification Code',
                               style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                     ),
                   );

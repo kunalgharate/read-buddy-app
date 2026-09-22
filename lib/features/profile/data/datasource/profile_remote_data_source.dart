@@ -56,7 +56,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 ProfileRemoteDataSource: getProfile status: ${response.statusCode}');
+          '🌐 ProfileRemoteDataSource: getProfile status: ${response.statusCode}',
+        );
         print('🌐 ProfileRemoteDataSource: getProfile data: ${response.data}');
       }
 
@@ -95,7 +96,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 ProfileRemoteDataSource: updateAvatar status: ${response.statusCode}');
+          '🌐 ProfileRemoteDataSource: updateAvatar status: ${response.statusCode}',
+        );
       }
 
       if (response.statusCode == ApiConstants.success) {
@@ -116,8 +118,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<AppUser> updateProfile(
-      {required Map<String, String> profileData}) async {
+  Future<AppUser> updateProfile({
+    required Map<String, String> profileData,
+  }) async {
     if (kDebugMode) {
       print('🌐 ProfileRemoteDataSource: Updating profile → $profileData');
       print('🌐 URL: ${ApiConstants.updateUserInfo}');
@@ -134,7 +137,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
       if (kDebugMode) {
         print(
-            '🌐 ProfileRemoteDataSource: updateProfile status: ${response.statusCode}');
+          '🌐 ProfileRemoteDataSource: updateProfile status: ${response.statusCode}',
+        );
       }
 
       if (response.statusCode == ApiConstants.success) {

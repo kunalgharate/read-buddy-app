@@ -107,9 +107,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
               const Text(
                 'Book Title',
                 style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               MyTextField(
                 controller: bookTitleController,
@@ -122,9 +123,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
               const Text(
                 'Author Name',
                 style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               MyTextField(
                 controller: authorController,
@@ -137,9 +139,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
               const Text(
                 'Categories',
                 style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               GenericAutocomplete<Item>(
                 options: BookValueItems.bookCategories,
@@ -158,9 +161,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
               const Text(
                 'Genre',
                 style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               DropdownSearch<String>(
                 selectedItem: selectedGenre,
@@ -169,12 +173,16 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                 },
                 validator: BookFormValidator.validateGenre,
                 decoratorProps: const DropDownDecoratorProps(
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey)),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey)),
-                        hintText: 'Seacrch Genre')),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    hintText: 'Seacrch Genre',
+                  ),
+                ),
                 items: (f, cs) => BookValueItems().bookGenres,
                 popupProps: const PopupProps.menu(fit: FlexFit.loose),
               ),
@@ -182,9 +190,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
               const Text(
                 'Number of Pages',
                 style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               MyTextField(
                 controller: pagesController,
@@ -199,9 +208,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                     ? 'ISBN (Optional)'
                     : 'ISBN',
                 style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               MyTextField(
                 controller: isbnController,
@@ -226,9 +236,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                         const Text(
                           'Publisher',
                           style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
-                              color: Color.fromARGB(255, 4, 33, 83)),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            color: Color.fromARGB(255, 4, 33, 83),
+                          ),
                         ),
                         MyTextField(
                           controller: publisherController,
@@ -248,9 +259,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                         const Text(
                           'Year',
                           style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
-                              color: Color.fromARGB(255, 4, 33, 83)),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            color: Color.fromARGB(255, 4, 33, 83),
+                          ),
                         ),
                         MyTextField(
                           controller: yearController,
@@ -269,9 +281,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
               const Text(
                 'Book Format',
                 style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               Wrap(
                 spacing: 16, // space between items horizontally
@@ -309,9 +322,10 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
               const Text(
                 'Language',
                 style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 4, 33, 83)),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 4, 33, 83),
+                ),
               ),
               DropdownSearch<String>(
                 selectedItem: selectedLanguage,
@@ -320,12 +334,16 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                 },
                 validator: BookFormValidator.validateLanguage,
                 decoratorProps: const DropDownDecoratorProps(
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey)),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey)),
-                        hintText: 'Select Language')),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    hintText: 'Select Language',
+                  ),
+                ),
                 items: (f, cs) => ["Tamil", 'English', 'Hindi', 'Malayalam'],
                 popupProps: const PopupProps.menu(fit: FlexFit.loose),
               ),
@@ -333,64 +351,66 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                 height: 16,
               ),
               ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // All fields are valid, proceed to next page or submit
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    // All fields are valid, proceed to next page or submit
 
-                      final book = BookCrudModel(
-                        id: '',
-                        title: bookTitleController.text,
-                        author: authorController.text,
-                        category: selectedCategory!.id,
-                        genre: selectedGenre ?? '',
-                        format: selectedFormat ?? '',
-                        language: selectedLanguage ?? '',
-                        isbn: isbnController.text,
-                        publisher: publisherController.text,
-                        publicationYear: int.tryParse(yearController.text) ?? 0,
-                        numberOfCopies: int.tryParse(pagesController.text) ?? 1,
-                        isAvailable: true,
-                        status: "available",
-                        subtitle: '',
-                        edition: '',
-                        condition: '',
-                        tags: [],
-                        location: '',
-                        ownerId: '',
-                        coverImageUrl: '',
-                        additionalImages: [],
-                        description: '',
-                        notes: '',
-                      );
-                      widget.onContinue(book);
-                    } else {
-                      // One or more fields are invalid, show errors
-                    }
-                  },
-                  // onPressed: () {
+                    final book = BookCrudModel(
+                      id: '',
+                      title: bookTitleController.text,
+                      author: authorController.text,
+                      category: selectedCategory!.id,
+                      genre: selectedGenre ?? '',
+                      format: selectedFormat ?? '',
+                      language: selectedLanguage ?? '',
+                      isbn: isbnController.text,
+                      publisher: publisherController.text,
+                      publicationYear: int.tryParse(yearController.text) ?? 0,
+                      numberOfCopies: int.tryParse(pagesController.text) ?? 1,
+                      isAvailable: true,
+                      status: "available",
+                      subtitle: '',
+                      edition: '',
+                      condition: '',
+                      tags: [],
+                      location: '',
+                      ownerId: '',
+                      coverImageUrl: '',
+                      additionalImages: [],
+                      description: '',
+                      notes: '',
+                    );
+                    widget.onContinue(book);
+                  } else {
+                    // One or more fields are invalid, show errors
+                  }
+                },
+                // onPressed: () {
 
-                  //   // Navigator.push(
-                  //   //     context,
-                  //   //     MaterialPageRoute(
-                  //   //         builder: (context) => UpdateBookPage2(
-                  //   //               onBack: () {},
-                  //   //             )));
-                  // },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          10), // Adjust the value as needed
-                    ),
+                //   // Navigator.push(
+                //   //     context,
+                //   //     MaterialPageRoute(
+                //   //         builder: (context) => UpdateBookPage2(
+                //   //               onBack: () {},
+                //   //             )));
+                // },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      10,
+                    ), // Adjust the value as needed
                   ),
-                  child: const Text(
-                    "Continue",
-                    style: TextStyle(color: Colors.white),
-                  )),
+                ),
+                child: const Text(
+                  "Continue",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
               const SizedBox(
                 height: 30,
-              )
+              ),
             ],
           ),
         ),

@@ -57,9 +57,7 @@ class _BooksListPageState extends State<BooksListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-  
         title: const Text('Books'),
         centerTitle: true,
       ),
@@ -78,30 +76,32 @@ class _BooksListPageState extends State<BooksListPage> {
                 controller: searchBookController,
                 onChanged: (value) => _onSearchChanged(),
                 decoration: InputDecoration(
-                    hintText: 'Search Book',
-                    prefixIcon: const Icon(Icons.search),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    )),
+                  hintText: 'Search Book',
+                  prefixIcon: const Icon(Icons.search),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                ),
               ),
             ),
             const SizedBox(
               height: 30,
             ),
-            Expanded(child: BlocBuilder<BookCrudBloc, BookCrudState>(
-              builder: (context, state) {
-                switch (state) {
-                  case BookCrudLoading():
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  case BookCrudListLoaded(:final booksCollection):
-                    return ListView.builder(
+            Expanded(
+              child: BlocBuilder<BookCrudBloc, BookCrudState>(
+                builder: (context, state) {
+                  switch (state) {
+                    case BookCrudLoading():
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    case BookCrudListLoaded(:final booksCollection):
+                      return ListView.builder(
                         //physics: const NeverScrollableScrollPhysics(),
                         itemCount: booksCollection.length,
                         itemBuilder: (context, index) {
@@ -121,20 +121,22 @@ class _BooksListPageState extends State<BooksListPage> {
                               bookcollection: bookCollectionItem,
                             ),
                           );
-                        });
-                  case BookCrudError(:final message):
-                    return Center(
-                      child: Text(message),
-                    );
+                        },
+                      );
+                    case BookCrudError(:final message):
+                      return Center(
+                        child: Text(message),
+                      );
 
-                  default:
-                    return const SizedBox.shrink();
-                }
-              },
-            )),
+                    default:
+                      return const SizedBox.shrink();
+                  }
+                },
+              ),
+            ),
             const SizedBox(
               height: 50,
-            )
+            ),
           ],
         ),
       ),

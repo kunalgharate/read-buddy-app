@@ -6,5 +6,9 @@ class InitiateReturnUsecase {
   InitiateReturnUsecase(this.repository);
 
   Future<void> call(String id, String returnMethod, {String? returnBranchId}) =>
-      repository.initiateReturn(id, returnMethod, returnBranchId: returnBranchId);
+      repository.initiateReturn(
+        id,
+        returnMethod,
+        returnBranchId: returnBranchId,
+      );
 }

@@ -7,7 +7,6 @@ class DeleteCategory {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-  
         content: const Text(
           "Are you sure you want to permanently delete this book from the ReadBuddy app?",
           style: TextStyle(fontSize: 15),
@@ -19,9 +18,11 @@ class DeleteCategory {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
-                    shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        side: const BorderSide(color: Colors.black))),
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
                 child: const Text(
                   "Cancel",
                   style: TextStyle(color: Colors.black),
@@ -36,9 +37,11 @@ class DeleteCategory {
                   Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
-                    shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        side: const BorderSide(color: Colors.black))),
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
                 child:
                     const Text("Delete", style: TextStyle(color: Colors.black)),
               ),

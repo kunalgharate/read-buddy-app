@@ -183,8 +183,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             ),
             const SizedBox(height: 32),
             Row(
-              children: List.generate(
-                  6, (index) => _buildCodeBox(index, context)),
+              children:
+                  List.generate(6, (index) => _buildCodeBox(index, context)),
             ),
             const SizedBox(height: 32),
             GestureDetector(
@@ -240,13 +240,17 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           final secureStorage = getIt<SecureStorageUtil>();
           await secureStorage.saveUser(state.user);
           await secureStorage.saveTokens(
-              accessToken: state.user.accessToken,
-              refreshToken: state.user.refreshToken);
+            accessToken: state.user.accessToken,
+            refreshToken: state.user.refreshToken,
+          );
           await AppPreferences.setLoggedIn(true);
 
           if (!context.mounted) return;
           Navigator.pushNamedAndRemoveUntil(
-              context, '/onboarding-questionnaire', (route) => false);
+            context,
+            '/onboarding-questionnaire',
+            (route) => false,
+          );
         } else if (state is ResendVerificationEmailSuccess) {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -261,7 +265,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Verification code re-sent to ${widget.email ?? ''}'),
+              content:
+                  Text('Verification code re-sent to ${widget.email ?? ''}'),
               backgroundColor: const Color(0xFF00C853),
             ),
           );
@@ -280,8 +285,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 action: SnackBarAction(
                   label: 'Sign In',
                   textColor: Colors.white,
-                  onPressed: () => Navigator.pushReplacementNamed(
-                      context, '/signin'),
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, '/signin'),
                 ),
               ),
             );
@@ -302,33 +307,34 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         }
       },
       child: BlocBuilder<SignUpBloc, SignUpState>(
-          builder: (context, signUpBlocState) {
-        if (signUpBlocState is SignUpSuccess) {
-          final displayEmail = signUpBlocState.email.isEmpty
-              ? (widget.email ?? '')
-              : signUpBlocState.email;
-          return _buildOtpScreen(context, displayEmail);
-        }
+        builder: (context, signUpBlocState) {
+          if (signUpBlocState is SignUpSuccess) {
+            final displayEmail = signUpBlocState.email.isEmpty
+                ? (widget.email ?? '')
+                : signUpBlocState.email;
+            return _buildOtpScreen(context, displayEmail);
+          }
 
-        if (signUpBlocState is ResendVerificationEmailSuccess) {
-          return _buildOtpScreen(context, signUpBlocState.email);
-        }
+          if (signUpBlocState is ResendVerificationEmailSuccess) {
+            return _buildOtpScreen(context, signUpBlocState.email);
+          }
 
-        if (signUpBlocState is SignUpLoading) {
+          if (signUpBlocState is SignUpLoading) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          // Error or initial — keep OTP screen if email is available
+          if (widget.email != null && widget.email!.isNotEmpty) {
+            return _buildOtpScreen(context, widget.email!);
+          }
+
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(child: Text('Something went wrong')),
           );
-        }
-
-        // Error or initial — keep OTP screen if email is available
-        if (widget.email != null && widget.email!.isNotEmpty) {
-          return _buildOtpScreen(context, widget.email!);
-        }
-
-        return const Scaffold(
-          body: Center(child: Text('Something went wrong')),
-        );
-      }),
+        },
+      ),
     );
   }
 }

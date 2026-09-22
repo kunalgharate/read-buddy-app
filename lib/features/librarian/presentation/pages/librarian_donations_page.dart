@@ -68,8 +68,10 @@ class _DonationsView extends StatelessWidget {
                   children: [
                     Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
                     SizedBox(height: 12),
-                    Text('No donations yet',
-                        style: TextStyle(color: Colors.grey, fontSize: 16)),
+                    Text(
+                      'No donations yet',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
                   ],
                 ),
               );
@@ -116,8 +118,8 @@ class _DonationCard extends StatelessWidget {
     // A librarian can schedule the physical pickup once a PICKUP donation has
     // been approved / requested and before it is already scheduled.
     final isPickup = fulfillmentType == 'PICKUP';
-    final canSchedulePickup = isPickup &&
-        (status == 'approved' || status == 'pickup_requested');
+    final canSchedulePickup =
+        isPickup && (status == 'approved' || status == 'pickup_requested');
 
     Color statusColor;
     switch (status) {
@@ -180,8 +182,10 @@ class _DonationCard extends StatelessWidget {
               children: [
                 const Icon(Icons.person_outline, size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text(donorName.toString(),
-                    style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                Text(
+                  donorName.toString(),
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                ),
               ],
             ),
             if (status == 'pending') ...[
@@ -192,7 +196,8 @@ class _DonationCard extends StatelessWidget {
                   OutlinedButton(
                     onPressed: () {
                       context.read<LibrarianBloc>().add(
-                          UpdateDonationStatusEvent(donationId, 'rejected'));
+                            UpdateDonationStatusEvent(donationId, 'rejected'),
+                          );
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
@@ -205,7 +210,8 @@ class _DonationCard extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       context.read<LibrarianBloc>().add(
-                          UpdateDonationStatusEvent(donationId, 'approved'));
+                            UpdateDonationStatusEvent(donationId, 'approved'),
+                          );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -241,7 +247,9 @@ class _DonationCard extends StatelessWidget {
   }
 
   Future<void> _showSchedulePickupDialog(
-      BuildContext context, String donationId) async {
+    BuildContext context,
+    String donationId,
+  ) async {
     final bloc = context.read<LibrarianBloc>();
     final now = DateTime.now();
 
@@ -282,9 +290,11 @@ class _DonationCard extends StatelessWidget {
     final scheduledTime =
         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
-    bloc.add(SchedulePickupEvent(donationId, {
-      'scheduledDate': scheduledDate,
-      'scheduledTime': scheduledTime,
-    }));
+    bloc.add(
+      SchedulePickupEvent(donationId, {
+        'scheduledDate': scheduledDate,
+        'scheduledTime': scheduledTime,
+      }),
+    );
   }
 }

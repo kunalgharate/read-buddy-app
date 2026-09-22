@@ -28,22 +28,28 @@ class DonatedBooksRemoteDataSourceImpl implements DonatedBooksRemoteDataSource {
       if (data is List) {
         // Direct array response
         return data
-            .map((json) =>
-                DonatedBooksModel.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) =>
+                  DonatedBooksModel.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
       } else if (data is Map<String, dynamic>) {
         // Nested response with success flag
         if (data.containsKey('success') && data['success'] == true) {
           final donations = data['donations'] ?? data['data'] ?? [];
           return (donations as List)
-              .map((json) =>
-                  DonatedBooksModel.fromJson(json as Map<String, dynamic>))
+              .map(
+                (json) =>
+                    DonatedBooksModel.fromJson(json as Map<String, dynamic>),
+              )
               .toList();
         } else if (data.containsKey('donations')) {
           // Direct donations key
           return (data['donations'] as List)
-              .map((json) =>
-                  DonatedBooksModel.fromJson(json as Map<String, dynamic>))
+              .map(
+                (json) =>
+                    DonatedBooksModel.fromJson(json as Map<String, dynamic>),
+              )
               .toList();
         } else {
           throw Exception(data['message'] ?? 'Unexpected response format');

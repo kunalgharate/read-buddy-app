@@ -22,10 +22,12 @@ class ContributeCubit extends Cubit<ContributeState> {
             status == 'received';
       }).toList();
       final totalAmount = confirmed.fold<int>(0, (sum, d) => sum + d.amount);
-      emit(ContributeLoaded(
-        moneyDonations: donations,
-        totalMoneyDonated: totalAmount,
-      ));
+      emit(
+        ContributeLoaded(
+          moneyDonations: donations,
+          totalMoneyDonated: totalAmount,
+        ),
+      );
     } catch (e) {
       if (isClosed) return;
       emit(ContributeError(e.toString()));

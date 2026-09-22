@@ -144,7 +144,6 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
           widget.question == null ? 'Add Question' : 'Edit Question',
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-  
         foregroundColor: Colors.black,
         elevation: 1,
       ),
@@ -166,9 +165,10 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                   Text(
                     'Question',
                     style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800]),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
@@ -205,9 +205,10 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                   Text(
                     'Question Type',
                     style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800]),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Column(
@@ -221,7 +222,9 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: selectedType == 'single'
                                 ? Colors.green.withValues(alpha: 0.1)
@@ -262,7 +265,9 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: selectedType == 'multiple'
                                 ? Colors.green.withValues(alpha: 0.1)
@@ -315,9 +320,10 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                       Text(
                         'Answer Options',
                         style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[800]),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
                       ),
                       ElevatedButton.icon(
                         onPressed: addOption,
@@ -327,7 +333,9 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           textStyle: const TextStyle(fontSize: 14),
                         ),
                       ),
@@ -370,10 +378,14 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                   borderSide: const BorderSide(
-                                      color: Colors.green, width: 2),
+                                    color: Colors.green,
+                                    width: 2,
+                                  ),
                                 ),
                                 contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
                               ),
                             ),
                           ),
@@ -406,7 +418,9 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   textStyle: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 child: _isLoading
                     ? const SizedBox(
@@ -417,9 +431,11 @@ class _AddEditQuestionPageState extends State<AddEditQuestionPage> {
                           strokeWidth: 2,
                         ),
                       )
-                    : Text(widget.question == null
-                        ? 'Create Question'
-                        : 'Update Question'),
+                    : Text(
+                        widget.question == null
+                            ? 'Create Question'
+                            : 'Update Question',
+                      ),
               ),
             ),
           ],

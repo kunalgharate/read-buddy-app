@@ -63,8 +63,9 @@ class BookModel extends Book {
         'coverImageUrl': bookimage,
         'genre': genre,
         'category': BookCategoryModel(
-                id: bookCategory.id, categoryName: bookCategory.categoryName)
-            .toJson(),
+          id: bookCategory.id,
+          categoryName: bookCategory.categoryName,
+        ).toJson(),
       };
 }
 

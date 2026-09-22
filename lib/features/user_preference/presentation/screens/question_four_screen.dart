@@ -43,7 +43,6 @@ class _QuestionFourScreenState extends State<QuestionFourScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

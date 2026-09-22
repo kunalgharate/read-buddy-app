@@ -37,7 +37,9 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
   }
 
   Future<void> _onLoadVariants(
-      LoadVariants event, Emitter<VariantState> emit) async {
+    LoadVariants event,
+    Emitter<VariantState> emit,
+  ) async {
     emit(VariantLoading());
     try {
       final variants = await getVariantsForBook(event.bookId);
@@ -48,7 +50,9 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
   }
 
   Future<void> _onCreateVariant(
-      CreateVariantEvent event, Emitter<VariantState> emit) async {
+    CreateVariantEvent event,
+    Emitter<VariantState> emit,
+  ) async {
     emit(VariantLoading());
     try {
       final variant = await createVariant(
@@ -64,7 +68,9 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
   }
 
   Future<void> _onUpdateVariant(
-      UpdateVariantEvent event, Emitter<VariantState> emit) async {
+    UpdateVariantEvent event,
+    Emitter<VariantState> emit,
+  ) async {
     emit(VariantLoading());
     try {
       final variant = await updateVariant(event.variantId, event.data);
@@ -75,7 +81,9 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
   }
 
   Future<void> _onDeleteVariant(
-      DeleteVariantEvent event, Emitter<VariantState> emit) async {
+    DeleteVariantEvent event,
+    Emitter<VariantState> emit,
+  ) async {
     emit(VariantLoading());
     try {
       await deleteVariant(event.variantId);
@@ -89,7 +97,9 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
   }
 
   Future<void> _onAddFormat(
-      AddFormatEvent event, Emitter<VariantState> emit) async {
+    AddFormatEvent event,
+    Emitter<VariantState> emit,
+  ) async {
     emit(VariantLoading());
     try {
       final variant = await addFormat(
@@ -106,7 +116,9 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
   }
 
   Future<void> _onRemoveFormat(
-      RemoveFormatEvent event, Emitter<VariantState> emit) async {
+    RemoveFormatEvent event,
+    Emitter<VariantState> emit,
+  ) async {
     emit(VariantLoading());
     try {
       await removeFormat(event.variantId, event.formatId);
@@ -120,7 +132,9 @@ class VariantBloc extends Bloc<VariantEvent, VariantState> {
   }
 
   Future<void> _onAddPartsToFormat(
-      AddPartsToFormatEvent event, Emitter<VariantState> emit) async {
+    AddPartsToFormatEvent event,
+    Emitter<VariantState> emit,
+  ) async {
     emit(VariantLoading());
     try {
       final variant = await addPartsToFormat(

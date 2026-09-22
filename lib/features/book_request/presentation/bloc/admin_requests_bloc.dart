@@ -90,7 +90,9 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
   }
 
   Future<void> _onLoadAll(
-      LoadAllRequests event, Emitter<AdminRequestsState> emit) async {
+    LoadAllRequests event,
+    Emitter<AdminRequestsState> emit,
+  ) async {
     emit(AdminRequestsLoading());
     try {
       final requests = await getAllBookRequests();
@@ -101,7 +103,9 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
   }
 
   Future<void> _onAccept(
-      AcceptRequest event, Emitter<AdminRequestsState> emit) async {
+    AcceptRequest event,
+    Emitter<AdminRequestsState> emit,
+  ) async {
     final currentList = _currentList();
     emit(AdminRequestActionLoading(currentList, event.requestId));
     try {
@@ -134,7 +138,9 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
   }
 
   Future<void> _onDecline(
-      DeclineRequest event, Emitter<AdminRequestsState> emit) async {
+    DeclineRequest event,
+    Emitter<AdminRequestsState> emit,
+  ) async {
     final currentList = _currentList();
     emit(AdminRequestActionLoading(currentList, event.requestId));
     try {
@@ -166,14 +172,20 @@ class AdminRequestsBloc extends Bloc<AdminRequestsEvent, AdminRequestsState> {
   }
 
   Future<void> _onUpdateStatus(
-      UpdateRequestStatus event, Emitter<AdminRequestsState> emit) async {
+    UpdateRequestStatus event,
+    Emitter<AdminRequestsState> emit,
+  ) async {
     final currentList = _currentList();
     emit(AdminRequestActionLoading(currentList, event.requestId));
     try {
       await updateRequestStatus(event.requestId, event.status);
       final updated = await getAllBookRequests();
-      emit(AdminRequestActionSuccess(
-          updated, 'Status updated to ${event.status}'));
+      emit(
+        AdminRequestActionSuccess(
+          updated,
+          'Status updated to ${event.status}',
+        ),
+      );
     } catch (e) {
       emit(AdminRequestActionError(currentList, 'Failed to update status: $e'));
     }

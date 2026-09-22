@@ -15,18 +15,20 @@ class BannerRepoImpl implements BannerRepository {
   }
 
   @override
-  Future<void> createBanner(
-      {required String title,
-      String? link,
-      String? description,
-      required String bannerType,
-      required File bannerImage}) {
+  Future<void> createBanner({
+    required String title,
+    String? link,
+    String? description,
+    required String bannerType,
+    required File bannerImage,
+  }) {
     return remoteDataSource.createBanner(
-        title: title,
-        link: link,
-        description: description,
-        bannerType: bannerType,
-        bannerImage: bannerImage);
+      title: title,
+      link: link,
+      description: description,
+      bannerType: bannerType,
+      bannerImage: bannerImage,
+    );
   }
 
   @override
@@ -35,13 +37,14 @@ class BannerRepoImpl implements BannerRepository {
   }
 
   @override
-  Future<void> updateBanner(
-      {required String id,
-      required String title,
-      String? link,
-      String? description,
-      required String bannerType,
-      required File bannerImage}) {
+  Future<void> updateBanner({
+    required String id,
+    required String title,
+    String? link,
+    String? description,
+    required String bannerType,
+    required File bannerImage,
+  }) {
     return remoteDataSource.updateBanner(
       id: id,
       title: title,

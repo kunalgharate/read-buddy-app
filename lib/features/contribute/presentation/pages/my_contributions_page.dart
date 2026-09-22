@@ -122,7 +122,8 @@ class _BooksTab extends StatelessWidget {
           final books = allBooksSorted(state.stats.bookStatusList);
 
           if (books.isEmpty) {
-            return _buildEmpty(context,
+            return _buildEmpty(
+              context,
               'No donations yet.\n'
               'Books appear here after you donate and once admin processes them.',
             );
@@ -187,8 +188,11 @@ class _MoneyTab extends StatelessWidget {
                         color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.attach_money,
-                          color: Color(0xFFF59E0B), size: 22),
+                      child: const Icon(
+                        Icons.attach_money,
+                        color: Color(0xFFF59E0B),
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -236,8 +240,11 @@ Widget _buildEmpty(BuildContext context, String message) {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_outlined,
-              size: 48, color: AppColors.textMutedColor(context)),
+          Icon(
+            Icons.inbox_outlined,
+            size: 48,
+            color: AppColors.textMutedColor(context),
+          ),
           const SizedBox(height: 12),
           Text(
             message,

@@ -41,11 +41,13 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   Future<List<CategoryModel>> getCategories() async {
     try {
       print(
-          '📂 [CategoryDataSource] Fetching categories from: ${ApiConstants.categories}');
+        '📂 [CategoryDataSource] Fetching categories from: ${ApiConstants.categories}',
+      );
       final response = await dio.get(ApiConstants.categories);
       print('📂 [CategoryDataSource] Response status: ${response.statusCode}');
       print(
-          '📂 [CategoryDataSource] Response data type: ${response.data.runtimeType}');
+        '📂 [CategoryDataSource] Response data type: ${response.data.runtimeType}',
+      );
       print('📂 [CategoryDataSource] Response data: ${response.data}');
 
       CategoryItems.parentCategoryItems.clear();

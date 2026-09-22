@@ -56,8 +56,11 @@ class DonatedBookCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const AspectRatio(
                             aspectRatio: 113 / 136,
-                            child: Icon(Icons.menu_book,
-                                color: Colors.grey, size: 40),
+                            child: Icon(
+                              Icons.menu_book,
+                              color: Colors.grey,
+                              size: 40,
+                            ),
                           ),
                         ),
                       )

@@ -36,8 +36,7 @@ class AddBookToLibraryDialog extends StatefulWidget {
   }
 
   @override
-  State<AddBookToLibraryDialog> createState() =>
-      _AddBookToLibraryDialogState();
+  State<AddBookToLibraryDialog> createState() => _AddBookToLibraryDialogState();
 }
 
 class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
@@ -112,8 +111,7 @@ class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
       final data = response.data;
       final list = data['variants'] ?? data['data'] ?? data;
       setState(() {
-        _variants =
-            list is List ? List<Map<String, dynamic>>.from(list) : [];
+        _variants = list is List ? List<Map<String, dynamic>>.from(list) : [];
         _loadingVariants = false;
       });
     } catch (e) {
@@ -130,8 +128,7 @@ class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
     if (_selectedVariant == null) return [];
     final formats = _selectedVariant!['formats'] as List<dynamic>? ?? [];
     return formats
-        .where((f) =>
-            f['type'] == 'hardcover' || f['type'] == 'paperback')
+        .where((f) => f['type'] == 'hardcover' || f['type'] == 'paperback')
         .map((f) => f['type'].toString())
         .toList();
   }
@@ -210,11 +207,14 @@ class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
             const SizedBox(height: 16),
 
             // Step 1: Search book
-            const Text('Search Book',
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary)),
+            const Text(
+              'Search Book',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
             const SizedBox(height: 6),
             TextField(
               controller: _searchCtrl,
@@ -246,8 +246,7 @@ class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
             if (_searching)
               const Padding(
                 padding: EdgeInsets.all(12),
-                child: Center(
-                    child: CircularProgressIndicator(strokeWidth: 2)),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
               ),
             if (_books.isNotEmpty)
               ConstrainedBox(
@@ -274,15 +273,17 @@ class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
             // Step 2: Select variant
             if (_selectedBook != null) ...[
               const SizedBox(height: 16),
-              const Text('Select Language Variant',
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary)),
+              const Text(
+                'Select Language Variant',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
               const SizedBox(height: 6),
               if (_loadingVariants)
-                const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2))
+                const Center(child: CircularProgressIndicator(strokeWidth: 2))
               else if (_variants.isEmpty)
                 const Text(
                   'No variants found. Create a variant for this book first.',
@@ -311,43 +312,51 @@ class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
             // Step 3: Select format
             if (_selectedVariant != null) ...[
               const SizedBox(height: 16),
-              const Text('Select Format',
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary)),
+              const Text(
+                'Select Format',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
               const SizedBox(height: 6),
-              Builder(builder: (context) {
-                final formats = _getPhysicalFormats();
-                if (formats.isEmpty) {
-                  return const Text(
-                    'No physical formats (hardcover/paperback) in this variant.',
-                    style: TextStyle(color: Colors.red, fontSize: 12),
-                  );
-                }
-                return Wrap(
-                  spacing: 8,
-                  children: formats.map((f) {
-                    return ChoiceChip(
-                      label: Text(f),
-                      selected: _selectedFormatType == f,
-                      onSelected: (_) {
-                        setState(() => _selectedFormatType = f);
-                      },
+              Builder(
+                builder: (context) {
+                  final formats = _getPhysicalFormats();
+                  if (formats.isEmpty) {
+                    return const Text(
+                      'No physical formats (hardcover/paperback) in this variant.',
+                      style: TextStyle(color: Colors.red, fontSize: 12),
                     );
-                  }).toList(),
-                );
-              }),
+                  }
+                  return Wrap(
+                    spacing: 8,
+                    children: formats.map((f) {
+                      return ChoiceChip(
+                        label: Text(f),
+                        selected: _selectedFormatType == f,
+                        onSelected: (_) {
+                          setState(() => _selectedFormatType = f);
+                        },
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
             ],
 
             // Step 4: Copies count
             if (_selectedFormatType != null) ...[
               const SizedBox(height: 16),
-              const Text('Number of Copies',
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary)),
+              const Text(
+                'Number of Copies',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
               const SizedBox(height: 6),
               TextField(
                 controller: _copiesCtrl,
@@ -355,7 +364,8 @@ class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
                 decoration: InputDecoration(
                   hintText: 'e.g. 10',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ],
@@ -365,10 +375,9 @@ class _AddBookToLibraryDialogState extends State<AddBookToLibraryDialog> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed:
-                    _selectedFormatType != null && !_submitting
-                        ? _submit
-                        : null,
+                onPressed: _selectedFormatType != null && !_submitting
+                    ? _submit
+                    : null,
                 child: _submitting
                     ? const SizedBox(
                         width: 20,

@@ -73,16 +73,16 @@ class _MyAppState extends State<MyApp> {
         if (!mounted) return;
         final ctx = _navigatorKey.currentContext;
         if (ctx != null) {
-          showSessionExpiredDialog(
-              ctx); // ignore: use_build_context_synchronously
+          // ignore: use_build_context_synchronously
+          showSessionExpiredDialog(ctx);
         } else {
           // Fallback: navigate after a short delay if context not ready
           Future.delayed(const Duration(milliseconds: 500), () {
             if (!mounted) return;
             final delayedCtx = _navigatorKey.currentContext;
             if (delayedCtx != null) {
-              showSessionExpiredDialog(
-                  delayedCtx); // ignore: use_build_context_synchronously
+              // ignore: use_build_context_synchronously
+              showSessionExpiredDialog(delayedCtx);
             }
           });
         }
@@ -116,124 +116,124 @@ class _MyAppState extends State<MyApp> {
       ],
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: ThemeNotifier.instance,
-        builder: (context, themeMode, _) =>
-            ValueListenableBuilder<Locale>(
+        builder: (context, themeMode, _) => ValueListenableBuilder<Locale>(
           valueListenable: LocaleNotifier.instance,
           builder: (context, locale, __) => MaterialApp(
-          title: 'Read Buddy',
-          debugShowCheckedModeBanner: false,
-          navigatorKey: _navigatorKey,
-          themeMode: themeMode,
-          locale: locale,
-          supportedLocales: LocaleNotifier.supportedLocales,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: AppColors.primary,
-              primary: AppColors.primary,
-              secondary: AppColors.secondary,
-              surface: AppColors.surface,
-              onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+            title: 'Read Buddy',
+            debugShowCheckedModeBanner: false,
+            navigatorKey: _navigatorKey,
+            themeMode: themeMode,
+            locale: locale,
+            supportedLocales: LocaleNotifier.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: AppColors.primary,
+                primary: AppColors.primary,
+                secondary: AppColors.secondary,
+                surface: AppColors.surface,
+                onPrimary: Colors.white,
+                onSurface: AppColors.textPrimary,
+              ),
+              scaffoldBackgroundColor: AppColors.background,
+              appBarTheme: const AppBarTheme(
+                backgroundColor: AppColors.surface,
+                foregroundColor: AppColors.textPrimary,
+                elevation: 0,
+              ),
+              textTheme: GoogleFonts.poppinsTextTheme(),
+              useMaterial3: true,
             ),
-            scaffoldBackgroundColor: AppColors.background,
-            appBarTheme: const AppBarTheme(
-              backgroundColor: AppColors.surface,
-              foregroundColor: AppColors.textPrimary,
-              elevation: 0,
-            ),
-            textTheme: GoogleFonts.poppinsTextTheme(),
-            useMaterial3: true,
-          ),
-          darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: AppColors.primary,
-              brightness: Brightness.dark,
-              primary: AppColors.primary,
-              secondary: AppColors.secondary,
-              surface: AppColors.surfaceDark,
-              onPrimary: Colors.black,
-              onSurface: AppColors.textPrimaryDark,
-            ),
-            scaffoldBackgroundColor: AppColors.backgroundDark,
-            appBarTheme: const AppBarTheme(
-              backgroundColor: AppColors.surfaceDark,
-              foregroundColor: AppColors.textPrimaryDark,
-              elevation: 0,
-            ),
-            cardTheme: CardThemeData(
-              color: AppColors.cardDark,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: AppColors.primary,
+                brightness: Brightness.dark,
+                primary: AppColors.primary,
+                secondary: AppColors.secondary,
+                surface: AppColors.surfaceDark,
+                onPrimary: Colors.black,
+                onSurface: AppColors.textPrimaryDark,
+              ),
+              scaffoldBackgroundColor: AppColors.backgroundDark,
+              appBarTheme: const AppBarTheme(
+                backgroundColor: AppColors.surfaceDark,
+                foregroundColor: AppColors.textPrimaryDark,
+                elevation: 0,
+              ),
+              cardTheme: CardThemeData(
+                color: AppColors.cardDark,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: AppColors.borderDark),
+                ),
+              ),
+              dividerTheme: const DividerThemeData(
+                color: AppColors.dividerDark,
+                thickness: 1,
+              ),
+              listTileTheme: const ListTileThemeData(
+                textColor: AppColors.textPrimaryDark,
+                iconColor: AppColors.textSecondaryDark,
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: AppColors.cardDark,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.borderDark),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.borderDark),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: AppColors.primary, width: 2),
+                ),
+                labelStyle: const TextStyle(color: AppColors.textSecondaryDark),
+                hintStyle: const TextStyle(color: AppColors.textMutedDark),
+              ),
+              chipTheme: ChipThemeData(
+                backgroundColor: AppColors.cardDark,
+                labelStyle: const TextStyle(color: AppColors.textPrimaryDark),
                 side: const BorderSide(color: AppColors.borderDark),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
+              textTheme:
+                  GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
+              useMaterial3: true,
             ),
-            dividerTheme: const DividerThemeData(
-              color: AppColors.dividerDark,
-              thickness: 1,
+            home: const ConnectivityWrapper(
+              child: SplashScreen(),
             ),
-            listTileTheme: const ListTileThemeData(
-              textColor: AppColors.textPrimaryDark,
-              iconColor: AppColors.textSecondaryDark,
-            ),
-            inputDecorationTheme: InputDecorationTheme(
-              filled: true,
-              fillColor: AppColors.cardDark,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.borderDark),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.borderDark),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: AppColors.primary, width: 2),
-              ),
-              labelStyle: const TextStyle(color: AppColors.textSecondaryDark),
-              hintStyle: const TextStyle(color: AppColors.textMutedDark),
-            ),
-            chipTheme: ChipThemeData(
-              backgroundColor: AppColors.cardDark,
-              labelStyle: const TextStyle(color: AppColors.textPrimaryDark),
-              side: const BorderSide(color: AppColors.borderDark),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
-            useMaterial3: true,
-          ),
-          home: const ConnectivityWrapper(
-            child: SplashScreen(),
-          ),
-          onGenerateRoute: AppRouter.generateRoute,
-          builder: (context, child) {
-            return Material(
-              child: Stack(
-                children: [
-                  Positioned.fill(child: child ?? const SizedBox.shrink()),
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: SafeArea(
-                      top: false,
-                      child: MiniAudioPlayer(),
+            onGenerateRoute: AppRouter.generateRoute,
+            builder: (context, child) {
+              return Material(
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: child ?? const SizedBox.shrink()),
+                    const Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: SafeArea(
+                        top: false,
+                        child: MiniAudioPlayer(),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),

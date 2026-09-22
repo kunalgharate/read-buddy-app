@@ -35,7 +35,9 @@ abstract class VariantRepository {
   /// Updates a variant (re-submits formats via create/merge).
   /// The backend has no PATCH — this uses POST which auto-merges.
   Future<BookVariantEntity> updateVariant(
-      String variantId, Map<String, dynamic> data);
+    String variantId,
+    Map<String, dynamic> data,
+  );
 
   /// Deletes an entire variant.
   /// DELETE /api/book-variants/:variantId

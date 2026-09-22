@@ -147,13 +147,18 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.error_outline,
-                                size: 64, color: Colors.red[300]),
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red[300],
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               _errorMessage!,
                               style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 15),
+                                color: Colors.grey[600],
+                                fontSize: 15,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
@@ -174,13 +179,18 @@ class _SearchScreenState extends State<SearchScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.search_off,
-                                    size: 64, color: Colors.grey[300]),
+                                Icon(
+                                  Icons.search_off,
+                                  size: 64,
+                                  color: Colors.grey[300],
+                                ),
                                 const SizedBox(height: 12),
                                 Text(
                                   'No books found for "${_searchController.text}"',
                                   style: TextStyle(
-                                      color: Colors.grey[500], fontSize: 15),
+                                    color: Colors.grey[500],
+                                    fontSize: 15,
+                                  ),
                                 ),
                               ],
                             ),

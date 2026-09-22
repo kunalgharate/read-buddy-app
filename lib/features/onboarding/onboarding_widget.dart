@@ -44,7 +44,9 @@ class OnboardingWidget extends StatelessWidget {
                   description,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: isLandscape ? 14 : 16, color: Colors.grey[800]),
+                    fontSize: isLandscape ? 14 : 16,
+                    color: Colors.grey[800],
+                  ),
                 ),
               ],
             ),

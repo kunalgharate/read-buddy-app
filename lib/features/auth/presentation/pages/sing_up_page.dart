@@ -110,8 +110,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 context,
                 message: 'Registration successful! Please verify your email.',
               );
-              Navigator.pushNamed(context, '/verification',
-                  arguments: state.email);
+              Navigator.pushNamed(
+                context,
+                '/verification',
+                arguments: state.email,
+              );
             }
 
             // Only react to errors this screen originated; the OTP screen
@@ -169,7 +172,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const Text(
                         'Name',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
@@ -177,7 +182,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         validator: _validateName,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
-                              RegExp(r'[\p{L}\s]', unicode: true)),
+                            RegExp(r'[\p{L}\s]', unicode: true),
+                          ),
                         ],
                         decoration: InputDecoration(
                           filled: true,
@@ -195,7 +201,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const Text(
                         'Email',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
@@ -218,7 +226,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const Text(
                         'Password',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
@@ -254,7 +264,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const Text(
                         'Phone Number',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
@@ -294,7 +306,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const Text(
                             'Already have an account? ',
                             style: TextStyle(
-                                color: AppColors.textHint, fontSize: 14),
+                              color: AppColors.textHint,
+                              fontSize: 14,
+                            ),
                           ),
                           TextButton(
                             onPressed: _navigateToSignIn,

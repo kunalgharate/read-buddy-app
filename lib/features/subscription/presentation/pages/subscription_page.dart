@@ -53,8 +53,11 @@ class SubscriptionPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.workspace_premium,
-                      color: AppColors.primary, size: 48),
+                  const Icon(
+                    Icons.workspace_premium,
+                    color: AppColors.primary,
+                    size: 48,
+                  ),
                   const SizedBox(height: 12),
                   const Text(
                     'Unlock the Full Experience',
@@ -218,8 +221,11 @@ class _PlanCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.check_circle,
-                      color: AppColors.success, size: 18),
+                  const Icon(
+                    Icons.check_circle,
+                    color: AppColors.success,
+                    size: 18,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(

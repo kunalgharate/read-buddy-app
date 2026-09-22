@@ -17,6 +17,7 @@ linter:
     prefer_const_constructors: true
     prefer_const_declarations: true
     avoid_unnecessary_containers: true
+    require_trailing_commas: true
 
 dart_code_metrics:
   metrics:

@@ -54,7 +54,8 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
             TextField(
               controller: labelCtrl,
               decoration: const InputDecoration(
-                  labelText: 'Label (Home, Office, etc.)'),
+                labelText: 'Label (Home, Office, etc.)',
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -66,11 +67,13 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Save')),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -82,13 +85,15 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
       final dio = getIt<Dio>();
       final body = {
         'label': labelCtrl.text.trim(),
-        'address': addressCtrl.text.trim()
+        'address': addressCtrl.text.trim(),
       };
       if (existing == null) {
         await dio.post('${ApiConstants.baseUrl}/addresses', data: body);
       } else {
-        await dio.put('${ApiConstants.baseUrl}/addresses/${existing['_id']}',
-            data: body);
+        await dio.put(
+          '${ApiConstants.baseUrl}/addresses/${existing['_id']}',
+          data: body,
+        );
       }
       _fetchAddresses();
     } catch (e) {
@@ -108,8 +113,9 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
         content: const Text('Are you sure you want to remove this address?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -154,11 +160,15 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                     children: [
                       Icon(Icons.location_off, size: 64, color: Colors.grey),
                       SizedBox(height: 12),
-                      Text('No addresses saved',
-                          style: TextStyle(color: Colors.grey, fontSize: 16)),
+                      Text(
+                        'No addresses saved',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
                       SizedBox(height: 4),
-                      Text('Tap + to add your delivery address',
-                          style: TextStyle(color: Colors.grey)),
+                      Text(
+                        'Tap + to add your delivery address',
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ],
                   ),
                 )
@@ -171,11 +181,15 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
                         leading: const Icon(Icons.location_on_outlined),
-                        title: Text(addr['label'] ?? 'Address',
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: Text(addr['address'] ?? '',
-                            maxLines: 2, overflow: TextOverflow.ellipsis),
+                        title: Text(
+                          addr['label'] ?? 'Address',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          addr['address'] ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         trailing: PopupMenuButton<String>(
                           onSelected: (val) {
                             if (val == 'edit') {
@@ -187,9 +201,13 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                           },
                           itemBuilder: (_) => [
                             const PopupMenuItem(
-                                value: 'edit', child: Text('Edit')),
+                              value: 'edit',
+                              child: Text('Edit'),
+                            ),
                             const PopupMenuItem(
-                                value: 'delete', child: Text('Delete')),
+                              value: 'delete',
+                              child: Text('Delete'),
+                            ),
                           ],
                         ),
                       ),

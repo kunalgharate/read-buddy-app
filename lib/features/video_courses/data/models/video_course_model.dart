@@ -111,9 +111,11 @@ class VideoCourseModel extends VideoCourseEntity {
         'isEnrolled': isEnrolled,
         'progress': progress,
         'lessons': lessons
-            .map((e) => e is VideoLessonModel
-                ? e.toJson()
-                : VideoLessonModel.fromEntity(e).toJson())
+            .map(
+              (e) => e is VideoLessonModel
+                  ? e.toJson()
+                  : VideoLessonModel.fromEntity(e).toJson(),
+            )
             .toList(),
       };
 }

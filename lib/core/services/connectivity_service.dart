@@ -114,7 +114,8 @@ class ConnectivityService {
         );
         if (hasAdapter) {
           print(
-              '🌐 ConnectivityService: DNS failed but network adapter present — assuming connected (emulator workaround)');
+            '🌐 ConnectivityService: DNS failed but network adapter present — assuming connected (emulator workaround)',
+          );
           return true;
         }
       } catch (_) {}
