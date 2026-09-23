@@ -5,6 +5,7 @@ class AppUser {
   final String password;
   final String role;
   final bool isPrime;
+  final DateTime? membershipExpires;
   final int finesDue;
   final bool isEmailVerified;
   final bool onboardingCompleted;
@@ -27,6 +28,7 @@ class AppUser {
     required this.password,
     required this.role,
     required this.isPrime,
+    this.membershipExpires,
     required this.finesDue,
     required this.isEmailVerified,
     required this.onboardingCompleted,
@@ -55,6 +57,9 @@ class AppUser {
       password: u['password']?.toString() ?? '',
       role: u['role']?.toString() ?? 'user',
       isPrime: u['isPrime'] as bool? ?? false,
+      membershipExpires: u['membershipExpires'] != null
+          ? DateTime.tryParse(u['membershipExpires'].toString())
+          : null,
       finesDue: (u['finesDue'] as num?)?.toInt() ?? 0,
       isEmailVerified: u['isEmailVerified'] as bool? ?? false,
       onboardingCompleted: u['onboardingCompleted'] as bool? ?? false,
@@ -86,6 +91,7 @@ class AppUser {
         'email': email,
         'role': role,
         'isPrime': isPrime,
+        'membershipExpires': membershipExpires?.toIso8601String(),
         'finesDue': finesDue,
         'isEmailVerified': isEmailVerified,
         'onboardingCompleted': onboardingCompleted,

@@ -147,6 +147,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       userAvatar: u.userAvatar,
       role: u.role,
       isPrime: u.isPrime,
+      membershipExpires: u.membershipExpires,
       finesDue: u.finesDue,
       isEmailVerified: u.isEmailVerified,
       onboardingCompleted: u.onboardingCompleted,

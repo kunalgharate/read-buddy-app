@@ -164,15 +164,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             secondary: const Icon(Icons.notifications_outlined),
           ),
           const Divider(),
-          _SectionHeader(title: l10n.addresses),
-          ListTile(
-            leading: const Icon(Icons.location_on_outlined),
-            title: Text(l10n.manageAddresses),
-            subtitle: Text(l10n.manageAddressesSubtitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.pushNamed(context, '/addresses'),
-          ),
-          const Divider(),
           _SectionHeader(title: l10n.account),
           ListTile(
             leading: const Icon(Icons.security_outlined),
