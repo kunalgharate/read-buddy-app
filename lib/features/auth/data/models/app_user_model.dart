@@ -9,6 +9,7 @@ class AppUserModel extends AppUser {
     required super.password,
     required super.role,
     required super.isPrime,
+    super.membershipExpires,
     required super.finesDue,
     required super.isEmailVerified,
     required super.onboardingCompleted, // ← ADDED
@@ -43,6 +44,9 @@ class AppUserModel extends AppUser {
       password: (user['password'] ?? '').toString(),
       role: (user['role'] ?? user['userRole'] ?? 'user').toString(),
       isPrime: user['isPrime'] as bool? ?? false,
+      membershipExpires: user['membershipExpires'] != null
+          ? DateTime.tryParse(user['membershipExpires'].toString())
+          : null,
       finesDue: (user['finesDue'] as num?)?.toInt() ?? 0,
       isEmailVerified: user['isEmailVerified'] as bool? ?? false,
       onboardingCompleted: user['onboardingCompleted'] as bool? ?? false,
@@ -73,6 +77,7 @@ class AppUserModel extends AppUser {
         'password': password,
         'role': role,
         'isPrime': isPrime,
+        'membershipExpires': membershipExpires?.toIso8601String(),
         'finesDue': finesDue,
         'isEmailVerified': isEmailVerified,
         'onboardingCompleted': onboardingCompleted, // ← ADDED
