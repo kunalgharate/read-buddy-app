@@ -7,6 +7,7 @@ class ProfileUser {
   final String? userAvatar; // NEW
   final String role;
   final bool isPrime;
+  final DateTime? membershipExpires;
   final int finesDue;
   final bool isEmailVerified;
   final bool onboardingCompleted;
@@ -24,6 +25,7 @@ class ProfileUser {
     this.userAvatar, // NEW
     required this.role,
     required this.isPrime,
+    this.membershipExpires,
     required this.finesDue,
     required this.isEmailVerified,
     required this.onboardingCompleted,
@@ -43,6 +45,7 @@ class ProfileUser {
       userAvatar: userAvatar ?? this.userAvatar,
       role: role,
       isPrime: isPrime ?? this.isPrime,
+      membershipExpires: membershipExpires,
       finesDue: finesDue,
       isEmailVerified: isEmailVerified,
       onboardingCompleted: onboardingCompleted,

@@ -9,6 +9,7 @@ class ProfileUserModel extends ProfileUser {
     super.picture,
     required super.role,
     required super.isPrime,
+    super.membershipExpires,
     required super.finesDue,
     super.userAvatar,
     required super.isEmailVerified,
@@ -29,6 +30,9 @@ class ProfileUserModel extends ProfileUser {
       picture: user['picture'],
       role: user['userRole'] ?? user['role'] ?? 'user',
       isPrime: user['isPrime'] ?? false,
+      membershipExpires: user['membershipExpires'] != null
+          ? DateTime.tryParse(user['membershipExpires'].toString())
+          : null,
       finesDue: user['finesDue'] ?? 0,
       userAvatar: user['userAvatar'],
       isEmailVerified: user['isEmailVerified'] ?? false,

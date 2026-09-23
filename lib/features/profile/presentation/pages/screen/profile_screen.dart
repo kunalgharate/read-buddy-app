@@ -411,44 +411,129 @@ class _ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildPrimeMembershipCard() {
+  Widget _buildPrimeMembershipCard(ProfileUser user) {
+    String fmt(DateTime? d) {
+      if (d == null) return 'N/A';
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      final dd = d.day.toString().padLeft(2, '0');
+      return '$dd ${months[d.month - 1]} ${d.year}';
+    }
+
+    final expires = user.membershipExpires;
+    // Membership is granted for 1 year; activation = expiry - 365 days.
+    final activated = expires?.subtract(const Duration(days: 365));
+
+    const amberText = Color(0xFF92400E);
+    const amberValue = Color(0xFF78350F);
+    const amberBorder = Color(0xFFFDE68A);
+
+    Widget row(String label, String value, {bool border = true}) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          border: border
+              ? const Border(bottom: BorderSide(color: amberBorder))
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: amberText,
+              ),
+            ),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: amberValue,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF059669), Color(0xFF2CE07F)],
+          colors: [Color(0xFFFFFBEB), Color(0xFFFEF9C3)],
         ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: amberBorder),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                '\uD83D\uDC51',
-                style: TextStyle(fontSize: 24),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'You are a Prime Member',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+          // Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: amberBorder)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFDE68A),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.workspace_premium_rounded,
+                    color: Color(0xFFD97706),
+                    size: 22,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'You are a Prime Member 👑',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: amberText,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Enjoy premium benefits for 1 year',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFB45309),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          SizedBox(height: 4),
-          Text(
-            'Enjoy premium benefits',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
-          ),
-          SizedBox(height: 16),
+          row('Activated On', fmt(activated)),
+          row('Expires On', fmt(expires), border: false),
         ],
       ),
     );
@@ -813,7 +898,7 @@ class _ProfileView extends StatelessWidget {
           if (user.isPrime) ...[
             _buildPrimeBadge(),
             const SizedBox(height: 16),
-            _buildPrimeMembershipCard(),
+            _buildPrimeMembershipCard(user),
           ],
           const SizedBox(height: 32),
           _buildInfoSection(context, user),
