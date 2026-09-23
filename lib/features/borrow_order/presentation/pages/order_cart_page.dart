@@ -6,6 +6,8 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../library/domain/entities/library_entity.dart';
 import '../../../library/domain/usecases/library_usecases.dart';
+import '../../../address/domain/entities/address_entity.dart';
+import '../../../address/presentation/widgets/address_selector_widget.dart';
 import '../../domain/entities/borrow_order_entity.dart';
 import '../bloc/borrow_order_bloc.dart';
 import '../widgets/order_book_card.dart';
@@ -28,7 +30,7 @@ class _OrderCartView extends StatefulWidget {
 
 class _OrderCartViewState extends State<_OrderCartView> {
   FulfillmentMethod? _selectedMethod;
-  final _addressController = TextEditingController();
+  AddressEntity? _selectedAddress;
   LibraryEntity? _selectedLibrary;
   Completer<void>? _refreshCompleter;
 
@@ -40,7 +42,6 @@ class _OrderCartViewState extends State<_OrderCartView> {
 
   @override
   void dispose() {
-    _addressController.dispose();
     super.dispose();
   }
 
@@ -198,20 +199,11 @@ class _OrderCartViewState extends State<_OrderCartView> {
           ),
         ),
         const SizedBox(height: 12),
-        TextField(
-          controller: _addressController,
-          maxLines: 3,
-          decoration: InputDecoration(
-            labelText: 'Delivery Address',
-            hintText: 'Enter your full delivery address',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primary),
-            ),
-          ),
+        AddressSelectorWidget(
+          selectedAddress: _selectedAddress,
+          onAddressSelected: (addr) {
+            setState(() => _selectedAddress = addr);
+          },
         ),
       ],
     );
@@ -222,7 +214,7 @@ class _OrderCartViewState extends State<_OrderCartView> {
         order.bookRequests.isNotEmpty &&
         order.totalBookValue <= order.budgetLimit &&
         (_selectedMethod == FulfillmentMethod.DELIVERY
-            ? _addressController.text.trim().isNotEmpty
+            ? _selectedAddress != null
             : _selectedLibrary != null);
 
     return Container(
@@ -295,7 +287,7 @@ class _OrderCartViewState extends State<_OrderCartView> {
                                 fulfillmentMethod: _selectedMethod!,
                                 address: _selectedMethod ==
                                         FulfillmentMethod.DELIVERY
-                                    ? _addressController.text.trim()
+                                    ? _selectedAddress?.fullAddress ?? ''
                                     : null,
                                 libraryId:
                                     _selectedMethod == FulfillmentMethod.PICKUP
