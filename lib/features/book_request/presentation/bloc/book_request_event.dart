@@ -10,6 +10,7 @@ class LoadBookDetail extends BookRequestEvent {
 class CreateBookRequest extends BookRequestEvent {
   final String bookId;
   final String fulfillmentMethod;
+  final String? libraryId;
   final String? deliveryName;
   final String? deliveryPhone;
   final String? deliveryAddress;
@@ -19,6 +20,7 @@ class CreateBookRequest extends BookRequestEvent {
   CreateBookRequest(
     this.bookId, {
     this.fulfillmentMethod = 'pickup',
+    this.libraryId,
     this.deliveryName,
     this.deliveryPhone,
     this.deliveryAddress,
@@ -27,7 +29,14 @@ class CreateBookRequest extends BookRequestEvent {
   });
 }
 
-class LoadLibraryDetails extends BookRequestEvent {}
+class LoadLibraryDetails extends BookRequestEvent {
+  /// The library saved on the request (if any) — used to show the exact
+  /// pickup library instead of defaulting to the first/nearest one.
+  final String? preferredLibraryId;
+  final double? userLat;
+  final double? userLng;
+  LoadLibraryDetails({this.preferredLibraryId, this.userLat, this.userLng});
+}
 
 class SchedulePickup extends BookRequestEvent {
   final PickupDetailsEntity details;

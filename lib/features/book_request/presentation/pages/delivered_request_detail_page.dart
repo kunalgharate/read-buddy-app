@@ -130,8 +130,11 @@ class _DeliveredRequestDetailPageState
 
             // Pickup details
             if (widget.request.pickupUserName != null ||
-                widget.request.pickupAddress != null) ...[
+                widget.request.pickupAddress != null ||
+                widget.request.libraryName != null) ...[
               const SizedBox(height: 4),
+              if (widget.request.libraryName != null)
+                _InfoRow('Pickup Library', widget.request.libraryName!),
               if (widget.request.pickupUserName != null)
                 _InfoRow('Pickup Name', widget.request.pickupUserName!),
               if (widget.request.pickupPhone != null)

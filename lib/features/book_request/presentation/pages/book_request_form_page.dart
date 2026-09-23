@@ -58,7 +58,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
       // Filter and sort by distance if location available
       final position = await LocationService.instance.getCurrentLocation();
       if (position != null && libraries.isNotEmpty) {
-        // Only show libraries within 25 km
+        // Only show libraries within 15 km
         libraries = libraries.where((lib) {
           if (lib.address.latitude == 0 && lib.address.longitude == 0) {
             return false;
@@ -69,7 +69,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
             lib.address.latitude,
             lib.address.longitude,
           );
-          return km <= 25;
+          return km <= 15;
         }).toList();
 
         // Sort nearest first
@@ -222,6 +222,7 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
           CreateBookRequest(
             widget.bookId,
             fulfillmentMethod: _fulfillmentMethod,
+            libraryId: !isDropoff ? _selectedLibrary?.id : null,
             deliveryName: isDropoff ? _nameController.text.trim() : null,
             deliveryPhone: isDropoff ? _phoneController.text.trim() : null,
             deliveryAddress: isDropoff ? _addressController.text.trim() : null,

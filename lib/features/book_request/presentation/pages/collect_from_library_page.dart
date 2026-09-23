@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
@@ -28,8 +29,16 @@ class CollectFromLibraryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pos = LocationService.instance.lastPosition;
     return BlocProvider(
-      create: (_) => getIt<BookRequestBloc>()..add(LoadLibraryDetails()),
+      create: (_) => getIt<BookRequestBloc>()
+        ..add(
+          LoadLibraryDetails(
+            preferredLibraryId: request.libraryId,
+            userLat: pos?.latitude,
+            userLng: pos?.longitude,
+          ),
+        ),
       child: _CollectFromLibraryView(
         request: request,
         initialTab: initialTab,

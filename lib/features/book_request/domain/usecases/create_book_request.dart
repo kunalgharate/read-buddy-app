@@ -8,6 +8,7 @@ class CreateBookRequestUsecase {
   Future<String> call(
     String bookId,
     String fulfillmentMethod, {
+    String? libraryId,
     String? deliveryName,
     String? deliveryPhone,
     String? deliveryAddress,
@@ -17,6 +18,7 @@ class CreateBookRequestUsecase {
       repository.createBookRequest(
         bookId,
         fulfillmentMethod,
+        libraryId: libraryId,
         deliveryName: deliveryName,
         deliveryPhone: deliveryPhone,
         deliveryAddress: deliveryAddress,

@@ -6,5 +6,14 @@ class GetLibraryDetailsUsecase {
 
   GetLibraryDetailsUsecase(this.repository);
 
-  Future<LibraryEntity> call() => repository.getLibraryDetails();
+  Future<LibraryEntity> call({
+    String? preferredLibraryId,
+    double? userLat,
+    double? userLng,
+  }) =>
+      repository.getLibraryDetails(
+        preferredLibraryId: preferredLibraryId,
+        userLat: userLat,
+        userLng: userLng,
+      );
 }

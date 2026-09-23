@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_constants.dart';
+import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../models/book_detail_model.dart';
 import '../models/book_request_model.dart';
@@ -13,6 +14,7 @@ abstract class BookRequestRemoteDataSource {
   Future<String> createBookRequest(
     String bookId,
     String fulfillmentMethod, {
+    String? libraryId,
     String? deliveryName,
     String? deliveryPhone,
     String? deliveryAddress,
@@ -25,7 +27,11 @@ abstract class BookRequestRemoteDataSource {
   Future<void> cancelBookRequest(String id, String reason);
   Future<void> acceptBookRequest(String id, {String? notes});
   Future<void> declineBookRequest(String id, {String reason});
-  Future<LibraryEntity> getLibraryDetails();
+  Future<LibraryEntity> getLibraryDetails({
+    String? preferredLibraryId,
+    double? userLat,
+    double? userLng,
+  });
   Future<BookRequestModel> schedulePickup(PickupDetailsEntity details);
   Future<BookRequestModel> getRequestDetails(String id);
   Future<void> updateRequestStatus(String id, String status);
@@ -97,6 +103,7 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   Future<String> createBookRequest(
     String bookId,
     String fulfillmentMethod, {
+    String? libraryId,
     String? deliveryName,
     String? deliveryPhone,
     String? deliveryAddress,
@@ -132,6 +139,12 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
         'bookId': bookId,
         'fulfillmentMethod': method,
       };
+      // Persist the selected pickup library so it can be shown back to the
+      // user in the request detail (Pickup Details) instead of defaulting to
+      // some other/first library.
+      if (method == 'PICKUP' && libraryId != null && libraryId.isNotEmpty) {
+        body['libraryId'] = libraryId;
+      }
       // Backend stores `address` only for DELIVERY; forward the user's
       // delivery address so it is not silently dropped.
       if (method == 'DELIVERY' && deliveryAddress != null) {
@@ -285,19 +298,71 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<LibraryEntity> getLibraryDetails() async {
+  Future<LibraryEntity> getLibraryDetails({
+    String? preferredLibraryId,
+    double? userLat,
+    double? userLng,
+  }) async {
     try {
       final response = await dio.get(ApiConstants.libraryDetails);
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load library details');
       }
       final decoded = response.data;
-      final libraryData = decoded is Map
-          ? (decoded['data'] is Map
-              ? Map<String, dynamic>.from(decoded['data'])
-              : Map<String, dynamic>.from(decoded))
-          : <String, dynamic>{};
-      return LibraryModel.fromJson(libraryData);
+
+      // The endpoint returns { success, libraries: [...] }. Older callers
+      // wrongly parsed the whole envelope as a single library, which produced
+      // a blank/incorrect library card. Parse the list properly, then pick the
+      // library that matches the request's saved libraryId; fall back to the
+      // nearest (when coordinates are provided) and finally the first.
+      final rawList = decoded is Map && decoded['libraries'] is List
+          ? decoded['libraries'] as List
+          : (decoded is Map && decoded['data'] is List
+              ? decoded['data'] as List
+              : const []);
+
+      final libraries = rawList
+          .whereType<Map>()
+          .map((e) => LibraryModel.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+
+      if (libraries.isEmpty) {
+        throw Exception('No libraries available');
+      }
+
+      // 1. Prefer the exact library saved on the request.
+      if (preferredLibraryId != null && preferredLibraryId.isNotEmpty) {
+        for (final lib in libraries) {
+          if (lib.id == preferredLibraryId) return lib;
+        }
+      }
+
+      // 2. Otherwise pick the nearest to the user (if location known),
+      //    respecting the 15 km service radius. Libraries farther than 15 km
+      //    are not surfaced for pickup/return drop-off.
+      if (userLat != null && userLng != null) {
+        LibraryEntity? nearest;
+        double? nearestKm;
+        for (final lib in libraries) {
+          if (lib.address.latitude == 0 && lib.address.longitude == 0) {
+            continue;
+          }
+          final km = LocationService.instance.calculateDistanceKm(
+            userLat,
+            userLng,
+            lib.address.latitude,
+            lib.address.longitude,
+          );
+          if (km <= 15.0 && (nearestKm == null || km < nearestKm)) {
+            nearestKm = km;
+            nearest = lib;
+          }
+        }
+        if (nearest != null) return nearest;
+      }
+
+      // 3. Final fallback — first library.
+      return libraries.first;
     } catch (e) {
       rethrow;
     }
