@@ -359,9 +359,14 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
           }
         }
         if (nearest != null) return nearest;
+
+        // Coordinates are known but no library falls within the 15 km service
+        // radius. Do NOT surface a distant library — signal callers so they can
+        // render a "no nearby library" empty state.
+        throw Exception('NO_NEARBY_LIBRARY');
       }
 
-      // 3. Final fallback — first library.
+      // 3. Final fallback (only when location is unknown) — first library.
       return libraries.first;
     } catch (e) {
       rethrow;

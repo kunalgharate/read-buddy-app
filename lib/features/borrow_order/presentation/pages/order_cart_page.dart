@@ -134,7 +134,14 @@ class _OrderCartViewState extends State<_OrderCartView> {
                 _FulfillmentSelector(
                   selected: _selectedMethod,
                   onChanged: (method) {
-                    setState(() => _selectedMethod = method);
+                    setState(() {
+                      _selectedMethod = method;
+                      // Drop any stale pickup library when leaving PICKUP so a
+                      // previously chosen id can't be submitted with DELIVERY.
+                      if (method != FulfillmentMethod.PICKUP) {
+                        _selectedLibrary = null;
+                      }
+                    });
                   },
                 ),
                 const SizedBox(height: 16),
@@ -638,12 +645,28 @@ class _PickupLibrarySelectorState extends State<_PickupLibrarySelector> {
   bool _loading = true;
   String? _error;
   bool _locationUnavailable = false;
+  bool _hadLibraries = false;
   List<_LibraryWithDistance> _libraries = [];
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  // Reconciles the parent's selection against the current in-range list:
+  // keep the current selection only if still in range, otherwise select the
+  // nearest available, else clear it (so the parent drops any stale id).
+  void _reconcileSelection(List<_LibraryWithDistance> within) {
+    final currentId = widget.selectedLibrary?.id;
+    final stillValid =
+        currentId != null && within.any((l) => l.library.id == currentId);
+    if (stillValid) return;
+    if (within.isNotEmpty) {
+      widget.onSelected(within.first.library);
+    } else {
+      widget.onSelected(null);
+    }
   }
 
   Future<void> _load() async {
@@ -654,16 +677,21 @@ class _PickupLibrarySelectorState extends State<_PickupLibrarySelector> {
     });
     try {
       final all = await getIt<GetLibraryDetails>()();
+      if (!mounted) return;
       final position = await LocationService.instance.getCurrentLocation();
+      if (!mounted) return;
 
       if (position == null) {
         // Graceful degradation: no location -> show all (no distance), let the
         // user pick manually. Do NOT auto-select.
+        final listed = all
+            .map((l) => _LibraryWithDistance(library: l, distanceKm: null))
+            .toList();
+        _reconcileSelection(listed);
         setState(() {
           _locationUnavailable = true;
-          _libraries = all
-              .map((l) => _LibraryWithDistance(library: l, distanceKm: null))
-              .toList();
+          _hadLibraries = all.isNotEmpty;
+          _libraries = listed;
           _loading = false;
         });
         return;
@@ -684,16 +712,16 @@ class _PickupLibrarySelectorState extends State<_PickupLibrarySelector> {
       }
       within.sort((a, b) => a.distanceKm!.compareTo(b.distanceKm!));
 
+      _reconcileSelection(within);
+
       setState(() {
+        _hadLibraries = all.isNotEmpty;
         _libraries = within;
         _loading = false;
       });
-
-      // Auto-select the nearest library if nothing is chosen yet.
-      if (within.isNotEmpty && widget.selectedLibrary == null) {
-        widget.onSelected(within.first.library);
-      }
     } catch (e) {
+      if (!mounted) return;
+      widget.onSelected(null);
       setState(() {
         _error = 'Could not load libraries. Please try again.';
         _loading = false;
@@ -724,6 +752,18 @@ class _PickupLibrarySelectorState extends State<_PickupLibrarySelector> {
     }
 
     if (_libraries.isEmpty) {
+      // Distinguish the three empty cases so the message is accurate.
+      final String message;
+      if (_locationUnavailable) {
+        message = 'Location unavailable — enable location to find nearby '
+            'libraries, or try Delivery instead.';
+      } else if (_hadLibraries) {
+        message = 'No libraries within 15 km of your location. '
+            'Try Delivery instead.';
+      } else {
+        message = 'No libraries are available right now. '
+            'Try Delivery instead.';
+      }
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -731,15 +771,17 @@ class _PickupLibrarySelectorState extends State<_PickupLibrarySelector> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.location_off, color: Colors.orange, size: 22),
-            SizedBox(width: 10),
+            const Icon(Icons.location_off, color: Colors.orange, size: 22),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'No libraries within 15 km of your location. '
-                'Try Delivery instead.',
-                style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                message,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           ],

@@ -29,20 +29,32 @@ class CollectFromLibraryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pos = LocationService.instance.lastPosition;
     return BlocProvider(
-      create: (_) => getIt<BookRequestBloc>()
-        ..add(
-          LoadLibraryDetails(
-            preferredLibraryId: request.libraryId,
-            userLat: pos?.latitude,
-            userLng: pos?.longitude,
-          ),
-        ),
+      create: (_) {
+        final bloc = getIt<BookRequestBloc>();
+        _dispatchLoad(bloc);
+        return bloc;
+      },
       child: _CollectFromLibraryView(
         request: request,
         initialTab: initialTab,
         isReturn: isReturn,
+      ),
+    );
+  }
+
+  // Resolves the user's location (cached fast-path, otherwise a fresh fix)
+  // before dispatching LoadLibraryDetails, so nearest-within-15km selection
+  // is not skipped on a cold start. Guards against a closed bloc.
+  Future<void> _dispatchLoad(BookRequestBloc bloc) async {
+    var pos = LocationService.instance.lastPosition;
+    pos ??= await LocationService.instance.getCurrentLocation();
+    if (bloc.isClosed) return;
+    bloc.add(
+      LoadLibraryDetails(
+        preferredLibraryId: request.libraryId,
+        userLat: pos?.latitude,
+        userLng: pos?.longitude,
       ),
     );
   }

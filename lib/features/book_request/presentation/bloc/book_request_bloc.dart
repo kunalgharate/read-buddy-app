@@ -92,7 +92,15 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
       );
       emit(LibraryDetailsLoaded(library));
     } catch (e) {
-      emit(LibraryDetailsError('Failed to load library details: $e'));
+      if (e.toString().contains('NO_NEARBY_LIBRARY')) {
+        emit(
+          LibraryDetailsError(
+            'No library found within 15 km of your location.',
+          ),
+        );
+      } else {
+        emit(LibraryDetailsError('Failed to load library details: $e'));
+      }
     }
   }
 

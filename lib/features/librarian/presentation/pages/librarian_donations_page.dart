@@ -137,6 +137,7 @@ class _DonationCard extends StatelessWidget {
       case 'approved':
       case 'accepted':
       case 'received':
+      case 'completed':
         statusColor = Colors.green;
         break;
       case 'rejected':
@@ -217,20 +218,24 @@ class _DonationCard extends StatelessWidget {
                     ),
                     child: const Text('Reject'),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<LibrarianBloc>().add(
-                            UpdateDonationStatusEvent(donationId, 'approved'),
-                          );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                  // Approve belongs to the PICKUP flow only. A DROP_OFF
+                  // donation is completed in one step via 'Mark as Received'.
+                  if (isPickup) ...[
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<LibrarianBloc>().add(
+                              UpdateDonationStatusEvent(donationId, 'approved'),
+                            );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      child: const Text('Approve'),
                     ),
-                    child: const Text('Approve'),
-                  ),
+                  ],
                 ],
               ),
             ],
