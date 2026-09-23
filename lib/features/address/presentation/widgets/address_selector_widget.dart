@@ -63,7 +63,12 @@ class _AddressSelectorView extends StatelessWidget {
                   const Text('No saved addresses'),
                   const SizedBox(height: 8),
                   TextButton.icon(
-                    onPressed: () => Navigator.pushNamed(context, '/addresses'),
+                    onPressed: () async {
+                      await Navigator.pushNamed(context, '/addresses');
+                      if (context.mounted) {
+                        context.read<AddressBloc>().add(LoadAddresses());
+                      }
+                    },
                     icon: const Icon(Icons.add),
                     label: const Text('Add Address'),
                   ),
@@ -98,7 +103,12 @@ class _AddressSelectorView extends StatelessWidget {
                   ),
                   const Spacer(),
                   TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/addresses'),
+                    onPressed: () async {
+                      await Navigator.pushNamed(context, '/addresses');
+                      if (context.mounted) {
+                        context.read<AddressBloc>().add(LoadAddresses());
+                      }
+                    },
                     child: const Text('Manage'),
                   ),
                 ],

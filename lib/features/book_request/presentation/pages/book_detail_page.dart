@@ -534,24 +534,25 @@ class _CoverImageSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        // Centered, bounded cover.
+        // Centered, bounded cover. Shadow lives on the outer (unclipped)
+        // container; the image itself is clipped to the rounded corners.
         Center(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: coverWidth,
-              height: coverHeight,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE0E0E0)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+          child: Container(
+            width: coverWidth,
+            height: coverHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE0E0E0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
               child: cover(),
             ),
           ),
@@ -935,6 +936,15 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
   }
 
   BookFormatEntity? _borrowableFormat(BookVariantEntity variant) {
+    // Prefer an IN-STOCK physical format (matching the availability check),
+    // so we never send an out-of-stock format's id to the cart. Fall back to
+    // any physical format, then any format at all.
+    for (final type in _physicalFormats) {
+      final inStock = variant.formats.where(
+        (f) => f.type == type && (f.availableCopies ?? 0) > 0,
+      );
+      if (inStock.isNotEmpty) return inStock.first;
+    }
     for (final type in _physicalFormats) {
       final match = variant.formats.where((f) => f.type == type);
       if (match.isNotEmpty) return match.first;
@@ -955,6 +965,11 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
     }
 
     setState(() => _isAdding = true);
+    // Capture navigator + messenger up front: switching to a digital-only
+    // variant mid-add can dispose this widget, so we must not rely on `context`
+    // /`mounted` afterwards to show success and open the cart.
+    final navigator = Navigator.of(context, rootNavigator: true);
+    final messenger = ScaffoldMessenger.of(context);
     try {
       await getIt<AddBookToOrder>()(
         bookId: book.id,
@@ -962,12 +977,21 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
         formatId: format.id!,
         libraryId: null,
       );
-      if (!mounted) return;
-      _showSnack('Added to your borrow cart', success: true);
-      Navigator.pushNamed(context, '/order-cart');
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Added to your borrow cart'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.green,
+        ),
+      );
+      navigator.pushNamed('/order-cart');
     } catch (e) {
-      if (!mounted) return;
-      _showSnack(ErrorHandler.getErrorMessage(e));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(ErrorHandler.getErrorMessage(e)),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isAdding = false);
     }
@@ -1013,51 +1037,61 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
 
     final enabled = !_isAdding && !hasActiveRequest && !unavailable;
 
-    return GestureDetector(
-      onTap: !enabled
-          ? (hasActiveRequest
-              ? () => _showSnack('You have already requested this book')
-              : unavailable
-                  ? () => _showSnack('No copies available to borrow')
-                  : null)
-          : () {
-              if (!isPrime) {
-                showPrimeRequiredDialog(context);
-                return;
-              }
-              _addToCartAndOpen(variantState);
-            },
-      child: Container(
+    VoidCallback? onPressed;
+    if (enabled) {
+      onPressed = () {
+        if (!isPrime) {
+          showPrimeRequiredDialog(context);
+          return;
+        }
+        _addToCartAndOpen(variantState);
+      };
+    } else if (hasActiveRequest) {
+      // Informational tap; still a real (enabled) button so it stays
+      // keyboard-focusable and announces its label.
+      onPressed = () => _showSnack('You have already requested this book');
+    } else {
+      // Unavailable / in-flight → semantically disabled (null onPressed).
+      onPressed = null;
+    }
+
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bg,
+        disabledBackgroundColor: bg.withValues(alpha: 0.6),
+        foregroundColor: Colors.white,
+        disabledForegroundColor: Colors.white70,
+        elevation: 0,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-        decoration: BoxDecoration(
-          color: bg,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_isAdding)
-              const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            else
-              Icon(icon, color: Colors.white, size: 18),
-            const SizedBox(width: 6),
-            Text(
-              _isAdding ? 'Adding…' : label,
-              style: const TextStyle(
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_isAdding)
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
                 color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
               ),
+            )
+          else
+            Icon(icon, color: Colors.white, size: 18),
+          const SizedBox(width: 6),
+          Text(
+            _isAdding ? 'Adding…' : label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

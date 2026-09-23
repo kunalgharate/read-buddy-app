@@ -45,19 +45,6 @@ class _OrderCartViewState extends State<_OrderCartView> {
     super.dispose();
   }
 
-  /// Format a structured address into the single-line string the borrow-order
-  /// API expects (mirrors the web: street/line, city, state, pincode).
-  String _formatAddress(AddressEntity? a) {
-    if (a == null) return '';
-    return [
-      a.addressLine1,
-      a.addressLine2,
-      a.city,
-      a.state,
-      a.pincode,
-    ].where((s) => s.trim().isNotEmpty).join(', ');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -300,7 +287,7 @@ class _OrderCartViewState extends State<_OrderCartView> {
                                 fulfillmentMethod: _selectedMethod!,
                                 address: _selectedMethod ==
                                         FulfillmentMethod.DELIVERY
-                                    ? _formatAddress(_selectedAddress)
+                                    ? _selectedAddress?.fullAddress ?? ''
                                     : null,
                                 libraryId:
                                     _selectedMethod == FulfillmentMethod.PICKUP
