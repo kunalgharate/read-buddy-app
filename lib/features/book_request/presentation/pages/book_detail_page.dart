@@ -96,14 +96,6 @@ class _BookDetailView extends StatelessWidget {
           return const SizedBox.shrink();
         },
       ),
-      bottomNavigationBar: BlocBuilder<BookRequestBloc, BookRequestState>(
-        builder: (context, state) {
-          if (state is BookDetailLoaded) {
-            return _BottomRequestBar(book: state.book);
-          }
-          return const SizedBox.shrink();
-        },
-      ),
     );
   }
 }
@@ -399,12 +391,32 @@ class _LanguageAndActions extends StatelessWidget {
       );
     }
 
-    if (buttons.isEmpty) return const SizedBox.shrink();
-    return Row(
-      children: buttons
-          .expand((btn) => [Expanded(child: btn), const SizedBox(width: 10)])
-          .toList()
-        ..removeLast(),
+    // Physical (borrowable) formats and their availability — mirrors web's
+    // hasAvailablePhysicalCopy gating.
+    final physicalFormats = selectedVariant.formats
+        .where((f) => f.type == 'hardcover' || f.type == 'paperback')
+        .toList();
+    final hasAvailablePhysicalCopy = physicalFormats.any(
+      (f) => (f.availableCopies ?? 0) > 0,
+    );
+
+    // Borrow button is grouped WITH the read/listen/watch actions (like web),
+    // and only shown when the book has physical copies. When it has physical
+    // formats but none are available, it is shown disabled as 'Unavailable'.
+    final actionButtons = <Widget>[
+      if (physicalFormats.isNotEmpty)
+        _BorrowActionButton(
+          book: book,
+          available: hasAvailablePhysicalCopy,
+        ),
+      ...buttons,
+    ];
+
+    if (actionButtons.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: actionButtons,
     );
   }
 
@@ -417,12 +429,13 @@ class _LanguageAndActions extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: Colors.white, size: 18),
@@ -453,83 +466,53 @@ class _CoverImageSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
 
-    return Stack(
-      children: [
-        // Cover image - full natural height
-        SizedBox(
-          width: double.infinity,
-          child: book.coverImageUrl.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: book.coverImageUrl,
-                  width: double.infinity,
-                  fit: BoxFit.fitWidth,
-                  placeholder: (_, __) => Container(
-                    height: 300,
-                    color: const Color(0xFF042153),
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF2CE07F),
-                      ),
-                    ),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    height: 300,
-                    color: const Color(0xFF042153),
-                    child: const Center(
-                      child: Icon(
-                        Icons.menu_book_rounded,
-                        size: 64,
-                        color: Colors.white30,
-                      ),
-                    ),
-                  ),
-                )
-              : Container(
-                  height: 300,
-                  color: const Color(0xFF042153),
-                  child: const Center(
-                    child: Icon(
-                      Icons.menu_book_rounded,
-                      size: 80,
-                      color: Colors.white30,
-                    ),
-                  ),
-                ),
-        ),
-        // Gradient overlay at top for icon visibility
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: topPadding + 80,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.35),
-                  Colors.transparent,
-                ],
-              ),
+    // Bounded, centered cover to match the web layout (h-45 w-32 ≈ 180x128),
+    // instead of a full-width, full-height image.
+    const coverWidth = 128.0;
+    const coverHeight = 180.0;
+
+    Widget cover() {
+      if (book.coverImageUrl.isNotEmpty) {
+        return CachedNetworkImage(
+          imageUrl: book.coverImageUrl,
+          width: coverWidth,
+          height: coverHeight,
+          fit: BoxFit.contain,
+          placeholder: (_, __) => Container(
+            color: const Color(0xFFF0F0F0),
+            child: const Center(
+              child: CircularProgressIndicator(color: Color(0xFF2CE07F)),
             ),
           ),
-        ),
-        // Back button
-        Positioned(
-          top: topPadding + 8,
-          left: 8,
-          child: _IconCircleButton(
-            icon: Icons.arrow_back,
-            onTap: () => Navigator.pop(context),
+          errorWidget: (_, __, ___) => Container(
+            color: const Color(0xFFF0F0F0),
+            child: const Center(
+              child:
+                  Icon(Icons.menu_book_rounded, size: 48, color: Colors.grey),
+            ),
           ),
+        );
+      }
+      return Container(
+        color: const Color(0xFFF0F0F0),
+        child: const Center(
+          child: Icon(Icons.menu_book_rounded, size: 48, color: Colors.grey),
         ),
-        // Wishlist + Share icons
-        Positioned(
-          top: topPadding + 8,
-          right: 8,
+      );
+    }
+
+    return Column(
+      children: [
+        // Top bar: back button (left) + wishlist/share (right).
+        Padding(
+          padding: EdgeInsets.fromLTRB(8, topPadding + 8, 8, 0),
           child: Row(
             children: [
+              _IconCircleButton(
+                icon: Icons.arrow_back,
+                onTap: () => Navigator.pop(context),
+              ),
+              const Spacer(),
               BlocBuilder<BookDetailVariantCubit, BookDetailVariantState>(
                 builder: (context, state) {
                   return _IconCircleButton(
@@ -550,6 +533,30 @@ class _CoverImageSection extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: 12),
+        // Centered, bounded cover.
+        Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: coverWidth,
+              height: coverHeight,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE0E0E0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: cover(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
       ],
     );
   }
@@ -569,8 +576,9 @@ class _IconCircleButton extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
+          color: const Color(0xFFF2F2F2),
           shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFFE0E0E0)),
         ),
         child: Icon(icon, size: 20, color: AppColors.textPrimary),
       ),
@@ -897,18 +905,19 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-// ─── Bottom Request Bar ─────────────────────────────────────────────────────
+// ─── Borrow action button (grouped with Read/Listen/Watch) ──────────────────
 
-class _BottomRequestBar extends StatefulWidget {
+class _BorrowActionButton extends StatefulWidget {
   final BookDetailEntity book;
+  final bool available;
 
-  const _BottomRequestBar({required this.book});
+  const _BorrowActionButton({required this.book, required this.available});
 
   @override
-  State<_BottomRequestBar> createState() => _BottomRequestBarState();
+  State<_BorrowActionButton> createState() => _BorrowActionButtonState();
 }
 
-class _BottomRequestBarState extends State<_BottomRequestBar> {
+class _BorrowActionButtonState extends State<_BorrowActionButton> {
   bool _isAdding = false;
 
   BookDetailEntity get book => widget.book;
@@ -916,7 +925,6 @@ class _BottomRequestBarState extends State<_BottomRequestBar> {
   /// Physical formats that can be borrowed via the cart.
   static const _physicalFormats = ['hardcover', 'paperback'];
 
-  /// Resolve the currently-selected variant from the variant cubit state.
   BookVariantEntity? _selectedVariant(BookDetailVariantState state) {
     final variants = state.variants;
     if (variants.isEmpty) return null;
@@ -926,8 +934,6 @@ class _BottomRequestBarState extends State<_BottomRequestBar> {
     return match.isNotEmpty ? match.first : variants.first;
   }
 
-  /// Pick a borrowable (physical) format from the variant. Falls back to the
-  /// first available format so the user can still add to the cart.
   BookFormatEntity? _borrowableFormat(BookVariantEntity variant) {
     for (final type in _physicalFormats) {
       final match = variant.formats.where((f) => f.type == type);
@@ -954,7 +960,6 @@ class _BottomRequestBarState extends State<_BottomRequestBar> {
         bookId: book.id,
         variantId: variant.id,
         formatId: format.id!,
-        // libraryId is chosen later in the cart / at submission time.
         libraryId: null,
       );
       if (!mounted) return;
@@ -983,55 +988,75 @@ class _BottomRequestBarState extends State<_BottomRequestBar> {
     final variantState = context.watch<BookDetailVariantCubit>().state;
     final profileState = context.watch<ProfileBloc>().state;
     final isPrime = profileState is ProfileLoaded && profileState.user.isPrime;
+    final hasActiveRequest = variantState.hasActiveRequest;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: variantState.hasActiveRequest
-                  ? Colors.grey
-                  : const Color(0xFF2CE07F),
-              foregroundColor: Colors.black87,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+    // When there are physical formats but none available, show a disabled
+    // 'Unavailable' button (mirrors web). Otherwise a normal Add to Cart.
+    final unavailable = !widget.available;
+
+    final Color bg;
+    final IconData icon;
+    final String label;
+    if (hasActiveRequest) {
+      bg = Colors.grey;
+      icon = Icons.timelapse_rounded;
+      label = 'Requested';
+    } else if (unavailable) {
+      bg = const Color(0xFFEF4444);
+      icon = Icons.shopping_bag_outlined;
+      label = 'Unavailable';
+    } else {
+      bg = const Color(0xFF2CE07F);
+      icon = Icons.shopping_bag_outlined;
+      label = 'Borrow';
+    }
+
+    final enabled = !_isAdding && !hasActiveRequest && !unavailable;
+
+    return GestureDetector(
+      onTap: !enabled
+          ? (hasActiveRequest
+              ? () => _showSnack('You have already requested this book')
+              : unavailable
+                  ? () => _showSnack('No copies available to borrow')
+                  : null)
+          : () {
+              if (!isPrime) {
+                showPrimeRequiredDialog(context);
+                return;
+              }
+              _addToCartAndOpen(variantState);
+            },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_isAdding)
+              const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            else
+              Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              _isAdding ? 'Adding…' : label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
               ),
             ),
-            onPressed: _isAdding
-                ? null
-                : variantState.hasActiveRequest
-                    ? () {
-                        _showSnack('You have already requested this book');
-                      }
-                    : () {
-                        if (!isPrime) {
-                          showPrimeRequiredDialog(context);
-                          return;
-                        }
-                        _addToCartAndOpen(variantState);
-                      },
-            child: _isAdding
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.black87,
-                    ),
-                  )
-                : Text(
-                    variantState.hasActiveRequest
-                        ? 'Already Requested'
-                        : 'Add to Borrow Cart',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-          ),
+          ],
         ),
       ),
     );
