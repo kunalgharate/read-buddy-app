@@ -7,6 +7,8 @@ class BookRequestEntity extends Equatable {
   final String fulfillmentMethod;
   final String paymentStatus;
   final String requestDate;
+  final String? libraryId;
+  final String? libraryName;
   final String? dueDate;
   final String? returnDate;
   final String? returnMethod;
@@ -44,6 +46,8 @@ class BookRequestEntity extends Equatable {
     required this.fulfillmentMethod,
     required this.paymentStatus,
     required this.requestDate,
+    this.libraryId,
+    this.libraryName,
     this.dueDate,
     this.returnDate,
     this.returnMethod,
@@ -83,6 +87,8 @@ class BookRequestEntity extends Equatable {
         fulfillmentMethod,
         paymentStatus,
         requestDate,
+        libraryId,
+        libraryName,
         dueDate,
         returnDate,
         returnMethod,

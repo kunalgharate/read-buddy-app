@@ -20,6 +20,7 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   Future<String> createBookRequest(
     String bookId,
     String fulfillmentMethod, {
+    String? libraryId,
     String? deliveryName,
     String? deliveryPhone,
     String? deliveryAddress,
@@ -29,6 +30,7 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
     return await remoteDataSource.createBookRequest(
       bookId,
       fulfillmentMethod,
+      libraryId: libraryId,
       deliveryName: deliveryName,
       deliveryPhone: deliveryPhone,
       deliveryAddress: deliveryAddress,
@@ -71,8 +73,16 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   }
 
   @override
-  Future<LibraryEntity> getLibraryDetails() async {
-    return await remoteDataSource.getLibraryDetails();
+  Future<LibraryEntity> getLibraryDetails({
+    String? preferredLibraryId,
+    double? userLat,
+    double? userLng,
+  }) async {
+    return await remoteDataSource.getLibraryDetails(
+      preferredLibraryId: preferredLibraryId,
+      userLat: userLat,
+      userLng: userLng,
+    );
   }
 
   @override

@@ -9,6 +9,7 @@ abstract class BookRequestRepository {
   Future<String> createBookRequest(
     String bookId,
     String fulfillmentMethod, {
+    String? libraryId,
     String? deliveryName,
     String? deliveryPhone,
     String? deliveryAddress,
@@ -21,7 +22,11 @@ abstract class BookRequestRepository {
   Future<void> cancelBookRequest(String id, String reason);
   Future<void> acceptBookRequest(String id, {String? notes});
   Future<void> declineBookRequest(String id, {String reason});
-  Future<LibraryEntity> getLibraryDetails();
+  Future<LibraryEntity> getLibraryDetails({
+    String? preferredLibraryId,
+    double? userLat,
+    double? userLng,
+  });
   Future<BookRequestEntity> schedulePickup(PickupDetailsEntity details);
   Future<BookRequestEntity> getRequestDetails(String id);
   Future<void> updateRequestStatus(String id, String status);

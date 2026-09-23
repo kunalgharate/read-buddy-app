@@ -23,6 +23,9 @@ class LibrarySelectorWidget extends StatefulWidget {
 
 class _LibrarySelectorWidgetState extends State<LibrarySelectorWidget> {
   List<_LibraryWithDistance> _sorted = [];
+  bool _locationUnavailable = false;
+  bool _hadLibraries = false;
+  bool _loaded = false;
 
   @override
   void initState() {
@@ -32,8 +35,14 @@ class _LibrarySelectorWidgetState extends State<LibrarySelectorWidget> {
 
   Future<void> _sortByDistance(List<LibraryEntity> libraries) async {
     final position = await LocationService.instance.getCurrentLocation();
+    if (!mounted) return;
     if (position == null) {
+      // Graceful degradation: no location -> show all (unfiltered) so the user
+      // can still pick a drop-off library manually.
       setState(() {
+        _locationUnavailable = true;
+        _hadLibraries = libraries.isNotEmpty;
+        _loaded = true;
         _sorted = libraries
             .map((l) => _LibraryWithDistance(library: l, distanceKm: null))
             .toList();
@@ -41,22 +50,30 @@ class _LibrarySelectorWidgetState extends State<LibrarySelectorWidget> {
       return;
     }
 
-    final sorted = libraries.map((lib) {
-      final dist = LocationService.instance.calculateDistanceKm(
-        position.latitude,
-        position.longitude,
-        lib.address.latitude,
-        lib.address.longitude,
-      );
-      return _LibraryWithDistance(library: lib, distanceKm: dist);
-    }).toList()
-      ..sort((a, b) {
-        if (a.distanceKm == null) return 1;
-        if (b.distanceKm == null) return -1;
-        return a.distanceKm!.compareTo(b.distanceKm!);
-      });
+    // Only keep libraries within 15 km, nearest first.
+    final within = libraries
+        .where(
+          (lib) => !(lib.address.latitude == 0 && lib.address.longitude == 0),
+        )
+        .map((lib) {
+          final dist = LocationService.instance.calculateDistanceKm(
+            position.latitude,
+            position.longitude,
+            lib.address.latitude,
+            lib.address.longitude,
+          );
+          return _LibraryWithDistance(library: lib, distanceKm: dist);
+        })
+        .where((item) => item.distanceKm! <= 15.0)
+        .toList()
+      ..sort((a, b) => a.distanceKm!.compareTo(b.distanceKm!));
 
-    setState(() => _sorted = sorted);
+    setState(() {
+      _locationUnavailable = false;
+      _hadLibraries = libraries.isNotEmpty;
+      _loaded = true;
+      _sorted = within;
+    });
   }
 
   @override
@@ -91,7 +108,49 @@ class _LibrarySelectorWidgetState extends State<LibrarySelectorWidget> {
             ),
           );
         }
-        if (_sorted.isEmpty) return const SizedBox.shrink();
+        if (_sorted.isEmpty) {
+          // Loaded but nothing to show -> pick an accurate empty message.
+          if (_loaded) {
+            final String message;
+            if (_locationUnavailable) {
+              message = 'Location unavailable — enable location to find '
+                  'nearby drop-off libraries.';
+            } else if (_hadLibraries) {
+              message = 'No drop-off libraries within 15 km of your location.';
+            } else {
+              message = 'No drop-off libraries are available right now.';
+            }
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.location_off,
+                    color: Colors.orange,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,6 +166,16 @@ class _LibrarySelectorWidgetState extends State<LibrarySelectorWidget> {
                 ),
               ),
             ),
+            if (_locationUnavailable)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  'Location unavailable — showing all libraries. '
+                  'Enable location to see the nearest ones.',
+                  style:
+                      TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ),
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

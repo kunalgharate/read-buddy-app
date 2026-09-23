@@ -121,11 +121,23 @@ class _DonationCard extends StatelessWidget {
     final canSchedulePickup =
         isPickup && (status == 'approved' || status == 'pickup_requested');
 
+    // Backend initial donation status is 'donation_created' (legacy: 'pending').
+    // Approve/Reject apply to a freshly submitted donation.
+    final isNew = status == 'donation_created' || status == 'pending';
+    // DROP_OFF: the librarian receives the book at the library, which completes
+    // the donation in a single action (backend allows forward donation_created
+    // -> completed). Offer it while the donation is still open.
+    final canMarkReceived = !isPickup &&
+        (status == 'donation_created' ||
+            status == 'pending' ||
+            status == 'approved');
+
     Color statusColor;
     switch (status) {
       case 'approved':
       case 'accepted':
       case 'received':
+      case 'completed':
         statusColor = Colors.green;
         break;
       case 'rejected':
@@ -188,7 +200,7 @@ class _DonationCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (status == 'pending') ...[
+            if (isNew) ...[
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -206,21 +218,45 @@ class _DonationCard extends StatelessWidget {
                     ),
                     child: const Text('Reject'),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<LibrarianBloc>().add(
-                            UpdateDonationStatusEvent(donationId, 'approved'),
-                          );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                  // Approve belongs to the PICKUP flow only. A DROP_OFF
+                  // donation is completed in one step via 'Mark as Received'.
+                  if (isPickup) ...[
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<LibrarianBloc>().add(
+                              UpdateDonationStatusEvent(donationId, 'approved'),
+                            );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      child: const Text('Approve'),
                     ),
-                    child: const Text('Approve'),
-                  ),
+                  ],
                 ],
+              ),
+            ],
+            if (canMarkReceived) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<LibrarianBloc>().add(
+                          UpdateDonationStatusEvent(donationId, 'completed'),
+                        );
+                  },
+                  icon: const Icon(Icons.check_circle_outline, size: 18),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  label: const Text('Mark as Received'),
+                ),
               ),
             ],
             if (canSchedulePickup) ...[

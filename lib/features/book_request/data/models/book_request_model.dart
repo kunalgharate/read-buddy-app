@@ -8,6 +8,8 @@ class BookRequestModel extends BookRequestEntity {
     required super.fulfillmentMethod,
     required super.paymentStatus,
     required super.requestDate,
+    super.libraryId,
+    super.libraryName,
     super.dueDate,
     super.returnDate,
     super.returnMethod,
@@ -65,6 +67,11 @@ class BookRequestModel extends BookRequestEntity {
         ? json['deliveryDetails'] as Map<String, dynamic>
         : null;
 
+    // libraryId can be null, a plain String id, or a populated Library object
+    final libraryObj = json['libraryId'] is Map<String, dynamic>
+        ? json['libraryId'] as Map<String, dynamic>
+        : null;
+
     return BookRequestModel(
       id: json['_id'] ?? '',
       userId:
@@ -74,6 +81,9 @@ class BookRequestModel extends BookRequestEntity {
       paymentStatus: json['paymentStatus'] ?? '',
       // new API uses createdAt, old used requestDate
       requestDate: json['requestDate'] ?? json['createdAt'] ?? '',
+      libraryId: libraryObj?['_id'] as String? ??
+          (json['libraryId'] is String ? json['libraryId'] as String : null),
+      libraryName: libraryObj?['name'] as String?,
       dueDate: json['dueDate'],
       returnDate: json['returnDate'],
       returnMethod: json['returnMethod'],

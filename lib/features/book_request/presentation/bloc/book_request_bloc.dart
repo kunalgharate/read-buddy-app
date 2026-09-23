@@ -66,6 +66,7 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
       final requestId = await createBookRequest(
         event.bookId,
         event.fulfillmentMethod,
+        libraryId: event.libraryId,
         deliveryName: event.deliveryName,
         deliveryPhone: event.deliveryPhone,
         deliveryAddress: event.deliveryAddress,
@@ -84,10 +85,22 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   ) async {
     emit(LibraryDetailsLoading());
     try {
-      final library = await getLibraryDetails();
+      final library = await getLibraryDetails(
+        preferredLibraryId: event.preferredLibraryId,
+        userLat: event.userLat,
+        userLng: event.userLng,
+      );
       emit(LibraryDetailsLoaded(library));
     } catch (e) {
-      emit(LibraryDetailsError('Failed to load library details: $e'));
+      if (e.toString().contains('NO_NEARBY_LIBRARY')) {
+        emit(
+          LibraryDetailsError(
+            'No library found within 15 km of your location.',
+          ),
+        );
+      } else {
+        emit(LibraryDetailsError('Failed to load library details: $e'));
+      }
     }
   }
 

@@ -356,6 +356,8 @@ class _RequestCardState extends State<_RequestCard> {
               fulfillmentMethod: request.fulfillmentMethod,
               paymentStatus: request.paymentStatus,
               requestDate: request.requestDate,
+              libraryId: request.libraryId,
+              libraryName: request.libraryName,
               dueDate: request.dueDate,
               returnDate: request.returnDate,
               bookId: book.id,
