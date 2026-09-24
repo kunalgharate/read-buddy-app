@@ -176,9 +176,10 @@ class _DeliveredRequestDetailPageState
             if (widget.request.returnDate != null)
               _InfoRow('Return Date', _fmtDate(widget.request.returnDate)),
 
-            // Write a review — only shown when the user is eligible
-            // (borrowed + completed and not yet reviewed). The widget queries
-            // the eligibility endpoint and renders nothing otherwise.
+            // Write a review — the widget queries the eligibility endpoint and
+            // shows a 'Write a review' button when the user is eligible and
+            // has not yet reviewed, or an 'Edit your review' button when a
+            // review already exists. It renders nothing otherwise.
             if (widget.request.bookId != null &&
                 widget.request.bookId!.isNotEmpty)
               WriteReviewEntry(bookId: widget.request.bookId!),

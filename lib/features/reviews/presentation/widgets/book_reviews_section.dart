@@ -67,11 +67,14 @@ class _BookReviewsSectionContent extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        // Hide the whole section when there are no reviews AND the user
-        // cannot write one (matches the web behavior).
-        if (state is ReviewsLoaded) {
-          final canReview = state.eligibility?.canReview ?? false;
-          final hasExisting = state.eligibility?.existingReview != null;
+        // Hide the whole section only when we KNOW (eligibility != null) that
+        // the user cannot write a review AND there are no reviews to show.
+        // When eligibility is null (unknown/failed best-effort lookup), never
+        // hide the section on that basis alone, and never hide a non-empty
+        // list.
+        if (state is ReviewsLoaded && state.eligibility != null) {
+          final canReview = state.eligibility!.canReview;
+          final hasExisting = state.eligibility!.existingReview != null;
           if (state.reviews.isEmpty && !canReview && !hasExisting) {
             return const SizedBox.shrink();
           }
@@ -94,21 +97,26 @@ class _BookReviewsSectionContent extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Text(
-              'Reviews',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimaryColor(context),
+        Expanded(
+          child: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  'Reviews',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimaryColor(context),
+                  ),
+                ),
               ),
-            ),
-            if (state is ReviewsLoaded) ...[
-              const SizedBox(width: 8),
-              _buildAverageRatingBadge(context, state),
+              if (state is ReviewsLoaded) ...[
+                const SizedBox(width: 8),
+                _buildAverageRatingBadge(context, state),
+              ],
             ],
-          ],
+          ),
         ),
         _buildWriteReviewAction(context, eligibility),
       ],

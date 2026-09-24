@@ -95,154 +95,160 @@ class _ReviewFormWidgetState extends State<ReviewFormWidget> {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.borderColor(context),
-                  borderRadius: BorderRadius.circular(2),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.borderColor(context),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Title
-            Text(
-              isEditing ? 'Edit Review' : 'Write a Review',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimaryColor(context),
+              // Title
+              Text(
+                isEditing ? 'Edit Review' : 'Write a Review',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimaryColor(context),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Star rating
-            Text(
-              'Your Rating',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondaryColor(context),
+              // Star rating
+              Text(
+                'Your Rating',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondaryColor(context),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            _buildStarSelector(),
-            const SizedBox(height: 20),
+              const SizedBox(height: 8),
+              _buildStarSelector(),
+              const SizedBox(height: 20),
 
-            // Review title (required)
-            Text(
-              'Title',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondaryColor(context),
+              // Review title (required)
+              Text(
+                'Title',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondaryColor(context),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _titleController,
-              maxLength: 100,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                hintText: 'Sum up your review in a few words',
-                hintStyle: TextStyle(
-                  color: AppColors.textMutedColor(context),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.borderColor(context)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.borderColor(context)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary),
-                ),
-                contentPadding: const EdgeInsets.all(14),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please provide a title';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-
-            // Comment field
-            Text(
-              'Your Review',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondaryColor(context),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _commentController,
-              maxLines: 4,
-              maxLength: 500,
-              decoration: InputDecoration(
-                hintText: 'Share your thoughts about this book...',
-                hintStyle: TextStyle(
-                  color: AppColors.textMutedColor(context),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.borderColor(context)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.borderColor(context)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary),
-                ),
-                contentPadding: const EdgeInsets.all(14),
-              ),
-              validator: (value) {
-                if ((value == null || value.trim().isEmpty) && _rating == 0) {
-                  return 'Please provide a rating or comment';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Submit button
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _onSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _titleController,
+                maxLength: 100,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  hintText: 'Sum up your review in a few words',
+                  hintStyle: TextStyle(
+                    color: AppColors.textMutedColor(context),
+                  ),
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        BorderSide(color: AppColors.borderColor(context)),
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        BorderSide(color: AppColors.borderColor(context)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                  contentPadding: const EdgeInsets.all(14),
                 ),
-                child: Text(
-                  isEditing ? 'Update Review' : 'Submit Review',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please provide a title';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Comment field
+              Text(
+                'Your Review',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondaryColor(context),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _commentController,
+                maxLines: 4,
+                maxLength: 500,
+                decoration: InputDecoration(
+                  hintText: 'Share your thoughts about this book...',
+                  hintStyle: TextStyle(
+                    color: AppColors.textMutedColor(context),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        BorderSide(color: AppColors.borderColor(context)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        BorderSide(color: AppColors.borderColor(context)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                  contentPadding: const EdgeInsets.all(14),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please write your review';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Submit button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _onSubmit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    isEditing ? 'Update Review' : 'Submit Review',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

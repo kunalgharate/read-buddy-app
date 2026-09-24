@@ -46,21 +46,24 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     emit(ReviewLoading());
     try {
       final BookReviewsResponse response = await _getBookReviews(event.bookId);
-      // Eligibility is best-effort — failure here must not break the list.
-      ReviewEligibilityEntity? eligibility;
-      try {
-        eligibility = await _getReviewEligibility(event.bookId);
-      } catch (_) {
-        eligibility = null;
-      }
-      emit(
-        ReviewsLoaded(
-          reviews: response.reviews,
-          averageRating: response.averageRating,
-          totalReviews: response.totalReviews,
-          eligibility: eligibility,
-        ),
+      // Emit the reviews immediately with unknown (null) eligibility so a slow
+      // or failing eligibility endpoint never keeps the list stuck loading.
+      final loaded = ReviewsLoaded(
+        reviews: response.reviews,
+        averageRating: response.averageRating,
+        totalReviews: response.totalReviews,
+        eligibility: null,
       );
+      emit(loaded);
+
+      // Eligibility is best-effort — fetch it after and update in place.
+      // A failure here must not throw away the already-loaded reviews.
+      try {
+        final eligibility = await _getReviewEligibility(event.bookId);
+        emit(loaded.copyWith(eligibility: eligibility));
+      } catch (_) {
+        // Keep the already-emitted reviews with unknown eligibility.
+      }
     } catch (error) {
       emit(ReviewError(ErrorHandler.getErrorMessage(error)));
     }

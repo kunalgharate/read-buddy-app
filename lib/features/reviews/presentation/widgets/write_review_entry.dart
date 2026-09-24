@@ -22,6 +22,7 @@ class WriteReviewEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
+      key: ValueKey(bookId),
       create: (_) =>
           GetIt.instance<ReviewBloc>()..add(LoadReviewEligibility(bookId)),
       child: _WriteReviewEntryContent(bookId: bookId),
@@ -29,42 +30,83 @@ class WriteReviewEntry extends StatelessWidget {
   }
 }
 
-class _WriteReviewEntryContent extends StatelessWidget {
+class _WriteReviewEntryContent extends StatefulWidget {
   final String bookId;
 
   const _WriteReviewEntryContent({required this.bookId});
+
+  @override
+  State<_WriteReviewEntryContent> createState() =>
+      _WriteReviewEntryContentState();
+}
+
+class _WriteReviewEntryContentState extends State<_WriteReviewEntryContent> {
+  /// Last known eligibility so we can keep showing the Write/Edit button while
+  /// a subsequent operation (create/update reload) is loading or fails.
+  ReviewEligibilityEntity? _lastEligibility;
+
+  /// Whether the in-flight operation was started by the user (create/update).
+  /// Only such failures should surface an error SnackBar — the best-effort
+  /// eligibility load must stay silent.
+  bool _userInitiatedInFlight = false;
+
+  String get bookId => widget.bookId;
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ReviewBloc, ReviewState>(
       listener: (context, state) {
         if (state is ReviewActionSuccess) {
+          _userInitiatedInFlight = false;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
               backgroundColor: AppColors.success,
             ),
           );
-          // Refresh eligibility so the button reflects the new review state.
-          context.read<ReviewBloc>().add(LoadReviewEligibility(bookId));
+          // The create/update handlers already dispatch LoadBookReviews which
+          // refreshes eligibility, so no extra refresh is needed here.
         } else if (state is ReviewError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          // Only report failures for actual user-initiated create/update
+          // actions — never for the best-effort eligibility load/reload.
+          if (_userInitiatedInFlight) {
+            _userInitiatedInFlight = false;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
         }
       },
       builder: (context, state) {
-        ReviewEligibilityEntity? eligibility;
+        // Track the freshest eligibility we have seen so it survives later
+        // loading/error states.
         if (state is ReviewEligibilityLoaded) {
-          eligibility = state.eligibility;
-        } else if (state is ReviewsLoaded) {
-          eligibility = state.eligibility;
+          _lastEligibility = state.eligibility;
+        } else if (state is ReviewsLoaded && state.eligibility != null) {
+          _lastEligibility = state.eligibility;
         }
 
-        if (eligibility == null) return const SizedBox.shrink();
+        final eligibility = _lastEligibility;
+
+        // Eligibility never resolved yet: offer a silent retry on error so the
+        // entry does not stay absent for the page lifetime.
+        if (eligibility == null) {
+          if (state is ReviewError) {
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => context
+                    .read<ReviewBloc>()
+                    .add(LoadReviewEligibility(bookId)),
+                child: const Text('Retry'),
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        }
 
         final existing = eligibility.existingReview;
         final canWrite = eligibility.canReview || existing != null;
@@ -80,7 +122,7 @@ class _WriteReviewEntryContent extends StatelessWidget {
               width: double.infinity,
               height: 48,
               child: OutlinedButton.icon(
-                onPressed: () => _showReviewForm(context, eligibility!),
+                onPressed: () => _showReviewForm(context, eligibility),
                 icon: Icon(
                   existing != null ? Icons.edit : Icons.rate_review,
                   size: 18,
@@ -126,6 +168,8 @@ class _WriteReviewEntryContent extends StatelessWidget {
         required String title,
         required String comment,
       }) {
+        // Mark the operation as user-initiated so an error surfaces a SnackBar.
+        _userInitiatedInFlight = true;
         if (existing?.id != null) {
           bloc.add(
             UpdateReviewEvent(
