@@ -60,7 +60,12 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       // A failure here must not throw away the already-loaded reviews.
       try {
         final eligibility = await _getReviewEligibility(event.bookId);
-        emit(loaded.copyWith(eligibility: eligibility));
+        // Merge onto the CURRENT state (not the stale `loaded` snapshot) so we
+        // don't clobber a newer ReviewsLoaded emitted while we awaited.
+        final current = state;
+        if (current is ReviewsLoaded) {
+          emit(current.copyWith(eligibility: eligibility));
+        }
       } catch (_) {
         // Keep the already-emitted reviews with unknown eligibility.
       }

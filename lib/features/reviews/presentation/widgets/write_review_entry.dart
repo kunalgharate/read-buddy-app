@@ -58,14 +58,23 @@ class _WriteReviewEntryContentState extends State<_WriteReviewEntryContent> {
       listener: (context, state) {
         if (state is ReviewActionSuccess) {
           _userInitiatedInFlight = false;
+          // Optimistically flip local eligibility so the stale 'Write' button
+          // clears immediately (they just submitted) instead of lingering until
+          // the reviews+eligibility reload completes. The subsequent
+          // LoadReviewEligibility will replace this with the authoritative value.
+          if (_lastEligibility != null) {
+            setState(() {
+              _lastEligibility = _lastEligibility!.copyWith(canReview: false);
+            });
+          }
+          // Refresh eligibility so Edit/Delete reflect the new review promptly.
+          context.read<ReviewBloc>().add(LoadReviewEligibility(bookId));
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
               backgroundColor: AppColors.success,
             ),
           );
-          // The create/update handlers already dispatch LoadBookReviews which
-          // refreshes eligibility, so no extra refresh is needed here.
         } else if (state is ReviewError) {
           // Only report failures for actual user-initiated create/update
           // actions — never for the best-effort eligibility load/reload.

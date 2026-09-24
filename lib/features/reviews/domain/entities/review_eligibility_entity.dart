@@ -12,6 +12,18 @@ class ReviewEligibilityEntity extends Equatable {
     this.existingReview,
   });
 
+  ReviewEligibilityEntity copyWith({
+    bool? canReview,
+    bool? hasBorrowed,
+    ReviewEntity? existingReview,
+  }) {
+    return ReviewEligibilityEntity(
+      canReview: canReview ?? this.canReview,
+      hasBorrowed: hasBorrowed ?? this.hasBorrowed,
+      existingReview: existingReview ?? this.existingReview,
+    );
+  }
+
   @override
   List<Object?> get props => [canReview, hasBorrowed, existingReview];
 }
