@@ -54,12 +54,12 @@ class _LibrarySelectorWidgetState extends State<LibrarySelectorWidget> {
     // can't be distance-filtered, so keep them as a fallback rather than
     // hiding them (they appear after the in-range ones, with no distance).
     final coordLess = libraries
-        .where((lib) => lib.address.latitude == 0 && lib.address.longitude == 0)
+        .where((lib) => lib.address.latitude == 0 || lib.address.longitude == 0)
         .map((lib) => _LibraryWithDistance(library: lib, distanceKm: null))
         .toList();
     final within = libraries
         .where(
-          (lib) => !(lib.address.latitude == 0 && lib.address.longitude == 0),
+          (lib) => !(lib.address.latitude == 0 || lib.address.longitude == 0),
         )
         .map((lib) {
           final dist = LocationService.instance.calculateDistanceKm(

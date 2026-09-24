@@ -13,6 +13,7 @@ import 'package:read_buddy_app/features/category_crud/presentation/bloc/bloc/cat
 import 'package:read_buddy_app/features/donate/domain/entities/book_donation_request.dart';
 import 'package:read_buddy_app/features/library/domain/entities/library_entity.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
+import 'package:read_buddy_app/core/services/location_service.dart';
 import 'package:read_buddy_app/features/donate/presentation/pages/donation_success_screen.dart';
 
 class DonationPage extends StatelessWidget {
@@ -55,6 +56,51 @@ class _DonationPageState extends State<_DonationPageContent> {
   final _contractController = TextEditingController();
   DateTime? _preferredDate;
   LibraryEntity? _selectedLibrary;
+
+  static const double _dropRadiusKm = 15.0;
+
+  /// A library is coordinate-less when EITHER coordinate is absent or the 0
+  /// sentinel (each absent server coord is parsed to 0 independently, so a
+  /// partial pair must also count as coord-less — otherwise it would be sent
+  /// through distance filtering and wrongly hidden).
+  bool _isCoordless(dynamic address) {
+    final lat = address.latitude;
+    final lng = address.longitude;
+    return lat == 0 || lng == 0;
+  }
+
+  /// Libraries within 15km of the user (nearest first), then coord-less
+  /// libraries appended as a visible fallback. When the user location is
+  /// unknown, keep all libraries (coord ones first) so nothing is hidden.
+  List<LibraryEntity> _orderDropoffLibraries(List<LibraryEntity> libraries) {
+    final coordless = libraries.where((l) => _isCoordless(l.address)).toList();
+    final located = libraries.where((l) => !_isCoordless(l.address)).toList();
+
+    final pos = LocationService.instance.lastPosition;
+    if (pos == null) {
+      // No location: can't distance-filter; show located first, then fallback.
+      return [...located, ...coordless];
+    }
+
+    final withDistance = located
+        .map(
+          (l) => MapEntry(
+            l,
+            LocationService.instance.calculateDistanceKm(
+              pos.latitude,
+              pos.longitude,
+              l.address.latitude,
+              l.address.longitude,
+            ),
+          ),
+        )
+        .where((e) => e.value <= _dropRadiusKm)
+        .toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
+
+    return [...withDistance.map((e) => e.key), ...coordless];
+  }
+
   File? _receiptImage;
 
   final ImagePicker _picker = ImagePicker();
@@ -877,16 +923,26 @@ class _DonationPageState extends State<_DonationPageContent> {
                   );
                 }
 
-                if (_selectedLibrary == null && state.libraries.isNotEmpty) {
+                // Order: libraries within 15km (nearest first), then libraries
+                // that lack usable coordinates (kept visible as a fallback).
+                final ordered = _orderDropoffLibraries(state.libraries);
+
+                // Only auto-select when the nearest option has verified
+                // coordinates — never silently pick a coord-less (possibly
+                // far / other-city) library; that requires an explicit tap.
+                if (_selectedLibrary == null &&
+                    ordered.isNotEmpty &&
+                    !_isCoordless(ordered.first.address)) {
+                  final first = ordered.first;
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (mounted && _selectedLibrary == null) {
-                      setState(() => _selectedLibrary = state.libraries.first);
+                      setState(() => _selectedLibrary = first);
                     }
                   });
                 }
 
                 return Column(
-                  children: state.libraries.map((library) {
+                  children: ordered.map((library) {
                     final isSelected = _selectedLibrary?.id == library.id;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
