@@ -54,11 +54,15 @@ class LibraryInventoryRepositoryImpl implements LibraryInventoryRepository {
     String? search,
     int? page,
     int? limit,
+    double? lat,
+    double? lng,
   }) =>
       _remoteDataSource.browseByCity(
         city: city,
         search: search,
         page: page,
         limit: limit,
+        lat: lat,
+        lng: lng,
       );
 }

@@ -10,6 +10,7 @@ import '../../../audiobook/domain/entities/audiobook.dart';
 import '../../../bookcrud/domain/entities/book_variant_entity.dart';
 import '../../../bookcrud/domain/respository/variant_repository.dart';
 import '../../../borrow_order/domain/usecases/borrow_order_usecases.dart';
+import '../../../library_inventory/presentation/widgets/library_picker_sheet.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../../reviews/presentation/bloc/review_bloc.dart';
@@ -964,6 +965,20 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
       return;
     }
 
+    // Let the user pick WHICH library to borrow from (nearest first) and HOW
+    // they want it (Pickup within range / Delivery anywhere in city). The
+    // picker resolves the correct variantId/formatId for the chosen library's
+    // inventory, so we prefer those over the locally auto-selected ones.
+    final pick = await LibraryPickerSheet.show(
+      context,
+      bookId: book.id,
+      bookTitle: book.title,
+      preferredVariantId: variant.id,
+    );
+    // User dismissed the picker without choosing — abort silently.
+    if (pick == null) return;
+    if (!mounted) return;
+
     setState(() => _isAdding = true);
     // Capture navigator + messenger up front: switching to a digital-only
     // variant mid-add can dispose this widget, so we must not rely on `context`
@@ -973,13 +988,18 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
     try {
       await getIt<AddBookToOrder>()(
         bookId: book.id,
-        variantId: variant.id,
-        formatId: format.id!,
-        libraryId: null,
+        variantId: pick.variantId,
+        formatId: pick.formatId,
+        libraryId: pick.libraryId,
+        fulfillmentMethod: pick.fulfillmentMethod,
       );
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Added to your borrow cart'),
+        SnackBar(
+          content: Text(
+            'Added to your borrow cart — '
+            '${pick.fulfillmentMethod == 'PICKUP' ? 'Pickup' : 'Delivery'} '
+            'from ${pick.libraryName}',
+          ),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.green,
         ),
