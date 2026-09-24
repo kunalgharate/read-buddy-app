@@ -16,12 +16,14 @@ class BorrowOrderRepositoryImpl implements BorrowOrderRepository {
     required String variantId,
     required String formatId,
     String? libraryId,
+    String? fulfillmentMethod,
   }) =>
       _remoteDataSource.addBook(
         bookId: bookId,
         variantId: variantId,
         formatId: formatId,
         libraryId: libraryId,
+        fulfillmentMethod: fulfillmentMethod,
       );
 
   @override

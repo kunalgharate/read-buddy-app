@@ -104,6 +104,8 @@ class LibraryInventoryBloc
       final books = await _repository.browseByCity(
         city: event.city,
         search: event.search,
+        lat: event.lat,
+        lng: event.lng,
       );
       emit(CityBooksLoaded(books));
     } catch (e) {

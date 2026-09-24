@@ -54,6 +54,8 @@ class CityBookEntity extends Equatable {
   final String? coverImageUrl;
   final List<String> categories;
   final int totalAvailable;
+  final double? nearestDistanceKm;
+  final bool pickupAvailable;
   final List<CityBookLibraryInfo> libraries;
 
   const CityBookEntity({
@@ -63,6 +65,8 @@ class CityBookEntity extends Equatable {
     this.coverImageUrl,
     required this.categories,
     required this.totalAvailable,
+    this.nearestDistanceKm,
+    this.pickupAvailable = false,
     required this.libraries,
   });
 
@@ -78,6 +82,10 @@ class CityBookLibraryInfo extends Equatable {
   final String formatType;
   final int availableCopies;
   final int totalCopies;
+  final double? latitude;
+  final double? longitude;
+  final double? distanceKm;
+  final bool pickupEligible;
 
   const CityBookLibraryInfo({
     required this.libraryId,
@@ -85,9 +93,13 @@ class CityBookLibraryInfo extends Equatable {
     required this.formatType,
     required this.availableCopies,
     required this.totalCopies,
+    this.latitude,
+    this.longitude,
+    this.distanceKm,
+    this.pickupEligible = false,
   });
 
   @override
   List<Object?> get props =>
-      [libraryId, formatType, availableCopies, totalCopies];
+      [libraryId, formatType, availableCopies, totalCopies, distanceKm];
 }

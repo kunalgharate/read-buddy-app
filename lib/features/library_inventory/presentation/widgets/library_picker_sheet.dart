@@ -83,7 +83,13 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
       final dio = getIt<Dio>();
       final response = await dio.get(
         ApiConstants.libraryInventoryBrowse,
-        queryParameters: {'city': city},
+        queryParameters: {
+          'city': city,
+          if (CityNotifier.instance.latitude != null)
+            'lat': CityNotifier.instance.latitude,
+          if (CityNotifier.instance.longitude != null)
+            'lng': CityNotifier.instance.longitude,
+        },
       );
       final data = response.data;
       final books = (data['books'] as List<dynamic>?) ?? [];
@@ -106,39 +112,33 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
         bookData as Map<String, dynamic>,
       );
 
-      // Now fetch the actual inventory records to get variantId/formatId per library
-      // We use the admin-like GET but the browse already gives us per-library breakdown
-      // For the borrow we need: libraryId, variantId (from inventory), formatType
-      // Let's query inventory per library
+      // Build options from the per-library breakdown (already distance-sorted
+      // and coordinate-filtered by the backend when user coords were sent).
       final options = <_LibraryOption>[];
       for (final lib in cityBook.libraries) {
-        if (lib.availableCopies > 0) {
-          options.add(
-            _LibraryOption(
-              libraryId: lib.libraryId,
-              libraryName: lib.libraryName,
-              formatType: lib.formatType,
-              availableCopies: lib.availableCopies,
-              totalCopies: lib.totalCopies,
-            ),
-          );
-        }
+        options.add(
+          _LibraryOption(
+            libraryId: lib.libraryId,
+            libraryName: lib.libraryName,
+            formatType: lib.formatType,
+            availableCopies: lib.availableCopies,
+            totalCopies: lib.totalCopies,
+            distanceKm: lib.distanceKm,
+            pickupEligible: lib.pickupEligible,
+          ),
+        );
       }
 
-      // Also add out-of-stock libraries (disabled)
-      for (final lib in cityBook.libraries) {
-        if (lib.availableCopies <= 0) {
-          options.add(
-            _LibraryOption(
-              libraryId: lib.libraryId,
-              libraryName: lib.libraryName,
-              formatType: lib.formatType,
-              availableCopies: 0,
-              totalCopies: lib.totalCopies,
-            ),
-          );
+      // Nearest, in-stock libraries first; out-of-stock sink to the bottom.
+      options.sort((a, b) {
+        if ((a.availableCopies > 0) != (b.availableCopies > 0)) {
+          return a.availableCopies > 0 ? -1 : 1;
         }
-      }
+        if (a.distanceKm == null && b.distanceKm == null) return 0;
+        if (a.distanceKm == null) return 1;
+        if (b.distanceKm == null) return -1;
+        return a.distanceKm!.compareTo(b.distanceKm!);
+      });
 
       setState(() {
         _options = options;
@@ -152,7 +152,10 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
     }
   }
 
-  Future<void> _selectLibrary(_LibraryOption option) async {
+  Future<void> _selectLibrary(
+    _LibraryOption option,
+    String fulfillmentMethod,
+  ) async {
     // We need variantId and formatId. Fetch inventory record for this library+book.
     try {
       final dio = getIt<Dio>();
@@ -229,6 +232,7 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
             variantId: variantId,
             formatId: formatId,
             formatType: option.formatType,
+            fulfillmentMethod: fulfillmentMethod,
           ),
         );
       }
@@ -323,8 +327,12 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
             ..._options.map(
               (opt) => _LibraryOptionTile(
                 option: opt,
-                onTap:
-                    opt.availableCopies > 0 ? () => _selectLibrary(opt) : null,
+                onPickup: opt.availableCopies > 0 && opt.pickupEligible
+                    ? () => _selectLibrary(opt, 'PICKUP')
+                    : null,
+                onDelivery: opt.availableCopies > 0
+                    ? () => _selectLibrary(opt, 'DELIVERY')
+                    : null,
               ),
             ),
 
@@ -343,6 +351,8 @@ class _LibraryOption {
   final String formatType;
   final int availableCopies;
   final int totalCopies;
+  final double? distanceKm;
+  final bool pickupEligible;
 
   const _LibraryOption({
     required this.libraryId,
@@ -350,6 +360,8 @@ class _LibraryOption {
     required this.formatType,
     required this.availableCopies,
     required this.totalCopies,
+    this.distanceKm,
+    this.pickupEligible = false,
   });
 }
 
@@ -361,12 +373,16 @@ class LibraryPickResult {
   final String formatId;
   final String formatType;
 
+  /// 'DELIVERY' or 'PICKUP' — how the user wants to receive the book.
+  final String fulfillmentMethod;
+
   const LibraryPickResult({
     required this.libraryId,
     required this.libraryName,
     required this.variantId,
     required this.formatId,
     required this.formatType,
+    this.fulfillmentMethod = 'DELIVERY',
   });
 }
 
@@ -374,82 +390,139 @@ class LibraryPickResult {
 
 class _LibraryOptionTile extends StatelessWidget {
   final _LibraryOption option;
-  final VoidCallback? onTap;
+  final VoidCallback? onPickup;
+  final VoidCallback? onDelivery;
 
-  const _LibraryOptionTile({required this.option, this.onTap});
+  const _LibraryOptionTile({
+    required this.option,
+    this.onPickup,
+    this.onDelivery,
+  });
+
+  String _distanceLabel(double km) {
+    if (km < 1.0) return '${(km * 1000).round()} m away';
+    return '${km.toStringAsFixed(1)} km away';
+  }
 
   @override
   Widget build(BuildContext context) {
     final isAvailable = option.availableCopies > 0;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isAvailable
-                  ? AppColors.primary.withValues(alpha: 0.3)
-                  : Colors.grey.shade200,
-            ),
-            color: isAvailable ? null : Colors.grey.shade50,
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isAvailable
+                ? AppColors.primary.withValues(alpha: 0.3)
+                : Colors.grey.shade200,
           ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.local_library,
-                size: 20,
-                color: isAvailable ? AppColors.primary : Colors.grey,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      option.libraryName,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isAvailable
-                            ? AppColors.textPrimaryColor(context)
-                            : AppColors.textMutedColor(context),
-                      ),
-                    ),
-                    Text(
-                      '${option.formatType} • ${option.availableCopies} of ${option.totalCopies} available',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isAvailable
-                            ? AppColors.textSecondaryColor(context)
-                            : AppColors.textMutedColor(context),
-                      ),
-                    ),
-                  ],
+          color: isAvailable ? null : Colors.grey.shade50,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.local_library,
+                  size: 20,
+                  color: isAvailable ? AppColors.primary : Colors.grey,
                 ),
-              ),
-              if (isAvailable)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(8),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              option.libraryName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: isAvailable
+                                    ? AppColors.textPrimaryColor(context)
+                                    : AppColors.textMutedColor(context),
+                              ),
+                            ),
+                          ),
+                          if (option.distanceKm != null)
+                            Text(
+                              _distanceLabel(option.distanceKm!),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${option.formatType} • ${option.availableCopies} of ${option.totalCopies} available',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isAvailable
+                              ? AppColors.textSecondaryColor(context)
+                              : AppColors.textMutedColor(context),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Text(
-                    'Borrow',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                ),
+              ],
+            ),
+            if (isAvailable) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  // Pickup — only within the pickup radius.
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onPickup,
+                      icon: const Icon(Icons.store_mall_directory, size: 16),
+                      label: const Text('Pickup'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        foregroundColor: onPickup != null
+                            ? AppColors.primary
+                            : AppColors.textMutedColor(context),
+                      ),
                     ),
                   ),
-                )
-              else
-                Text(
+                  const SizedBox(width: 10),
+                  // Delivery — available anywhere in the city (courier).
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: onDelivery,
+                      icon: const Icon(Icons.local_shipping, size: 16),
+                      label: const Text('Delivery'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (onPickup == null && option.distanceKm != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    'Pickup unavailable — too far. Delivery only.',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppColors.textMutedColor(context),
+                    ),
+                  ),
+                ),
+            ] else
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
                   'Out of Stock',
                   style: TextStyle(
                     fontSize: 11,
@@ -457,8 +530,8 @@ class _LibraryOptionTile extends StatelessWidget {
                     color: Colors.red.shade400,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

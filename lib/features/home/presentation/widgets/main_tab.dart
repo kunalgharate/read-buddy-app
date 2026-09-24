@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/services/city_notifier.dart';
+import 'package:read_buddy_app/core/services/location_service.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/core/widgets/city_location_bar.dart';
 import 'package:read_buddy_app/features/banner/domain/entity/banner_entity.dart';
@@ -46,16 +47,81 @@ class _MainTabState extends State<MainTab> {
     // Load city books when city is available
     final city = CityNotifier.instance.value;
     if (city != null && city.isNotEmpty) {
-      _inventoryBloc.add(BrowseCityBooks(city: city));
+      _inventoryBloc.add(
+        BrowseCityBooks(
+          city: city,
+          lat: CityNotifier.instance.latitude,
+          lng: CityNotifier.instance.longitude,
+        ),
+      );
     }
     // Also listen for future city changes
     CityNotifier.instance.addListener(_onCityChanged);
+
+    // On first load, if we don't yet know the user's city, proactively ask for
+    // location access (Zomato-style) and detect it, so "Borrow Books Nearby"
+    // populates immediately. Runs once after first frame so we have a context.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureLocation());
+  }
+
+  bool _promptedForLocation = false;
+
+  /// Ask for location permission and detect the city when none is set yet.
+  /// Non-blocking: if the user declines, the city bar remains for manual pick.
+  Future<void> _ensureLocation() async {
+    if (_promptedForLocation) return;
+    _promptedForLocation = true;
+
+    final existing = CityNotifier.instance.value;
+    if (existing != null && existing.isNotEmpty) return;
+
+    final available = await LocationService.instance.isLocationAvailable();
+    if (!available) {
+      final granted = await LocationService.instance.requestPermission();
+      if (!granted) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Enable location to see books available near you, '
+              'or pick your city from the top bar.',
+            ),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: 'Settings',
+              onPressed: () => LocationService.instance.openAppSettings(),
+            ),
+          ),
+        );
+        return;
+      }
+    }
+
+    final city = await CityNotifier.instance.detectFromGPS();
+    if (!mounted) return;
+    if (city == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not detect your city. Please pick it from the top bar.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+    // On success, CityNotifier's listener (_onCityChanged) triggers the browse.
   }
 
   void _onCityChanged() {
     final city = CityNotifier.instance.value;
     if (city != null && city.isNotEmpty) {
-      _inventoryBloc.add(BrowseCityBooks(city: city));
+      _inventoryBloc.add(
+        BrowseCityBooks(
+          city: city,
+          lat: CityNotifier.instance.latitude,
+          lng: CityNotifier.instance.longitude,
+        ),
+      );
     }
   }
 
@@ -143,8 +209,18 @@ class _MainTabView extends StatelessWidget {
                     const _ContinueReadingSection(),
                     const SizedBox(height: 32),
 
-                    // ── City-Filtered Books (replaces global Latest / Recommended) ──
+                    // ── Borrow Books Nearby (physical, city + distance based) ──
                     const _CityBooksSection(),
+
+                    const SizedBox(height: 32),
+
+                    // ── Read & Listen (digital: ebooks/audiobooks/videobooks,
+                    // no delivery — open directly) ──
+                    _ReadAndListenSection(
+                      trending: state.trendingBooks,
+                      latest: state.latestBooks,
+                      recommended: state.recommendedBooks,
+                    ),
 
                     const SizedBox(height: 32),
                     _MonthlyStatsCard(
@@ -581,7 +657,13 @@ class _CityBooksSection extends StatelessWidget {
                       TextButton(
                         onPressed: () => context
                             .read<LibraryInventoryBloc>()
-                            .add(BrowseCityBooks(city: city)),
+                            .add(
+                              BrowseCityBooks(
+                                city: city,
+                                lat: CityNotifier.instance.latitude,
+                                lng: CityNotifier.instance.longitude,
+                              ),
+                            ),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -592,9 +674,13 @@ class _CityBooksSection extends StatelessWidget {
 
             // Initial state — trigger load
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              context
-                  .read<LibraryInventoryBloc>()
-                  .add(BrowseCityBooks(city: city));
+              context.read<LibraryInventoryBloc>().add(
+                    BrowseCityBooks(
+                      city: city,
+                      lat: CityNotifier.instance.latitude,
+                      lng: CityNotifier.instance.longitude,
+                    ),
+                  );
             });
             return const SizedBox.shrink();
           },
@@ -624,7 +710,7 @@ class _CityBooksList extends StatelessWidget {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  'Available in $city',
+                  'Borrow Books Nearby — $city',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -783,6 +869,46 @@ class _CityBookCard extends StatelessWidget {
         ),
         child: const Icon(Icons.book, size: 44, color: Color(0xFFB0BEC5)),
       );
+}
+
+// ─────────────────────────────────────────────
+// Read & Listen — digital books (ebook / audiobook / videobook).
+// These need no delivery: the user opens and reads/listens directly.
+// Sourced by filtering the global home feed on digital format.
+// ─────────────────────────────────────────────
+
+class _ReadAndListenSection extends StatelessWidget {
+  final List<BookEntity> trending;
+  final List<BookEntity> latest;
+  final List<BookEntity> recommended;
+
+  const _ReadAndListenSection({
+    required this.trending,
+    required this.latest,
+    required this.recommended,
+  });
+
+  static const _digitalFormats = {'ebook', 'audiobook', 'videobook'};
+
+  bool _isDigital(BookEntity b) =>
+      _digitalFormats.contains(b.format.trim().toLowerCase());
+
+  @override
+  Widget build(BuildContext context) {
+    // Merge all feed lists, keep only digital formats, de-duplicate by id.
+    final seen = <String>{};
+    final digital = <BookEntity>[];
+    for (final b in [...latest, ...trending, ...recommended]) {
+      if (_isDigital(b) && seen.add(b.id)) digital.add(b);
+    }
+
+    if (digital.isEmpty) return const SizedBox.shrink();
+
+    return _BookSection(
+      title: 'Read & Listen',
+      books: digital,
+    );
+  }
 }
 
 // ─────────────────────────────────────────────

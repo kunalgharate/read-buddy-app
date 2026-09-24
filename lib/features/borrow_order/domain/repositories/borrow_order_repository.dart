@@ -7,6 +7,7 @@ abstract class BorrowOrderRepository {
     required String variantId,
     required String formatId,
     String? libraryId,
+    String? fulfillmentMethod,
   });
   Future<BorrowOrderEntity> removeBook(String bookRequestId);
   Future<BorrowOrderEntity> submitOrder({

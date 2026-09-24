@@ -35,6 +35,8 @@ abstract class LibraryInventoryRemoteDataSource {
     String? search,
     int? page,
     int? limit,
+    double? lat,
+    double? lng,
   });
 }
 
@@ -118,11 +120,15 @@ class LibraryInventoryRemoteDataSourceImpl
     String? search,
     int? page,
     int? limit,
+    double? lat,
+    double? lng,
   }) async {
     final queryParams = <String, dynamic>{'city': city};
     if (search != null && search.isNotEmpty) queryParams['search'] = search;
     if (page != null) queryParams['page'] = page;
     if (limit != null) queryParams['limit'] = limit;
+    if (lat != null) queryParams['lat'] = lat;
+    if (lng != null) queryParams['lng'] = lng;
 
     final response = await _dio.get(
       ApiConstants.libraryInventoryBrowse,
