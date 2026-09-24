@@ -646,16 +646,18 @@ class _PickupLibrarySelectorState extends State<_PickupLibrarySelector> {
     _load();
   }
 
-  // Reconciles the parent's selection against the current in-range list:
-  // keep the current selection only if still in range, otherwise select the
-  // nearest available, else clear it (so the parent drops any stale id).
-  void _reconcileSelection(List<_LibraryWithDistance> within) {
+  // Reconciles the parent's selection against the current list. Keep the
+  // current selection if it's still offered. Otherwise auto-select only the
+  // nearest IN-RANGE (known-distance) library — never a coord-less fallback,
+  // which could be far / in another city and must be an explicit user choice.
+  void _reconcileSelection(List<_LibraryWithDistance> items) {
     final currentId = widget.selectedLibrary?.id;
     final stillValid =
-        currentId != null && within.any((l) => l.library.id == currentId);
+        currentId != null && items.any((l) => l.library.id == currentId);
     if (stillValid) return;
-    if (within.isNotEmpty) {
-      widget.onSelected(within.first.library);
+    final firstInRange = items.where((l) => l.distanceKm != null);
+    if (firstInRange.isNotEmpty) {
+      widget.onSelected(firstInRange.first.library);
     } else {
       widget.onSelected(null);
     }
@@ -690,25 +692,35 @@ class _PickupLibrarySelectorState extends State<_PickupLibrarySelector> {
       }
 
       final within = <_LibraryWithDistance>[];
+      final noCoords = <_LibraryWithDistance>[];
       for (final lib in all) {
-        if (lib.address.latitude == 0 && lib.address.longitude == 0) continue;
+        final lat = lib.address.latitude;
+        final lng = lib.address.longitude;
+        // Either coordinate absent/zero => coord-less (a partial pair can't be
+        // distance-filtered reliably, so keep it as a fallback, don't hide it).
+        if (lat == 0 || lng == 0) {
+          noCoords.add(_LibraryWithDistance(library: lib, distanceKm: null));
+          continue;
+        }
         final km = LocationService.instance.calculateDistanceKm(
           position.latitude,
           position.longitude,
-          lib.address.latitude,
-          lib.address.longitude,
+          lat,
+          lng,
         );
         if (km <= _radiusKm) {
           within.add(_LibraryWithDistance(library: lib, distanceKm: km));
         }
       }
       within.sort((a, b) => a.distanceKm!.compareTo(b.distanceKm!));
+      // In-range (nearest first) then coord-less fallbacks.
+      final visible = [...within, ...noCoords];
 
-      _reconcileSelection(within);
+      _reconcileSelection(visible);
 
       setState(() {
         _hadLibraries = all.isNotEmpty;
-        _libraries = within;
+        _libraries = visible;
         _loading = false;
       });
     } catch (e) {
