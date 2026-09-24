@@ -8,14 +8,17 @@ class ReviewModel extends ReviewEntity {
     required super.userName,
     required super.userAvatar,
     required super.rating,
+    super.title,
     required super.comment,
+    super.helpfulCount,
     required super.createdAt,
     required super.updatedAt,
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
-    // userId can be a String (ID) or Map (populated object with _id, name, userAvatar)
-    final userData = json['userId'];
+    // The user reference can arrive under 'user' (new contract) or 'userId'
+    // (legacy). Either may be a String (ID) or a populated Map.
+    final userData = json['user'] ?? json['userId'];
     String userId = '';
     String userName = '';
     String userAvatar = '';
@@ -36,16 +39,30 @@ class ReviewModel extends ReviewEntity {
       userAvatar = json['userAvatar']?.toString() ?? '';
     }
 
+    // book reference: 'bookId' (legacy) or 'book' (new contract)
+    final bookData = json['bookId'] ?? json['book'];
+    String bookId = '';
+    if (bookData is Map<String, dynamic>) {
+      bookId = bookData['_id']?.toString() ?? '';
+    } else if (bookData != null) {
+      bookId = bookData.toString();
+    }
+
     return ReviewModel(
       id: json['_id']?.toString(),
-      bookId: json['bookId']?.toString() ?? '',
+      bookId: bookId,
       userId: userId,
       userName: userName,
       userAvatar: userAvatar,
       rating: (json['rating'] is int)
           ? json['rating'] as int
           : (json['rating'] as num?)?.toInt() ?? 0,
-      comment: json['comment']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      // Backend field is 'review'; keep 'comment' as a legacy fallback.
+      comment: json['review']?.toString() ?? json['comment']?.toString() ?? '',
+      helpfulCount: (json['helpfulCount'] is int)
+          ? json['helpfulCount'] as int
+          : (json['helpfulCount'] as num?)?.toInt() ?? 0,
       createdAt: json['createdAt']?.toString() ?? '',
       updatedAt: json['updatedAt']?.toString() ?? '',
     );
@@ -56,7 +73,8 @@ class ReviewModel extends ReviewEntity {
       if (id != null) '_id': id,
       'bookId': bookId,
       'rating': rating,
-      'comment': comment,
+      'title': title,
+      'review': comment,
     };
   }
 }

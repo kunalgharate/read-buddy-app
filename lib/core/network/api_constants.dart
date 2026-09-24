@@ -80,6 +80,9 @@ class ApiConstants {
   static String get reviews => '$baseUrl/review';
   static String reviewById(String id) => '$baseUrl/review/$id';
   static String reviewsByBook(String bookId) => '$baseUrl/review/book/$bookId';
+  static String reviewEligibility(String bookId) =>
+      '$baseUrl/review/book/$bookId/eligibility';
+  static String reviewHelpful(String id) => '$baseUrl/review/$id/helpful';
 
   // HTTP Status Codes
   static const int success = 200;

@@ -244,6 +244,7 @@ import 'package:read_buddy_app/features/reviews/data/datasources/review_remote_d
 import 'package:read_buddy_app/features/reviews/data/repositories/review_repository_impl.dart';
 import 'package:read_buddy_app/features/reviews/domain/repositories/review_repository.dart';
 import 'package:read_buddy_app/features/reviews/domain/usecases/get_book_reviews.dart';
+import 'package:read_buddy_app/features/reviews/domain/usecases/get_review_eligibility.dart';
 import 'package:read_buddy_app/features/reviews/domain/usecases/create_review.dart';
 import 'package:read_buddy_app/features/reviews/domain/usecases/update_review.dart';
 import 'package:read_buddy_app/features/reviews/domain/usecases/delete_review.dart';
@@ -1024,6 +1025,9 @@ void _registerReviewsFeature() {
 
   // UseCases
   getIt.registerLazySingleton(() => GetBookReviews(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(
+    () => GetReviewEligibility(getIt<ReviewRepository>()),
+  );
   getIt.registerLazySingleton(() => CreateReview(getIt<ReviewRepository>()));
   getIt.registerLazySingleton(() => UpdateReview(getIt<ReviewRepository>()));
   getIt.registerLazySingleton(() => DeleteReview(getIt<ReviewRepository>()));
@@ -1032,6 +1036,7 @@ void _registerReviewsFeature() {
   getIt.registerFactory(
     () => ReviewBloc(
       getBookReviews: getIt<GetBookReviews>(),
+      getReviewEligibility: getIt<GetReviewEligibility>(),
       createReview: getIt<CreateReview>(),
       updateReview: getIt<UpdateReview>(),
       deleteReview: getIt<DeleteReview>(),

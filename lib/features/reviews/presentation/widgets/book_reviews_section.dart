@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
-import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
-import 'package:read_buddy_app/features/reviews/domain/entities/review_entity.dart';
+import 'package:read_buddy_app/features/reviews/domain/entities/review_eligibility_entity.dart';
 import 'package:read_buddy_app/features/reviews/presentation/bloc/review_bloc.dart';
 import 'package:read_buddy_app/features/reviews/presentation/widgets/review_card.dart';
 import 'package:read_buddy_app/features/reviews/presentation/widgets/review_form_widget.dart';
@@ -68,6 +67,19 @@ class _BookReviewsSectionContent extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        // Hide the whole section only when we KNOW (eligibility != null) that
+        // the user cannot write a review AND there are no reviews to show.
+        // When eligibility is null (unknown/failed best-effort lookup), never
+        // hide the section on that basis alone, and never hide a non-empty
+        // list.
+        if (state is ReviewsLoaded && state.eligibility != null) {
+          final canReview = state.eligibility!.canReview;
+          final hasExisting = state.eligibility!.existingReview != null;
+          if (state.reviews.isEmpty && !canReview && !hasExisting) {
+            return const SizedBox.shrink();
+          }
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -81,35 +93,83 @@ class _BookReviewsSectionContent extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, ReviewState state) {
+    final eligibility = state is ReviewsLoaded ? state.eligibility : null;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Text(
-              'Reviews',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimaryColor(context),
+        Expanded(
+          child: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  'Reviews',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimaryColor(context),
+                  ),
+                ),
               ),
-            ),
-            if (state is ReviewsLoaded) ...[
-              const SizedBox(width: 8),
-              _buildAverageRatingBadge(context, state),
+              if (state is ReviewsLoaded) ...[
+                const SizedBox(width: 8),
+                _buildAverageRatingBadge(context, state),
+              ],
             ],
-          ],
-        ),
-        TextButton.icon(
-          onPressed: () => _showReviewForm(context),
-          icon: const Icon(Icons.rate_review, size: 18),
-          label: const Text('Write Review'),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
           ),
         ),
+        _buildWriteReviewAction(context, eligibility),
       ],
     );
+  }
+
+  /// Show the 'Write Review' entry ONLY when the user is eligible and has not
+  /// yet reviewed. When the user already has a review, show Edit + Delete for
+  /// it instead. Otherwise render nothing.
+  Widget _buildWriteReviewAction(
+    BuildContext context,
+    ReviewEligibilityEntity? eligibility,
+  ) {
+    final existing = eligibility?.existingReview;
+    if (existing != null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextButton.icon(
+            onPressed: () => _showReviewForm(
+              context,
+              reviewId: existing.id,
+              initialRating: existing.rating,
+              initialTitle: existing.title,
+              initialComment: existing.comment,
+            ),
+            icon: const Icon(Icons.edit, size: 18),
+            label: const Text('Edit'),
+            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+          ),
+          if (existing.id != null)
+            TextButton.icon(
+              onPressed: () => _confirmDelete(context, existing.id!),
+              icon: const Icon(Icons.delete, size: 18),
+              label: const Text('Delete'),
+              style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            ),
+        ],
+      );
+    }
+
+    if (eligibility?.canReview == true) {
+      return TextButton.icon(
+        onPressed: () => _showReviewForm(context),
+        icon: const Icon(Icons.rate_review, size: 18),
+        label: const Text('Write Review'),
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primary,
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget _buildAverageRatingBadge(
@@ -164,7 +224,7 @@ class _BookReviewsSectionContent extends StatelessWidget {
       if (state.reviews.isEmpty) {
         return _buildEmptyState(context);
       }
-      return _buildReviewList(context, state.reviews);
+      return _buildReviewList(context, state);
     }
 
     if (state is ReviewError) {
@@ -233,8 +293,10 @@ class _BookReviewsSectionContent extends StatelessWidget {
 
   Widget _buildReviewList(
     BuildContext context,
-    List<ReviewEntity> reviews,
+    ReviewsLoaded state,
   ) {
+    final reviews = state.reviews;
+    final ownReviewId = state.eligibility?.existingReview?.id;
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -242,44 +304,30 @@ class _BookReviewsSectionContent extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final review = reviews[index];
-        return FutureBuilder<bool>(
-          future: _isReviewOwner(review.userId),
-          builder: (context, snapshot) {
-            final isOwner = snapshot.data ?? false;
-            return ReviewCard(
-              review: review,
-              isOwner: isOwner,
-              onEdit: isOwner
-                  ? () => _showReviewForm(
-                        context,
-                        reviewId: review.id,
-                        initialRating: review.rating,
-                        initialComment: review.comment,
-                      )
-                  : null,
-              onDelete:
-                  isOwner ? () => _confirmDelete(context, review.id!) : null,
-            );
-          },
+        final isOwner = ownReviewId != null && review.id == ownReviewId;
+        return ReviewCard(
+          review: review,
+          isOwner: isOwner,
+          onEdit: isOwner
+              ? () => _showReviewForm(
+                    context,
+                    reviewId: review.id,
+                    initialRating: review.rating,
+                    initialTitle: review.title,
+                    initialComment: review.comment,
+                  )
+              : null,
+          onDelete: isOwner ? () => _confirmDelete(context, review.id!) : null,
         );
       },
     );
-  }
-
-  Future<bool> _isReviewOwner(String reviewUserId) async {
-    try {
-      final storage = GetIt.instance<SecureStorageUtil>();
-      final user = await storage.getUser();
-      return user?.id == reviewUserId;
-    } catch (_) {
-      return false;
-    }
   }
 
   void _showReviewForm(
     BuildContext context, {
     String? reviewId,
     int? initialRating,
+    String? initialTitle,
     String? initialComment,
   }) {
     final bloc = context.read<ReviewBloc>();
@@ -289,14 +337,20 @@ class _BookReviewsSectionContent extends StatelessWidget {
       bookId: bookId,
       reviewId: reviewId,
       initialRating: initialRating,
+      initialTitle: initialTitle,
       initialComment: initialComment,
-      onSubmit: ({required int rating, required String comment}) {
+      onSubmit: ({
+        required int rating,
+        required String title,
+        required String comment,
+      }) {
         if (reviewId != null) {
           bloc.add(
             UpdateReviewEvent(
               id: reviewId,
               bookId: bookId,
               rating: rating,
+              title: title,
               comment: comment,
             ),
           );
@@ -305,6 +359,7 @@ class _BookReviewsSectionContent extends StatelessWidget {
             CreateReviewEvent(
               bookId: bookId,
               rating: rating,
+              title: title,
               comment: comment,
             ),
           );

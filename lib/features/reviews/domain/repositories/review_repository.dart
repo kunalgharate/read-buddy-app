@@ -1,15 +1,19 @@
+import 'package:read_buddy_app/features/reviews/domain/entities/review_eligibility_entity.dart';
 import 'package:read_buddy_app/features/reviews/domain/entities/review_entity.dart';
 
 abstract class ReviewRepository {
   Future<BookReviewsResponse> getBookReviews(String bookId);
+  Future<ReviewEligibilityEntity> getEligibility(String bookId);
   Future<ReviewEntity> createReview({
     required String bookId,
     required int rating,
+    required String title,
     required String comment,
   });
   Future<ReviewEntity> updateReview({
     required String id,
     required int rating,
+    required String title,
     required String comment,
   });
   Future<void> deleteReview(String id);
