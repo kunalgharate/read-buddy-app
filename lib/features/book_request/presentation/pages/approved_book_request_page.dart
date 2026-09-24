@@ -33,6 +33,15 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   bool _paying = false;
   bool _paid = false;
 
+  /// The Razorpay order id created server-side for this request's ₹25 delivery
+  /// fee. This is the order id the checkout was opened with. Signature
+  /// verification MUST use this value (per Razorpay docs) and NOT the
+  /// `razorpay_order_id` echoed by the checkout callback, which is
+  /// undefined/blank in test-mode on some payment methods — sending a blank
+  /// order id makes the backend hash over `|payment_id` and fail with
+  /// "Invalid signature".
+  String? _razorpayOrderId;
+
   // Contract: paymentStatus enum is PENDING | PAID | FREE. The ₹25 delivery
   // fee is payable only in the active-unpaid state (PENDING). Used to gate
   // createDeliveryPaymentOrder so it can't be reached for any other value.
@@ -66,6 +75,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
       final res = await ds.createDeliveryPaymentOrder(widget.request.id);
       if (!mounted) return;
       final order = res['order'] as Map;
+      _razorpayOrderId = order['id'] as String?;
       _razorpay.open({
         'key': res['keyId'],
         'amount': order['amount'],
@@ -87,12 +97,22 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   }
 
   Future<void> _onDeliveryPaid(PaymentSuccessResponse response) async {
+    // Verify against the order id the server created and the checkout was
+    // opened with, not the callback's razorpay_order_id (can be blank in
+    // test mode — Razorpay docs: never use it for signature verification).
+    // Fall back to the callback value only if it was never captured.
+    final orderId = _razorpayOrderId ?? response.orderId ?? '';
+    if (kDebugMode) {
+      debugPrint(
+        '[Pay ₹25] verify | request=${widget.request.id} | paymentId=${response.paymentId ?? ''} | orderId=$orderId',
+      );
+    }
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
       await ds.verifyDeliveryPayment(
         widget.request.id,
         paymentId: response.paymentId ?? '',
-        orderId: response.orderId ?? '',
+        orderId: orderId,
         signature: response.signature ?? '',
       );
       if (!mounted) return;
