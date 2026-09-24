@@ -943,6 +943,21 @@ class _DonationPageState extends State<_DonationPageContent> {
                 // that lack usable coordinates (kept visible as a fallback).
                 final ordered = _orderDropoffLibraries(state.libraries);
 
+                // Reconcile: if a previously-selected library is no longer in
+                // the filtered list (e.g. it fell outside 15km once the fresh
+                // location arrived), clear it so a hidden library can't be
+                // submitted with no visible selection.
+                if (_selectedLibrary != null &&
+                    !ordered.any((l) => l.id == _selectedLibrary!.id)) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted &&
+                        _selectedLibrary != null &&
+                        !ordered.any((l) => l.id == _selectedLibrary!.id)) {
+                      setState(() => _selectedLibrary = null);
+                    }
+                  });
+                }
+
                 // Only auto-select when we have a verified user position AND
                 // the nearest option is a located (in-range) library — never
                 // auto-pick when location is unknown or the first is coord-less
