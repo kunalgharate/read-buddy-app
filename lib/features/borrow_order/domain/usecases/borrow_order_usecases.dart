@@ -17,12 +17,14 @@ class AddBookToOrder {
     required String variantId,
     required String formatId,
     String? libraryId,
+    String? fulfillmentMethod,
   }) =>
       _repository.addBook(
         bookId: bookId,
         variantId: variantId,
         formatId: formatId,
         libraryId: libraryId,
+        fulfillmentMethod: fulfillmentMethod,
       );
 }
 

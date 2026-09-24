@@ -52,6 +52,8 @@ class CityBookModel extends CityBookEntity {
     super.coverImageUrl,
     required super.categories,
     required super.totalAvailable,
+    super.nearestDistanceKm,
+    super.pickupAvailable,
     required super.libraries,
   });
 
@@ -76,6 +78,8 @@ class CityBookModel extends CityBookEntity {
       coverImageUrl: json['coverImageUrl']?.toString(),
       categories: cats,
       totalAvailable: (json['totalAvailable'] ?? 0) as int,
+      nearestDistanceKm: (json['nearestDistanceKm'] as num?)?.toDouble(),
+      pickupAvailable: json['pickupAvailable'] as bool? ?? false,
       libraries: libs,
     );
   }
@@ -88,6 +92,10 @@ class CityBookLibraryInfoModel extends CityBookLibraryInfo {
     required super.formatType,
     required super.availableCopies,
     required super.totalCopies,
+    super.latitude,
+    super.longitude,
+    super.distanceKm,
+    super.pickupEligible,
   });
 
   factory CityBookLibraryInfoModel.fromJson(Map<String, dynamic> json) {
@@ -97,6 +105,10 @@ class CityBookLibraryInfoModel extends CityBookLibraryInfo {
       formatType: json['formatType']?.toString() ?? 'hardcover',
       availableCopies: (json['availableCopies'] ?? 0) as int,
       totalCopies: (json['totalCopies'] ?? 0) as int,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+      distanceKm: (json['distanceKm'] as num?)?.toDouble(),
+      pickupEligible: json['pickupEligible'] as bool? ?? false,
     );
   }
 }

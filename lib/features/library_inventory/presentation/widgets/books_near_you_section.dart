@@ -40,7 +40,13 @@ class _BooksNearYouSectionState extends State<BooksNearYouSection> {
         );
         if (address != null && address.city.isNotEmpty) {
           _city = address.city;
-          _bloc.add(BrowseCityBooks(city: _city!));
+          _bloc.add(
+            BrowseCityBooks(
+              city: _city!,
+              lat: position.latitude,
+              lng: position.longitude,
+            ),
+          );
         }
       }
     } catch (_) {

@@ -67,7 +67,9 @@ final class DeleteInventoryEvent extends LibraryInventoryEvent {
 final class BrowseCityBooks extends LibraryInventoryEvent {
   final String city;
   final String? search;
-  const BrowseCityBooks({required this.city, this.search});
+  final double? lat;
+  final double? lng;
+  const BrowseCityBooks({required this.city, this.search, this.lat, this.lng});
   @override
-  List<Object?> get props => [city, search];
+  List<Object?> get props => [city, search, lat, lng];
 }
