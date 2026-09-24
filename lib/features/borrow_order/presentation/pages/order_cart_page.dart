@@ -690,25 +690,35 @@ class _PickupLibrarySelectorState extends State<_PickupLibrarySelector> {
       }
 
       final within = <_LibraryWithDistance>[];
+      final noCoords = <_LibraryWithDistance>[];
       for (final lib in all) {
-        if (lib.address.latitude == 0 && lib.address.longitude == 0) continue;
+        final lat = lib.address.latitude;
+        final lng = lib.address.longitude;
+        // Libraries without coordinates (absent or 0,0) can't be distance-
+        // filtered — keep them as a fallback rather than hiding them.
+        if (lat == 0 && lng == 0) {
+          noCoords.add(_LibraryWithDistance(library: lib, distanceKm: null));
+          continue;
+        }
         final km = LocationService.instance.calculateDistanceKm(
           position.latitude,
           position.longitude,
-          lib.address.latitude,
-          lib.address.longitude,
+          lat,
+          lng,
         );
         if (km <= _radiusKm) {
           within.add(_LibraryWithDistance(library: lib, distanceKm: km));
         }
       }
       within.sort((a, b) => a.distanceKm!.compareTo(b.distanceKm!));
+      // In-range (nearest first) then coord-less fallbacks.
+      final visible = [...within, ...noCoords];
 
-      _reconcileSelection(within);
+      _reconcileSelection(visible);
 
       setState(() {
         _hadLibraries = all.isNotEmpty;
-        _libraries = within;
+        _libraries = visible;
         _loading = false;
       });
     } catch (e) {
