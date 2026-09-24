@@ -97,6 +97,11 @@ class _MainTabState extends State<MainTab> {
       }
     }
 
+    // The user may have picked a city manually while we awaited the permission
+    // prompt / availability check — don't let GPS overwrite that newer choice.
+    final chosenMeanwhile = CityNotifier.instance.value;
+    if (chosenMeanwhile != null && chosenMeanwhile.isNotEmpty) return;
+
     final city = await CityNotifier.instance.detectFromGPS();
     if (!mounted) return;
     if (city == null) {
@@ -655,15 +660,14 @@ class _CityBooksSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       TextButton(
-                        onPressed: () => context
-                            .read<LibraryInventoryBloc>()
-                            .add(
-                              BrowseCityBooks(
-                                city: city,
-                                lat: CityNotifier.instance.latitude,
-                                lng: CityNotifier.instance.longitude,
-                              ),
-                            ),
+                        onPressed: () =>
+                            context.read<LibraryInventoryBloc>().add(
+                                  BrowseCityBooks(
+                                    city: city,
+                                    lat: CityNotifier.instance.latitude,
+                                    lng: CityNotifier.instance.longitude,
+                                  ),
+                                ),
                         child: const Text('Retry'),
                       ),
                     ],

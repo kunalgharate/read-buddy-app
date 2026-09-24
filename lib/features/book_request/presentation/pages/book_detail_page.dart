@@ -973,6 +973,7 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
       context,
       bookId: book.id,
       bookTitle: book.title,
+      preferredVariantId: variant.id,
     );
     // User dismissed the picker without choosing — abort silently.
     if (pick == null) return;

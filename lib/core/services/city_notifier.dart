@@ -66,7 +66,11 @@ class CityNotifier extends ValueNotifier<String?> {
   /// Set city manually (user picks from list or types).
   /// Coordinates are cleared unless [latitude]/[longitude] are provided, since
   /// a hand-typed city has no precise coordinates.
-  Future<void> setCity(String city, {double? latitude, double? longitude}) async {
+  Future<void> setCity(
+    String city, {
+    double? latitude,
+    double? longitude,
+  }) async {
     if (city.trim().isEmpty) return;
     final trimmed = city.trim();
     value = trimmed;
@@ -74,6 +78,11 @@ class CityNotifier extends ValueNotifier<String?> {
     if (latitude != null && longitude != null) {
       _latitude = latitude;
       _longitude = longitude;
+    } else {
+      // Manual city with no precise coordinates → clear stale coords so we
+      // don't keep another city's location.
+      _latitude = null;
+      _longitude = null;
     }
 
     // Update recents
@@ -87,8 +96,13 @@ class CityNotifier extends ValueNotifier<String?> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyCity, trimmed);
     await prefs.setString(_keyRecent, jsonEncode(_recentCities));
-    if (_latitude != null) await prefs.setDouble(_keyLat, _latitude!);
-    if (_longitude != null) await prefs.setDouble(_keyLng, _longitude!);
+    if (_latitude != null && _longitude != null) {
+      await prefs.setDouble(_keyLat, _latitude!);
+      await prefs.setDouble(_keyLng, _longitude!);
+    } else {
+      await prefs.remove(_keyLat);
+      await prefs.remove(_keyLng);
+    }
   }
 
   /// Detect city from GPS and set it (also stores precise coordinates).

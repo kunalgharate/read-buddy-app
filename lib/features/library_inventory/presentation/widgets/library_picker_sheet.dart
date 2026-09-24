@@ -27,10 +27,15 @@ class LibraryPickerSheet extends StatefulWidget {
   final String bookId;
   final String bookTitle;
 
+  /// When the user chose a specific edition (variant) on the detail page, prefer
+  /// the inventory record for that variant so borrowing keeps the same edition.
+  final String? preferredVariantId;
+
   const LibraryPickerSheet({
     super.key,
     required this.bookId,
     required this.bookTitle,
+    this.preferredVariantId,
   });
 
   /// Show the picker and return selected library info, or null if dismissed.
@@ -38,6 +43,7 @@ class LibraryPickerSheet extends StatefulWidget {
     BuildContext context, {
     required String bookId,
     required String bookTitle,
+    String? preferredVariantId,
   }) {
     return showModalBottomSheet<LibraryPickResult>(
       context: context,
@@ -48,6 +54,7 @@ class LibraryPickerSheet extends StatefulWidget {
       builder: (_) => LibraryPickerSheet(
         bookId: bookId,
         bookTitle: bookTitle,
+        preferredVariantId: preferredVariantId,
       ),
     );
   }
@@ -166,15 +173,30 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
       final data = response.data;
       final inventory = (data['inventory'] as List?) ?? [];
 
-      // Find the inventory record matching this book and format
-      final record = inventory.firstWhere(
-        (inv) {
-          final bookId = inv['bookId'] is Map
-              ? inv['bookId']['_id']?.toString()
-              : inv['bookId']?.toString();
-          return bookId == widget.bookId &&
-              inv['formatType'] == option.formatType;
-        },
+      String recBookId(dynamic inv) => inv['bookId'] is Map
+          ? (inv['bookId']['_id']?.toString() ?? '')
+          : (inv['bookId']?.toString() ?? '');
+      String recVariantId(dynamic inv) => inv['variantId'] is Map
+          ? (inv['variantId']['_id']?.toString() ?? '')
+          : (inv['variantId']?.toString() ?? '');
+
+      // Prefer the record for the user's chosen edition (variant) + format;
+      // fall back to any record matching this book + format.
+      dynamic record;
+      if (widget.preferredVariantId != null &&
+          widget.preferredVariantId!.isNotEmpty) {
+        record = inventory.firstWhere(
+          (inv) =>
+              recBookId(inv) == widget.bookId &&
+              inv['formatType'] == option.formatType &&
+              recVariantId(inv) == widget.preferredVariantId,
+          orElse: () => null,
+        );
+      }
+      record ??= inventory.firstWhere(
+        (inv) =>
+            recBookId(inv) == widget.bookId &&
+            inv['formatType'] == option.formatType,
         orElse: () => null,
       );
 

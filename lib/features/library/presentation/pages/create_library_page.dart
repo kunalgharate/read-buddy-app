@@ -43,6 +43,7 @@ class _CreateLibraryFormState extends State<_CreateLibraryForm> {
   late bool _isSuperLibrary;
   bool _fetchingLocation = false;
   bool _geocoding = false;
+  bool _submitting = false;
 
   bool get _isEditing => widget.existing != null;
 
@@ -154,56 +155,61 @@ class _CreateLibraryFormState extends State<_CreateLibraryForm> {
   }
 
   Future<void> _submit() async {
+    if (_submitting) return; // prevent concurrent/duplicate submissions
     if (!_formKey.currentState!.validate()) return;
-
-    // If coordinates are blank, try to resolve them from the address first so
-    // the library reliably gets coordinates (needed for nearby/pickup). We do
-    // NOT block saving if this fails — the backend also geocodes best-effort.
-    var lat = double.tryParse(_latCtrl.text);
-    var lng = double.tryParse(_lngCtrl.text);
-    if (lat == null || lng == null || lat == 0 || lng == 0) {
-      setState(() => _geocoding = true);
-      final coords = await LocationService.instance.forwardGeocode(
-        street: _streetCtrl.text.trim(),
-        city: _cityCtrl.text.trim(),
-        state: _stateCtrl.text.trim(),
-        pincode: _pincodeCtrl.text.trim(),
-      );
-      if (mounted) setState(() => _geocoding = false);
-      if (coords != null) {
-        lat = coords.latitude;
-        lng = coords.longitude;
-        _latCtrl.text = lat.toStringAsFixed(6);
-        _lngCtrl.text = lng.toStringAsFixed(6);
+    setState(() => _submitting = true);
+    try {
+      // If coordinates are blank, try to resolve them from the address first so
+      // the library reliably gets coordinates (needed for nearby/pickup). We do
+      // NOT block saving if this fails — the backend also geocodes best-effort.
+      var lat = double.tryParse(_latCtrl.text);
+      var lng = double.tryParse(_lngCtrl.text);
+      if (lat == null || lng == null || lat == 0 || lng == 0) {
+        setState(() => _geocoding = true);
+        final coords = await LocationService.instance.forwardGeocode(
+          street: _streetCtrl.text.trim(),
+          city: _cityCtrl.text.trim(),
+          state: _stateCtrl.text.trim(),
+          pincode: _pincodeCtrl.text.trim(),
+        );
+        if (mounted) setState(() => _geocoding = false);
+        if (coords != null) {
+          lat = coords.latitude;
+          lng = coords.longitude;
+          _latCtrl.text = lat.toStringAsFixed(6);
+          _lngCtrl.text = lng.toStringAsFixed(6);
+        }
       }
-    }
 
-    final data = LibraryModel(
-      id: '',
-      name: _nameCtrl.text.trim(),
-      contactNumber: _contactCtrl.text.trim(),
-      openHours: _hoursCtrl.text.trim(),
-      isSuperLibrary: _isSuperLibrary,
-      address: LibraryAddressModel(
-        street: _streetCtrl.text.trim(),
-        city: _cityCtrl.text.trim(),
-        state: _stateCtrl.text.trim(),
-        country: 'India',
-        pincode: _pincodeCtrl.text.trim(),
-        latitude: lat ?? 0,
-        longitude: lng ?? 0,
-      ),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ).toJson();
+      final data = LibraryModel(
+        id: '',
+        name: _nameCtrl.text.trim(),
+        contactNumber: _contactCtrl.text.trim(),
+        openHours: _hoursCtrl.text.trim(),
+        isSuperLibrary: _isSuperLibrary,
+        address: LibraryAddressModel(
+          street: _streetCtrl.text.trim(),
+          city: _cityCtrl.text.trim(),
+          state: _stateCtrl.text.trim(),
+          country: 'India',
+          pincode: _pincodeCtrl.text.trim(),
+          latitude: lat ?? 0,
+          longitude: lng ?? 0,
+        ),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ).toJson();
 
-    if (!mounted) return;
-    if (_isEditing) {
-      context
-          .read<LibraryBloc>()
-          .add(UpdateLibraryEvent(widget.existing!.id, data));
-    } else {
-      context.read<LibraryBloc>().add(CreateLibraryEvent(data));
+      if (!mounted) return;
+      if (_isEditing) {
+        context
+            .read<LibraryBloc>()
+            .add(UpdateLibraryEvent(widget.existing!.id, data));
+      } else {
+        context.read<LibraryBloc>().add(CreateLibraryEvent(data));
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
@@ -421,7 +427,7 @@ class _CreateLibraryFormState extends State<_CreateLibraryForm> {
                   builder: (context, state) {
                     final loading = state is LibraryLoading;
                     return FilledButton(
-                      onPressed: loading ? null : _submit,
+                      onPressed: (loading || _submitting) ? null : _submit,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),

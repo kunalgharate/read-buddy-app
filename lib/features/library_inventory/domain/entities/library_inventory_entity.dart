@@ -73,7 +73,7 @@ class CityBookEntity extends Equatable {
   bool get isAvailable => totalAvailable > 0;
 
   @override
-  List<Object?> get props => [bookId, totalAvailable];
+  List<Object?> get props => [bookId, totalAvailable, pickupAvailable];
 }
 
 class CityBookLibraryInfo extends Equatable {
@@ -100,6 +100,14 @@ class CityBookLibraryInfo extends Equatable {
   });
 
   @override
-  List<Object?> get props =>
-      [libraryId, formatType, availableCopies, totalCopies, distanceKm];
+  List<Object?> get props => [
+        libraryId,
+        formatType,
+        availableCopies,
+        totalCopies,
+        latitude,
+        longitude,
+        distanceKm,
+        pickupEligible,
+      ];
 }
