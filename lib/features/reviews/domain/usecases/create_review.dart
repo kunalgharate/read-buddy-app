@@ -9,11 +9,13 @@ class CreateReview {
   Future<ReviewEntity> call({
     required String bookId,
     required int rating,
+    required String title,
     required String comment,
   }) =>
       repository.createReview(
         bookId: bookId,
         rating: rating,
+        title: title,
         comment: comment,
       );
 }

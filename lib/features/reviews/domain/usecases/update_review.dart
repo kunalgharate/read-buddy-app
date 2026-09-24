@@ -9,11 +9,13 @@ class UpdateReview {
   Future<ReviewEntity> call({
     required String id,
     required int rating,
+    required String title,
     required String comment,
   }) =>
       repository.updateReview(
         id: id,
         rating: rating,
+        title: title,
         comment: comment,
       );
 }

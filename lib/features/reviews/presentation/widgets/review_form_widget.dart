@@ -4,10 +4,12 @@ import 'package:read_buddy_app/core/theme/app_colors.dart';
 class ReviewFormWidget extends StatefulWidget {
   final String bookId;
   final int? initialRating;
+  final String? initialTitle;
   final String? initialComment;
   final String? reviewId;
   final void Function({
     required int rating,
+    required String title,
     required String comment,
   }) onSubmit;
 
@@ -15,6 +17,7 @@ class ReviewFormWidget extends StatefulWidget {
     super.key,
     required this.bookId,
     this.initialRating,
+    this.initialTitle,
     this.initialComment,
     this.reviewId,
     required this.onSubmit,
@@ -25,10 +28,14 @@ class ReviewFormWidget extends StatefulWidget {
     required BuildContext context,
     required String bookId,
     int? initialRating,
+    String? initialTitle,
     String? initialComment,
     String? reviewId,
-    required void Function({required int rating, required String comment})
-        onSubmit,
+    required void Function({
+      required int rating,
+      required String title,
+      required String comment,
+    }) onSubmit,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -41,6 +48,7 @@ class ReviewFormWidget extends StatefulWidget {
         child: ReviewFormWidget(
           bookId: bookId,
           initialRating: initialRating,
+          initialTitle: initialTitle,
           initialComment: initialComment,
           reviewId: reviewId,
           onSubmit: onSubmit,
@@ -55,6 +63,7 @@ class ReviewFormWidget extends StatefulWidget {
 
 class _ReviewFormWidgetState extends State<ReviewFormWidget> {
   late int _rating;
+  late TextEditingController _titleController;
   late TextEditingController _commentController;
   final _formKey = GlobalKey<FormState>();
 
@@ -64,12 +73,14 @@ class _ReviewFormWidgetState extends State<ReviewFormWidget> {
   void initState() {
     super.initState();
     _rating = widget.initialRating ?? 0;
+    _titleController = TextEditingController(text: widget.initialTitle ?? '');
     _commentController =
         TextEditingController(text: widget.initialComment ?? '');
   }
 
   @override
   void dispose() {
+    _titleController.dispose();
     _commentController.dispose();
     super.dispose();
   }
@@ -124,6 +135,48 @@ class _ReviewFormWidgetState extends State<ReviewFormWidget> {
             const SizedBox(height: 8),
             _buildStarSelector(),
             const SizedBox(height: 20),
+
+            // Review title (required)
+            Text(
+              'Title',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondaryColor(context),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _titleController,
+              maxLength: 100,
+              textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                hintText: 'Sum up your review in a few words',
+                hintStyle: TextStyle(
+                  color: AppColors.textMutedColor(context),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.borderColor(context)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.borderColor(context)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.primary),
+                ),
+                contentPadding: const EdgeInsets.all(14),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Please provide a title';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
 
             // Comment field
             Text(
@@ -227,6 +280,7 @@ class _ReviewFormWidgetState extends State<ReviewFormWidget> {
     if (_formKey.currentState?.validate() ?? false) {
       widget.onSubmit(
         rating: _rating,
+        title: _titleController.text.trim(),
         comment: _commentController.text.trim(),
       );
       Navigator.of(context).pop();

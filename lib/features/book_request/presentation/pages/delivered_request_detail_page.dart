@@ -1,6 +1,7 @@
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:read_buddy_app/features/reviews/presentation/widgets/write_review_entry.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../widgets/shipment_tracking_widget.dart';
 import 'collect_from_library_page.dart';
@@ -174,6 +175,13 @@ class _DeliveredRequestDetailPageState
               _InfoRow('Due Date', _fmtDate(widget.request.dueDate)),
             if (widget.request.returnDate != null)
               _InfoRow('Return Date', _fmtDate(widget.request.returnDate)),
+
+            // Write a review — only shown when the user is eligible
+            // (borrowed + completed and not yet reviewed). The widget queries
+            // the eligibility endpoint and renders nothing otherwise.
+            if (widget.request.bookId != null &&
+                widget.request.bookId!.isNotEmpty)
+              WriteReviewEntry(bookId: widget.request.bookId!),
           ],
         ),
       ),
