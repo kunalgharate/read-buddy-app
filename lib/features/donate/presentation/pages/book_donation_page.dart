@@ -14,6 +14,7 @@ import 'package:read_buddy_app/features/donate/domain/entities/book_donation_req
 import 'package:read_buddy_app/features/library/domain/entities/library_entity.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/core/services/location_service.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:read_buddy_app/features/donate/presentation/pages/donation_success_screen.dart';
 
 class DonationPage extends StatelessWidget {
@@ -57,6 +58,9 @@ class _DonationPageState extends State<_DonationPageContent> {
   DateTime? _preferredDate;
   LibraryEntity? _selectedLibrary;
 
+  // Fresh user position for the drop-off 15km filter (see _resolveDropPosition).
+  Position? _dropPosition;
+
   static const double _dropRadiusKm = 15.0;
 
   /// A library is coordinate-less when EITHER coordinate is absent or the 0
@@ -76,7 +80,7 @@ class _DonationPageState extends State<_DonationPageContent> {
     final coordless = libraries.where((l) => _isCoordless(l.address)).toList();
     final located = libraries.where((l) => !_isCoordless(l.address)).toList();
 
-    final pos = LocationService.instance.lastPosition;
+    final pos = _dropPosition;
     if (pos == null) {
       // No location: can't distance-filter; show located first, then fallback.
       return [...located, ...coordless];
@@ -156,6 +160,18 @@ class _DonationPageState extends State<_DonationPageContent> {
     super.initState();
     context.read<CategoryBloc>().add(LoadCategories());
     context.read<DonateBookBloc>().add(LoadNearestLibraries());
+    _resolveDropPosition();
+  }
+
+  /// Acquire a FRESH position for the drop-off 15km filter, so we don't rely on
+  /// a stale cached location from an earlier visit in another city. Falls back
+  /// to the cached position only if a fresh fix isn't available.
+  Future<void> _resolveDropPosition() async {
+    final fresh = await LocationService.instance.getCurrentLocation();
+    if (!mounted) return;
+    setState(() {
+      _dropPosition = fresh ?? LocationService.instance.lastPosition;
+    });
   }
 
   @override
@@ -927,10 +943,12 @@ class _DonationPageState extends State<_DonationPageContent> {
                 // that lack usable coordinates (kept visible as a fallback).
                 final ordered = _orderDropoffLibraries(state.libraries);
 
-                // Only auto-select when the nearest option has verified
-                // coordinates — never silently pick a coord-less (possibly
-                // far / other-city) library; that requires an explicit tap.
+                // Only auto-select when we have a verified user position AND
+                // the nearest option is a located (in-range) library — never
+                // auto-pick when location is unknown or the first is coord-less
+                // (it could be in another city; require an explicit tap).
                 if (_selectedLibrary == null &&
+                    _dropPosition != null &&
                     ordered.isNotEmpty &&
                     !_isCoordless(ordered.first.address)) {
                   final first = ordered.first;
