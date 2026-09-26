@@ -23,24 +23,28 @@ class ExploreSearchBar extends StatelessWidget {
           ),
         ],
       ),
-      child: const Row(
-        children: [
-          Icon(Icons.search, color: Colors.grey, size: 20),
-          SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search any Books',
-                hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
-                border: InputBorder.none,
-                isDense: true,
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, '/search'),
+        child: const Row(
+          children: [
+            Icon(Icons.search, color: Colors.grey, size: 20),
+            SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                readOnly: true,
+                decoration: InputDecoration(
+                  hintText: 'Search any Books',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
               ),
             ),
-          ),
-          Icon(Icons.qr_code_scanner, color: Colors.grey, size: 20),
-          SizedBox(width: 12),
-          Icon(Icons.tune, color: Colors.grey, size: 20),
-        ],
+            Icon(Icons.qr_code_scanner, color: Colors.grey, size: 20),
+            SizedBox(width: 12),
+            Icon(Icons.tune, color: Colors.grey, size: 20),
+          ],
+        ),
       ),
     );
   }
