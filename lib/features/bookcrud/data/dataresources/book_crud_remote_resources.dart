@@ -3,11 +3,18 @@ import 'package:injectable/injectable.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/utils/secure_storage_utils.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
+import 'package:read_buddy_app/features/bookcrud/data/model/paged_books_result.dart';
 import '../../../../core/network/api_constants.dart';
 
 abstract class BookCrudRemoteDataSource {
   Future<List<BookCrudModel>> getBooks();
   Future<List<BookCrudModel>> searchBooks(String query);
+  Future<PagedBooksResult> searchBooksPaged({
+    required String query,
+    String? format,
+    int page = 1,
+    int limit = 50,
+  });
   Future<BookCrudModel> getBookById(String id);
   Future<void> addBook(BookCrudModel book);
   Future<void> updateBook(String id, BookCrudModel book);
@@ -254,6 +261,50 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
       print("❌ Error fetching searching books: $e");
       print("🔍 StackTrace: $stackTrace");
       rethrow; // rethrowing allows the error to be handled further up the chain (e.g., in Bloc)
+    }
+  }
+
+  @override
+  Future<PagedBooksResult> searchBooksPaged({
+    required String query,
+    String? format,
+    int page = 1,
+    int limit = 50,
+  }) async {
+    try {
+      final response = await dio.get(
+        ApiConstants.books,
+        queryParameters: {
+          'search': query,
+          if (format != null && format.isNotEmpty) 'format': format,
+          'page': page,
+          'limit': limit,
+        },
+      );
+
+      if (response.statusCode != ApiConstants.success) {
+        throw Exception(
+          'Failed to load books. Status code: ${response.statusCode}',
+        );
+      }
+
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw Exception('Unexpected response format for books');
+      }
+      final list = (data['data'] as List? ?? const [])
+          .map((json) => BookCrudModel.fromJson(json))
+          .toList();
+      return PagedBooksResult(
+        books: list,
+        total: (data['total'] as num?)?.toInt() ?? list.length,
+        page: (data['page'] as num?)?.toInt() ?? page,
+        totalPages: (data['totalPages'] as num?)?.toInt() ?? 1,
+      );
+    } catch (e, stackTrace) {
+      print("❌ Error searching paged books: $e");
+      print("🔍 StackTrace: $stackTrace");
+      rethrow;
     }
   }
 }
