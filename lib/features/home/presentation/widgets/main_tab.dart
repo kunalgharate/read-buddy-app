@@ -143,7 +143,18 @@ class _MainTabView extends StatelessWidget {
                     const _ContinueReadingSection(),
                     const SizedBox(height: 32),
 
-                    // ── City-Filtered Books (replaces global Latest / Recommended) ──
+                    _BookSection(
+                      title: 'Latest',
+                      books: state.latestBooks,
+                    ),
+                    const SizedBox(height: 32),
+                    _BookSection(
+                      title: 'Recommended for you',
+                      books: state.recommendedBooks,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // ── City books (shown when user has selected a city) ──
                     const _CityBooksSection(),
 
                     const SizedBox(height: 32),
