@@ -10,6 +10,7 @@ abstract class BorrowOrderRemoteDataSource {
     required String variantId,
     required String formatId,
     String? libraryId,
+    String? fulfillmentMethod,
   });
   Future<BorrowOrderModel> removeBook(String bookRequestId);
   Future<BorrowOrderModel> submitOrder({
@@ -57,6 +58,7 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
     required String variantId,
     required String formatId,
     String? libraryId,
+    String? fulfillmentMethod,
   }) async {
     final data = <String, dynamic>{
       'bookId': bookId,
@@ -64,6 +66,9 @@ class BorrowOrderRemoteDataSourceImpl implements BorrowOrderRemoteDataSource {
       'formatId': formatId,
     };
     if (libraryId != null) data['libraryId'] = libraryId;
+    if (fulfillmentMethod != null) {
+      data['fulfillmentMethod'] = fulfillmentMethod.toUpperCase();
+    }
 
     final response = await _dio.post(
       '$_baseEndpoint/add-book',

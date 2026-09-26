@@ -128,6 +128,33 @@ class LocationService {
   /// Open device location settings (if permission permanently denied).
   Future<bool> openSettings() => Geolocator.openLocationSettings();
 
+  // ─── Forward Geocoding (address → coordinates) ─────────────────────────────
+
+  /// Convert a textual address into coordinates. Used by the admin library
+  /// form so a library always gets proper coordinates (nearby/pickup depend on
+  /// this). Returns null when the address can't be resolved.
+  Future<({double latitude, double longitude})?> forwardGeocode({
+    String? street,
+    String? city,
+    String? state,
+    String? pincode,
+    String country = 'India',
+  }) async {
+    final query = [street, city, state, pincode, country]
+        .where((s) => s != null && s.trim().isNotEmpty)
+        .join(', ');
+    if (query.trim().isEmpty) return null;
+    try {
+      final locations = await locationFromAddress(query);
+      if (locations.isEmpty) return null;
+      final l = locations.first;
+      return (latitude: l.latitude, longitude: l.longitude);
+    } catch (e) {
+      if (kDebugMode) print('📍 Forward geocode failed for "$query": $e');
+      return null;
+    }
+  }
+
   /// Open app settings (for permission denied forever).
   Future<bool> openAppSettings() => Geolocator.openAppSettings();
 }

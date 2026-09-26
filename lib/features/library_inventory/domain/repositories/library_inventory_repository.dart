@@ -28,5 +28,7 @@ abstract class LibraryInventoryRepository {
     String? search,
     int? page,
     int? limit,
+    double? lat,
+    double? lng,
   });
 }
