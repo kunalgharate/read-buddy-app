@@ -15,6 +15,11 @@ abstract class BookCrudRemoteDataSource {
     int page = 1,
     int limit = 50,
   });
+  Future<PagedBooksResult> booksByCategory({
+    required String categoryId,
+    int page = 1,
+    int limit = 50,
+  });
   Future<BookCrudModel> getBookById(String id);
   Future<void> addBook(BookCrudModel book);
   Future<void> updateBook(String id, BookCrudModel book);
@@ -303,6 +308,48 @@ class BookCrudRemoteDataSourceImpl implements BookCrudRemoteDataSource {
       );
     } catch (e, stackTrace) {
       print("❌ Error searching paged books: $e");
+      print("🔍 StackTrace: $stackTrace");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<PagedBooksResult> booksByCategory({
+    required String categoryId,
+    int page = 1,
+    int limit = 50,
+  }) async {
+    try {
+      final response = await dio.get(
+        '${ApiConstants.books}/filter',
+        queryParameters: {
+          'category': categoryId,
+          'page': page,
+          'limit': limit,
+        },
+      );
+
+      if (response.statusCode != ApiConstants.success) {
+        throw Exception(
+          'Failed to load category books. Status code: ${response.statusCode}',
+        );
+      }
+
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw Exception('Unexpected response format for books');
+      }
+      final list = (data['data'] as List? ?? const [])
+          .map((json) => BookCrudModel.fromJson(json))
+          .toList();
+      return PagedBooksResult(
+        books: list,
+        total: (data['total'] as num?)?.toInt() ?? list.length,
+        page: (data['page'] as num?)?.toInt() ?? page,
+        totalPages: (data['totalPages'] as num?)?.toInt() ?? 1,
+      );
+    } catch (e, stackTrace) {
+      print("❌ Error fetching books by category: $e");
       print("🔍 StackTrace: $stackTrace");
       rethrow;
     }

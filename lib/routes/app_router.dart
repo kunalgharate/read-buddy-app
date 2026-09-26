@@ -77,6 +77,7 @@ import 'package:read_buddy_app/features/mybook/presentation/mybook.dart';
 import 'package:read_buddy_app/features/notification/presentation/pages/notification_page.dart';
 import 'package:read_buddy_app/features/rewards/presentation/pages/rewards_page.dart';
 import 'package:read_buddy_app/features/search/presentation/screens/search_screen.dart';
+import 'package:read_buddy_app/features/search/presentation/screens/category_books_screen.dart';
 import 'package:read_buddy_app/features/settings/settings_screen.dart';
 import 'package:read_buddy_app/features/splash/splash_screen.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
@@ -221,6 +222,14 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const RewardsPage());
       case '/search':
         return MaterialPageRoute(builder: (_) => const SearchScreen());
+      case '/category-books':
+        final args = settings.arguments as Map<String, String>;
+        return MaterialPageRoute(
+          builder: (_) => CategoryBooksScreen(
+            categoryId: args['id'] ?? '',
+            categoryTitle: args['title'] ?? 'Books',
+          ),
+        );
       case '/notification':
         return MaterialPageRoute(builder: (_) => const NotificationPage());
       case '/settings':

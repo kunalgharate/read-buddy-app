@@ -36,6 +36,18 @@ class _CategoryTabState extends State<CategoryTab> {
     });
   }
 
+  void _openCategory(CategoryEntity category) {
+    if (category.id.isEmpty) {
+      _onCategorySelected(category);
+      return;
+    }
+    Navigator.pushNamed(
+      context,
+      '/category-books',
+      arguments: {'id': category.id, 'title': category.title},
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -205,7 +217,11 @@ class _CategoryTabState extends State<CategoryTab> {
               selected: isSelected,
               onSelected: (selected) {
                 if (selected) {
-                  _onCategorySelected(category);
+                  if (isAllChip) {
+                    _onCategorySelected(null);
+                  } else {
+                    _openCategory(category!);
+                  }
                 }
               },
               selectedColor: _green.withValues(alpha: 0.12),
@@ -281,7 +297,7 @@ class _CategoryTabState extends State<CategoryTab> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                   child: InkWell(
-                    onTap: () => _onCategorySelected(category),
+                    onTap: () => _openCategory(category),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -343,7 +359,7 @@ class _CategoryTabState extends State<CategoryTab> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => _onCategorySelected(category),
+onTap: () => _openCategory(category),
                           child: Icon(
                             Icons.arrow_forward_ios,
                             size: 16,
