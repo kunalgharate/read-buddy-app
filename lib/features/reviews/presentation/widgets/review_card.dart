@@ -31,6 +31,17 @@ class ReviewCard extends StatelessWidget {
           _buildHeader(context),
           const SizedBox(height: 8),
           _buildStarRating(context),
+          if (review.title != null && review.title!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              review.title!,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimaryColor(context),
+              ),
+            ),
+          ],
           if (review.comment.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(

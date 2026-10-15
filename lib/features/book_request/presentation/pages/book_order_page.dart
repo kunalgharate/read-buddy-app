@@ -113,7 +113,7 @@ class _BookOrderViewState extends State<_BookOrderView> {
       body: BlocListener<BookRequestBloc, BookRequestState>(
         listener: (context, state) {
           if (state is LibraryDetailsLoaded) {
-            setState(() => _library = state.library);
+            setState(() => _library = state.libraries.isNotEmpty ? state.libraries.first : null);
           }
           if (state is DeliveryScheduled) {
             setState(() => _currentTab = 1);

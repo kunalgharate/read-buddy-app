@@ -1,3 +1,4 @@
+import '../entities/pickup_details_entity.dart';
 import '../repositories/book_request_repository.dart';
 
 class InitiateReturnUsecase {
@@ -5,6 +6,16 @@ class InitiateReturnUsecase {
 
   InitiateReturnUsecase(this.repository);
 
-  Future<void> call(String id, String returnMethod, {String? returnBranchId}) =>
-      repository.initiateReturn(id, returnMethod, returnBranchId: returnBranchId);
+  Future<void> call(
+    String id, {
+    required String returnMethod,
+    String? returnBranchId,
+    PickupDetailsEntity? pickup,
+  }) =>
+      repository.initiateReturn(
+        id,
+        returnMethod: returnMethod,
+        returnBranchId: returnBranchId,
+        pickup: pickup,
+      );
 }

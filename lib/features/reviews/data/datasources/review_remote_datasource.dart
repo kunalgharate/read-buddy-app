@@ -8,11 +8,13 @@ abstract class ReviewRemoteDataSource {
     required String bookId,
     required int rating,
     required String comment,
+    String? title,
   });
   Future<ReviewModel> updateReview({
     required String id,
     required int rating,
     required String comment,
+    String? title,
   });
   Future<void> deleteReview(String id);
 }
@@ -57,14 +59,20 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     required String bookId,
     required int rating,
     required String comment,
+    String? title,
   }) async {
+    final dataPayload = {
+      'bookId': bookId,
+      'rating': rating,
+      'review': comment, // Backend expects 'review' field
+    };
+    if (title != null && title.isNotEmpty) {
+      dataPayload['title'] = title;
+      dataPayload['reviewTitle'] = title;
+    }
     final response = await dio.post(
       ApiConstants.reviews,
-      data: {
-        'bookId': bookId,
-        'rating': rating,
-        'review': comment, // Backend expects 'review' field
-      },
+      data: dataPayload,
     );
 
     if (response.statusCode != ApiConstants.success &&
@@ -89,13 +97,19 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     required String id,
     required int rating,
     required String comment,
+    String? title,
   }) async {
+    final dataPayload = {
+      'rating': rating,
+      'review': comment, // Backend expects 'review' field
+    };
+    if (title != null && title.isNotEmpty) {
+      dataPayload['title'] = title;
+      dataPayload['reviewTitle'] = title;
+    }
     final response = await dio.put(
       ApiConstants.reviewById(id),
-      data: {
-        'rating': rating,
-        'review': comment, // Backend expects 'review' field
-      },
+      data: dataPayload,
     );
 
     if (response.statusCode != ApiConstants.success) {

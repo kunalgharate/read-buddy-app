@@ -4,7 +4,7 @@ sealed class ReviewEvent extends Equatable {
   const ReviewEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 final class LoadBookReviews extends ReviewEvent {
@@ -20,15 +20,17 @@ final class CreateReviewEvent extends ReviewEvent {
   final String bookId;
   final int rating;
   final String comment;
+  final String? title;
 
   const CreateReviewEvent({
     required this.bookId,
     required this.rating,
     required this.comment,
+    this.title,
   });
 
   @override
-  List<Object> get props => [bookId, rating, comment];
+  List<Object?> get props => [bookId, rating, comment, title];
 }
 
 final class UpdateReviewEvent extends ReviewEvent {
@@ -36,16 +38,18 @@ final class UpdateReviewEvent extends ReviewEvent {
   final String bookId;
   final int rating;
   final String comment;
+  final String? title;
 
   const UpdateReviewEvent({
     required this.id,
     required this.bookId,
     required this.rating,
     required this.comment,
+    this.title,
   });
 
   @override
-  List<Object> get props => [id, bookId, rating, comment];
+  List<Object?> get props => [id, bookId, rating, comment, title];
 }
 
 final class DeleteReviewEvent extends ReviewEvent {

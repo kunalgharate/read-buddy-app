@@ -8,6 +8,7 @@ class ReviewEntity extends Equatable {
   final String userAvatar;
   final int rating;
   final String comment;
+  final String? title;
   final String createdAt;
   final String updatedAt;
 
@@ -19,6 +20,7 @@ class ReviewEntity extends Equatable {
     required this.userAvatar,
     required this.rating,
     required this.comment,
+    this.title,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -32,6 +34,7 @@ class ReviewEntity extends Equatable {
         userAvatar,
         rating,
         comment,
+        title,
         createdAt,
         updatedAt,
       ];

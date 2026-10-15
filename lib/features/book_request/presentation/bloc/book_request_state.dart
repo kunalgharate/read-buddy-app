@@ -28,8 +28,8 @@ class BookRequestError extends BookRequestState {
 class LibraryDetailsLoading extends BookRequestState {}
 
 class LibraryDetailsLoaded extends BookRequestState {
-  final LibraryEntity library;
-  LibraryDetailsLoaded(this.library);
+  final List<LibraryEntity> libraries;
+  LibraryDetailsLoaded(this.libraries);
 }
 
 class LibraryDetailsError extends BookRequestState {

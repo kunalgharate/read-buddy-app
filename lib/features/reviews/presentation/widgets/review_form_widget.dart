@@ -5,10 +5,12 @@ class ReviewFormWidget extends StatefulWidget {
   final String bookId;
   final int? initialRating;
   final String? initialComment;
+  final String? initialTitle;
   final String? reviewId;
   final void Function({
     required int rating,
     required String comment,
+    String? title,
   }) onSubmit;
 
   const ReviewFormWidget({
@@ -16,6 +18,7 @@ class ReviewFormWidget extends StatefulWidget {
     required this.bookId,
     this.initialRating,
     this.initialComment,
+    this.initialTitle,
     this.reviewId,
     required this.onSubmit,
   });
@@ -26,8 +29,9 @@ class ReviewFormWidget extends StatefulWidget {
     required String bookId,
     int? initialRating,
     String? initialComment,
+    String? initialTitle,
     String? reviewId,
-    required void Function({required int rating, required String comment})
+    required void Function({required int rating, required String comment, String? title})
         onSubmit,
   }) {
     return showModalBottomSheet(
@@ -42,6 +46,7 @@ class ReviewFormWidget extends StatefulWidget {
           bookId: bookId,
           initialRating: initialRating,
           initialComment: initialComment,
+          initialTitle: initialTitle,
           reviewId: reviewId,
           onSubmit: onSubmit,
         ),
@@ -55,6 +60,7 @@ class ReviewFormWidget extends StatefulWidget {
 
 class _ReviewFormWidgetState extends State<ReviewFormWidget> {
   late int _rating;
+  late TextEditingController _titleController;
   late TextEditingController _commentController;
   final _formKey = GlobalKey<FormState>();
 
@@ -64,12 +70,14 @@ class _ReviewFormWidgetState extends State<ReviewFormWidget> {
   void initState() {
     super.initState();
     _rating = widget.initialRating ?? 0;
+    _titleController = TextEditingController(text: widget.initialTitle ?? '');
     _commentController =
         TextEditingController(text: widget.initialComment ?? '');
   }
 
   @override
   void dispose() {
+    _titleController.dispose();
     _commentController.dispose();
     super.dispose();
   }
@@ -111,6 +119,42 @@ class _ReviewFormWidgetState extends State<ReviewFormWidget> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Review Title
+            Text(
+              'Review Title (Optional)',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondaryColor(context),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _titleController,
+              maxLines: 1,
+              maxLength: 100,
+              decoration: InputDecoration(
+                hintText: 'Enter review title...',
+                hintStyle: TextStyle(
+                  color: AppColors.textMutedColor(context),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.borderColor(context)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.borderColor(context)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.primary),
+                ),
+                contentPadding: const EdgeInsets.all(14),
+              ),
+            ),
+            const SizedBox(height: 16),
 
             // Star rating
             Text(
@@ -228,6 +272,7 @@ class _ReviewFormWidgetState extends State<ReviewFormWidget> {
       widget.onSubmit(
         rating: _rating,
         comment: _commentController.text.trim(),
+        title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
       );
       Navigator.of(context).pop();
     }

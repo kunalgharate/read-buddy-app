@@ -68,7 +68,7 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   }
 
   @override
-  Future<LibraryEntity> getLibraryDetails() async {
+  Future<List<LibraryEntity>> getLibraryDetails() async {
     return await remoteDataSource.getLibraryDetails();
   }
 
@@ -101,9 +101,39 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
   }
 
   @override
-  Future<void> initiateReturn(String id, String returnMethod,
-      {String? returnBranchId}) async {
-    return await remoteDataSource.initiateReturn(id, returnMethod,
-        returnBranchId: returnBranchId);
+  Future<void> initiateReturn(
+    String id, {
+    required String returnMethod,
+    String? returnBranchId,
+    PickupDetailsEntity? pickup,
+  }) async {
+    return await remoteDataSource.initiateReturn(
+      id,
+      returnMethod: returnMethod,
+      returnBranchId: returnBranchId,
+      pickup: pickup,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> createReturnPickupOrder(String id) async {
+    return await remoteDataSource.createReturnPickupOrder(id);
+  }
+
+  @override
+  Future<void> verifyReturnPickupPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+    required String pickupAddress,
+  }) async {
+    return await remoteDataSource.verifyReturnPickupPayment(
+      id,
+      paymentId: paymentId,
+      orderId: orderId,
+      signature: signature,
+      pickupAddress: pickupAddress,
+    );
   }
 }

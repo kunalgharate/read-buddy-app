@@ -9,6 +9,7 @@ class ReviewModel extends ReviewEntity {
     required super.userAvatar,
     required super.rating,
     required super.comment,
+    super.title,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -36,6 +37,15 @@ class ReviewModel extends ReviewEntity {
       userAvatar = json['userAvatar']?.toString() ?? '';
     }
 
+    // Handle comment/review text field (backend may use 'review' instead of 'comment')
+    final comment = json['comment']?.toString() ??
+        json['review']?.toString() ??
+        json['text']?.toString() ??
+        json['content']?.toString() ??
+        '';
+
+    final title = json['title']?.toString() ?? json['reviewTitle']?.toString() ?? '';
+
     return ReviewModel(
       id: json['_id']?.toString(),
       bookId: json['bookId']?.toString() ?? '',
@@ -45,7 +55,8 @@ class ReviewModel extends ReviewEntity {
       rating: (json['rating'] is int)
           ? json['rating'] as int
           : (json['rating'] as num?)?.toInt() ?? 0,
-      comment: json['comment']?.toString() ?? '',
+      comment: comment,
+      title: title.isNotEmpty ? title : null,
       createdAt: json['createdAt']?.toString() ?? '',
       updatedAt: json['updatedAt']?.toString() ?? '',
     );
@@ -57,6 +68,7 @@ class ReviewModel extends ReviewEntity {
       'bookId': bookId,
       'rating': rating,
       'comment': comment,
+      if (title != null && title!.isNotEmpty) 'title': title,
     };
   }
 }

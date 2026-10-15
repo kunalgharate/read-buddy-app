@@ -246,14 +246,15 @@ class _BookReviewsSectionContent extends StatelessWidget {
             return ReviewCard(
               review: review,
               isOwner: isOwner,
-              onEdit: isOwner
-                  ? () => _showReviewForm(
-                        context,
-                        reviewId: review.id,
-                        initialRating: review.rating,
-                        initialComment: review.comment,
-                      )
-                  : null,
+                onEdit: isOwner
+                    ? () => _showReviewForm(
+                          context,
+                          reviewId: review.id,
+                          initialRating: review.rating,
+                          initialComment: review.comment,
+                          initialTitle: review.title,
+                        )
+                    : null,
               onDelete:
                   isOwner ? () => _confirmDelete(context, review.id!) : null,
             );
@@ -278,6 +279,7 @@ class _BookReviewsSectionContent extends StatelessWidget {
     String? reviewId,
     int? initialRating,
     String? initialComment,
+    String? initialTitle,
   }) {
     final bloc = context.read<ReviewBloc>();
 
@@ -287,19 +289,22 @@ class _BookReviewsSectionContent extends StatelessWidget {
       reviewId: reviewId,
       initialRating: initialRating,
       initialComment: initialComment,
-      onSubmit: ({required int rating, required String comment}) {
+      initialTitle: initialTitle,
+      onSubmit: ({required int rating, required String comment, String? title}) {
         if (reviewId != null) {
           bloc.add(UpdateReviewEvent(
             id: reviewId,
             bookId: bookId,
             rating: rating,
             comment: comment,
+            title: title,
           ));
         } else {
           bloc.add(CreateReviewEvent(
             bookId: bookId,
             rating: rating,
             comment: comment,
+            title: title,
           ));
         }
       },

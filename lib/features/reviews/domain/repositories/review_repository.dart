@@ -6,11 +6,13 @@ abstract class ReviewRepository {
     required String bookId,
     required int rating,
     required String comment,
+    String? title,
   });
   Future<ReviewEntity> updateReview({
     required String id,
     required int rating,
     required String comment,
+    String? title,
   });
   Future<void> deleteReview(String id);
 }

@@ -1,7 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/services/city_notifier.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/core/utils/error_handler.dart';
+import 'package:read_buddy_app/features/library/domain/entities/library_entity.dart';
+import 'package:read_buddy_app/features/library/domain/usecases/library_usecases.dart';
 import '../../domain/entities/borrow_order_entity.dart';
 import '../bloc/borrow_order_bloc.dart';
 import '../widgets/order_book_card.dart';
@@ -25,7 +30,9 @@ class _OrderCartView extends StatefulWidget {
 class _OrderCartViewState extends State<_OrderCartView> {
   FulfillmentMethod? _selectedMethod;
   final _addressController = TextEditingController();
-  final _libraryIdController = TextEditingController();
+  String? _libraryId;
+  String? _libraryName;
+  bool _pickingLibrary = false;
   Completer<void>? _refreshCompleter;
 
   void _completeRefresh() {
@@ -35,9 +42,22 @@ class _OrderCartViewState extends State<_OrderCartView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // canSubmit reads controller text during build, so the Submit button has
+    // to be re-evaluated as the user types — otherwise it never enables.
+    _addressController.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  @override
   void dispose() {
+    _addressController.removeListener(_onFormChanged);
     _addressController.dispose();
-    _libraryIdController.dispose();
     super.dispose();
   }
 
@@ -205,21 +225,106 @@ class _OrderCartViewState extends State<_OrderCartView> {
   }
 
   Widget _buildPickupSection() {
-    return TextField(
-      controller: _libraryIdController,
-      decoration: InputDecoration(
-        labelText: 'Library ID',
-        hintText: 'Enter the library ID for pickup',
-        prefixIcon: const Icon(Icons.local_library_outlined),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+    final selectedName = _libraryName;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Pickup Library',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: _pickingLibrary ? null : _pickLibrary,
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: selectedName == null ? 'Select a library' : null,
+              hintText: selectedName == null ? 'Choose where to pick up' : null,
+              prefixIcon: const Icon(Icons.local_library_outlined),
+              suffixIcon: _pickingLibrary
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : const Icon(Icons.arrow_drop_down),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.primary),
+              ),
+            ),
+            child: selectedName == null
+                ? const SizedBox.shrink()
+                : Text(
+                    selectedName,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+          ),
         ),
-      ),
+        const SizedBox(height: 8),
+        const Text(
+          'Books can only be collected from a library in your city.',
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+      ],
     );
+  }
+
+  /// Loads the libraries the user can collect from (preferring their
+  /// selected city) and lets them pick one.
+  Future<void> _pickLibrary() async {
+    setState(() => _pickingLibrary = true);
+    try {
+      final city = CityNotifier.instance.value;
+      var libraries = await getIt<GetLibraries>()(city: city);
+      if (city != null && libraries.isEmpty) {
+        // City filter can be stricter than the backend data — fall back to
+        // every library rather than dead-ending the pickup flow.
+        libraries = await getIt<GetLibraries>()();
+      }
+      if (!mounted) return;
+      if (libraries.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No libraries are available yet')),
+        );
+        return;
+      }
+
+      final selected = await showModalBottomSheet<LibraryEntity>(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (ctx) => _LibraryPickerSheet(libraries: libraries),
+      );
+      if (selected == null || !mounted) return;
+      setState(() {
+        _libraryId = selected.id;
+        _libraryName = selected.name;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ErrorHandler.getErrorMessage(e))),
+      );
+    } finally {
+      if (mounted) setState(() => _pickingLibrary = false);
+    }
   }
 
   Widget _buildSubmitSection(BuildContext context, BorrowOrderEntity order) {
@@ -228,7 +333,7 @@ class _OrderCartViewState extends State<_OrderCartView> {
         order.totalBookValue <= order.budgetLimit &&
         (_selectedMethod == FulfillmentMethod.DELIVERY
             ? _addressController.text.trim().isNotEmpty
-            : _libraryIdController.text.trim().isNotEmpty);
+            : _libraryId != null);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -302,10 +407,10 @@ class _OrderCartViewState extends State<_OrderCartView> {
                                         FulfillmentMethod.DELIVERY
                                     ? _addressController.text.trim()
                                     : null,
-                                libraryId:
-                                    _selectedMethod == FulfillmentMethod.PICKUP
-                                        ? _libraryIdController.text.trim()
-                                        : null,
+                                libraryId: _selectedMethod ==
+                                        FulfillmentMethod.PICKUP
+                                    ? _libraryId
+                                    : null,
                               ),
                             );
                       }
@@ -616,6 +721,75 @@ class _MethodCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Lets the user choose which library to collect their borrow order from,
+/// instead of hand-typing an opaque library id.
+class _LibraryPickerSheet extends StatelessWidget {
+  final List<LibraryEntity> libraries;
+
+  const _LibraryPickerSheet({required this.libraries});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+              child: Text(
+                'Choose a pickup library',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
+                itemCount: libraries.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                itemBuilder: (context, index) {
+                  final library = libraries[index];
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.local_library_outlined,
+                      color: AppColors.primary,
+                    ),
+                    title: Text(
+                      library.name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    subtitle: Text(
+                      library.address.fullAddress,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    onTap: () => Navigator.pop(context, library),
+                  );
+                },
               ),
             ),
           ],

@@ -6,5 +6,5 @@ class GetLibraryDetailsUsecase {
 
   GetLibraryDetailsUsecase(this.repository);
 
-  Future<LibraryEntity> call() => repository.getLibraryDetails();
+  Future<List<LibraryEntity>> call() => repository.getLibraryDetails();
 }

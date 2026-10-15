@@ -20,7 +20,7 @@ abstract class BookRequestRepository {
   Future<void> cancelBookRequest(String id, String reason);
   Future<void> acceptBookRequest(String id, {String? notes});
   Future<void> declineBookRequest(String id, {String reason});
-  Future<LibraryEntity> getLibraryDetails();
+  Future<List<LibraryEntity>> getLibraryDetails();
   Future<BookRequestEntity> schedulePickup(PickupDetailsEntity details);
   Future<BookRequestEntity> getRequestDetails(String id);
   Future<void> updateRequestStatus(String id, String status);
@@ -32,6 +32,18 @@ abstract class BookRequestRepository {
       String pincode,
       String preferredDate,
       String preferredTime);
-  Future<void> initiateReturn(String id, String returnMethod,
-      {String? returnBranchId});
+  Future<void> initiateReturn(
+    String id, {
+    required String returnMethod,
+    String? returnBranchId,
+    PickupDetailsEntity? pickup,
+  });
+  Future<Map<String, dynamic>> createReturnPickupOrder(String id);
+  Future<void> verifyReturnPickupPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+    required String pickupAddress,
+  });
 }

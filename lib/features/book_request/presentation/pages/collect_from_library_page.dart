@@ -1,13 +1,17 @@
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
 import '../../domain/entities/pickup_details_entity.dart';
+import '../../domain/usecases/create_return_pickup_order.dart';
+import '../../domain/usecases/verify_return_pickup_payment.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
@@ -59,6 +63,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   late int _selectedTab;
   bool _showingConfirmation = false;
 
+  /// Branch currently selected for drop-off return.
+  LibraryEntity? _library;
+  List<LibraryEntity> _libraries = [];
+
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
@@ -67,10 +75,19 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
+  late final Razorpay _razorpay;
+  bool _processingReturnPayment = false;
+  String? _returnOrderId;
+  String? _returnPickupAddress;
+
   @override
   void initState() {
     super.initState();
     _selectedTab = widget.initialTab;
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onReturnPaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onReturnPaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _onReturnExternalWallet);
     _prefillFromUser();
   }
 
@@ -95,6 +112,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
 
   @override
   void dispose() {
+    _razorpay.clear();
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
@@ -161,7 +179,9 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     final address = _addressController.text.trim();
     final isDropOffReturn = widget.isReturn && _selectedTab == 1;
 
-    if (!widget.isReturn) {
+    if (!isDropOffReturn) {
+      // Contact fields are hidden for a library drop-off, but a home pickup
+      // return still needs a name and phone number to be collectable.
       if (name.isEmpty || phone.isEmpty) {
         _showSnack('Please fill in all fields');
         return false;
@@ -172,7 +192,12 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
       }
     }
     if (isDropOffReturn) {
-      // no address needed for library drop-off
+      // The backend requires returnBranchId for DROP_OFF and rejects a null
+      // one with 400, so block until the library card has resolved.
+      if (_library?.id == null) {
+        _showSnack('Library details are still loading. Please try again.');
+        return false;
+      }
     } else {
       if (address.isEmpty) {
         _showSnack('Please fill in all fields');
@@ -201,11 +226,21 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   }
 
   void _onActualConfirm() {
+    final isDropOffReturn = widget.isReturn && _selectedTab == 1;
+    final isPickupReturn = widget.isReturn && !isDropOffReturn;
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
-    final address = widget.isReturn && _selectedTab == 1
-        ? 'library-drop-off'
-        : _addressController.text.trim();
+    // Drop-off returns carry no home address — the branch identifies the drop
+    // location. Empty address is omitted from the initiate-return payload.
+    final address = isDropOffReturn ? '' : _addressController.text.trim();
+
+    // A home-pickup return is a paid flow: create a Razorpay order, collect
+    // payment, then verify it. The backend flips the request to `returning`
+    // only after a successful payment verification.
+    if (isPickupReturn) {
+      _startReturnPickupPayment(address);
+      return;
+    }
 
     final timeStr =
         '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
@@ -222,10 +257,104 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
             ),
             isReturn: widget.isReturn,
             returnMethod: widget.isReturn
-                ? (_selectedTab == 1 ? 'DROP_OFF' : 'PICKUP')
+                ? (isDropOffReturn ? 'DROP_OFF' : 'PICKUP')
                 : null,
+            returnBranchId: isDropOffReturn ? _library?.id : null,
           ),
         );
+  }
+
+  Future<void> _startReturnPickupPayment(String pickupAddress) async {
+    if (_processingReturnPayment) return;
+    setState(() => _processingReturnPayment = true);
+    try {
+      final order = await getIt<CreateReturnPickupOrderUsecase>()(
+        widget.request.id,
+      );
+      final orderId = order['orderId']?.toString();
+      final razorpayKey = order['razorpayKey']?.toString();
+      if (orderId == null || orderId.isEmpty || razorpayKey == null ||
+          razorpayKey.isEmpty) {
+        throw Exception(
+            'Payment is temporarily unavailable. Please try again later.');
+      }
+      // Amount comes back in paise (e.g. 2500 = ₹25).
+      final amount = order['amount']?.toString() ?? '';
+
+      _returnOrderId = orderId;
+      _returnPickupAddress = pickupAddress;
+
+      if (kDebugMode) {
+        debugPrint(
+            '💳 [Razorpay/Return] orderId=...${orderId.length > 6 ? orderId.substring(orderId.length - 6) : orderId} amount(paise)=$amount');
+      }
+
+      _razorpay.open({
+        'key': razorpayKey,
+        'amount': amount,
+        'currency': 'INR',
+        'order_id': orderId,
+        'name': 'ReadBuddy',
+        'description': 'Book Return Pickup',
+        'prefill': {
+          'contact': _phoneController.text.trim(),
+          'name': _nameController.text.trim(),
+        },
+        'theme': {'color': '#2CE07F'},
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _processingReturnPayment = false);
+        _showSnack(_cleanError(e));
+      }
+    }
+  }
+
+  Future<void> _onReturnPaymentSuccess(PaymentSuccessResponse response) async {
+    final orderId = response.orderId ?? _returnOrderId ?? '';
+    try {
+      await getIt<VerifyReturnPickupPaymentUsecase>()(
+        widget.request.id,
+        paymentId: response.paymentId ?? '',
+        orderId: orderId,
+        signature: response.signature ?? '',
+        pickupAddress: _returnPickupAddress ?? '',
+      );
+      if (!mounted) return;
+      setState(() => _processingReturnPayment = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Return pickup scheduled successfully.'),
+          backgroundColor: Color(0xFF2CE07F),
+        ),
+      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _processingReturnPayment = false);
+      _showSnack(_cleanError(e));
+    }
+  }
+
+  void _onReturnPaymentError(PaymentFailureResponse response) {
+    if (kDebugMode) {
+      debugPrint('💳 [Razorpay/Return] PAYMENT_ERROR | code=${response.code}');
+    }
+    if (!mounted) return;
+    setState(() => _processingReturnPayment = false);
+    _showSnack('Payment failed: ${response.message ?? 'Please try again'}');
+  }
+
+  void _onReturnExternalWallet(ExternalWalletResponse response) {
+    if (!mounted) return;
+    _showSnack('External wallet selected: ${response.walletName}');
+  }
+
+  String _cleanError(Object e) {
+    final message = e.toString();
+    return message.startsWith('Exception: ')
+        ? message.substring('Exception: '.length)
+        : message;
   }
 
   void _showSnack(String message) {
@@ -337,8 +466,19 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
       ),
       body: BlocListener<BookRequestBloc, BookRequestState>(
         listenWhen: (_, state) =>
-            state is PickupScheduled || state is PickupScheduleError,
+            state is LibraryDetailsLoaded ||
+            state is PickupScheduled ||
+            state is PickupScheduleError,
         listener: (context, state) {
+          if (state is LibraryDetailsLoaded) {
+            _libraries = state.libraries;
+            if (_libraries.isNotEmpty) {
+              _library ??= _libraries.first;
+            } else {
+              _library = null;
+            }
+            return;
+          }
           if (state is PickupScheduled) {
             String message;
             if (widget.isReturn) {
@@ -533,7 +673,58 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                                 );
                               }
                               if (state is LibraryDetailsLoaded) {
-                                return _LibraryCard(library: state.library);
+                                _libraries = state.libraries;
+                                if (_libraries.isNotEmpty &&
+                                    _library == null) {
+                                  _library = _libraries.first;
+                                }
+                                if (_libraries.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(label: 'Select Library'),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                            color: const Color(0xFFEDEDED)),
+                                        color: Colors.white,
+                                      ),
+                                      child: DropdownButton<LibraryEntity>(
+                                        value: _library ??
+                                            (_libraries.isNotEmpty
+                                                ? _libraries.first
+                                                : null),
+                                        isExpanded: true,
+                                        underline: const SizedBox.shrink(),
+                                        items: _libraries
+                                            .map(
+                                              (l) => DropdownMenuItem(
+                                                value: l,
+                                                child: Text(
+                                                  l.name,
+                                                  style: const TextStyle(
+                                                      fontSize: 14),
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                        onChanged: (l) {
+                                          if (l != null) {
+                                            setState(() => _library = l);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _LibraryCard(library: _library!),
+                                  ],
+                                );
                               }
                               if (state is LibraryDetailsError) {
                                 return Center(
@@ -566,7 +757,9 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                     height: 52,
                     child: BlocBuilder<BookRequestBloc, BookRequestState>(
                       builder: (context, state) {
-                        final isLoading = state is PickupScheduling;
+                        final isLoading =
+                            state is PickupScheduling ||
+                                _processingReturnPayment;
                         return ElevatedButton(
                           onPressed: isLoading ? null : _onActualConfirm,
                           style: ElevatedButton.styleFrom(

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/error_handler.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/usecases/get_book_detail.dart';
 import '../../domain/usecases/create_book_request.dart';
@@ -76,8 +77,8 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
   ) async {
     emit(LibraryDetailsLoading());
     try {
-      final library = await getLibraryDetails();
-      emit(LibraryDetailsLoaded(library));
+    final libraries = await getLibraryDetails();
+    emit(LibraryDetailsLoaded(libraries));
     } catch (e) {
       emit(LibraryDetailsError('Failed to load library details: $e'));
     }
@@ -97,11 +98,19 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
         // directly with the chosen method (DROP_OFF / PICKUP), which is the
         // only call that correctly transitions the request to 'returning'.
         final method = event.returnMethod;
-        if (method != null && method.isNotEmpty) {
-          await initiateReturn(event.details.requestId, method);
-        } else {
-          await updateRequestStatus(event.details.requestId, 'returning');
+        if (method == null || method.isEmpty) {
+          // A bare PATCH /status {returning} leaves returnMethod, schedule and
+          // payment fields unset, so it is not a valid return path. Require the
+          // caller to supply DROP_OFF/PICKUP instead of silently doing a
+          // partial status update.
+          throw Exception('A return method is required to initiate a return');
         }
+        await initiateReturn(
+          event.details.requestId,
+          returnMethod: method,
+          returnBranchId: event.returnBranchId,
+          pickup: event.details,
+        );
         // Reflect the requested return without an extra fetch. The
         // PickupScheduled listener only uses this to show a confirmation
         // message and pop, so a minimal entity is sufficient.
@@ -121,7 +130,8 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
       final updated = await schedulePickup(event.details);
       emit(PickupScheduled(updated));
     } catch (e) {
-      emit(PickupScheduleError(e.toString().replaceFirst('Exception: ', '')));
+      emit(PickupScheduleError(
+          ErrorHandler.getErrorMessage(e).replaceFirst('Exception: ', '')));
     }
   }
 

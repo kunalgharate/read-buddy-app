@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_constants.dart';
+import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../models/book_detail_model.dart';
 import '../models/book_request_model.dart';
@@ -24,7 +25,7 @@ abstract class BookRequestRemoteDataSource {
   Future<void> cancelBookRequest(String id, String reason);
   Future<void> acceptBookRequest(String id, {String? notes});
   Future<void> declineBookRequest(String id, {String reason});
-  Future<LibraryEntity> getLibraryDetails();
+  Future<List<LibraryEntity>> getLibraryDetails();
   Future<BookRequestModel> schedulePickup(PickupDetailsEntity details);
   Future<BookRequestModel> getRequestDetails(String id);
   Future<void> updateRequestStatus(String id, String status);
@@ -36,8 +37,20 @@ abstract class BookRequestRemoteDataSource {
       String pincode,
       String preferredDate,
       String preferredTime);
-  Future<void> initiateReturn(String id, String returnMethod,
-      {String? returnBranchId});
+  Future<void> initiateReturn(
+    String id, {
+    required String returnMethod,
+    String? returnBranchId,
+    PickupDetailsEntity? pickup,
+  });
+  Future<Map<String, dynamic>> createReturnPickupOrder(String id);
+  Future<void> verifyReturnPickupPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+    required String pickupAddress,
+  });
 }
 
 class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
@@ -257,19 +270,22 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<LibraryEntity> getLibraryDetails() async {
+  Future<List<LibraryEntity>> getLibraryDetails() async {
     try {
       final response = await dio.get(ApiConstants.libraryDetails);
       if (response.statusCode != ApiConstants.success) {
         throw Exception('Failed to load library details');
       }
       final decoded = response.data;
-      final libraryData = decoded is Map
-          ? (decoded['data'] is Map
-              ? Map<String, dynamic>.from(decoded['data'])
-              : Map<String, dynamic>.from(decoded))
-          : <String, dynamic>{};
-      return LibraryModel.fromJson(libraryData);
+      // The endpoint returns { success, libraries: [...] } — a list, not a
+      // single library object, so parse every entry.
+      final list = decoded is Map && decoded['libraries'] is List
+          ? decoded['libraries'] as List
+          : const [];
+      return list
+          .whereType<Map>()
+          .map((e) => LibraryModel.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
     } catch (e) {
       rethrow;
     }
@@ -350,20 +366,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   @override
   Future<BookRequestModel> schedulePickup(PickupDetailsEntity details) async {
     try {
-      final d = details.pickupDate;
-      final dateStr =
-          '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
-      final timeParts = details.pickupTime.split(':');
-      final hour24 = int.tryParse(timeParts[0]) ?? 0;
-      final minute = timeParts.length > 1 ? timeParts[1] : '00';
-      final period = hour24 >= 12 ? 'PM' : 'AM';
-      final hour12 = hour24 == 0
-          ? 12
-          : hour24 > 12
-              ? hour24 - 12
-              : hour24;
-      final timeStr12 = '${hour12.toString().padLeft(2, '0')}:$minute $period';
+      final dateStr = _formatDate(details.pickupDate);
+      final timeStr12 = _format12hTime(details.pickupTime);
 
       final response = await dio.post(
         '${ApiConstants.v1BookRequests}/${details.requestId}/schedule-pickup',
@@ -410,22 +414,137 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
   }
 
   @override
-  Future<void> initiateReturn(String id, String returnMethod,
-      {String? returnBranchId}) async {
+  Future<void> initiateReturn(
+    String id, {
+    required String returnMethod,
+    String? returnBranchId,
+    PickupDetailsEntity? pickup,
+  }) async {
+    // initiate-return only reads returnMethod, returnBranchId (DROP_OFF) and
+    // the return schedule (returnScheduledDate/Slot); contact fields belong to
+    // the borrow-side schedule-pickup endpoint and are ignored here, so don't
+    // send them. returnScheduledDate is a Date/date-time on the backend — send
+    // a full ISO-8601 value rather than a bare YYYY-MM-DD.
+    final scheduledDate = pickup == null
+        ? null
+        : DateTime(pickup.pickupDate.year, pickup.pickupDate.month,
+                pickup.pickupDate.day)
+            .toIso8601String();
+    final scheduledSlot =
+        pickup == null ? null : _format12hTime(pickup.pickupTime);
+
     try {
       final response = await dio.post(
         '${ApiConstants.v1BookRequests}/$id/initiate-return',
         data: {
           'returnMethod': returnMethod,
-          if (returnBranchId != null) 'returnBranchId': returnBranchId,
+          if (returnBranchId != null && returnBranchId.isNotEmpty)
+            'returnBranchId': returnBranchId,
+          if (scheduledDate != null) 'returnScheduledDate': scheduledDate,
+          if (scheduledSlot != null) 'returnScheduledSlot': scheduledSlot,
         },
       );
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {
         throw Exception('Failed to initiate return');
       }
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error']) as String?
+          : null;
+      throw Exception(serverMsg ?? ErrorHandler.getErrorMessage(e));
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  Future<Map<String, dynamic>> createReturnPickupOrder(String id) async {
+    // PICKUP returns are paid (home collection). The backend creates the
+    // Razorpay order and returns the order id + amount (paise) + checkout key.
+    // create-order requires the request to still be `delivered`, so it must be
+    // called *before* any initiate-return/verify call flips the status.
+    try {
+      final response = await dio.patch(
+        ApiConstants.returnRequestPickupPaymentCreateOrder(id),
+      );
+      final status = response.statusCode ?? 0;
+      if (status != ApiConstants.success && status != ApiConstants.created) {
+        throw Exception('Failed to create return pickup payment order');
+      }
+      final raw = response.data;
+      final root =
+          raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
+      final payload = root['data'] is Map
+          ? Map<String, dynamic>.from(root['data'] as Map)
+          : root;
+      final orderId =
+          (payload['orderId'] ?? payload['order_id'] ?? payload['id'])
+              ?.toString();
+      if (orderId == null || orderId.isEmpty) {
+        throw Exception('Payment order was not created. Please try again.');
+      }
+      final razorpayKey =
+          (payload['razorpayKey'] ?? payload['razorpay_key'] ?? payload['key'])
+              ?.toString();
+      return {
+        'orderId': orderId,
+        'amount': payload['amount'],
+        'razorpayKey': razorpayKey,
+      };
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error']) as String?
+          : null;
+      throw Exception(serverMsg ?? ErrorHandler.getErrorMessage(e));
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> verifyReturnPickupPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+    required String pickupAddress,
+  }) async {
+    try {
+      final response = await dio.patch(
+        ApiConstants.returnRequestPickupPaymentVerify(id),
+        data: {
+          'paymentId': paymentId,
+          'orderId': orderId,
+          'signature': signature,
+          'pickupAddress': pickupAddress,
+        },
+      );
+      if (response.statusCode != ApiConstants.success) {
+        throw Exception('Failed to verify return pickup payment');
+      }
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error']) as String?
+          : null;
+      throw Exception(serverMsg ?? ErrorHandler.getErrorMessage(e));
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  /// Converts a 24-hour "HH:mm" string into "hh:mm AM/PM" — the format the
+  /// schedule-pickup endpoint already accepts and stores.
+  String _format12hTime(String time24) {
+    final timeParts = time24.split(':');
+    final hour24 = int.tryParse(timeParts[0]) ?? 0;
+    final minute = timeParts.length > 1 ? timeParts[1] : '00';
+    final period = hour24 >= 12 ? 'PM' : 'AM';
+    final hour12 =
+        hour24 == 0 ? 12 : (hour24 > 12 ? hour24 - 12 : hour24);
+    return '${hour12.toString().padLeft(2, '0')}:$minute $period';
   }
 }

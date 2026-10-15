@@ -23,11 +23,13 @@ class ReviewRepositoryImpl implements ReviewRepository {
     required String bookId,
     required int rating,
     required String comment,
-  }) async {
-    return await remoteDataSource.createReview(
+    String? title,
+  }) {
+    return remoteDataSource.createReview(
       bookId: bookId,
       rating: rating,
       comment: comment,
+      title: title,
     );
   }
 
@@ -36,11 +38,13 @@ class ReviewRepositoryImpl implements ReviewRepository {
     required String id,
     required int rating,
     required String comment,
-  }) async {
-    return await remoteDataSource.updateReview(
+    String? title,
+  }) {
+    return remoteDataSource.updateReview(
       id: id,
       rating: rating,
       comment: comment,
+      title: title,
     );
   }
 

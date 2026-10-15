@@ -60,6 +60,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
         bookId: event.bookId,
         rating: event.rating,
         comment: event.comment,
+        title: event.title,
       );
       emit(const ReviewActionSuccess('Review submitted successfully'));
       // Reload reviews for the book
@@ -79,6 +80,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
         id: event.id,
         rating: event.rating,
         comment: event.comment,
+        title: event.title,
       );
       emit(const ReviewActionSuccess('Review updated successfully'));
       // Reload reviews for the book

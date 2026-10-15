@@ -68,9 +68,10 @@ class _AdminReturnRequestsPageState extends State<AdminReturnRequestsPage> {
       _refresh();
     } on DioException catch (e) {
       if (!mounted) return;
-      final msg =
-          (e.response?.data is Map ? e.response?.data['message'] : null) ??
-              'Failed to mark as received';
+      // receive returns {error: ...}; other routes use {message: ...}.
+      final data = e.response?.data;
+      final msg = (data is Map ? (data['message'] ?? data['error']) : null) ??
+          'Failed to mark as received';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(msg.toString()),
@@ -115,9 +116,10 @@ class _AdminReturnRequestsPageState extends State<AdminReturnRequestsPage> {
       _refresh();
     } on DioException catch (e) {
       if (!mounted) return;
-      final msg =
-          (e.response?.data is Map ? e.response?.data['message'] : null) ??
-              'Failed to complete inspection';
+      // inspect returns {error: ...}; other routes use {message: ...}.
+      final data = e.response?.data;
+      final msg = (data is Map ? (data['message'] ?? data['error']) : null) ??
+          'Failed to complete inspection';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(msg.toString()),

@@ -170,6 +170,8 @@ import '../../features/book_request/domain/usecases/schedule_pickup.dart';
 import '../../features/book_request/domain/usecases/schedule_delivery.dart';
 import '../../features/book_request/domain/usecases/update_request_status.dart';
 import '../../features/book_request/domain/usecases/initiate_return.dart';
+import '../../features/book_request/domain/usecases/create_return_pickup_order.dart';
+import '../../features/book_request/domain/usecases/verify_return_pickup_payment.dart';
 import '../../features/book_request/domain/usecases/get_upcoming_pickups.dart';
 import '../../features/book_request/domain/usecases/cancel_book_request.dart';
 import '../../features/book_request/presentation/bloc/book_request_bloc.dart';
@@ -605,6 +607,10 @@ void _registerUseCases() {
       () => UpdateRequestStatusUsecase(getIt<BookRequestRepository>()));
   getIt.registerLazySingleton(
       () => InitiateReturnUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => CreateReturnPickupOrderUsecase(getIt<BookRequestRepository>()));
+  getIt.registerLazySingleton(
+      () => VerifyReturnPickupPaymentUsecase(getIt<BookRequestRepository>()));
   getIt.registerLazySingleton(
       () => GetUpcomingPickupsUsecase(getIt<BookRequestRepository>()));
 
