@@ -126,11 +126,13 @@ class BookRequestRepositoryImpl implements BookRequestRepository {
     String id,
     String returnMethod, {
     String? returnBranchId,
+    PickupDetailsEntity? pickup,
   }) async {
     return await remoteDataSource.initiateReturn(
       id,
       returnMethod,
       returnBranchId: returnBranchId,
+      pickup: pickup,
     );
   }
 

@@ -1,11 +1,16 @@
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../../../../core/config/app_config.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
+import '../../../profile/presentation/blocs/profile_bloc.dart';
+import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
 import '../../domain/entities/pickup_details_entity.dart';
@@ -80,6 +85,9 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   late int _selectedTab;
   bool _showingConfirmation = false;
 
+  late final Razorpay _razorpay;
+  bool _paying = false;
+
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
@@ -93,6 +101,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     super.initState();
     _selectedTab = widget.initialTab;
     _prefillFromUser();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onReturnPaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onReturnPaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
   }
 
   Future<void> _prefillFromUser() async {
@@ -116,6 +128,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
 
   @override
   void dispose() {
+    _razorpay.clear();
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
@@ -221,12 +234,52 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     }
   }
 
+  // Tab 0 for the return flow is paid home pickup; tab 1 is free library
+  // drop-off. Only the drop-off return goes through SchedulePickup; the paid
+  // pickup is handled by the Razorpay create-order/verify flow below.
+  bool get _isHomePickupReturn => widget.isReturn && _selectedTab == 0;
+
+  String? get _selectedLibraryId {
+    final state = context.read<BookRequestBloc>().state;
+    if (state is LibraryDetailsLoaded) return state.library.id;
+    return null;
+  }
+
+  // The chosen return slot, in the same shapes the initiate-return contract
+  // uses (full ISO-8601 date, "hh:mm AM/PM" slot). Sent with the pickup
+  // payment verification so the paid path persists the schedule too.
+  String? get _returnScheduledDateIso {
+    final date = _selectedDate;
+    if (date == null) return null;
+    return DateTime(date.year, date.month, date.day).toIso8601String();
+  }
+
+  String? get _returnScheduledSlot {
+    final time = _selectedTime;
+    if (time == null) return null;
+    return _formatTime(time);
+  }
+
   void _onActualConfirm() {
+    if (_isHomePickupReturn) {
+      _startReturnPickupPayment();
+      return;
+    }
+
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final address = widget.isReturn && _selectedTab == 1
         ? 'library-drop-off'
         : _addressController.text.trim();
+
+    final libraryId = widget.isReturn && _selectedTab == 1
+        ? _selectedLibraryId
+        : null;
+    if (widget.isReturn && _selectedTab == 1 &&
+        (libraryId == null || libraryId.isEmpty)) {
+      _showSnack('Library details are still loading. Please try again.');
+      return;
+    }
 
     final timeStr =
         '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
@@ -245,8 +298,125 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
             returnMethod: widget.isReturn
                 ? (_selectedTab == 1 ? 'DROP_OFF' : 'PICKUP')
                 : null,
+            returnBranchId: libraryId,
           ),
         );
+  }
+
+  // PICKUP returns are paid (₹25 home-collection fee). create-order requires
+  // the request to still be `delivered`, so it runs before any initiate-return
+  // / verify call. The backend must return a `razorpayKey`; without it we can't
+  // open checkout, so surface the guarded message.
+  Future<void> _startReturnPickupPayment() async {
+    if (_paying) return;
+    setState(() => _paying = true);
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      final res = await ds.createReturnPickupOrder(widget.request.id);
+      final razorpayKey = res['razorpayKey'] as String?;
+      final orderId = res['orderId'] as String?;
+      if (razorpayKey == null ||
+          razorpayKey.isEmpty ||
+          orderId == null ||
+          orderId.isEmpty) {
+        throw Exception(
+          'Payment is temporarily unavailable. Please try again later.',
+        );
+      }
+      if (!mounted) return;
+      final amount = res['amount'];
+      _razorpay.open({
+        'key': razorpayKey,
+        'amount': amount is num ? amount.toInt() : amount,
+        'currency': 'INR',
+        'order_id': orderId,
+        'name': 'ReadBuddy',
+        'description': 'Home Pickup Return Fee',
+        'prefill': {
+          'name': _nameController.text.trim(),
+          'contact': _phoneController.text.trim(),
+        },
+        'theme': {'color': '#2CE07F'},
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        _showSnack(e.toString().replaceFirst('Exception: ', ''));
+      }
+    }
+  }
+
+  Future<void> _onReturnPaymentSuccess(PaymentSuccessResponse response) async {
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      await ds.verifyReturnPickupPayment(
+        widget.request.id,
+        paymentId: response.paymentId ?? '',
+        orderId: response.orderId ?? '',
+        signature: response.signature ?? '',
+        pickupAddress: _addressController.text.trim(),
+        returnScheduledDate: _returnScheduledDateIso,
+        returnScheduledSlot: _returnScheduledSlot,
+      );
+      if (!mounted) return;
+      setState(() => _paying = false);
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment successful! Return pickup scheduled.'),
+          backgroundColor: Color(0xFF2CE07F),
+        ),
+      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        _showSnack('Payment verification failed: $e');
+      }
+    }
+  }
+
+  void _onReturnPaymentError(PaymentFailureResponse response) {
+    if (!mounted) return;
+    setState(() => _paying = false);
+    _showSnack('Payment failed: ${response.message ?? 'Please try again'}');
+  }
+
+  // DEV/TEST ONLY: completes the ₹25 return pickup fee via the backend demo
+  // bypass (no card), mirroring the delivery-fee test hook. Useful for E2E
+  // testing while the live checkout key is pending on the backend.
+  Future<void> _payReturnPickupTest() async {
+    if (_paying) return;
+    setState(() => _paying = true);
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      final res = await ds.createReturnPickupOrder(widget.request.id);
+      final orderId = res['orderId'] as String?;
+      if (orderId == null || orderId.isEmpty) {
+        throw Exception('Payment order was not created. Please try again.');
+      }
+      await ds.verifyReturnPickupPayment(
+        widget.request.id,
+        paymentId: 'pay_demo_success_99',
+        orderId: orderId,
+        signature: 'demo_bypass',
+        pickupAddress: _addressController.text.trim(),
+        returnScheduledDate: _returnScheduledDateIso,
+        returnScheduledSlot: _returnScheduledSlot,
+      );
+      if (!mounted) return;
+      setState(() => _paying = false);
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Return pickup scheduled! (test)')),
+      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        _showSnack(e.toString().replaceFirst('Exception: ', ''));
+      }
+    }
   }
 
   void _showSnack(String message) {
@@ -593,7 +763,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                     height: 52,
                     child: BlocBuilder<BookRequestBloc, BookRequestState>(
                       builder: (context, state) {
-                        final isLoading = state is PickupScheduling;
+                        final isLoading = state is PickupScheduling || _paying;
                         return ElevatedButton(
                           onPressed: isLoading ? null : _onActualConfirm,
                           style: ElevatedButton.styleFrom(
@@ -614,9 +784,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Text(
-                                  'Confirm',
-                                  style: TextStyle(
+                              : Text(
+                                  _isHomePickupReturn
+                                      ? 'Confirm & Pay ₹25'
+                                      : 'Confirm',
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -626,6 +798,21 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                       },
                     ),
                   ),
+                  if (_isHomePickupReturn &&
+                      (kDebugMode ||
+                          (AppConfig.isInitialized &&
+                              AppConfig.instance.isDev))) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: OutlinedButton.icon(
+                        onPressed: _paying ? null : _payReturnPickupTest,
+                        icon: const Icon(Icons.bolt, size: 18),
+                        label: const Text('Pay ₹25 (TEST)'),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
