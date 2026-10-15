@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/core/utils/access_control.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_book.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -294,8 +297,29 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           trailing: const Icon(Icons.chevron_right, color: Colors.grey),
           onTap: () {
-            final model = BookCrudModel.fromEntity(book);
-            Navigator.pushNamed(context, '/book-variants', arguments: model);
+            // Normal users should reach the read-only book detail flow, not the
+            // book-CRUD variants management screen. Check role and route
+            // accordingly.
+            final profileState = context.read<ProfileBloc>().state;
+            String? role;
+            if (profileState is ProfileLoaded) {
+              role = profileState.user.role;
+            }
+            final canManage = AccessControl.canManageBooks(role);
+            if (canManage) {
+              final model = BookCrudModel.fromEntity(book);
+              Navigator.pushNamed(context, '/book-variants', arguments: model);
+              return;
+            }
+            // Fallback: open the read-only book detail page using the book id.
+            final bookId = book.id;
+            if (bookId != null && bookId.isNotEmpty) {
+              Navigator.pushNamed(
+                context,
+                '/book-details',
+                arguments: bookId,
+              );
+            }
           },
         );
       },
