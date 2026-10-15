@@ -48,6 +48,21 @@ abstract class BookRequestRemoteDataSource {
     String id,
     String returnMethod, {
     String? returnBranchId,
+    PickupDetailsEntity? pickup,
+  });
+
+  /// Creates the ₹25 home-pickup return Razorpay order. The request must still
+  /// be `delivered`, so this is called before any initiate-return/verify call.
+  /// Returns { orderId, amount (paise), razorpayKey }.
+  Future<Map<String, dynamic>> createReturnPickupOrder(String id);
+
+  /// Verifies the home-pickup return payment and records the pickup address.
+  Future<void> verifyReturnPickupPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+    required String pickupAddress,
   });
 
   /// Creates a ₹25 delivery-fee Razorpay order for an approved DELIVERY
@@ -517,22 +532,140 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
     String id,
     String returnMethod, {
     String? returnBranchId,
+    PickupDetailsEntity? pickup,
   }) async {
+    // initiate-return only reads returnMethod, returnBranchId (DROP_OFF) and
+    // the return schedule (returnScheduledDate/Slot); contact fields belong to
+    // the borrow-side schedule-pickup endpoint and are ignored here, so don't
+    // send them. returnScheduledDate is a Date/date-time on the backend — send
+    // a full ISO-8601 value rather than a bare YYYY-MM-DD.
+    final scheduledDate = pickup == null
+        ? null
+        : DateTime(
+            pickup.pickupDate.year,
+            pickup.pickupDate.month,
+            pickup.pickupDate.day,
+          ).toIso8601String();
+    final scheduledSlot =
+        pickup == null ? null : _format12hTime(pickup.pickupTime);
+
     try {
       final response = await dio.post(
         '${ApiConstants.v1BookRequests}/$id/initiate-return',
         data: {
           'returnMethod': returnMethod,
-          if (returnBranchId != null) 'returnBranchId': returnBranchId,
+          if (returnBranchId != null && returnBranchId.isNotEmpty)
+            'returnBranchId': returnBranchId,
+          if (scheduledDate != null) 'returnScheduledDate': scheduledDate,
+          if (scheduledSlot != null) 'returnScheduledSlot': scheduledSlot,
         },
       );
       if (response.statusCode != ApiConstants.success &&
           response.statusCode != ApiConstants.created) {
         throw Exception('Failed to initiate return');
       }
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error'])
+              as String?
+          : null;
+      throw Exception(serverMsg ?? 'Failed to initiate return. Please try again.');
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  Future<Map<String, dynamic>> createReturnPickupOrder(String id) async {
+    // PICKUP returns are paid (home collection). The backend creates the
+    // Razorpay order and returns the order id + amount (paise) + checkout key.
+    // create-order requires the request to still be `delivered`, so it must be
+    // called *before* any initiate-return/verify call flips the status.
+    try {
+      final response = await dio.patch(
+        ApiConstants.returnRequestPickupPaymentCreateOrder(id),
+      );
+      final status = response.statusCode ?? 0;
+      if (status != ApiConstants.success && status != ApiConstants.created) {
+        throw Exception('Failed to create return pickup payment order');
+      }
+      final raw = response.data;
+      final root =
+          raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
+      final payload = root['data'] is Map
+          ? Map<String, dynamic>.from(root['data'] as Map)
+          : root;
+      final orderId =
+          (payload['orderId'] ?? payload['order_id'] ?? payload['id'])
+              ?.toString();
+      if (orderId == null || orderId.isEmpty) {
+        throw Exception('Payment order was not created. Please try again.');
+      }
+      final razorpayKey =
+          (payload['razorpayKey'] ?? payload['razorpay_key'] ?? payload['key'])
+              ?.toString();
+      return {
+        'orderId': orderId,
+        'amount': payload['amount'],
+        'razorpayKey': razorpayKey,
+      };
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error'])
+              as String?
+          : null;
+      throw Exception(
+        serverMsg ?? 'Failed to start return payment. Please try again.',
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> verifyReturnPickupPayment(
+    String id, {
+    required String paymentId,
+    required String orderId,
+    required String signature,
+    required String pickupAddress,
+  }) async {
+    try {
+      final response = await dio.patch(
+        ApiConstants.returnRequestPickupPaymentVerify(id),
+        data: {
+          'paymentId': paymentId,
+          'orderId': orderId,
+          'signature': signature,
+          'pickupAddress': pickupAddress,
+        },
+      );
+      if (response.statusCode != ApiConstants.success &&
+          response.statusCode != ApiConstants.created) {
+        throw Exception('Failed to verify return pickup payment');
+      }
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['message'] ?? e.response!.data['error'])
+              as String?
+          : null;
+      throw Exception(
+        serverMsg ?? 'Payment verification failed. Please try again.',
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Converts a 24-hour "HH:mm" string into "hh:mm AM/PM" — the format the
+  /// schedule-pickup endpoint already accepts and stores.
+  String _format12hTime(String time24) {
+    final timeParts = time24.split(':');
+    final hour24 = int.tryParse(timeParts[0]) ?? 0;
+    final minute = timeParts.length > 1 ? timeParts[1] : '00';
+    final period = hour24 >= 12 ? 'PM' : 'AM';
+    final hour12 = hour24 == 0 ? 12 : (hour24 > 12 ? hour24 - 12 : hour24);
+    return '${hour12.toString().padLeft(2, '0')}:$minute $period';
   }
 
   @override
