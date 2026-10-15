@@ -245,6 +245,21 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     return null;
   }
 
+  // The chosen return slot, in the same shapes the initiate-return contract
+  // uses (full ISO-8601 date, "hh:mm AM/PM" slot). Sent with the pickup
+  // payment verification so the paid path persists the schedule too.
+  String? get _returnScheduledDateIso {
+    final date = _selectedDate;
+    if (date == null) return null;
+    return DateTime(date.year, date.month, date.day).toIso8601String();
+  }
+
+  String? get _returnScheduledSlot {
+    final time = _selectedTime;
+    if (time == null) return null;
+    return _formatTime(time);
+  }
+
   void _onActualConfirm() {
     if (_isHomePickupReturn) {
       _startReturnPickupPayment();
@@ -340,6 +355,8 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         orderId: response.orderId ?? '',
         signature: response.signature ?? '',
         pickupAddress: _addressController.text.trim(),
+        returnScheduledDate: _returnScheduledDateIso,
+        returnScheduledSlot: _returnScheduledSlot,
       );
       if (!mounted) return;
       setState(() => _paying = false);
@@ -384,6 +401,8 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         orderId: orderId,
         signature: 'demo_bypass',
         pickupAddress: _addressController.text.trim(),
+        returnScheduledDate: _returnScheduledDateIso,
+        returnScheduledSlot: _returnScheduledSlot,
       );
       if (!mounted) return;
       setState(() => _paying = false);

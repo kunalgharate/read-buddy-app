@@ -56,13 +56,18 @@ abstract class BookRequestRemoteDataSource {
   /// Returns { orderId, amount (paise), razorpayKey }.
   Future<Map<String, dynamic>> createReturnPickupOrder(String id);
 
-  /// Verifies the home-pickup return payment and records the pickup address.
+  /// Verifies the home-pickup return payment, records the pickup address and
+  /// persists the chosen return schedule (the paid path bypasses
+  /// initiate-return, so the date/slot must ride along here or the picked slot
+  /// is lost — the detail page renders returnScheduledDate/Slot for pickups).
   Future<void> verifyReturnPickupPayment(
     String id, {
     required String paymentId,
     required String orderId,
     required String signature,
     required String pickupAddress,
+    String? returnScheduledDate,
+    String? returnScheduledSlot,
   });
 
   /// Creates a ₹25 delivery-fee Razorpay order for an approved DELIVERY
@@ -629,6 +634,8 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
     required String orderId,
     required String signature,
     required String pickupAddress,
+    String? returnScheduledDate,
+    String? returnScheduledSlot,
   }) async {
     try {
       final response = await dio.patch(
@@ -638,6 +645,10 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
           'orderId': orderId,
           'signature': signature,
           'pickupAddress': pickupAddress,
+          if (returnScheduledDate != null && returnScheduledDate.isNotEmpty)
+            'returnScheduledDate': returnScheduledDate,
+          if (returnScheduledSlot != null && returnScheduledSlot.isNotEmpty)
+            'returnScheduledSlot': returnScheduledSlot,
         },
       );
       if (response.statusCode != ApiConstants.success &&

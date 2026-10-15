@@ -212,6 +212,8 @@ void main() {
         orderId: 'order_1',
         signature: 'sig_1',
         pickupAddress: 'Flat 12, MG Road',
+        returnScheduledDate: '2026-10-20T00:00:00.000',
+        returnScheduledSlot: '07:07 PM',
       );
 
       expect(adapter.lastOptions!.method, 'PATCH');
@@ -224,7 +226,26 @@ void main() {
         'orderId': 'order_1',
         'signature': 'sig_1',
         'pickupAddress': 'Flat 12, MG Road',
+        'returnScheduledDate': '2026-10-20T00:00:00.000',
+        'returnScheduledSlot': '07:07 PM',
       });
+    });
+
+    test('omits blank schedule fields', () async {
+      final adapter = _stub({'success': true}, 200);
+      final ds = _datasource(adapter);
+
+      await ds.verifyReturnPickupPayment(
+        'req1',
+        paymentId: 'pay_1',
+        orderId: 'order_1',
+        signature: 'sig_1',
+        pickupAddress: 'addr',
+      );
+
+      final data = adapter.lastOptions!.data as Map;
+      expect(data.containsKey('returnScheduledDate'), isFalse);
+      expect(data.containsKey('returnScheduledSlot'), isFalse);
     });
 
     test('surfaces the server message on failure', () async {
