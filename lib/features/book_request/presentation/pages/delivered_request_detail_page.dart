@@ -315,19 +315,25 @@ class _DeliveredRequestDetailPageState
     }
 
     if (isDropOff) {
-      // Show the drop-off library branch (not the home delivery address)
+      // Show the drop-off library branch name when we have it (the branch is
+      // the request's selected library), else a generic label.
       rows.add(
         _InfoRow(
           'Return Branch',
           (r.returnBranchId != null && r.returnBranchId!.isNotEmpty)
-              ? 'Library branch'
+              ? (r.libraryName ?? 'Library branch')
               : 'Return library branch details unavailable',
         ),
       );
     } else {
-      // Home pickup — show pickup address
-      if (r.pickupAddress != null && r.pickupAddress!.isNotEmpty) {
-        rows.add(_InfoRow('Pickup Address', r.pickupAddress!));
+      // Home pickup — show the address submitted during the pickup payment
+      // (returnPickupAddress); fall back to the older pickupDetails/address
+      // mapping for legacy records.
+      final pickupAddress = (r.returnPickupAddress?.isNotEmpty == true)
+          ? r.returnPickupAddress
+          : r.pickupAddress;
+      if (pickupAddress != null && pickupAddress.isNotEmpty) {
+        rows.add(_InfoRow('Pickup Address', pickupAddress));
       }
     }
     return rows;

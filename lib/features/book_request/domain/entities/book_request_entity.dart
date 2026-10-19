@@ -37,6 +37,7 @@ class BookRequestEntity extends Equatable {
   final String? pickupAddress;
   final String? pickupDate;
   final String? pickupTime;
+  final String? returnPickupAddress;
   final String? rejectionReason;
 
   const BookRequestEntity({
@@ -76,6 +77,7 @@ class BookRequestEntity extends Equatable {
     this.pickupAddress,
     this.pickupDate,
     this.pickupTime,
+    this.returnPickupAddress,
     this.rejectionReason,
   });
 
@@ -117,6 +119,7 @@ class BookRequestEntity extends Equatable {
         pickupAddress,
         pickupDate,
         pickupTime,
+        returnPickupAddress,
         rejectionReason,
       ];
 }

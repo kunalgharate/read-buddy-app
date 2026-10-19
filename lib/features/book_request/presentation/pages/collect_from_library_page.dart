@@ -121,8 +121,12 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
           widget.request.deliveryPhone ??
           user?.phno ??
           '';
-      _addressController.text =
-          widget.request.pickupAddress ?? widget.request.deliveryAddress ?? '';
+      _addressController.text = (widget.isReturn
+              ? widget.request.returnPickupAddress
+              : null) ??
+          widget.request.pickupAddress ??
+          widget.request.deliveryAddress ??
+          '';
     });
   }
 
