@@ -148,6 +148,20 @@ class AppInterceptor extends QueuedInterceptor {
 
     if (status == 401) return true;
 
+    // The backend answers 403 (not 401) when the access token is invalid or
+    // expired, e.g. {"error": "Invalid or expired token"}. Refresh and retry
+    // in that case — but leave genuine permission 403s (NOT_PRIME, admin-only
+    // routes, etc.) untouched. NOT_PRIME is filtered out in onError before
+    // this method is consulted.
+    if (status == 403 && responseData is Map) {
+      final message = (responseData['error'] ?? responseData['message'] ?? '')
+          .toString()
+          .toLowerCase();
+      if (message.contains('token') && !message.contains('refresh token')) {
+        return true;
+      }
+    }
+
     return false;
   }
 
