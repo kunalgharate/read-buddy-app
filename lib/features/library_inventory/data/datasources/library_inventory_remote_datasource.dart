@@ -130,6 +130,26 @@ class LibraryInventoryRemoteDataSourceImpl
     if (lat != null) queryParams['lat'] = lat;
     if (lng != null) queryParams['lng'] = lng;
 
+    var books = await _fetchCityBooks(queryParams);
+
+    // Libraries may be stored under a differently-cased/spaced city name than
+    // the one selected (e.g. "hyderabad" vs "Hyderabad", or with a trailing
+    // state). Retry with common normalizations so those books still surface
+    // instead of the city appearing to have no books at all.
+    if (books.isEmpty) {
+      for (final variant in _cityVariants(city)) {
+        if (variant == city) continue;
+        final retry = Map<String, dynamic>.from(queryParams)..['city'] = variant;
+        books = await _fetchCityBooks(retry);
+        if (books.isNotEmpty) break;
+      }
+    }
+    return books;
+  }
+
+  Future<List<CityBookModel>> _fetchCityBooks(
+    Map<String, dynamic> queryParams,
+  ) async {
     final response = await _dio.get(
       ApiConstants.libraryInventoryBrowse,
       queryParameters: queryParams,
@@ -139,5 +159,20 @@ class LibraryInventoryRemoteDataSourceImpl
     return list
         .map((json) => CityBookModel.fromJson(json as Map<String, dynamic>))
         .toList();
+  }
+
+  Iterable<String> _cityVariants(String city) {
+    final trimmed = city.trim();
+    final titleCased = trimmed
+        .split(RegExp(r'\s+'))
+        .map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1))
+        .join(' ');
+    final withoutSuffix = trimmed.split(',').first.trim();
+    return {
+      withoutSuffix,
+      titleCased,
+      titleCased.split(',').first.trim(),
+      trimmed.toLowerCase(),
+    };
   }
 }

@@ -315,6 +315,7 @@ class _RequestCardState extends State<_RequestCard> {
     final canCancel = isPendingOrRequested;
     final canMarkDelivered =
         statusLower == 'pickup_scheduled' || statusLower == 'shipping';
+    final isMutedDue = isCompleted || statusLower == 'returned';
 
     VoidCallback? onTap;
     if (isCompleted) {
@@ -505,6 +506,31 @@ class _RequestCardState extends State<_RequestCard> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
+                        if ((request.dueDate ?? '').isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.event_note,
+                                size: 14,
+                                color: isMutedDue
+                                    ? const Color(0xFFAAAAAA)
+                                    : const Color(0xFF888888),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Due ${formatRequestDate(request.dueDate)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isMutedDue
+                                      ? const Color(0xFFAAAAAA)
+                                      : const Color(0xFF888888),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         if (canCancel) ...[
                           const SizedBox(height: 8),
                           isCancelling

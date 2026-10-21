@@ -10,6 +10,7 @@ import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
 import 'collect_from_library_page.dart';
+import 'delivered_request_detail_page.dart';
 
 class ApprovedBookRequestPage extends StatefulWidget {
   final BookRequestEntity request;
@@ -162,9 +163,11 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   }
 
   String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '—';
-    final dt = DateTime.tryParse(dateStr);
-    if (dt == null) return dateStr;
+    final dt = parseRequestDateOnly(dateStr);
+    if (dt == null) {
+      if (dateStr == null || dateStr.isEmpty) return '—';
+      return dateStr;
+    }
     const months = [
       '',
       'January',
@@ -329,7 +332,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                           showDivider: true,
                         ),
                         _InfoRow(
-                          label: 'Return Date',
+                          label: 'Due Date',
                           value: _formatDate(req.dueDate),
                           showDivider: false,
                         ),

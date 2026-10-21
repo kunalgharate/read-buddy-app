@@ -88,9 +88,26 @@ class _ProfileView extends StatelessWidget {
           filename: pickedFile.name,
         ),
       });
-      await dio.post(ApiConstants.uploadProfileImage, data: formData);
+      final response = await dio.post(
+        ApiConstants.uploadProfileImage,
+        data: formData,
+      );
 
       if (!context.mounted) return;
+
+      // Read the body defensively — the server may answer 2xx with a failure payload
+      final responseError = _uploadResponseError(response.data);
+      if (responseError != null) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseError),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -104,12 +121,66 @@ class _ProfileView extends StatelessWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to upload photo. Please try again.'),
+        SnackBar(
+          content: Text(_uploadErrorMessage(e)),
           backgroundColor: Colors.red,
         ),
       );
     }
+  }
+
+  /// Extracts a picture/profile image URL from an upload response body.
+  String? _pictureUrlFrom(dynamic data) {
+    if (data is! Map) return null;
+    const keys = ['picture', 'url', 'imageUrl', 'profileImage', 'data'];
+    for (final key in keys) {
+      final value = data[key];
+      if (value is String && value.trim().isNotEmpty) return value.trim();
+      if (value is Map) {
+        final nested = _pictureUrlFrom(value);
+        if (nested != null) return nested;
+      }
+    }
+    return null;
+  }
+
+  /// Reads a server provided message out of a response body.
+  String? _serverMessage(dynamic data) {
+    if (data is! Map) return null;
+    final message = data['message'] ?? data['error'];
+    if (message is String && message.trim().isNotEmpty) return message.trim();
+    final nested = data['data'];
+    if (nested is Map) return _serverMessage(nested);
+    return null;
+  }
+
+  /// Returns the error carried by an upload response body, or null when the
+  /// upload succeeded (a picture URL is enough — the profile reload picks it up).
+  String? _uploadResponseError(dynamic data) {
+    if (data is! Map) return null;
+    if (_pictureUrlFrom(data) != null) return null;
+    final success = data['success'];
+    if (success == false || success == 'false') {
+      return _serverMessage(data) ?? 'Failed to upload photo. Please try again.';
+    }
+    return null;
+  }
+
+  /// Builds a user facing message for a failed upload.
+  String _uploadErrorMessage(Object error) {
+    if (error is DioException) {
+      final response = error.response;
+      final serverMessage = _serverMessage(response?.data);
+      if (serverMessage != null) return serverMessage;
+      final statusCode = response?.statusCode;
+      if (statusCode == 413) {
+        return 'Image is too large. Please choose a smaller photo.';
+      }
+      if (statusCode == 401 || statusCode == 403) {
+        return 'Your session has expired. Please sign in again.';
+      }
+    }
+    return 'Failed to upload photo. Please try again.';
   }
 
   void _showLogoutDialog(BuildContext context) {
@@ -256,6 +327,7 @@ class _ProfileView extends StatelessWidget {
 
   Widget _buildAvatarCircle(ProfileUser user, bool isUpdating) {
     final avatarAsset = AppAvatars.assetFor(user.userAvatar);
+    final picture = user.picture;
 
     Widget content;
     if (isUpdating) {
@@ -265,18 +337,16 @@ class _ProfileView extends StatelessWidget {
           child: CircularProgressIndicator(color: _green, strokeWidth: 2),
         ),
       );
-    } else if (avatarAsset != null) {
-      content = Image.asset(
-        avatarAsset,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _avatarFallback(user.name),
-      );
-    } else if (user.picture != null && user.picture!.isNotEmpty) {
+    } else if (picture != null && picture.isNotEmpty) {
+      // An uploaded photo always wins over the preset avatar
       content = Image.network(
-        user.picture!,
+        picture,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _avatarFallback(user.name),
+        errorBuilder: (_, __, ___) =>
+            _avatarAssetOrFallback(avatarAsset, user.name),
       );
+    } else if (avatarAsset != null) {
+      content = _avatarAssetOrFallback(avatarAsset, user.name);
     } else {
       content = _avatarFallback(user.name);
     }
@@ -289,6 +359,15 @@ class _ProfileView extends StatelessWidget {
         border: Border.all(color: _green, width: 2),
       ),
       child: ClipOval(child: content),
+    );
+  }
+
+  Widget _avatarAssetOrFallback(String? assetPath, String name) {
+    if (assetPath == null) return _avatarFallback(name);
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _avatarFallback(name),
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/network/api_constants.dart';
 import 'package:read_buddy_app/core/services/city_notifier.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/bookcrud/domain/respository/variant_repository.dart';
 import '../../data/models/library_inventory_model.dart';
 
 /// A bottom sheet that shows which libraries in the user's city have a
@@ -27,15 +28,18 @@ class LibraryPickerSheet extends StatefulWidget {
   final String bookId;
   final String bookTitle;
 
-  /// When the user chose a specific edition (variant) on the detail page, prefer
-  /// the inventory record for that variant so borrowing keeps the same edition.
-  final String? preferredVariantId;
+  /// Map of (lower-cased) format type (e.g. 'hardcover') to the variantId +
+  /// formatId to borrow for that format. Supplied by the detail page (from the
+  /// book's variants) so the picker can resolve what to borrow WITHOUT calling
+  /// the admin/librarian-only inventory endpoint, which returns 403 for regular
+  /// users.
+  final Map<String, ({String variantId, String formatId})> formatByType;
 
   const LibraryPickerSheet({
     super.key,
     required this.bookId,
     required this.bookTitle,
-    this.preferredVariantId,
+    required this.formatByType,
   });
 
   /// Show the picker and return selected library info, or null if dismissed.
@@ -43,7 +47,7 @@ class LibraryPickerSheet extends StatefulWidget {
     BuildContext context, {
     required String bookId,
     required String bookTitle,
-    String? preferredVariantId,
+    required Map<String, ({String variantId, String formatId})> formatByType,
   }) {
     return showModalBottomSheet<LibraryPickResult>(
       context: context,
@@ -54,7 +58,7 @@ class LibraryPickerSheet extends StatefulWidget {
       builder: (_) => LibraryPickerSheet(
         bookId: bookId,
         bookTitle: bookTitle,
-        preferredVariantId: preferredVariantId,
+        formatByType: formatByType,
       ),
     );
   }
@@ -88,36 +92,21 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
 
     try {
       final dio = getIt<Dio>();
-      final response = await dio.get(
-        ApiConstants.libraryInventoryBrowse,
-        queryParameters: {
-          'city': city,
-          if (CityNotifier.instance.latitude != null)
-            'lat': CityNotifier.instance.latitude,
-          if (CityNotifier.instance.longitude != null)
-            'lng': CityNotifier.instance.longitude,
-        },
-      );
-      final data = response.data;
-      final books = (data['books'] as List<dynamic>?) ?? [];
+      CityBookModel? cityBook = await _fetchCityBook(dio, city);
+      // Some libraries are stored under a differently-cased/spaced city name
+      // than the one the user picked (e.g. "hyderabad" vs "Hyderabad"). Retry
+      // with the raw city so those books still surface.
+      if (cityBook == null && city != city.trim()) {
+        cityBook = await _fetchCityBook(dio, city.trim());
+      }
 
-      // Find the specific book in results
-      final bookData = books.firstWhere(
-        (b) => b['bookId']?.toString() == widget.bookId,
-        orElse: () => null,
-      );
-
-      if (bookData == null) {
+      if (cityBook == null) {
         setState(() {
           _loading = false;
           _error = 'This book is not available in any library in $city.';
         });
         return;
       }
-
-      final cityBook = CityBookModel.fromJson(
-        bookData as Map<String, dynamic>,
-      );
 
       // Build options from the per-library breakdown (already distance-sorted
       // and coordinate-filtered by the backend when user coords were sent).
@@ -159,112 +148,84 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
     }
   }
 
+  Future<CityBookModel?> _fetchCityBook(Dio dio, String city) async {
+    final response = await dio.get(
+      ApiConstants.libraryInventoryBrowse,
+      queryParameters: {
+        'city': city,
+        if (CityNotifier.instance.latitude != null)
+          'lat': CityNotifier.instance.latitude,
+        if (CityNotifier.instance.longitude != null)
+          'lng': CityNotifier.instance.longitude,
+      },
+    );
+    final data = response.data;
+    final books = (data['books'] as List<dynamic>?) ?? [];
+    final bookData = books.firstWhere(
+      (b) => b['bookId']?.toString() == widget.bookId,
+      orElse: () => null,
+    );
+    if (bookData == null) return null;
+    return CityBookModel.fromJson(bookData as Map<String, dynamic>);
+  }
+
   Future<void> _selectLibrary(
     _LibraryOption option,
     String fulfillmentMethod,
   ) async {
-    // We need variantId and formatId. Fetch inventory record for this library+book.
-    try {
-      final dio = getIt<Dio>();
-      final response = await dio.get(
-        ApiConstants.libraryInventory,
-        queryParameters: {'libraryId': option.libraryId},
-      );
-      final data = response.data;
-      final inventory = (data['inventory'] as List?) ?? [];
+    // Resolve variantId + formatId from data the detail page already loaded
+    // (the book's variants). We deliberately avoid GET /v1/library-inventory
+    // here: that endpoint is admin/librarian-only and returns 403 for regular
+    // users, which previously broke borrowing.
+    var match = widget.formatByType[option.formatType.toLowerCase()];
 
-      String recBookId(dynamic inv) => inv['bookId'] is Map
-          ? (inv['bookId']['_id']?.toString() ?? '')
-          : (inv['bookId']?.toString() ?? '');
-      String recVariantId(dynamic inv) => inv['variantId'] is Map
-          ? (inv['variantId']['_id']?.toString() ?? '')
-          : (inv['variantId']?.toString() ?? '');
-
-      // Prefer the record for the user's chosen edition (variant) + format;
-      // fall back to any record matching this book + format.
-      dynamic record;
-      if (widget.preferredVariantId != null &&
-          widget.preferredVariantId!.isNotEmpty) {
-        record = inventory.firstWhere(
-          (inv) =>
-              recBookId(inv) == widget.bookId &&
-              inv['formatType'] == option.formatType &&
-              recVariantId(inv) == widget.preferredVariantId,
-          orElse: () => null,
-        );
-      }
-      record ??= inventory.firstWhere(
-        (inv) =>
-            recBookId(inv) == widget.bookId &&
-            inv['formatType'] == option.formatType,
-        orElse: () => null,
-      );
-
-      if (record == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not find inventory details.')),
-          );
-        }
-        return;
-      }
-
-      final variantId = record['variantId'] is Map
-          ? record['variantId']['_id']?.toString() ?? ''
-          : record['variantId']?.toString() ?? '';
-
-      // We need formatId from BookVariant.formats[] — look it up
-      final variantResponse = await dio.get(
-        '${ApiConstants.bookVariants}/book/${widget.bookId}',
-      );
-      final variantData = variantResponse.data;
-      final variants =
-          variantData['variants'] ?? variantData['data'] ?? variantData;
-      String? formatId;
-      if (variants is List) {
-        for (final v in variants) {
-          if ((v['_id'] ?? v['id'])?.toString() == variantId) {
-            final formats = v['formats'] as List? ?? [];
-            for (final f in formats) {
-              if (f['type'] == option.formatType) {
-                formatId = (f['_id'] ?? f['id'])?.toString();
-                break;
-              }
-            }
-            break;
-          }
-        }
-      }
-
-      if (formatId == null || variantId.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not resolve format details.')),
-          );
-        }
-        return;
-      }
-
+    // The detail page may not have supplied this format (e.g. variants arrived
+    // without format ids). Fall back to fetching the book's variants, which is
+    // a user-accessible endpoint, so borrowing still works.
+    if (match == null || match.variantId.isEmpty || match.formatId.isEmpty) {
+      match = await _resolveFormatFromVariants(option.formatType);
+    }
+    if (match == null || match.variantId.isEmpty || match.formatId.isEmpty) {
       if (mounted) {
-        Navigator.pop(
-          context,
-          LibraryPickResult(
-            libraryId: option.libraryId,
-            libraryName: option.libraryName,
-            variantId: variantId,
-            formatId: formatId,
-            formatType: option.formatType,
-            fulfillmentMethod: fulfillmentMethod,
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('This edition is not available at this library.'),
           ),
         );
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
+      return;
     }
+    if (!mounted) return;
+
+    Navigator.pop(
+      context,
+      LibraryPickResult(
+        libraryId: option.libraryId,
+        libraryName: option.libraryName,
+        variantId: match.variantId,
+        formatId: match.formatId,
+        formatType: option.formatType,
+        fulfillmentMethod: fulfillmentMethod,
+      ),
+    );
+  }
+
+  Future<({String variantId, String formatId})?> _resolveFormatFromVariants(
+    String formatType,
+  ) async {
+    try {
+      final variants =
+          await getIt<VariantRepository>().getVariantsForBook(widget.bookId);
+      final key = formatType.toLowerCase();
+      for (final v in variants) {
+        for (final f in v.formats) {
+          if (f.type.toLowerCase() == key && (f.id?.isNotEmpty ?? false)) {
+            return (variantId: v.id, formatId: f.id!);
+          }
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
   @override
