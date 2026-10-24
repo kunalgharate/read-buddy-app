@@ -125,19 +125,6 @@ class _BookPageState extends State<BookPage> {
                   borderRadius: BorderRadius.circular(15),
                   borderSide: const BorderSide(color: Colors.grey),
                 ),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pushNamed(context, '/search'),
-                      icon: const Icon(Icons.mic),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pushNamed(context, '/search'),
-                      icon: const Icon(Icons.qr_code),
-                    ),
-                  ],
-                ),
               ),
             ),
             const SizedBox(

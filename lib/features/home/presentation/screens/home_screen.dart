@@ -182,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.pushNamed(context, '/notification');
                     },
                   ),
-                  if (role == 'librarian') ...[
+                  if (AccessControl.isLibrarian(role)) ...[
                     const Divider(),
                     const Padding(
                       padding: EdgeInsets.only(left: 16, top: 8, bottom: 4),

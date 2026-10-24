@@ -122,6 +122,7 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
       }
       throw Exception('Unexpected response from payment server');
     } on DioException catch (e) {
+      if (e.response == null) rethrow;
       final serverMsg = e.response?.data is Map
           ? (e.response!.data['error'] ?? e.response!.data['message'])
               as String?
@@ -156,6 +157,7 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
       }
       return Map<String, dynamic>.from(response.data as Map);
     } on DioException catch (e) {
+      if (e.response == null) rethrow;
       final serverMsg = e.response?.data is Map
           ? (e.response!.data['error'] ?? e.response!.data['message'])
               as String?

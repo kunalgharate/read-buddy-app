@@ -9,9 +9,10 @@ void main() {
       expect(DateFormatter.parseRequestDateOnly('   '), isNull);
     });
 
-    test('returns null for unparseable input', () {
+    test('returns null for unparseable or impossible calendar dates', () {
       expect(DateFormatter.parseRequestDateOnly('not-a-date'), isNull);
       expect(DateFormatter.parseRequestDateOnly('2026-99-99'), isNull);
+      expect(DateFormatter.parseRequestDateOnly('2024-02-31'), isNull);
     });
 
     test('parses date-only string YYYY-MM-DD correctly', () {

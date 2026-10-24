@@ -14,43 +14,28 @@ class DateFormatter {
     'Dec',
   ];
 
-  static bool _hasUtcOffset(String s) {
-    return RegExp(r'[\sT].*[+-]\d{2}:?\d{2}$').hasMatch(s);
-  }
-
   static DateTime? parseRequestDateOnly(String? raw) {
     if (raw == null) return null;
     final s = raw.trim();
     if (s.isEmpty) return null;
-    final dt = DateTime.tryParse(s);
-    if (dt == null) return null;
 
     final datePart = s.split(RegExp(r'[\sT]')).first.split('-');
     if (datePart.length == 3) {
       final y = int.tryParse(datePart[0]);
       final m = int.tryParse(datePart[1]);
       final d = int.tryParse(datePart[2]);
-      if (y != null && m != null && d != null) {
-        if (m < 1 || m > 12 || d < 1 || d > 31) return null;
-      }
+      if (y == null || m == null || d == null) return null;
+      if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+
+      // Validate that y/m/d is a real calendar date (e.g. 2024-02-31 is invalid)
+      final testDt = DateTime(y, m, d);
+      if (testDt.year != y || testDt.month != m || testDt.day != d) return null;
+
+      return DateTime(y, m, d);
     }
 
-    if (s.endsWith('Z') || s.endsWith('z')) {
-      final utc = dt.toUtc();
-      return DateTime(utc.year, utc.month, utc.day);
-    }
-    if (_hasUtcOffset(s)) {
-      final parts = s.split(RegExp(r'[\sT]')).first.split('-');
-      if (parts.length == 3) {
-        final y = int.tryParse(parts[0]);
-        final m = int.tryParse(parts[1]);
-        final d = int.tryParse(parts[2]);
-        if (y != null && m != null && d != null) {
-          if (m < 1 || m > 12 || d < 1 || d > 31) return null;
-          return DateTime(y, m, d);
-        }
-      }
-    }
+    final dt = DateTime.tryParse(s);
+    if (dt == null) return null;
     return DateTime(dt.year, dt.month, dt.day);
   }
 

@@ -405,7 +405,11 @@ class _RazorpayBottomSheetState extends State<RazorpayBottomSheet> {
             width: double.infinity,
             height: size.height * 0.058,
             child: ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, '/donate-money'),
+              onPressed: () => Navigator.pushNamed(
+                context,
+                '/donate-money',
+                arguments: selectedAmount,
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFFC107),
                 foregroundColor: _textDark,

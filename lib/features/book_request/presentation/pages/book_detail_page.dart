@@ -1,7 +1,9 @@
+import 'package:read_buddy_app/core/network/api_constants.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/di/injection.dart';
@@ -523,10 +525,14 @@ class _CoverImageSection extends StatelessWidget {
               const SizedBox(width: 8),
               _IconCircleButton(
                 icon: Icons.share_outlined,
-                onTap: () {
+                onTap: () async {
+                  final url = '${ApiConstants.baseUrl}/books/${book.id}';
+                  await Clipboard.setData(ClipboardData(text: url));
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Share link copied to clipboard!'),
+                      content: Text('Book link copied to clipboard!'),
+                      behavior: SnackBarBehavior.floating,
                     ),
                   );
                 },

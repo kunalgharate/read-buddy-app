@@ -460,11 +460,12 @@ class _AddBookPage2State extends State<AddBookPage2> {
   /// ✅ Location Search Debounce
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
       final query = locationController.text.trim();
       if (query.length >= 3 && mounted) {
-        context.read<LocationCubit>().fetchlocations(query);
-      } else {
+        await context.read<LocationCubit>().fetchlocations(query);
+        if (mounted) setState(() {});
+      } else if (mounted) {
         setState(() {
           BookValueItems.locationsuggestions.clear();
         });

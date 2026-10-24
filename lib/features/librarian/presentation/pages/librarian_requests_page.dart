@@ -199,10 +199,7 @@ class _RequestCardState extends State<_RequestCard> {
                   OutlinedButton(
                     onPressed: _processing
                         ? null
-                        : () {
-                            setState(() => _processing = true);
-                            _showRejectDialog(context, requestId);
-                          },
+                        : () => _showRejectDialog(context, requestId),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
@@ -308,6 +305,7 @@ class _RequestCardState extends State<_RequestCard> {
             onPressed: () {
               final reason = reasonController.text.trim();
               if (reason.isNotEmpty) {
+                setState(() => _processing = true);
                 context
                     .read<LibrarianBloc>()
                     .add(RejectRequestEvent(requestId, reason));
