@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/features/book_request/presentation/pages/book_detail_page.dart'
     as request_detail;
 import 'package:read_buddy_app/features/category_crud/domain/entity/category_enity.dart';
@@ -11,6 +12,17 @@ import 'package:read_buddy_app/features/books/domain/entities/book.dart';
 
 const _green = Color(0xFF00C853);
 
+enum _BookSortOption {
+  relevance('Default'),
+  titleAsc('Title A–Z'),
+  titleDesc('Title Z–A'),
+  categoryAsc('Category A–Z');
+
+  const _BookSortOption(this.label);
+
+  final String label;
+}
+
 class CategoryTab extends StatefulWidget {
   const CategoryTab({super.key});
 
@@ -21,6 +33,17 @@ class CategoryTab extends StatefulWidget {
 class _CategoryTabState extends State<CategoryTab> {
   String _searchQuery = "";
   CategoryEntity? _selectedCategory; // null means 'All' is selected
+  _BookSortOption _sortOption = _BookSortOption.relevance;
+  String? _filterCategoryId; // null means every category is listed
+  bool _coverOnly = false;
+
+  int get _activeFilterCount {
+    var count = 0;
+    if (_sortOption != _BookSortOption.relevance) count++;
+    if (_filterCategoryId != null) count++;
+    if (_coverOnly) count++;
+    return count;
+  }
 
   @override
   void initState() {
@@ -94,7 +117,7 @@ class _CategoryTabState extends State<CategoryTab> {
                               child: _selectedCategory == null
                                   ? _buildDefaultAllView(categories, books)
                                   : _buildExploreView(
-                                      _selectedCategory!,
+                                      categories,
                                       books,
                                     ),
                             ),
@@ -166,19 +189,76 @@ class _CategoryTabState extends State<CategoryTab> {
                 ),
               ],
             ),
-            child: IconButton(
-              icon: Icon(
-                Icons.tune,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              onPressed: () {
-                // Future Filter/Sorting implementation
-              },
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  tooltip: 'Filter and sort books',
+                  icon: Icon(
+                    Icons.tune,
+                    color: _activeFilterCount > 0
+                        ? AppColors.primary
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+                  onPressed: _showFilterSheet,
+                ),
+                if (_activeFilterCount > 0)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$_activeFilterCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  // ─── Filter & Sort Bottom Sheet ─────────────────────────────────────────────
+  Future<void> _showFilterSheet() async {
+    final categoryState = context.read<CategoryBloc>().state;
+    final categories = categoryState is CategoryLoaded
+        ? categoryState.categories
+        : const <CategoryEntity>[];
+
+    final result = await showModalBottomSheet<_FilterSortResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => _FilterSortSheet(
+        categories: categories,
+        initialSort: _sortOption,
+        initialCategoryId: _filterCategoryId,
+        initialCoverOnly: _coverOnly,
+      ),
+    );
+
+    if (!mounted || result == null) return;
+
+    setState(() {
+      _sortOption = result.sort;
+      _filterCategoryId = result.categoryId;
+      _coverOnly = result.coverOnly;
+    });
   }
 
   // ─── Horizontal Category Navigation Bar ────────────────────────────────────
@@ -246,11 +326,8 @@ class _CategoryTabState extends State<CategoryTab> {
     // Show 'Popular Genres' using all categories (limit to 6 for premium design)
     final popularGenres = allCategories.take(8).toList();
 
-    // Group books by category and filter by search query
-    final filteredBooks = allBooks.where((book) {
-      if (_searchQuery.isEmpty) return true;
-      return book.title.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    // Group books by category and apply search, filter and sorting
+    final filteredBooks = _visibleBooks(allBooks, allCategories);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 80),
@@ -375,14 +452,19 @@ class _CategoryTabState extends State<CategoryTab> {
   }
 
   // ─── Explore View (Figma Screen 2 - Once user select any category) ──────────
-  Widget _buildExploreView(CategoryEntity category, List<Book> allBooks) {
-    // Filter books belonging to this category and matching search query
-    final categoryBooks = allBooks.where((book) {
-      final matchesCategory = _isBookInCategory(book, category);
-      final matchesSearch = _searchQuery.isEmpty ||
-          book.title.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    }).toList();
+  Widget _buildExploreView(
+    List<CategoryEntity> allCategories,
+    List<Book> allBooks,
+  ) {
+    // A category picked in the filter sheet wins over the selected chip so the
+    // list never ends up empty because of two conflicting category picks.
+    final filterCategory = _categoryById(allCategories, _filterCategoryId);
+    final effectiveCategory = filterCategory ?? _selectedCategory!;
+
+    // Filter books belonging to this category, applying search, filters and sorting
+    final categoryBooks = _visibleBooks(allBooks, allCategories)
+        .where((book) => _isBookInCategory(book, effectiveCategory))
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,7 +475,7 @@ class _CategoryTabState extends State<CategoryTab> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Explore ${_capitalize(category.title)}',
+                'Explore ${_capitalize(effectiveCategory.title)}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -457,6 +539,59 @@ class _CategoryTabState extends State<CategoryTab> {
     if (catName.contains(genre) || genre.contains(catName)) return true;
 
     return false;
+  }
+
+  // Applies the search query, the active filters and the selected sorting
+  List<Book> _visibleBooks(List<Book> books, List<CategoryEntity> categories) {
+    final query = _searchQuery.trim().toLowerCase();
+    final filterCategory = _categoryById(categories, _filterCategoryId);
+
+    final visible = books.where((book) {
+      if (query.isNotEmpty && !book.title.toLowerCase().contains(query)) {
+        return false;
+      }
+      if (_coverOnly && book.bookimage.isEmpty) return false;
+      if (filterCategory != null && !_isBookInCategory(book, filterCategory)) {
+        return false;
+      }
+      return true;
+    }).toList();
+
+    _sortBooks(visible);
+    return visible;
+  }
+
+  void _sortBooks(List<Book> books) {
+    switch (_sortOption) {
+      case _BookSortOption.relevance:
+        break;
+      case _BookSortOption.titleAsc:
+        books.sort(
+          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+        );
+      case _BookSortOption.titleDesc:
+        books.sort(
+          (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
+        );
+      case _BookSortOption.categoryAsc:
+        books.sort(
+          (a, b) => _categoryLabel(a).compareTo(_categoryLabel(b)),
+        );
+    }
+  }
+
+  CategoryEntity? _categoryById(List<CategoryEntity> categories, String? id) {
+    if (id == null) return null;
+    for (final category in categories) {
+      if (category.id == id) return category;
+    }
+    return null;
+  }
+
+  String _categoryLabel(Book book) {
+    final genre = book.genre.trim().toLowerCase();
+    if (genre.isNotEmpty) return genre;
+    return book.bookCategory.categoryName.trim().toLowerCase();
   }
 
   // ─── Horizontal Book Card Widget ───────────────────────────────────────────
@@ -723,5 +858,242 @@ class _CategoryTabState extends State<CategoryTab> {
       if (word.isEmpty) return '';
       return word[0].toUpperCase() + word.substring(1);
     }).join(' ');
+  }
+}
+
+class _FilterSortResult {
+  final _BookSortOption sort;
+  final String? categoryId;
+  final bool coverOnly;
+
+  const _FilterSortResult({
+    required this.sort,
+    required this.categoryId,
+    required this.coverOnly,
+  });
+}
+
+class _FilterSortSheet extends StatefulWidget {
+  final List<CategoryEntity> categories;
+  final _BookSortOption initialSort;
+  final String? initialCategoryId;
+  final bool initialCoverOnly;
+
+  const _FilterSortSheet({
+    required this.categories,
+    required this.initialSort,
+    required this.initialCategoryId,
+    required this.initialCoverOnly,
+  });
+
+  @override
+  State<_FilterSortSheet> createState() => _FilterSortSheetState();
+}
+
+class _FilterSortSheetState extends State<_FilterSortSheet> {
+  late _BookSortOption _sort = widget.initialSort;
+  late String? _categoryId = widget.initialCategoryId;
+  late bool _coverOnly = widget.initialCoverOnly;
+
+  void _apply() {
+    Navigator.pop(
+      context,
+      _FilterSortResult(
+        sort: _sort,
+        categoryId: _categoryId,
+        coverOnly: _coverOnly,
+      ),
+    );
+  }
+
+  void _clear() {
+    Navigator.pop(
+      context,
+      const _FilterSortResult(
+        sort: _BookSortOption.relevance,
+        categoryId: null,
+        coverOnly: false,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.onSurface;
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Filter & Sort',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Close',
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.close, color: textColor),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _sectionTitle('Sort by'),
+            RadioGroup<_BookSortOption>(
+              groupValue: _sort,
+              onChanged: (value) {
+                if (value != null) setState(() => _sort = value);
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _BookSortOption.values
+                    .map(
+                      (option) => RadioListTile<_BookSortOption>(
+                        value: option,
+                        title: Text(
+                          option.label,
+                          style: TextStyle(fontSize: 14, color: textColor),
+                        ),
+                        activeColor: AppColors.primary,
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            _sectionTitle('Filters'),
+            SwitchListTile(
+              value: _coverOnly,
+              onChanged: (value) => setState(() => _coverOnly = value),
+              title: Text(
+                'Cover image only',
+                style: TextStyle(fontSize: 14, color: textColor),
+              ),
+              subtitle: Text(
+                'Hide books without a cover image',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+              ),
+              activeThumbColor: AppColors.primary,
+              contentPadding: EdgeInsets.zero,
+            ),
+            if (widget.categories.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              _sectionTitle('Category'),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _categoryChip(null, 'All'),
+                  ...widget.categories.map(
+                    (category) => _categoryChip(category.id, category.title),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _clear,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: textColor,
+                      side: BorderSide(color: Colors.grey.shade400),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text('Clear'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _apply,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text('Apply'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String title) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: isDark ? Theme.of(context).colorScheme.onSurface : AppColors.navy,
+        ),
+      ),
+    );
+  }
+
+  Widget _categoryChip(String? id, String label) {
+    final isSelected = _categoryId == id;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => setState(() => _categoryId = id),
+      selectedColor: AppColors.primary.withValues(alpha: 0.12),
+      backgroundColor: Theme.of(context).chipTheme.backgroundColor ??
+          Theme.of(context).colorScheme.surfaceContainerHighest,
+      labelStyle: TextStyle(
+        color: isSelected
+            ? AppColors.primary
+            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        fontSize: 13,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          width: 1.5,
+        ),
+      ),
+      showCheckmark: false,
+    );
   }
 }

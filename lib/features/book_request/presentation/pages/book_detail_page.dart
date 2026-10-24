@@ -392,24 +392,18 @@ class _LanguageAndActions extends StatelessWidget {
       );
     }
 
-    // Physical (borrowable) formats and their availability — mirrors web's
-    // hasAvailablePhysicalCopy gating.
+    // Physical (borrowable) formats — the borrow button is shown whenever the
+    // book has any physical edition. Live availability is resolved by the
+    // library picker, so we don't gate on the (possibly stale) book-level
+    // copy count here.
     final physicalFormats = selectedVariant.formats
         .where((f) => f.type == 'hardcover' || f.type == 'paperback')
         .toList();
-    final hasAvailablePhysicalCopy = physicalFormats.any(
-      (f) => (f.availableCopies ?? 0) > 0,
-    );
 
     // Borrow button is grouped WITH the read/listen/watch actions (like web),
-    // and only shown when the book has physical copies. When it has physical
-    // formats but none are available, it is shown disabled as 'Unavailable'.
+    // and only shown when the book has physical copies.
     final actionButtons = <Widget>[
-      if (physicalFormats.isNotEmpty)
-        _BorrowActionButton(
-          book: book,
-          available: hasAvailablePhysicalCopy,
-        ),
+      if (physicalFormats.isNotEmpty) _BorrowActionButton(book: book),
       ...buttons,
     ];
 
@@ -911,9 +905,8 @@ class _SectionCard extends StatelessWidget {
 
 class _BorrowActionButton extends StatefulWidget {
   final BookDetailEntity book;
-  final bool available;
 
-  const _BorrowActionButton({required this.book, required this.available});
+  const _BorrowActionButton({required this.book});
 
   @override
   State<_BorrowActionButton> createState() => _BorrowActionButtonState();
@@ -966,14 +959,29 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
     }
 
     // Let the user pick WHICH library to borrow from (nearest first) and HOW
-    // they want it (Pickup within range / Delivery anywhere in city). The
-    // picker resolves the correct variantId/formatId for the chosen library's
-    // inventory, so we prefer those over the locally auto-selected ones.
+    // they want it (Pickup within range / Delivery anywhere in city). We pass
+    // the format-type → (variantId, formatId) map so the picker can resolve
+    // what to borrow locally, avoiding the admin-only inventory endpoint.
+    // Prefer the user's chosen variant, then fill any remaining format types
+    // from the book's other editions.
+    final formatByType = <String, ({String variantId, String formatId})>{};
+    for (final v in [
+      variant,
+      ...variantState.variants.where((v) => v.id != variant.id),
+    ]) {
+      for (final f in v.formats) {
+        final key = f.type.toLowerCase();
+        if (f.id != null && !formatByType.containsKey(key)) {
+          formatByType[key] = (variantId: v.id, formatId: f.id!);
+        }
+      }
+    }
+
     final pick = await LibraryPickerSheet.show(
       context,
       bookId: book.id,
       bookTitle: book.title,
-      preferredVariantId: variant.id,
+      formatByType: formatByType,
     );
     // User dismissed the picker without choosing — abort silently.
     if (pick == null) return;
@@ -1034,10 +1042,9 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
     final isPrime = profileState is ProfileLoaded && profileState.user.isPrime;
     final hasActiveRequest = variantState.hasActiveRequest;
 
-    // When there are physical formats but none available, show a disabled
-    // 'Unavailable' button (mirrors web). Otherwise a normal Add to Cart.
-    final unavailable = !widget.available;
-
+    // The borrow button is always actionable unless a request already exists.
+    // Live stock is resolved by the library picker, so book-level counts are
+    // not used to gate the button.
     final Color bg;
     final IconData icon;
     final String label;
@@ -1045,17 +1052,13 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
       bg = Colors.grey;
       icon = Icons.timelapse_rounded;
       label = 'Requested';
-    } else if (unavailable) {
-      bg = const Color(0xFFEF4444);
-      icon = Icons.shopping_bag_outlined;
-      label = 'Unavailable';
     } else {
       bg = const Color(0xFF2CE07F);
       icon = Icons.shopping_bag_outlined;
       label = 'Borrow';
     }
 
-    final enabled = !_isAdding && !hasActiveRequest && !unavailable;
+    final enabled = !_isAdding && !hasActiveRequest;
 
     VoidCallback? onPressed;
     if (enabled) {

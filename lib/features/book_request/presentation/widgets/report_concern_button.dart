@@ -53,7 +53,10 @@ class _ReportSheetState extends State<_ReportSheet> {
     'other': 'Other',
   };
 
+  static const _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+
   String _reason = 'copyright';
+  final _formKey = GlobalKey<FormState>();
   final _details = TextEditingController();
   final _email = TextEditingController();
   bool _submitting = false;
@@ -65,7 +68,17 @@ class _ReportSheetState extends State<_ReportSheet> {
     super.dispose();
   }
 
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty) return null;
+    if (!RegExp(_emailRegex).hasMatch(email)) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  }
+
   Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _submitting = true);
     try {
       await getIt<BookReportService>().report(
@@ -163,13 +176,18 @@ class _ReportSheetState extends State<_ReportSheet> {
               border: OutlineInputBorder(),
             ),
           ),
-          TextField(
-            controller: _email,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Your email (optional)',
-              hintText: 'For rights holders / follow-up',
-              border: OutlineInputBorder(),
+          Form(
+            key: _formKey,
+            child: TextFormField(
+              controller: _email,
+              keyboardType: TextInputType.emailAddress,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: _validateEmail,
+              decoration: const InputDecoration(
+                labelText: 'Your email (optional)',
+                hintText: 'For rights holders / follow-up',
+                border: OutlineInputBorder(),
+              ),
             ),
           ),
           const SizedBox(height: 16),

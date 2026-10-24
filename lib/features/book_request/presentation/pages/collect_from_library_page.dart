@@ -1,11 +1,19 @@
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../../../../core/config/app_config.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
+import '../../../address/domain/entities/address_entity.dart';
+import '../../../address/domain/usecases/address_usecases.dart';
+import '../../../address/presentation/pages/address_management_page.dart';
+import '../../../profile/presentation/blocs/profile_bloc.dart';
+import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
 import '../../domain/entities/pickup_details_entity.dart';
@@ -80,19 +88,30 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   late int _selectedTab;
   bool _showingConfirmation = false;
 
+  late final Razorpay _razorpay;
+  bool _paying = false;
+
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
-  bool _isEditingAddress = false;
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+
+  // Return pickup address picked from the saved-address flow.
+  bool _addressResolved = false;
+  String? _addressLabel;
 
   @override
   void initState() {
     super.initState();
     _selectedTab = widget.initialTab;
     _prefillFromUser();
+    if (widget.isReturn) _resolveSavedAddress();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onReturnPaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onReturnPaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
   }
 
   Future<void> _prefillFromUser() async {
@@ -109,17 +128,84 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
           widget.request.deliveryPhone ??
           user?.phno ??
           '';
-      _addressController.text =
-          widget.request.pickupAddress ?? widget.request.deliveryAddress ?? '';
+      _addressController.text = (widget.isReturn
+              ? widget.request.returnPickupAddress
+              : null) ??
+          widget.request.pickupAddress ??
+          widget.request.deliveryAddress ??
+          '';
     });
   }
 
   @override
   void dispose() {
+    _razorpay.clear();
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
     super.dispose();
+  }
+
+  // Prefer the user's saved default address for a return pickup. Runs only
+  // when the request carries no return address of its own, so an address that
+  // was already captured for this specific return always wins.
+  Future<void> _resolveSavedAddress() async {
+    if ((widget.request.returnPickupAddress ?? '').trim().isNotEmpty) {
+      if (mounted) setState(() => _addressResolved = true);
+      return;
+    }
+    try {
+      final addresses = await getIt<GetAddresses>()();
+      if (!mounted) return;
+      if (addresses.isNotEmpty) {
+        final def = addresses.firstWhere(
+          (a) => a.isDefault,
+          orElse: () => addresses.first,
+        );
+        _applyAddress(def);
+      } else {
+        setState(() => _addressResolved = true);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _addressResolved = true);
+    }
+  }
+
+  void _applyAddress(AddressEntity address) {
+    final line2 = address.addressLine2.trim();
+    final parts = [
+      address.addressLine1.trim(),
+      if (line2.isNotEmpty) line2,
+      address.city.trim(),
+      address.state.trim(),
+      address.pincode.trim(),
+    ].where((p) => p.isNotEmpty).toList();
+    setState(() {
+      _addressController.text = parts.join(', ');
+      _addressLabel = address.label;
+      _addressResolved = true;
+    });
+  }
+
+  // Opens the saved-address flow (add / edit / pick). The user may save a new
+  // address there and select it, which is reflected back into the pickup form.
+  Future<void> _changeAddress() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AddressManagementPage(),
+      ),
+    );
+    if (!mounted) return;
+    try {
+      final addresses = await getIt<GetAddresses>()();
+      if (!mounted || addresses.isEmpty) return;
+      final def = addresses.firstWhere(
+        (a) => a.isDefault,
+        orElse: () => addresses.first,
+      );
+      _applyAddress(def);
+    } catch (_) {}
   }
 
   Future<void> _pickDate() async {
@@ -182,6 +268,24 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     final address = _addressController.text.trim();
     final isDropOffReturn = widget.isReturn && _selectedTab == 1;
 
+    // A drop-off return needs an eligible library branch before it can proceed
+    // (issue: the "No library found within 15 km" state must block Next).
+    if (isDropOffReturn) {
+      final libState = context.read<BookRequestBloc>().state;
+      if (libState is LibraryDetailsLoading) {
+        _showSnack('Please wait, locating the nearest library…');
+        return false;
+      }
+      if (libState is! LibraryDetailsLoaded ||
+          libState.library.id.isEmpty) {
+        _showSnack(
+          'No library is available for drop-off yet. '
+          'Please try again later or choose home pickup.',
+        );
+        return false;
+      }
+    }
+
     if (!widget.isReturn) {
       if (name.isEmpty || phone.isEmpty) {
         _showSnack('Please fill in all fields');
@@ -196,7 +300,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
       // no address needed for library drop-off
     } else {
       if (address.isEmpty) {
-        _showSnack('Please fill in all fields');
+        _showSnack(
+          widget.isReturn
+              ? 'Please add a pickup address to continue.'
+              : 'Please fill in all fields',
+        );
         return false;
       }
       if (address.length < 10) {
@@ -221,12 +329,52 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     }
   }
 
+  // Tab 0 for the return flow is paid home pickup; tab 1 is free library
+  // drop-off. Only the drop-off return goes through SchedulePickup; the paid
+  // pickup is handled by the Razorpay create-order/verify flow below.
+  bool get _isHomePickupReturn => widget.isReturn && _selectedTab == 0;
+
+  String? get _selectedLibraryId {
+    final state = context.read<BookRequestBloc>().state;
+    if (state is LibraryDetailsLoaded) return state.library.id;
+    return null;
+  }
+
+  // The chosen return slot, in the same shapes the initiate-return contract
+  // uses (full ISO-8601 date, "hh:mm AM/PM" slot). Sent with the pickup
+  // payment verification so the paid path persists the schedule too.
+  String? get _returnScheduledDateIso {
+    final date = _selectedDate;
+    if (date == null) return null;
+    return DateTime(date.year, date.month, date.day).toIso8601String();
+  }
+
+  String? get _returnScheduledSlot {
+    final time = _selectedTime;
+    if (time == null) return null;
+    return _formatTime(time);
+  }
+
   void _onActualConfirm() {
+    if (_isHomePickupReturn) {
+      _startReturnPickupPayment();
+      return;
+    }
+
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final address = widget.isReturn && _selectedTab == 1
         ? 'library-drop-off'
         : _addressController.text.trim();
+
+    final libraryId = widget.isReturn && _selectedTab == 1
+        ? _selectedLibraryId
+        : null;
+    if (widget.isReturn && _selectedTab == 1 &&
+        (libraryId == null || libraryId.isEmpty)) {
+      _showSnack('Library details are still loading. Please try again.');
+      return;
+    }
 
     final timeStr =
         '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
@@ -245,8 +393,155 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
             returnMethod: widget.isReturn
                 ? (_selectedTab == 1 ? 'DROP_OFF' : 'PICKUP')
                 : null,
+            returnBranchId: libraryId,
           ),
         );
+  }
+
+  // PICKUP returns are paid (₹25 home-collection fee). create-order requires
+  // the request to still be `delivered`, so it runs before any initiate-return
+  // / verify call. The backend must return a `razorpayKey`; without it we can't
+  // open checkout, so surface the guarded message.
+  Future<void> _startReturnPickupPayment() async {
+    if (_paying) return;
+    setState(() => _paying = true);
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      final res = await ds.createReturnPickupOrder(widget.request.id);
+      final razorpayKey = res['razorpayKey'] as String?;
+      final orderId = res['orderId'] as String?;
+      if (razorpayKey == null ||
+          razorpayKey.isEmpty ||
+          orderId == null ||
+          orderId.isEmpty) {
+        throw Exception(
+          'Payment is temporarily unavailable. Please try again later.',
+        );
+      }
+      if (!mounted) return;
+      final amount = res['amount'];
+      _razorpay.open({
+        'key': razorpayKey,
+        'amount': amount is num ? amount.toInt() : amount,
+        'currency': 'INR',
+        'order_id': orderId,
+        'name': 'ReadBuddy',
+        'description': 'Home Pickup Return Fee',
+        'prefill': {
+          'name': _nameController.text.trim(),
+          'contact': _phoneController.text.trim(),
+        },
+        'theme': {'color': '#2CE07F'},
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        _showSnack(e.toString().replaceFirst('Exception: ', ''));
+      }
+    }
+  }
+
+  Future<void> _onReturnPaymentSuccess(PaymentSuccessResponse response) async {
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      await ds.verifyReturnPickupPayment(
+        widget.request.id,
+        paymentId: response.paymentId ?? '',
+        orderId: response.orderId ?? '',
+        signature: response.signature ?? '',
+        pickupAddress: _addressController.text.trim(),
+        returnScheduledDate: _returnScheduledDateIso,
+        returnScheduledSlot: _returnScheduledSlot,
+      );
+      if (!mounted) return;
+      setState(() => _paying = false);
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment successful! Return pickup scheduled.'),
+          backgroundColor: Color(0xFF2CE07F),
+        ),
+      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        _showSnack('Payment verification failed: $e');
+      }
+    }
+  }
+
+  void _onReturnPaymentError(PaymentFailureResponse response) {
+    if (!mounted) return;
+    setState(() => _paying = false);
+    _showSnack('Payment failed: ${response.message ?? 'Please try again'}');
+  }
+
+  // DEV/TEST ONLY: completes the ₹25 return pickup fee via the backend demo
+  // bypass (no card), mirroring the delivery-fee test hook. Useful for E2E
+  // testing while the live checkout key is pending on the backend.
+  //
+  // Resilient by design so a reviewer can always exercise the return flow:
+  //  • if create-order is unavailable (live Razorpay key not yet deployed) we
+  //    fall back to a demo order id;
+  //  • if verify-payment rejects the demo signature, we fall back to the free
+  //    initiate-return PICKUP path so the return still gets scheduled.
+  Future<void> _payReturnPickupTest() async {
+    if (_paying) return;
+    setState(() => _paying = true);
+    final ds = getIt<BookRequestRemoteDataSource>();
+    final address = _addressController.text.trim();
+
+    try {
+      var orderId = '';
+      try {
+        final res = await ds.createReturnPickupOrder(widget.request.id);
+        orderId = (res['orderId'] as String?) ?? '';
+      } catch (_) {
+        // create-order not available yet — fall through with a demo order id.
+      }
+      orderId = orderId.isEmpty ? 'order_test_${widget.request.id}' : orderId;
+
+      try {
+        await ds.verifyReturnPickupPayment(
+          widget.request.id,
+          paymentId: 'pay_demo_success_99',
+          orderId: orderId,
+          signature: 'demo_bypass',
+          pickupAddress: address,
+          returnScheduledDate: _returnScheduledDateIso,
+          returnScheduledSlot: _returnScheduledSlot,
+        );
+      } catch (_) {
+        // Demo signature was not accepted — schedule via the free return path.
+        await ds.initiateReturn(
+          widget.request.id,
+          'PICKUP',
+          pickup: PickupDetailsEntity(
+            requestId: widget.request.id,
+            userName: _nameController.text.trim(),
+            phoneNumber: _phoneController.text.trim(),
+            address: address,
+            pickupDate: _selectedDate!,
+            pickupTime:
+                '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}',
+          ),
+        );
+      }
+
+      if (!mounted) return;
+      setState(() => _paying = false);
+      context.read<ProfileBloc>().add(LoadProfileEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Return pickup scheduled! (test)')),
+      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _paying = false);
+        _showSnack(e.toString().replaceFirst('Exception: ', ''));
+      }
+    }
   }
 
   void _showSnack(String message) {
@@ -456,22 +751,17 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                           ],
 
                           if (!widget.isReturn || _selectedTab == 0) ...[
-                            // ── Address (read-only for return pickup) ──────
+                            // ── Address ────────────────────────────────
                             Row(
                               children: [
                                 const _FieldLabel(label: 'Address'),
                                 if (widget.isReturn && _selectedTab == 0) ...[
                                   const Spacer(),
                                   GestureDetector(
-                                    onTap: () => setState(
-                                      () => _isEditingAddress =
-                                          !_isEditingAddress,
-                                    ),
-                                    child: Text(
-                                      _isEditingAddress
-                                          ? 'Done'
-                                          : 'Change Address',
-                                      style: const TextStyle(
+                                    onTap: _changeAddress,
+                                    child: const Text(
+                                      'Change Address',
+                                      style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                         color: Color(0xFF2CE07F),
@@ -482,24 +772,29 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            _InputField(
-                              controller: _addressController,
-                              hint:
-                                  'e.g. Flat 12, Sunrise Apts, MG Road, Mumbai',
-                              keyboardType: TextInputType.streetAddress,
-                              prefixIcon: const Icon(
-                                Icons.location_on_outlined,
-                                color: Color(0xFF888888),
-                                size: 20,
+                            if (widget.isReturn && _selectedTab == 0)
+                              _AddressSummary(
+                                address: _addressController.text.trim(),
+                                label: _addressLabel,
+                                loading: !_addressResolved,
+                                onChange: _changeAddress,
+                              )
+                            else
+                              _InputField(
+                                controller: _addressController,
+                                hint:
+                                    'e.g. Flat 12, Sunrise Apts, MG Road, Mumbai',
+                                keyboardType: TextInputType.streetAddress,
+                                prefixIcon: const Icon(
+                                  Icons.location_on_outlined,
+                                  color: Color(0xFF888888),
+                                  size: 20,
+                                ),
+                                maxLines: 3,
+                                minLines: 3,
+                                helperText:
+                                    'Include flat/house no., street, area  •  min 10 characters',
                               ),
-                              maxLines: 3,
-                              minLines: 3,
-                              readOnly: widget.isReturn &&
-                                  _selectedTab == 0 &&
-                                  !_isEditingAddress,
-                              helperText:
-                                  'Include flat/house no., street, area  •  min 10 characters',
-                            ),
                           ],
 
                           const SizedBox(height: 16),
@@ -593,7 +888,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                     height: 52,
                     child: BlocBuilder<BookRequestBloc, BookRequestState>(
                       builder: (context, state) {
-                        final isLoading = state is PickupScheduling;
+                        final isLoading = state is PickupScheduling || _paying;
                         return ElevatedButton(
                           onPressed: isLoading ? null : _onActualConfirm,
                           style: ElevatedButton.styleFrom(
@@ -614,9 +909,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Text(
-                                  'Confirm',
-                                  style: TextStyle(
+                              : Text(
+                                  _isHomePickupReturn
+                                      ? 'Confirm & Pay ₹25'
+                                      : 'Confirm',
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -626,6 +923,21 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                       },
                     ),
                   ),
+                  if (_isHomePickupReturn &&
+                      (kDebugMode ||
+                          (AppConfig.isInitialized &&
+                              AppConfig.instance.isDev))) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: OutlinedButton.icon(
+                        onPressed: _paying ? null : _payReturnPickupTest,
+                        icon: const Icon(Icons.bolt, size: 18),
+                        label: const Text('Pay ₹25 (TEST)'),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
@@ -665,23 +977,34 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
               child: SizedBox(
                 width: double.infinity,
                 height: 52,
-                child: ElevatedButton(
-                  onPressed: _onConfirm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2CE07F),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    'Next',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
+                child: BlocBuilder<BookRequestBloc, BookRequestState>(
+                  builder: (context, state) {
+                    // A drop-off return cannot be confirmed until an eligible
+                    // library branch within range has been resolved.
+                    final dropOffBlocked = widget.isReturn &&
+                        _selectedTab == 1 &&
+                        state is! LibraryDetailsLoaded;
+                    return ElevatedButton(
+                      onPressed: dropOffBlocked ? null : _onConfirm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2CE07F),
+                        disabledBackgroundColor:
+                            const Color(0xFF2CE07F).withValues(alpha: 0.6),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Next',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -998,6 +1321,106 @@ class _LibraryCard extends StatelessWidget {
   }
 }
 
+// ─── Address summary (return pickup) ──────────────────────────────────────────
+
+class _AddressSummary extends StatelessWidget {
+  final String address;
+  final String? label;
+  final bool loading;
+  final VoidCallback onChange;
+
+  const _AddressSummary({
+    required this.address,
+    required this.label,
+    required this.loading,
+    required this.onChange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return Container(
+        height: 78,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFDDDDDD), width: 1.2),
+        ),
+        child: const SizedBox(
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    final hasAddress = address.isNotEmpty;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFDDDDDD), width: 1.2),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.location_on_outlined,
+            color: Color(0xFF888888),
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (hasAddress && label != null && label!.isNotEmpty) ...[
+                  Text(
+                    label!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF2CE07F),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                Text(
+                  hasAddress
+                      ? address
+                      : 'No pickup address saved. Add one to continue.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: hasAddress
+                        ? AppColors.textPrimary
+                        : const Color(0xFF999999),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onChange,
+            child: const Text(
+              'Change',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2CE07F),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Field label ──────────────────────────────────────────────────────────────
 
 class _FieldLabel extends StatelessWidget {
@@ -1029,7 +1452,6 @@ class _InputField extends StatelessWidget {
   final int maxLines;
   final int minLines;
   final String? helperText;
-  final bool readOnly;
 
   const _InputField({
     required this.controller,
@@ -1040,7 +1462,6 @@ class _InputField extends StatelessWidget {
     this.maxLines = 1,
     this.minLines = 1,
     this.helperText,
-    this.readOnly = false,
   });
 
   @override
@@ -1051,10 +1472,9 @@ class _InputField extends StatelessWidget {
       inputFormatters: inputFormatters,
       maxLines: maxLines,
       minLines: minLines,
-      readOnly: readOnly,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 14,
-        color: readOnly ? const Color(0xFF888888) : const Color(0xFF1E2939),
+        color: Color(0xFF1E2939),
       ),
       decoration: InputDecoration(
         hintText: hint,
@@ -1072,7 +1492,7 @@ class _InputField extends StatelessWidget {
           vertical: 14,
         ),
         filled: true,
-        fillColor: readOnly ? const Color(0xFFF5F5F5) : Colors.white,
+        fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Color(0xFFDDDDDD), width: 1.2),

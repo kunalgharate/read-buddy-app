@@ -176,6 +176,14 @@ class _DeliveredRequestDetailPageState
             if (widget.request.returnDate != null)
               _InfoRow('Return Date', _fmtDate(widget.request.returnDate)),
 
+            // Extension guidance — there is no extension endpoint, so this is
+            // instructions-only and mirrors the FAQ wording.
+            if (widget.request.status.toLowerCase() == 'delivered' &&
+                (widget.request.dueDate ?? '').isNotEmpty) ...[
+              const SizedBox(height: 4),
+              _ExtensionCard(dueDate: widget.request.dueDate!),
+            ],
+
             // Write a review — the widget queries the eligibility endpoint and
             // shows a 'Write a review' button when the user is eligible and
             // has not yet reviewed, or an 'Edit your review' button when a
@@ -315,19 +323,25 @@ class _DeliveredRequestDetailPageState
     }
 
     if (isDropOff) {
-      // Show the drop-off library branch (not the home delivery address)
+      // Show the drop-off library branch name when we have it (the branch is
+      // the request's selected library), else a generic label.
       rows.add(
         _InfoRow(
           'Return Branch',
           (r.returnBranchId != null && r.returnBranchId!.isNotEmpty)
-              ? 'Library branch'
+              ? (r.libraryName ?? 'Library branch')
               : 'Return library branch details unavailable',
         ),
       );
     } else {
-      // Home pickup — show pickup address
-      if (r.pickupAddress != null && r.pickupAddress!.isNotEmpty) {
-        rows.add(_InfoRow('Pickup Address', r.pickupAddress!));
+      // Home pickup — show the address submitted during the pickup payment
+      // (returnPickupAddress); fall back to the older pickupDetails/address
+      // mapping for legacy records.
+      final pickupAddress = (r.returnPickupAddress?.isNotEmpty == true)
+          ? r.returnPickupAddress
+          : r.pickupAddress;
+      if (pickupAddress != null && pickupAddress.isNotEmpty) {
+        rows.add(_InfoRow('Pickup Address', pickupAddress));
       }
     }
     return rows;
@@ -412,6 +426,50 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
+class _ExtensionCard extends StatelessWidget {
+  final String dueDate;
+
+  const _ExtensionCard({required this.dueDate});
+
+  @override
+  Widget build(BuildContext context) {
+    final formatted = formatRequestDate(dueDate);
+    final isDueNow = isDueOnOrBeforeToday(dueDate);
+    final message = isDueNow
+        ? 'Your due date is $formatted. Need more time? You can request an '
+            'extension (usually 30 more days), subject to availability — email '
+            'readbuddyin@gmail.com with your book title to request one.'
+        : 'Return by $formatted. Need more time? Extensions are available on '
+            'request.';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2CE07F).withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF2CE07F).withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.schedule, size: 18, color: Color(0xFF2CE07F)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: Color(0xFF555555),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _StatusChip extends StatelessWidget {
   final String status;
   const _StatusChip({required this.status});
@@ -449,26 +507,72 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-String _fmtDate(String? s) {
-  if (s == null || s.isEmpty) return '—';
-  try {
-    final dt = DateTime.parse(s);
-    const m = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${dt.day} ${m[dt.month - 1]} ${dt.year}';
-  } catch (_) {
-    return s;
+String _fmtDate(String? s) => formatRequestDate(s);
+
+const _monthAbbr = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+/// Parses a backend date string into the calendar day that was stored.
+///
+/// Date-only strings ('2026-11-10') and UTC-midnight ISO strings
+/// ('2026-11-10T00:00:00.000Z') are read using their UTC components so the
+/// day is never shifted by the device timezone.
+DateTime? parseRequestDateOnly(String? raw) {
+  if (raw == null) return null;
+  final s = raw.trim();
+  if (s.isEmpty) return null;
+  final dt = DateTime.tryParse(s);
+  if (dt == null) return null;
+  if (s.endsWith('Z') || s.endsWith('z')) {
+    final utc = dt.toUtc();
+    return DateTime(utc.year, utc.month, utc.day);
   }
+  if (_hasUtcOffset(s)) {
+    // Offset timestamps ('...+05:30') keep the calendar day as written.
+    final parts = s.split('T').first.split('-');
+    if (parts.length == 3) {
+      final y = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      final d = int.tryParse(parts[2]);
+      if (y != null && m != null && d != null) return DateTime(y, m, d);
+    }
+  }
+  return DateTime(dt.year, dt.month, dt.day);
+}
+
+/// Formats a backend date string as 'D MMM YYYY' (e.g. '10 Nov 2026').
+String formatRequestDate(String? raw) {
+  final date = parseRequestDateOnly(raw);
+  if (date == null) {
+    if (raw == null || raw.trim().isEmpty) return '—';
+    return raw;
+  }
+  return '${date.day} ${_monthAbbr[date.month - 1]} ${date.year}';
+}
+
+/// True when [raw] resolves to today or to an earlier calendar day.
+bool isDueOnOrBeforeToday(String? raw) {
+  final due = parseRequestDateOnly(raw);
+  if (due == null) return false;
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  return !due.isAfter(today);
+}
+
+bool _hasUtcOffset(String s) {
+  final t = s.indexOf('T');
+  if (t < 0) return false;
+  return RegExp(r'[+-]\d{2}:?\d{2}$').hasMatch(s.substring(t + 1));
 }

@@ -182,6 +182,10 @@ class ApiConstants {
       '$baseUrl/users/return-requests/$id/receive';
   static String returnRequestInspect(String id) =>
       '$baseUrl/users/return-requests/$id/inspect';
+  static String returnRequestPickupPaymentCreateOrder(String id) =>
+      '$baseUrl/users/return-requests/$id/pickup/payment/create-order';
+  static String returnRequestPickupPaymentVerify(String id) =>
+      '$baseUrl/users/return-requests/$id/pickup/payment/verify-payment';
 
   // Shipments
   static String get shipments => '$baseUrl/shipments';

@@ -43,6 +43,7 @@ abstract class BookRequestRepository {
     String id,
     String returnMethod, {
     String? returnBranchId,
+    PickupDetailsEntity? pickup,
   });
   Future<RequestPaymentIntent> createBookRequestPayment(String id);
   Future<void> verifyBookRequestPayment(
