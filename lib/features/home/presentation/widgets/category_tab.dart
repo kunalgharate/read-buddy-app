@@ -15,7 +15,8 @@ const _green = Color(0xFF00C853);
 enum _BookSortOption {
   relevance('Default'),
   titleAsc('Title A–Z'),
-  titleDesc('Title Z–A');
+  titleDesc('Title Z–A'),
+  categoryAsc('Category A–Z');
 
   const _BookSortOption(this.label);
 
@@ -391,7 +392,9 @@ class _CategoryTabState extends State<CategoryTab> {
           const SizedBox(height: 16),
 
           // ─── Category Sections with Horizontal Books Lists ──────────────
-          if (filteredBooks.isEmpty)
+          if (!allCategories.any(
+            (cat) => filteredBooks.any((book) => _isBookInCategory(book, cat)),
+          ))
             _buildNoBooksFound()
           else
             ...allCategories.map((category) {
@@ -575,6 +578,12 @@ class _CategoryTabState extends State<CategoryTab> {
       case _BookSortOption.titleDesc:
         books.sort(
           (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
+        );
+      case _BookSortOption.categoryAsc:
+        books.sort(
+          (a, b) => a.bookCategory.categoryName
+              .toLowerCase()
+              .compareTo(b.bookCategory.categoryName.toLowerCase()),
         );
     }
   }

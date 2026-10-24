@@ -977,12 +977,6 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
       }
     }
 
-    String? libraryId;
-    String? fulfillmentMethod;
-    String variantId = variant.id;
-    String formatId = format.id!;
-    String libraryName = '';
-
     final pick = await LibraryPickerSheet.show(
       context,
       bookId: book.id,
@@ -990,14 +984,7 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
       formatByType: formatByType,
     );
 
-    if (pick != null) {
-      variantId = pick.variantId;
-      formatId = pick.formatId;
-      libraryId = pick.libraryId;
-      fulfillmentMethod = pick.fulfillmentMethod;
-      libraryName = pick.libraryName;
-    }
-
+    if (pick == null) return;
     if (!mounted) return;
 
     setState(() => _isAdding = true);
@@ -1009,27 +996,20 @@ class _BorrowActionButtonState extends State<_BorrowActionButton> {
     try {
       await getIt<AddBookToOrder>()(
         bookId: book.id,
-        variantId: variantId,
-        formatId: formatId,
-        libraryId: libraryId,
-        fulfillmentMethod: fulfillmentMethod,
+        variantId: pick.variantId,
+        formatId: pick.formatId,
+        libraryId: pick.libraryId,
+        fulfillmentMethod: pick.fulfillmentMethod,
       );
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            libraryName.isNotEmpty
-                ? 'Added to your borrow cart — '
-                    '${fulfillmentMethod == 'PICKUP' ? 'Pickup' : 'Delivery'} '
-                    'from $libraryName'
-                : 'Added to your borrow cart!',
+            'Added to your borrow cart — '
+            '${pick.fulfillmentMethod == 'PICKUP' ? 'Pickup' : 'Delivery'} '
+            'from ${pick.libraryName}',
           ),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.green,
-          action: SnackBarAction(
-            label: 'View Cart',
-            textColor: Colors.white,
-            onPressed: () => navigator.pushNamed('/order-cart'),
-          ),
         ),
       );
       navigator.pushNamed('/order-cart');

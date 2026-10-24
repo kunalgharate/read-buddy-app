@@ -456,24 +456,36 @@ class _ExtensionCard extends StatefulWidget {
 
 class _ExtensionCardState extends State<_ExtensionCard> {
   bool _extending = false;
+  bool _extended = false;
+  String? _newDueDate;
 
   Future<void> _extend() async {
+    if (_extending || _extended) return;
     setState(() => _extending = true);
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
       await ds.extendBookRequest(widget.requestId);
-      messenger.showSnackBar(
+      if (!mounted) return;
+
+      final current =
+          DateFormatter.parseRequestDateOnly(widget.dueDate) ?? DateTime.now();
+      final updated = current.add(const Duration(days: 30));
+      setState(() {
+        _extended = true;
+        _newDueDate =
+            '${updated.year.toString().padLeft(4, '0')}-${updated.month.toString().padLeft(2, '0')}-${updated.day.toString().padLeft(2, '0')}';
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Due date extended by 30 days!'),
           backgroundColor: Color(0xFF2CE07F),
         ),
       );
-      if (mounted) {
-        context.read<ProfileBloc>().add(LoadProfileEvent());
-      }
+      context.read<ProfileBloc>().add(LoadProfileEvent());
     } catch (e) {
-      messenger.showSnackBar(
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Extension request failed: ${ErrorHandler.getErrorMessage(e)}',
@@ -488,11 +500,14 @@ class _ExtensionCardState extends State<_ExtensionCard> {
 
   @override
   Widget build(BuildContext context) {
-    final formatted = DateFormatter.formatRequestDate(widget.dueDate);
-    final isDueNow = DateFormatter.isDueOnOrBeforeToday(widget.dueDate);
-    final message = isDueNow
-        ? 'Your due date is $formatted. Need more time? Request a 30-day extension below.'
-        : 'Return by $formatted. Need more time? Extensions are available below.';
+    final activeDueDate = _newDueDate ?? widget.dueDate;
+    final formatted = DateFormatter.formatRequestDate(activeDueDate);
+    final isDueNow = DateFormatter.isDueOnOrBeforeToday(activeDueDate);
+    final message = _extended
+        ? 'Your return due date has been extended to $formatted.'
+        : isDueNow
+            ? 'Your due date is $formatted. Need more time? Request a 30-day extension below.'
+            : 'Return by $formatted. Need more time? Extensions are available below.';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -527,7 +542,7 @@ class _ExtensionCardState extends State<_ExtensionCard> {
             width: double.infinity,
             height: 38,
             child: OutlinedButton.icon(
-              onPressed: _extending ? null : _extend,
+              onPressed: (_extending || _extended) ? null : _extend,
               icon: _extending
                   ? const SizedBox(
                       width: 16,
@@ -537,13 +552,17 @@ class _ExtensionCardState extends State<_ExtensionCard> {
                         color: Color(0xFF2CE07F),
                       ),
                     )
-                  : const Icon(
-                      Icons.more_time,
+                  : Icon(
+                      _extended ? Icons.check : Icons.more_time,
                       size: 18,
-                      color: Color(0xFF2CE07F),
+                      color: const Color(0xFF2CE07F),
                     ),
               label: Text(
-                _extending ? 'Extending…' : 'Extend Due Date (+30 Days)',
+                _extended
+                    ? 'Extended (+30 Days)'
+                    : _extending
+                        ? 'Extending…'
+                        : 'Extend Due Date (+30 Days)',
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

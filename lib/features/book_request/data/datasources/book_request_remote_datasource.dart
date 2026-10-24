@@ -711,7 +711,7 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
 
   @override
   Future<void> extendBookRequest(String id) async {
-    await dio.patch('${ApiConstants.baseUrl}/v1/book-requests/$id/extend');
+    await dio.patch(ApiConstants.extendBookRequest(id));
   }
 
   @override

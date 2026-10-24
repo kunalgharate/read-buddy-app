@@ -98,9 +98,18 @@ class _RequestsView extends StatelessWidget {
   }
 }
 
-class _RequestCard extends StatelessWidget {
+class _RequestCard extends StatefulWidget {
   final Map<String, dynamic> request;
   const _RequestCard({required this.request});
+
+  @override
+  State<_RequestCard> createState() => _RequestCardState();
+}
+
+class _RequestCardState extends State<_RequestCard> {
+  bool _processing = false;
+
+  Map<String, dynamic> get request => widget.request;
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +197,12 @@ class _RequestCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   OutlinedButton(
-                    onPressed: () => _showRejectDialog(context, requestId),
+                    onPressed: _processing
+                        ? null
+                        : () {
+                            setState(() => _processing = true);
+                            _showRejectDialog(context, requestId);
+                          },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
@@ -198,11 +212,14 @@ class _RequestCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: () {
-                      context
-                          .read<LibrarianBloc>()
-                          .add(AcceptRequestEvent(requestId));
-                    },
+                    onPressed: _processing
+                        ? null
+                        : () {
+                            setState(() => _processing = true);
+                            context
+                                .read<LibrarianBloc>()
+                                .add(AcceptRequestEvent(requestId));
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -218,11 +235,17 @@ class _RequestCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    context.read<LibrarianBloc>().add(
-                          UpdateRequestStatusEvent(requestId, 'delivered'),
-                        );
-                  },
+                  onPressed: _processing
+                      ? null
+                      : () {
+                          setState(() => _processing = true);
+                          context.read<LibrarianBloc>().add(
+                                UpdateRequestStatusEvent(
+                                  requestId,
+                                  'delivered',
+                                ),
+                              );
+                        },
                   icon: const Icon(Icons.check_circle_outline, size: 18),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
@@ -238,11 +261,14 @@ class _RequestCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    context.read<LibrarianBloc>().add(
-                          UpdateRequestStatusEvent(requestId, 'returned'),
-                        );
-                  },
+                  onPressed: _processing
+                      ? null
+                      : () {
+                          setState(() => _processing = true);
+                          context.read<LibrarianBloc>().add(
+                                UpdateRequestStatusEvent(requestId, 'returned'),
+                              );
+                        },
                   icon: const Icon(Icons.check_circle, size: 18),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,

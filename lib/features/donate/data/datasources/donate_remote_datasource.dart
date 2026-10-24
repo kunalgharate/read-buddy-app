@@ -100,26 +100,34 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
     int amount, {
     String currency = 'INR',
   }) async {
-    final response = await dio.post(
-      ApiConstants.donateMoneyInitiate,
-      data: {
-        'amount': amount,
-        'currency': currency,
-      },
-    );
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception(
-        response.data?['error'] ??
-            response.data?['message'] ??
-            'Failed to initiate donation',
+    try {
+      final response = await dio.post(
+        ApiConstants.donateMoneyInitiate,
+        data: {
+          'amount': amount,
+          'currency': currency,
+        },
       );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(
+          response.data?['error'] ??
+              response.data?['message'] ??
+              'Failed to initiate donation',
+        );
+      }
+      final raw = response.data;
+      if (raw is Map) {
+        final Map map = raw['data'] is Map ? raw['data'] as Map : raw;
+        return Map<String, dynamic>.from(map);
+      }
+      throw Exception('Unexpected response from payment server');
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['error'] ?? e.response!.data['message'])
+              as String?
+          : null;
+      throw Exception(serverMsg ?? 'Failed to initiate donation');
     }
-    final raw = response.data;
-    if (raw is Map) {
-      final Map map = raw['data'] is Map ? raw['data'] as Map : raw;
-      return Map<String, dynamic>.from(map);
-    }
-    throw Exception('Unexpected response from payment server');
   }
 
   @override
@@ -129,18 +137,30 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
     required String razorpaySignature,
     required int amount,
   }) async {
-    final response = await dio.post(
-      ApiConstants.donateMoneyVerify,
-      data: {
-        'razorpay_order_id': razorpayOrderId,
-        'razorpay_payment_id': razorpayPaymentId,
-        'razorpay_signature': razorpaySignature,
-        'amount': amount,
-      },
-    );
-    if (response.statusCode != 200) {
-      throw Exception(response.data?['error'] ?? 'Payment verification failed');
+    try {
+      final response = await dio.post(
+        ApiConstants.donateMoneyVerify,
+        data: {
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+          'amount': amount,
+        },
+      );
+      if (response.statusCode != 200) {
+        throw Exception(
+          response.data?['error'] ??
+              response.data?['message'] ??
+              'Payment verification failed',
+        );
+      }
+      return Map<String, dynamic>.from(response.data as Map);
+    } on DioException catch (e) {
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['error'] ?? e.response!.data['message'])
+              as String?
+          : null;
+      throw Exception(serverMsg ?? 'Payment verification failed');
     }
-    return response.data as Map<String, dynamic>;
   }
 }

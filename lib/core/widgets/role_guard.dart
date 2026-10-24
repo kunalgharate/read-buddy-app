@@ -17,11 +17,13 @@ import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.
 class RoleGuard extends StatefulWidget {
   final bool Function(String? role) canAccess;
   final Widget child;
+  final String? deniedMessage;
 
   const RoleGuard({
     super.key,
     required this.canAccess,
     required this.child,
+    this.deniedMessage,
   });
 
   @override
@@ -74,13 +76,15 @@ class _RoleGuardState extends State<RoleGuard> {
 
   Widget _gate(String? role) {
     if (widget.canAccess(role)) return widget.child;
-    return const AccessDeniedScreen();
+    return AccessDeniedScreen(message: widget.deniedMessage);
   }
 }
 
 /// Shown in place of a guarded route when the signed-in user lacks permission.
 class AccessDeniedScreen extends StatelessWidget {
-  const AccessDeniedScreen({super.key});
+  final String? message;
+
+  const AccessDeniedScreen({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +103,7 @@ class AccessDeniedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'You don\'t have permission to manage books.',
+                'You don\'t have permission to access this page.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -109,7 +113,8 @@ class AccessDeniedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'This area is restricted to admins and library managers.',
+                message ??
+                    'This area is restricted to administrators and managers.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,

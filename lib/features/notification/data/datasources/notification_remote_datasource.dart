@@ -37,8 +37,12 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
     Response response;
     try {
       response = await _dio.get('${ApiConstants.baseUrl}/notifications');
-    } catch (_) {
-      response = await _dio.get('${ApiConstants.baseUrl}/notifications/my');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        response = await _dio.get('${ApiConstants.baseUrl}/notifications/my');
+      } else {
+        rethrow;
+      }
     }
     final data = response.data;
     if (data is List) {

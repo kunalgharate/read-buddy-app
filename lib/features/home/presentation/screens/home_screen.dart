@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/core/utils/access_control.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/category_tab.dart';
@@ -212,8 +213,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.pushNamed(context, '/librarian/requests');
                       },
                     ),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.inventory_2,
+                        color: AppColors.primary,
+                      ),
+                      title: const Text('Donations'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/librarian/donations');
+                      },
+                    ),
                   ],
-                  if (role == 'admin') ...[
+                  if (AccessControl.isAdmin(role)) ...[
                     const Divider(),
                     const Padding(
                       padding: EdgeInsets.only(left: 16, top: 8, bottom: 4),

@@ -270,15 +270,16 @@ class _NotificationCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                 ],
-                Text(
-                  data.message,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
-                    fontSize: 13,
-                    color: Color(0xFF555555),
+                if (data.message.isNotEmpty)
+                  Text(
+                    data.message,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 13,
+                      color: Color(0xFF555555),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -324,11 +325,20 @@ _NotificationData _toNotificationData(Map<String, dynamic> raw, int index) {
       raw['data'] is Map ? raw['data'] as Map<String, dynamic> : null;
 
   final title = _asText(raw['title']) ?? _asText(dataObj?['title']);
-  final body = _asText(raw['body']) ??
+  var body = _asText(raw['body']) ??
       _asText(raw['message']) ??
+      _asText(raw['text']) ??
       _asText(dataObj?['body']) ??
       _asText(dataObj?['message']) ??
-      'Notification';
+      _asText(dataObj?['text']);
+
+  if (title != null && body != null && title.trim() == body.trim()) {
+    body = null;
+  }
+  if (title == null && (body == null || body.trim().isEmpty)) {
+    body = 'Notification';
+  }
+
   final cover = _asText(raw['coverImageUrl']) ??
       _asText(raw['image']) ??
       _asText(dataObj?['coverImageUrl']) ??
@@ -336,7 +346,7 @@ _NotificationData _toNotificationData(Map<String, dynamic> raw, int index) {
 
   return _NotificationData(
     title: title,
-    message: body,
+    message: body ?? '',
     coverUrl: cover,
     time: _formatRelativeTime(_extractTimestamp(raw)),
     isHighlighted: _isHighlighted(raw, index),

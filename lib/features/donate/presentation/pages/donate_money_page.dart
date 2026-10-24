@@ -38,6 +38,7 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   }
 
   Future<void> _initiatePayment() async {
+    if (_processing) return;
     setState(() => _processing = true);
 
     try {
@@ -53,6 +54,12 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
       final razorpayKey =
           (result['razorpayKey'] ?? result['keyId'] ?? '').toString();
       final currency = (result['currency'] ?? 'INR').toString();
+
+      if (_currentOrderId == null ||
+          _currentOrderId!.isEmpty ||
+          razorpayKey.isEmpty) {
+        throw Exception('Invalid order details returned from server');
+      }
 
       if (kDebugMode) {
         debugPrint(
@@ -78,12 +85,11 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
       _razorpay.open(options);
     } catch (e) {
       if (mounted) {
+        setState(() => _processing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to initiate payment: $e')),
         );
       }
-    } finally {
-      if (mounted) setState(() => _processing = false);
     }
   }
 
@@ -123,6 +129,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
           SnackBar(content: Text('Payment verification failed: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _processing = false);
     }
   }
 
@@ -170,12 +178,20 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   /// fallback so QA/automation can exercise the Prime membership flow.
   /// Never shown in prod builds (gated by AppConfig.isDev).
   Future<void> _completeTestPayment() async {
+    if (_processing) return;
     setState(() => _processing = true);
     try {
       final datasource = getIt<DonateRemoteDataSource>();
       // Initiate a real order so we have a valid order id to verify against.
-      final result = await datasource.initiateMoneyDonation(_selectedPlan);
-      final orderId = result['orderId'] as String;
+      final result = await datasource.initiateMoneyDonation(
+        _selectedPlan,
+        currency: 'INR',
+      );
+      final orderId =
+          (result['orderId'] ?? result['order']?['id'] ?? '').toString();
+      if (orderId.isEmpty) {
+        throw Exception('Failed to get valid order id for test payment');
+      }
 
       await datasource.verifyMoneyDonation(
         razorpayOrderId: orderId,
@@ -196,6 +212,7 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   }
 
   void _onPaymentError(PaymentFailureResponse response) {
+    if (mounted) setState(() => _processing = false);
     if (kDebugMode) {
       debugPrint(
         '💳 [Razorpay] PAYMENT_ERROR | code=${response.code} (redacted: ${response.message == null ? 'none' : '${response.message!.length} chars'})',

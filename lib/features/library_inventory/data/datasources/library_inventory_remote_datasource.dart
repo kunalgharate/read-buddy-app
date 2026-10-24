@@ -155,6 +155,7 @@ class LibraryInventoryRemoteDataSourceImpl
       books = await _fetchCityBooks(cityOnlyParams);
       if (books.isEmpty) {
         for (final variant in _cityVariants(city)) {
+          if (variant == city) continue;
           final retry = Map<String, dynamic>.from(cityOnlyParams)
             ..['city'] = variant;
           books = await _fetchCityBooks(retry);

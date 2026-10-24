@@ -97,8 +97,8 @@ const {
 
 If the handler validates required fields explicitly, keep
 `paymentId/orderId/signature/pickupAddress` required and additionally reject
-with 400 when `returnScheduledDate` is present but is not a valid ISO-8601 string
-(e.g., validate against `/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/`), or when
+with 400 when `returnScheduledDate` is present but is not a valid ISO-8601 calendar date
+(e.g., validate with `const d = new Date(returnScheduledDate); if (isNaN(d.getTime())) ...`), or when
 `returnScheduledSlot` is present but empty.
 
 **Change 2b — persist them in the existing `findOneAndUpdate` `$set`**
@@ -140,9 +140,10 @@ response) hits the `status: 'delivered'` filter, matches nothing, and returns
 400 — the user sees "Payment verification failed" even though the return is
 already scheduled and paid.
 
-**Change:** change the initial lookup to load by ID without the `status: 'delivered'` filter (e.g., `findById(req.params.requestId)`). Right after the book request is loaded, short-circuit if already paid, and otherwise apply the delivered-status precondition:
+**Change:** change the initial lookup to load by ID and owner scope without the `status: 'delivered'` filter (e.g., `findOne({ _id: req.params.id, userId: req.user._id })`). Right after the book request is loaded, short-circuit if already paid, and otherwise apply the delivered-status precondition:
 
 ```js
+const bookRequest = await BookRequest.findOne({ _id: req.params.id, userId: req.user._id });
 if (!bookRequest) return res.status(404).json({ success: false, message: 'Not found' });
 
 if (bookRequest.returnPaymentStatus === 'PAID') {

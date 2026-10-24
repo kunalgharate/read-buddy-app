@@ -19,7 +19,13 @@ class ManageBookVariantsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, profileState) {
-        if (profileState is ProfileInitial || profileState is ProfileLoading) {
+        if (profileState is ProfileInitial) {
+          context.read<ProfileBloc>().add(LoadProfileEvent());
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (profileState is ProfileLoading) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );

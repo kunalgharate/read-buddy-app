@@ -158,9 +158,7 @@ class AppInterceptor extends QueuedInterceptor {
       final msgStr = (responseData['message']?.toString() ?? '').toLowerCase();
       final combined = '$errorStr $msgStr';
 
-      if (combined.contains('invalid or expired token') ||
-          combined.contains('invalid token') ||
-          combined.contains('token expired')) {
+      if (combined.contains('token') && !combined.contains('refresh token')) {
         return true;
       }
     }

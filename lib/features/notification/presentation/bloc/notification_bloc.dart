@@ -33,6 +33,7 @@ class NotificationError extends NotificationState {
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final GetMyNotificationsUsecase getMyNotifications;
   final NotificationRepository repository;
+  int _loadGeneration = 0;
 
   NotificationBloc({
     required this.getMyNotifications,
@@ -46,6 +47,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     NotificationLoadTimeout event,
     Emitter<NotificationState> emit,
   ) {
+    _loadGeneration++;
     if (state is NotificationLoading) {
       emit(NotificationError('Request timed out. Please pull to refresh.'));
     }
@@ -55,11 +57,14 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     LoadMyNotifications event,
     Emitter<NotificationState> emit,
   ) async {
+    final gen = ++_loadGeneration;
     emit(NotificationLoading());
     try {
       final notifications = await getMyNotifications();
+      if (gen != _loadGeneration) return;
       emit(NotificationLoaded(notifications));
     } catch (e) {
+      if (gen != _loadGeneration) return;
       emit(NotificationError('Failed to load notifications: $e'));
     }
   }
