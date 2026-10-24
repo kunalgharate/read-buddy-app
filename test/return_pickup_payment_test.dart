@@ -172,6 +172,25 @@ void main() {
       expect(result['razorpayKey'], 'rzp_live_999');
     });
 
+    test('accepts keyId as a last-resort fallback (delivery-fee naming)',
+        () async {
+      final adapter = _stub(
+        {
+          'success': true,
+          'orderId': 'order_K1',
+          'amount': 2500,
+          'keyId': 'rzp_test_k1',
+        },
+        200,
+      );
+      final ds = _datasource(adapter);
+
+      final result = await ds.createReturnPickupOrder('reqK');
+
+      expect(result['orderId'], 'order_K1');
+      expect(result['razorpayKey'], 'rzp_test_k1');
+    });
+
     test('throws a friendly error when no order id is returned', () async {
       final adapter = _stub({'success': true, 'amount': 2500}, 200);
       final ds = _datasource(adapter);

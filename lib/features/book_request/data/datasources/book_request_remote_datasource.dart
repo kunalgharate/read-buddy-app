@@ -606,9 +606,15 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
       if (orderId == null || orderId.isEmpty) {
         throw Exception('Payment order was not created. Please try again.');
       }
-      final razorpayKey =
-          (payload['razorpayKey'] ?? payload['razorpay_key'] ?? payload['key'])
-              ?.toString();
+      // Fallbacks: the patch contract names the field `razorpayKey`; also
+      // accept `razorpay_key` / `key`, and finally `keyId` — the name the
+      // delivery-fee endpoint already uses for the same public key — in case
+      // the backend mirrors that response shape.
+      final razorpayKey = (payload['razorpayKey'] ??
+              payload['razorpay_key'] ??
+              payload['key'] ??
+              payload['keyId'])
+          ?.toString();
       return {
         'orderId': orderId,
         'amount': payload['amount'],

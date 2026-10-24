@@ -9,19 +9,27 @@ import '../../domain/entities/address_entity.dart';
 import '../../data/models/address_model.dart';
 
 class AddressManagementPage extends StatelessWidget {
-  const AddressManagementPage({super.key});
+  /// When true, tapping an address card selects that address and pops the
+  /// page with it as the result (used by the return-pickup flow so the
+  /// chosen address actually sticks). Add / edit / delete keep working, and
+  /// the default manage-only behavior is unchanged when [selectable] is false.
+  final bool selectable;
+
+  const AddressManagementPage({super.key, this.selectable = false});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<AddressBloc>()..add(LoadAddresses()),
-      child: const _AddressManagementView(),
+      child: _AddressManagementView(selectable: selectable),
     );
   }
 }
 
 class _AddressManagementView extends StatelessWidget {
-  const _AddressManagementView();
+  final bool selectable;
+
+  const _AddressManagementView({this.selectable = false});
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +70,10 @@ class _AddressManagementView extends StatelessWidget {
               itemCount: state.addresses.length,
               itemBuilder: (context, index) => _AddressCard(
                 address: state.addresses[index],
+                selectable: selectable,
+                onSelect: selectable
+                    ? () => Navigator.pop(context, state.addresses[index])
+                    : null,
               ),
             );
           }
@@ -95,11 +107,18 @@ class _AddressManagementView extends StatelessWidget {
 
 class _AddressCard extends StatelessWidget {
   final AddressEntity address;
-  const _AddressCard({required this.address});
+  final bool selectable;
+  final VoidCallback? onSelect;
+
+  const _AddressCard({
+    required this.address,
+    this.selectable = false,
+    this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final card = Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -178,6 +197,12 @@ class _AddressCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (selectable)
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.textHint,
+                size: 22,
+              ),
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'edit') {
@@ -200,6 +225,14 @@ class _AddressCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+    // In selectable mode the whole card picks the address; edit/delete stay
+    // reachable through the popup menu, so both flows keep working.
+    if (!selectable || onSelect == null) return card;
+    return InkWell(
+      onTap: onSelect,
+      borderRadius: BorderRadius.circular(12),
+      child: card,
     );
   }
 }
