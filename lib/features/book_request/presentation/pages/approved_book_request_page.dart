@@ -69,7 +69,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
 
   // Creates the ₹25 delivery order and opens Razorpay checkout.
   Future<void> _payDeliveryFee() async {
-    if (!_isPayable) return;
+    if (!_isPayable || _paying) return;
     setState(() => _paying = true);
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
@@ -104,8 +104,10 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     // Fall back to the callback value only if it was never captured.
     final orderId = _razorpayOrderId ?? response.orderId ?? '';
     if (kDebugMode) {
+      final pid = response.paymentId ?? '';
+      final oid = orderId;
       debugPrint(
-        '[Pay ₹25] verify | request=${widget.request.id} | paymentId=${response.paymentId ?? ''} | orderId=$orderId',
+        '💳 [Pay ₹25] PAYMENT_SUCCESS | request=${widget.request.id} | paymentId=...${pid.length > 6 ? pid.substring(pid.length - 6) : pid} | orderId=...${oid.length > 6 ? oid.substring(oid.length - 6) : oid}',
       );
     }
     try {
@@ -150,7 +152,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
 
   // DEV/TEST ONLY: complete the ₹25 fee via the backend demo bypass (no card).
   Future<void> _payDeliveryFeeTest() async {
-    if (!_isPayable) return;
+    if (!_isPayable || _paying) return;
     setState(() => _paying = true);
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
