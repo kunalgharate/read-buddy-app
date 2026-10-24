@@ -106,12 +106,22 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   void initState() {
     super.initState();
     _selectedTab = widget.initialTab;
-    _prefillFromUser();
-    if (widget.isReturn) _resolveSavedAddress();
+    _initFields();
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onReturnPaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onReturnPaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
+  }
+
+  // Serialized init: prefill first (name/phone + any address already
+  // captured for this request), then resolve the saved default address for a
+  // return. Running both concurrently raced — a late _prefillFromUser could
+  // overwrite the address _resolveSavedAddress had just applied, leaving the
+  // field blank even though a saved address existed.
+  Future<void> _initFields() async {
+    await _prefillFromUser();
+    if (!mounted || !widget.isReturn) return;
+    await _resolveSavedAddress();
   }
 
   Future<void> _prefillFromUser() async {
@@ -187,16 +197,24 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     });
   }
 
-  // Opens the saved-address flow (add / edit / pick). The user may save a new
-  // address there and select it, which is reflected back into the pickup form.
+  // Opens the saved-address flow in *select* mode: the page pops the tapped
+  // address back here so the user's choice actually sticks (previously it
+  // always re-applied the default, discarding any selection). If the user
+  // backs out without selecting, we keep any address already shown and only
+  // fall back to the saved default when the field is still empty.
   Future<void> _changeAddress() async {
-    await Navigator.push(
+    final selected = await Navigator.push<AddressEntity>(
       context,
       MaterialPageRoute(
-        builder: (_) => const AddressManagementPage(),
+        builder: (_) => const AddressManagementPage(selectable: true),
       ),
     );
     if (!mounted) return;
+    if (selected != null) {
+      _applyAddress(selected);
+      return;
+    }
+    if (_addressController.text.trim().isNotEmpty) return;
     try {
       final addresses = await getIt<GetAddresses>()();
       if (!mounted || addresses.isEmpty) return;
