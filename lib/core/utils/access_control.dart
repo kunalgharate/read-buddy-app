@@ -12,6 +12,13 @@ class AccessControl {
   /// * `librarian` — Library Manager
   static const Set<String> bookManagerRoles = {'admin', 'librarian'};
 
+  /// Whether [role] is an administrator.
+  static bool isAdmin(String? role) {
+    if (role == null) return false;
+    final normalised = role.trim().toLowerCase();
+    return normalised == 'admin';
+  }
+
   /// Whether [role] may access book-management functionality.
   ///
   /// Fails closed: `null`, empty, or unknown roles are denied.

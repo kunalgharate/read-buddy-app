@@ -82,11 +82,14 @@ class _ProfileView extends StatelessWidget {
 
     try {
       final dio = getIt<Dio>();
+      final file = await MultipartFile.fromFile(
+        pickedFile.path,
+        filename: pickedFile.name,
+      );
       final formData = FormData.fromMap({
-        'profileImage': await MultipartFile.fromFile(
-          pickedFile.path,
-          filename: pickedFile.name,
-        ),
+        'image': file,
+        'picture': file,
+        'profileImage': file,
       });
       final response = await dio.post(
         ApiConstants.uploadProfileImage,
@@ -158,11 +161,12 @@ class _ProfileView extends StatelessWidget {
   /// upload succeeded (a picture URL is enough — the profile reload picks it up).
   String? _uploadResponseError(dynamic data) {
     if (data is! Map) return null;
-    if (_pictureUrlFrom(data) != null) return null;
     final success = data['success'];
     if (success == false || success == 'false') {
-      return _serverMessage(data) ?? 'Failed to upload photo. Please try again.';
+      return _serverMessage(data) ??
+          'Failed to upload photo. Please try again.';
     }
+    if (_pictureUrlFrom(data) != null) return null;
     return null;
   }
 

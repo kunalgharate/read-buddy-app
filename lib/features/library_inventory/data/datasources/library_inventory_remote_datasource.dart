@@ -139,9 +139,27 @@ class LibraryInventoryRemoteDataSourceImpl
     if (books.isEmpty) {
       for (final variant in _cityVariants(city)) {
         if (variant == city) continue;
-        final retry = Map<String, dynamic>.from(queryParams)..['city'] = variant;
+        final retry = Map<String, dynamic>.from(queryParams)
+          ..['city'] = variant;
         books = await _fetchCityBooks(retry);
         if (books.isNotEmpty) break;
+      }
+    }
+
+    // If still empty and distance filtering (lat/lng) was enabled, retry without lat/lng
+    // so books in cities like Hyderabad surface even if the GPS coords are distant or unmapped.
+    if (books.isEmpty && (lat != null || lng != null)) {
+      final cityOnlyParams = Map<String, dynamic>.from(queryParams)
+        ..remove('lat')
+        ..remove('lng');
+      books = await _fetchCityBooks(cityOnlyParams);
+      if (books.isEmpty) {
+        for (final variant in _cityVariants(city)) {
+          final retry = Map<String, dynamic>.from(cityOnlyParams)
+            ..['city'] = variant;
+          books = await _fetchCityBooks(retry);
+          if (books.isNotEmpty) break;
+        }
       }
     }
     return books;
@@ -165,7 +183,10 @@ class LibraryInventoryRemoteDataSourceImpl
     final trimmed = city.trim();
     final titleCased = trimmed
         .split(RegExp(r'\s+'))
-        .map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1))
+        .map(
+          (w) =>
+              w.isEmpty ? w : w[0].toUpperCase() + w.substring(1).toLowerCase(),
+        )
         .join(' ');
     final withoutSuffix = trimmed.split(',').first.trim();
     return {

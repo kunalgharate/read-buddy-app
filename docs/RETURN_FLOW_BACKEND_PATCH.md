@@ -97,8 +97,8 @@ const {
 
 If the handler validates required fields explicitly, keep
 `paymentId/orderId/signature/pickupAddress` required and additionally reject
-with 400 when `returnScheduledDate` is present but
-`Number.isNaN(Date.parse(returnScheduledDate))` (must be ISO-8601), or when
+with 400 when `returnScheduledDate` is present but is not a valid ISO-8601 string
+(e.g., validate against `/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/`), or when
 `returnScheduledSlot` is present but empty.
 
 **Change 2b — persist them in the existing `findOneAndUpdate` `$set`**
@@ -140,10 +140,11 @@ response) hits the `status: 'delivered'` filter, matches nothing, and returns
 400 — the user sees "Payment verification failed" even though the return is
 already scheduled and paid.
 
-**Change:** right after the book request is loaded (and before the
-status/precondition checks), short-circuit:
+**Change:** change the initial lookup to load by ID without the `status: 'delivered'` filter (e.g., `findById(req.params.requestId)`). Right after the book request is loaded, short-circuit if already paid, and otherwise apply the delivered-status precondition:
 
 ```js
+if (!bookRequest) return res.status(404).json({ success: false, message: 'Not found' });
+
 if (bookRequest.returnPaymentStatus === 'PAID') {
   // Already verified — persist any schedule that arrives on the retry,
   // then report success so client retries are safe.
@@ -160,6 +161,10 @@ if (bookRequest.returnPaymentStatus === 'PAID') {
     message: "Payment already verified",
     data: bookRequest,
   });
+}
+
+if (bookRequest.status !== 'delivered') {
+  return res.status(400).json({ success: false, message: "Book must be delivered first" });
 }
 ```
 
@@ -188,7 +193,7 @@ returns `{ success: true, alreadyVerified: true }` on retry.
 ## Known gap not covered here
 
 There is no Razorpay webhook: if the app is killed between checkout success
-and the verify call, the payment stays pending until the user reopens the app
-(the verify retry then succeeds, especially with Patch 3). A webhook route
+and the verify call, the payment stays pending and the user has no way to retry
+the verification since the app loses the payment/order IDs in memory. A webhook route
 (`express.raw()` + HMAC validation of `razorpay-signature`) is the durable
 fix but is not required for launch.

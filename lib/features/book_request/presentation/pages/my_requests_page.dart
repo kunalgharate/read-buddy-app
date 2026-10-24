@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/utils/date_formatter.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/my_requests_bloc.dart';
@@ -520,7 +521,7 @@ class _RequestCardState extends State<_RequestCard> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Due ${formatRequestDate(request.dueDate)}',
+                                'Due ${DateFormatter.formatRequestDate(request.dueDate)}',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isMutedDue

@@ -10,7 +10,7 @@ import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
 import 'collect_from_library_page.dart';
-import 'delivered_request_detail_page.dart';
+import '../../../../core/utils/date_formatter.dart';
 
 class ApprovedBookRequestPage extends StatefulWidget {
   final BookRequestEntity request;
@@ -185,7 +185,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
   }
 
   String _formatDate(String? dateStr) {
-    final dt = parseRequestDateOnly(dateStr);
+    final dt = DateFormatter.parseRequestDateOnly(dateStr);
     if (dt == null) {
       if (dateStr == null || dateStr.isEmpty) return '—';
       return dateStr;

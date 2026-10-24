@@ -117,6 +117,7 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
             libraryId: lib.libraryId,
             libraryName: lib.libraryName,
             formatType: lib.formatType,
+            variantId: lib.variantId,
             availableCopies: lib.availableCopies,
             totalCopies: lib.totalCopies,
             distanceKm: lib.distanceKm,
@@ -179,11 +180,22 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
     // users, which previously broke borrowing.
     var match = widget.formatByType[option.formatType.toLowerCase()];
 
+    // If the library inventory provided the specific variantId for this edition,
+    // match against it so we don't accidentally check out a different edition
+    // that shares the same format type (e.g. translated edition).
+    if (option.variantId != null && option.variantId!.isNotEmpty) {
+      if (match?.variantId != option.variantId) {
+        match =
+            null; // force fetch or we could just resolve the format for this variantId
+      }
+    }
+
     // The detail page may not have supplied this format (e.g. variants arrived
     // without format ids). Fall back to fetching the book's variants, which is
     // a user-accessible endpoint, so borrowing still works.
     if (match == null || match.variantId.isEmpty || match.formatId.isEmpty) {
-      match = await _resolveFormatFromVariants(option.formatType);
+      match =
+          await _resolveFormatFromVariants(option.formatType, option.variantId);
     }
     if (match == null || match.variantId.isEmpty || match.formatId.isEmpty) {
       if (mounted) {
@@ -212,12 +224,18 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
 
   Future<({String variantId, String formatId})?> _resolveFormatFromVariants(
     String formatType,
+    String? targetVariantId,
   ) async {
     try {
       final variants =
           await getIt<VariantRepository>().getVariantsForBook(widget.bookId);
       final key = formatType.toLowerCase();
       for (final v in variants) {
+        if (targetVariantId != null &&
+            targetVariantId.isNotEmpty &&
+            v.id != targetVariantId) {
+          continue;
+        }
         for (final f in v.formats) {
           if (f.type.toLowerCase() == key && (f.id?.isNotEmpty ?? false)) {
             return (variantId: v.id, formatId: f.id!);
@@ -332,6 +350,7 @@ class _LibraryOption {
   final String libraryId;
   final String libraryName;
   final String formatType;
+  final String? variantId;
   final int availableCopies;
   final int totalCopies;
   final double? distanceKm;
@@ -341,6 +360,7 @@ class _LibraryOption {
     required this.libraryId,
     required this.libraryName,
     required this.formatType,
+    this.variantId,
     required this.availableCopies,
     required this.totalCopies,
     this.distanceKm,

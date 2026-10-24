@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/app_preferences.dart';
+import '../../../../core/utils/app_validators.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
@@ -26,9 +27,6 @@ class _SignInScreenState extends State<SignInScreen> {
   // State
   bool _obscurePassword = true;
 
-  // Constants
-  static const _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-
   // Colors
   static const _primaryColor = AppColors.primary;
 
@@ -44,7 +42,7 @@ class _SignInScreenState extends State<SignInScreen> {
     if (value?.trim().isEmpty ?? true) {
       return "Please enter your email";
     }
-    if (!RegExp(_emailRegex).hasMatch(value!.trim())) {
+    if (!AppValidators.isValidEmail(value!)) {
       return "Please enter a valid email address";
     }
     return null;

@@ -1,7 +1,13 @@
-import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:read_buddy_app/core/di/injection.dart';
+import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/core/utils/date_formatter.dart';
+import 'package:read_buddy_app/core/utils/error_handler.dart';
+import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'package:read_buddy_app/features/reviews/presentation/widgets/write_review_entry.dart';
+import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../widgets/shipment_tracking_widget.dart';
 import 'collect_from_library_page.dart';
@@ -181,7 +187,10 @@ class _DeliveredRequestDetailPageState
             if (widget.request.status.toLowerCase() == 'delivered' &&
                 (widget.request.dueDate ?? '').isNotEmpty) ...[
               const SizedBox(height: 4),
-              _ExtensionCard(dueDate: widget.request.dueDate!),
+              _ExtensionCard(
+                requestId: widget.request.id,
+                dueDate: widget.request.dueDate!,
+              ),
             ],
 
             // Write a review — the widget queries the eligibility endpoint and
@@ -325,11 +334,17 @@ class _DeliveredRequestDetailPageState
     if (isDropOff) {
       // Show the drop-off library branch name when we have it (the branch is
       // the request's selected library), else a generic label.
+      final branchName = (r.returnBranchName?.isNotEmpty == true)
+          ? r.returnBranchName
+          : ((r.returnBranchId == r.libraryId &&
+                  r.libraryName?.isNotEmpty == true)
+              ? r.libraryName
+              : null);
       rows.add(
         _InfoRow(
           'Return Branch',
           (r.returnBranchId != null && r.returnBranchId!.isNotEmpty)
-              ? (r.libraryName ?? 'Library branch')
+              ? (branchName ?? 'Library branch')
               : 'Return library branch details unavailable',
         ),
       );
@@ -426,41 +441,120 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _ExtensionCard extends StatelessWidget {
+class _ExtensionCard extends StatefulWidget {
+  final String requestId;
   final String dueDate;
 
-  const _ExtensionCard({required this.dueDate});
+  const _ExtensionCard({
+    required this.requestId,
+    required this.dueDate,
+  });
+
+  @override
+  State<_ExtensionCard> createState() => _ExtensionCardState();
+}
+
+class _ExtensionCardState extends State<_ExtensionCard> {
+  bool _extending = false;
+
+  Future<void> _extend() async {
+    setState(() => _extending = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final ds = getIt<BookRequestRemoteDataSource>();
+      await ds.extendBookRequest(widget.requestId);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Due date extended by 30 days!'),
+          backgroundColor: Color(0xFF2CE07F),
+        ),
+      );
+      if (mounted) {
+        context.read<ProfileBloc>().add(LoadProfileEvent());
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Extension request failed: ${ErrorHandler.getErrorMessage(e)}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _extending = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final formatted = formatRequestDate(dueDate);
-    final isDueNow = isDueOnOrBeforeToday(dueDate);
+    final formatted = DateFormatter.formatRequestDate(widget.dueDate);
+    final isDueNow = DateFormatter.isDueOnOrBeforeToday(widget.dueDate);
     final message = isDueNow
-        ? 'Your due date is $formatted. Need more time? You can request an '
-            'extension (usually 30 more days), subject to availability — email '
-            'readbuddyin@gmail.com with your book title to request one.'
-        : 'Return by $formatted. Need more time? Extensions are available on '
-            'request.';
+        ? 'Your due date is $formatted. Need more time? Request a 30-day extension below.'
+        : 'Return by $formatted. Need more time? Extensions are available below.';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFF2CE07F).withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF2CE07F).withValues(alpha: 0.5)),
+        border:
+            Border.all(color: const Color(0xFF2CE07F).withValues(alpha: 0.5)),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.schedule, size: 18, color: Color(0xFF2CE07F)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                fontSize: 13,
-                height: 1.4,
-                color: Color(0xFF555555),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.schedule, size: 18, color: Color(0xFF2CE07F)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: Color(0xFF555555),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 38,
+            child: OutlinedButton.icon(
+              onPressed: _extending ? null : _extend,
+              icon: _extending
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF2CE07F),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.more_time,
+                      size: 18,
+                      color: Color(0xFF2CE07F),
+                    ),
+              label: Text(
+                _extending ? 'Extending…' : 'Extend Due Date (+30 Days)',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2CE07F),
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFF2CE07F)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ),
@@ -507,72 +601,4 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-String _fmtDate(String? s) => formatRequestDate(s);
-
-const _monthAbbr = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-
-/// Parses a backend date string into the calendar day that was stored.
-///
-/// Date-only strings ('2026-11-10') and UTC-midnight ISO strings
-/// ('2026-11-10T00:00:00.000Z') are read using their UTC components so the
-/// day is never shifted by the device timezone.
-DateTime? parseRequestDateOnly(String? raw) {
-  if (raw == null) return null;
-  final s = raw.trim();
-  if (s.isEmpty) return null;
-  final dt = DateTime.tryParse(s);
-  if (dt == null) return null;
-  if (s.endsWith('Z') || s.endsWith('z')) {
-    final utc = dt.toUtc();
-    return DateTime(utc.year, utc.month, utc.day);
-  }
-  if (_hasUtcOffset(s)) {
-    // Offset timestamps ('...+05:30') keep the calendar day as written.
-    final parts = s.split('T').first.split('-');
-    if (parts.length == 3) {
-      final y = int.tryParse(parts[0]);
-      final m = int.tryParse(parts[1]);
-      final d = int.tryParse(parts[2]);
-      if (y != null && m != null && d != null) return DateTime(y, m, d);
-    }
-  }
-  return DateTime(dt.year, dt.month, dt.day);
-}
-
-/// Formats a backend date string as 'D MMM YYYY' (e.g. '10 Nov 2026').
-String formatRequestDate(String? raw) {
-  final date = parseRequestDateOnly(raw);
-  if (date == null) {
-    if (raw == null || raw.trim().isEmpty) return '—';
-    return raw;
-  }
-  return '${date.day} ${_monthAbbr[date.month - 1]} ${date.year}';
-}
-
-/// True when [raw] resolves to today or to an earlier calendar day.
-bool isDueOnOrBeforeToday(String? raw) {
-  final due = parseRequestDateOnly(raw);
-  if (due == null) return false;
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  return !due.isAfter(today);
-}
-
-bool _hasUtcOffset(String s) {
-  final t = s.indexOf('T');
-  if (t < 0) return false;
-  return RegExp(r'[+-]\d{2}:?\d{2}$').hasMatch(s.substring(t + 1));
-}
+String _fmtDate(String? s) => DateFormatter.formatRequestDate(s);

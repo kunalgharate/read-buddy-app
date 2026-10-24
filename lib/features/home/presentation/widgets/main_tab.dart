@@ -214,7 +214,7 @@ class _MainTabView extends StatelessWidget {
                     const _ContinueReadingSection(),
                     const SizedBox(height: 32),
 
-_BookSection(
+                    _BookSection(
                       title: 'Latest',
                       books: state.latestBooks,
                     ),

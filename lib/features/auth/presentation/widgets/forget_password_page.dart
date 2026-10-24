@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
+import '../../../../core/utils/app_validators.dart';
 import '../blocs/sign_in/sign_in_bloc.dart';
 import 'custom_button_widget.dart';
 
@@ -139,10 +140,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       text: 'Continue',
                       onPressed: () {
                         final email = _emailController.text.trim();
-                        final emailRegex = RegExp(
-                          r'^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$',
-                        );
-                        if (email.isEmpty || !emailRegex.hasMatch(email)) {
+                        if (email.isEmpty ||
+                            !AppValidators.isValidEmail(email)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(

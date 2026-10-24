@@ -14,6 +14,7 @@ class BookRequestModel extends BookRequestEntity {
     super.returnDate,
     super.returnMethod,
     super.returnBranchId,
+    super.returnBranchName,
     super.returnScheduledDate,
     super.returnScheduledSlot,
     super.returnPaymentStatus,
@@ -94,6 +95,9 @@ class BookRequestModel extends BookRequestEntity {
           : (json['returnBranchId'] is String
               ? json['returnBranchId'] as String
               : null),
+      returnBranchName: json['returnBranchId'] is Map<String, dynamic>
+          ? (json['returnBranchId'] as Map<String, dynamic>)['name'] as String?
+          : null,
       returnScheduledDate: json['returnScheduledDate'],
       returnScheduledSlot: json['returnScheduledSlot'],
       returnPaymentStatus: json['returnPaymentStatus'],

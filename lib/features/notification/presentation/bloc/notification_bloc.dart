@@ -8,6 +8,8 @@ abstract class NotificationEvent {}
 
 class LoadMyNotifications extends NotificationEvent {}
 
+class NotificationLoadTimeout extends NotificationEvent {}
+
 // ─── States ────────────────────────────────────────────────────────────────
 
 abstract class NotificationState {}
@@ -37,6 +39,16 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     required this.repository,
   }) : super(NotificationInitial()) {
     on<LoadMyNotifications>(_onLoad);
+    on<NotificationLoadTimeout>(_onTimeout);
+  }
+
+  void _onTimeout(
+    NotificationLoadTimeout event,
+    Emitter<NotificationState> emit,
+  ) {
+    if (state is NotificationLoading) {
+      emit(NotificationError('Request timed out. Please pull to refresh.'));
+    }
   }
 
   Future<void> _onLoad(

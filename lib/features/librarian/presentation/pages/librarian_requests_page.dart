@@ -109,7 +109,13 @@ class _RequestCard extends StatelessWidget {
         request['bookTitle'] ?? request['book']?['title'] ?? 'Unknown Book';
     final userName =
         request['userName'] ?? request['user']?['name'] ?? 'Unknown User';
-    final requestId = request['_id'] ?? '';
+    final requestId = request['_id']?.toString() ?? '';
+    final isPending = status == 'pending' || status == 'requested';
+    final canDeliver = status == 'approved' ||
+        status == 'accepted' ||
+        status == 'pickup_scheduled' ||
+        status == 'shipping';
+    final canConfirmReturn = status == 'returning';
 
     Color statusColor;
     switch (status) {
@@ -176,7 +182,7 @@ class _RequestCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (status == 'pending') ...[
+            if (isPending) ...[
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -205,6 +211,46 @@ class _RequestCard extends StatelessWidget {
                     child: const Text('Accept'),
                   ),
                 ],
+              ),
+            ],
+            if (canDeliver) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<LibrarianBloc>().add(
+                          UpdateRequestStatusEvent(requestId, 'delivered'),
+                        );
+                  },
+                  icon: const Icon(Icons.check_circle_outline, size: 18),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  label: const Text('Mark Delivered / Handed Over'),
+                ),
+              ),
+            ],
+            if (canConfirmReturn) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<LibrarianBloc>().add(
+                          UpdateRequestStatusEvent(requestId, 'returned'),
+                        );
+                  },
+                  icon: const Icon(Icons.check_circle, size: 18),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  label: const Text('Confirm Return Received'),
+                ),
               ),
             ],
           ],

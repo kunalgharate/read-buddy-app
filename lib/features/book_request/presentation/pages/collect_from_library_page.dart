@@ -60,7 +60,7 @@ class CollectFromLibraryPage extends StatelessWidget {
     if (bloc.isClosed) return;
     bloc.add(
       LoadLibraryDetails(
-        preferredLibraryId: request.libraryId,
+        preferredLibraryId: isReturn ? null : request.libraryId,
         userLat: pos?.latitude,
         userLng: pos?.longitude,
       ),
@@ -124,6 +124,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     await _resolveSavedAddress();
   }
 
+  String? _nonEmpty(String? s) => (s == null || s.trim().isEmpty) ? null : s;
   Future<void> _prefillFromUser() async {
     final storage = getIt<SecureStorageUtil>();
     final user = await storage.getUser();
@@ -139,10 +140,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
           user?.phno ??
           '';
       _addressController.text = (widget.isReturn
-              ? widget.request.returnPickupAddress
+              ? _nonEmpty(widget.request.returnPickupAddress)
               : null) ??
-          widget.request.pickupAddress ??
-          widget.request.deliveryAddress ??
+          _nonEmpty(widget.request.pickupAddress) ??
+          _nonEmpty(widget.request.deliveryAddress) ??
           '';
     });
   }
@@ -294,8 +295,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         _showSnack('Please wait, locating the nearest library…');
         return false;
       }
-      if (libState is! LibraryDetailsLoaded ||
-          libState.library.id.isEmpty) {
+      if (libState is! LibraryDetailsLoaded || libState.library.id.isEmpty) {
         _showSnack(
           'No library is available for drop-off yet. '
           'Please try again later or choose home pickup.',
@@ -385,10 +385,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         ? 'library-drop-off'
         : _addressController.text.trim();
 
-    final libraryId = widget.isReturn && _selectedTab == 1
-        ? _selectedLibraryId
-        : null;
-    if (widget.isReturn && _selectedTab == 1 &&
+    final libraryId =
+        widget.isReturn && _selectedTab == 1 ? _selectedLibraryId : null;
+    if (widget.isReturn &&
+        _selectedTab == 1 &&
         (libraryId == null || libraryId.isEmpty)) {
       _showSnack('Library details are still loading. Please try again.');
       return;
