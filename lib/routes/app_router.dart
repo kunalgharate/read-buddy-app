@@ -61,6 +61,9 @@ import 'package:read_buddy_app/features/audiobook/presentation/pages/audiobook_p
 import 'package:read_buddy_app/features/videobook/presentation/pages/videobook_player_page.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_variant_entity.dart';
 import 'package:read_buddy_app/features/home/presentation/screens/home_screen.dart';
+import 'package:read_buddy_app/features/book_request/presentation/pages/book_detail_page.dart';
+import 'package:read_buddy_app/core/utils/access_control.dart';
+import 'package:read_buddy_app/core/widgets/role_guard.dart';
 
 import 'package:read_buddy_app/features/questionaries/presentations/pages/onboarding_questionaire.dart';
 import 'package:read_buddy_app/features/question_crud/presentation/pages/question_list_page.dart';
@@ -96,7 +99,12 @@ class AppRouter {
           builder: (_) => const AdminUpcomingPickupsPage(),
         );
       case '/book':
-        return MaterialPageRoute(builder: (_) => const BookPage());
+        return MaterialPageRoute(
+          builder: (_) => const RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: BookPage(),
+          ),
+        );
       case '/onboarding':
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case '/signin':
@@ -116,25 +124,51 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const ChangePasswordPage());
       case '/admin-return-requests':
         return MaterialPageRoute(
-          builder: (_) => const AdminReturnRequestsPage(),
+          builder: (_) => const RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: AdminReturnRequestsPage(),
+          ),
         );
       case '/admin':
-        return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
+        return MaterialPageRoute(
+          builder: (_) => const RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: AdminDashboardScreen(),
+          ),
+        );
       case '/admin-users':
-        return MaterialPageRoute(builder: (_) => const AdminUsersPage());
+        return MaterialPageRoute(
+          builder: (_) => const RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: AdminUsersPage(),
+          ),
+        );
       case '/admin-donations':
-        return MaterialPageRoute(builder: (_) => const AdminDonationsPage());
+        return MaterialPageRoute(
+          builder: (_) => const RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: AdminDonationsPage(),
+          ),
+        );
       case '/category':
-        return MaterialPageRoute(builder: (_) => const CategoryListPage());
+        return MaterialPageRoute(
+          builder: (_) => const RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: CategoryListPage(),
+          ),
+        );
       case '/books':
         return MaterialPageRoute(
-          builder: (_) => MultiBlocProvider(
-            providers: [
-              BlocProvider(create: (_) => getIt<BookCrudBloc>()),
-              BlocProvider(create: (_) => getIt<UserCubit>()),
-              BlocProvider(create: (_) => getIt<LocationCubit>()),
-            ],
-            child: const BooksListPage(),
+          builder: (_) => RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (_) => getIt<BookCrudBloc>()),
+                BlocProvider(create: (_) => getIt<UserCubit>()),
+                BlocProvider(create: (_) => getIt<LocationCubit>()),
+              ],
+              child: const BooksListPage(),
+            ),
           ),
         );
       case '/questions':
@@ -172,13 +206,19 @@ class AppRouter {
       case '/book-variants':
         final book = settings.arguments as BookCrudModel;
         return MaterialPageRoute(
-          builder: (_) => ManageBookVariantsPage(bookCrudModel: book),
+          builder: (_) => RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: ManageBookVariantsPage(bookCrudModel: book),
+          ),
         );
       case '/banner':
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (_) => getIt<BannerBloc>(),
-            child: const BannersList(),
+          builder: (_) => RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: BlocProvider(
+              create: (_) => getIt<BannerBloc>(),
+              child: const BannersList(),
+            ),
           ),
         );
       case '/libraries':
@@ -195,7 +235,10 @@ class AppRouter {
         );
       case '/assign-librarian':
         return MaterialPageRoute(
-          builder: (_) => const AssignLibrarianPage(),
+          builder: (_) => const RoleGuard(
+            canAccess: AccessControl.canManageBooks,
+            child: AssignLibrarianPage(),
+          ),
         );
       case '/addresses':
         return MaterialPageRoute(
@@ -305,6 +348,11 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const RefundPolicyPage());
       case '/copyright':
         return MaterialPageRoute(builder: (_) => const CopyrightPolicyPage());
+      case '/book-details':
+        final bookId = settings.arguments as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => BookDetailPage(bookId: bookId),
+        );
       case '/faq':
       case '/help':
         return MaterialPageRoute(builder: (_) => const FaqPage());
