@@ -8,7 +8,10 @@ abstract class DonateRemoteDataSource {
   Future<DonationStatsModel> getDonationStats();
   Future<void> createBookDonation(BookDonationRequestModel request);
   Future<void> uploadReceipt(String donationId, FormData formData);
-  Future<Map<String, dynamic>> initiateMoneyDonation(int amount);
+  Future<Map<String, dynamic>> initiateMoneyDonation(
+    int amount, {
+    String currency = 'INR',
+  });
   Future<Map<String, dynamic>> verifyMoneyDonation({
     required String razorpayOrderId,
     required String razorpayPaymentId,
@@ -93,15 +96,30 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> initiateMoneyDonation(int amount) async {
+  Future<Map<String, dynamic>> initiateMoneyDonation(
+    int amount, {
+    String currency = 'INR',
+  }) async {
     final response = await dio.post(
       ApiConstants.donateMoneyInitiate,
-      data: {'amount': amount},
+      data: {
+        'amount': amount,
+        'currency': currency,
+      },
     );
-    if (response.statusCode != 200) {
-      throw Exception(response.data?['error'] ?? 'Failed to initiate donation');
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception(
+        response.data?['error'] ??
+            response.data?['message'] ??
+            'Failed to initiate donation',
+      );
     }
-    return response.data as Map<String, dynamic>;
+    final raw = response.data;
+    if (raw is Map) {
+      final Map map = raw['data'] is Map ? raw['data'] as Map : raw;
+      return Map<String, dynamic>.from(map);
+    }
+    throw Exception('Unexpected response from payment server');
   }
 
   @override

@@ -42,11 +42,17 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
 
     try {
       final datasource = getIt<DonateRemoteDataSource>();
-      final result = await datasource.initiateMoneyDonation(_selectedPlan);
+      final result = await datasource.initiateMoneyDonation(
+        _selectedPlan,
+        currency: 'INR',
+      );
 
-      _currentOrderId = result['orderId'] as String;
+      _currentOrderId =
+          (result['orderId'] ?? result['order']?['id'] ?? '').toString();
       _currentAmount = _selectedPlan;
-      final razorpayKey = result['razorpayKey'] as String;
+      final razorpayKey =
+          (result['razorpayKey'] ?? result['keyId'] ?? '').toString();
+      final currency = (result['currency'] ?? 'INR').toString();
 
       if (kDebugMode) {
         debugPrint(
@@ -55,13 +61,13 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         debugPrint(
           '💳 [Razorpay] Key is LIVE mode: ${razorpayKey.startsWith('rzp_live_')}',
         );
-        debugPrint('💳 [Razorpay] Amount: $_currentAmount INR');
+        debugPrint('💳 [Razorpay] Amount: $_currentAmount $currency');
       }
 
       final options = {
         'key': razorpayKey,
         'amount': (_selectedPlan * 100).toString(), // paise
-        'currency': 'INR',
+        'currency': currency,
         'order_id': _currentOrderId,
         'name': 'ReadBuddy',
         'description': 'Prime Membership - 1 Year',
