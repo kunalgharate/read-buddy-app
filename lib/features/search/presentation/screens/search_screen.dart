@@ -6,6 +6,7 @@ import 'package:read_buddy_app/core/di/injection.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/core/utils/access_control.dart';
 import 'package:read_buddy_app/features/bookcrud/data/model/book_crud_model.dart';
+import 'package:read_buddy_app/features/book_request/presentation/pages/book_detail_page.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/entities/book_crud.dart';
 import 'package:read_buddy_app/features/bookcrud/domain/usecases/search_book.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -313,13 +314,13 @@ class _SearchScreenState extends State<SearchScreen> {
             }
             // Fallback: open the read-only book detail page using the book id.
             final bookId = book.id;
-            if (bookId != null && bookId.isNotEmpty) {
-              Navigator.pushNamed(
-                context,
-                '/book-details',
-                arguments: bookId,
-              );
-            }
+            if (bookId == null || bookId.isEmpty) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BookDetailPage(bookId: bookId),
+              ),
+            );
           },
         );
       },

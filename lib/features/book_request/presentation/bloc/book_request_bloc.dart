@@ -117,12 +117,18 @@ class BookRequestBloc extends Bloc<BookRequestEvent, BookRequestState> {
         // initiate-return fail (400). So for returns we call initiate-return
         // directly with the chosen method (DROP_OFF / PICKUP), which is the
         // only call that correctly transitions the request to 'returning'.
+        // A paid home-pickup return does not reach here — it is handled by the
+        // Razorpay create-order/verify flow in the page.
         final method = event.returnMethod;
-        if (method != null && method.isNotEmpty) {
-          await initiateReturn(event.details.requestId, method);
-        } else {
-          await updateRequestStatus(event.details.requestId, 'returning');
+        if (method == null || method.isEmpty) {
+          throw Exception('A return method is required to initiate a return');
         }
+        await initiateReturn(
+          event.details.requestId,
+          method,
+          returnBranchId: event.returnBranchId,
+          pickup: event.details,
+        );
         // Reflect the requested return without an extra fetch. The
         // PickupScheduled listener only uses this to show a confirmation
         // message and pop, so a minimal entity is sufficient.

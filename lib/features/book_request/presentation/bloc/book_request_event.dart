@@ -45,7 +45,17 @@ class SchedulePickup extends BookRequestEvent {
   /// Return method to persist when [isReturn] is true.
   /// 'DROP_OFF' for library drop-off, 'PICKUP' for home pickup.
   final String? returnMethod;
-  SchedulePickup(this.details, {this.isReturn = false, this.returnMethod});
+
+  /// Branch the book is dropped at, when [isReturn] and [returnMethod] is
+  /// 'DROP_OFF'. Mirrors the `returnBranchId` field the API reads back.
+  final String? returnBranchId;
+
+  SchedulePickup(
+    this.details, {
+    this.isReturn = false,
+    this.returnMethod,
+    this.returnBranchId,
+  });
 }
 
 class ScheduleDelivery extends BookRequestEvent {

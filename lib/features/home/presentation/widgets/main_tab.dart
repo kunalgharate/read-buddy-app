@@ -214,6 +214,17 @@ class _MainTabView extends StatelessWidget {
                     const _ContinueReadingSection(),
                     const SizedBox(height: 32),
 
+_BookSection(
+                      title: 'Latest',
+                      books: state.latestBooks,
+                    ),
+                    const SizedBox(height: 32),
+                    _BookSection(
+                      title: 'Recommended for you',
+                      books: state.recommendedBooks,
+                    ),
+                    const SizedBox(height: 32),
+
                     // ── Borrow Books Nearby (physical, city + distance based) ──
                     const _CityBooksSection(),
 

@@ -38,6 +38,7 @@ class BookRequestModel extends BookRequestEntity {
     super.pickupAddress,
     super.pickupDate,
     super.pickupTime,
+    super.returnPickupAddress,
     super.rejectionReason,
   });
 
@@ -121,6 +122,12 @@ class BookRequestModel extends BookRequestEntity {
       pickupAddress: pickupDetails?['address'] ?? json['address'],
       pickupDate: pickupDetails?['pickupDate'] ?? json['pickupDate'],
       pickupTime: pickupDetails?['pickupTime'] ?? json['pickupTime'],
+      // Home-pickup return address — the paid pickup verify flow stores the
+      // submitted address under returnPickupAddress (not pickupDetails/address,
+      // which belong to the borrow-side schedule-pickup).
+      returnPickupAddress: json['returnPickupAddress'] is String
+          ? json['returnPickupAddress'] as String
+          : null,
       rejectionReason: json['rejectionReason'] ?? json['reason'],
     );
   }
