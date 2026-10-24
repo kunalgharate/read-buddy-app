@@ -139,7 +139,8 @@ class BooksCollection extends StatelessWidget {
                     runSpacing: 4,
                     children: [
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/search'),
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(
@@ -160,7 +161,8 @@ class BooksCollection extends StatelessWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/search'),
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(

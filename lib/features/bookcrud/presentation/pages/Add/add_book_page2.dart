@@ -464,10 +464,10 @@ class _AddBookPage2State extends State<AddBookPage2> {
       final query = locationController.text.trim();
       if (query.length >= 3 && mounted) {
         context.read<LocationCubit>().fetchlocations(query);
-        setState(() {});
       } else {
-        BookValueItems.locationsuggestions.clear();
-        setState(() {});
+        setState(() {
+          BookValueItems.locationsuggestions.clear();
+        });
       }
     });
   }

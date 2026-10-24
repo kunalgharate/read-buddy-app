@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -202,7 +203,7 @@ class _MainTabView extends StatelessWidget {
                     // ── City Location Bar (Zomato-style) ──
                     CityLocationBar(
                       onCityChanged: (city) {
-                        // Bloc already listens via CityNotifier listener in _MainTabState
+                        if (kDebugMode) debugPrint('City changed to: $city');
                       },
                     ),
                     const SizedBox(height: 16),

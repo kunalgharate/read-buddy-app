@@ -58,7 +58,11 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onDeliveryPaid);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onDeliveryPayError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (response) {
+      if (kDebugMode) {
+        debugPrint('External wallet selected: ${response.walletName}');
+      }
+    });
   }
 
   @override

@@ -110,7 +110,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onReturnPaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onReturnPaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (response) {
+      if (kDebugMode) {
+        debugPrint('External wallet selected: ${response.walletName}');
+      }
+    });
   }
 
   // Serialized init: prefill first (name/phone + any address already
@@ -315,7 +319,9 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
       }
     }
     if (isDropOffReturn) {
-      // no address needed for library drop-off
+      if (kDebugMode) {
+        debugPrint('Drop-off return: skipping address validation');
+      }
     } else {
       if (address.isEmpty) {
         _showSnack(

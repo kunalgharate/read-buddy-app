@@ -128,9 +128,12 @@ class _BookPageState extends State<BookPage> {
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(onPressed: () {}, icon: const Icon(Icons.mic)),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.pushNamed(context, '/search'),
+                      icon: const Icon(Icons.mic),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pushNamed(context, '/search'),
                       icon: const Icon(Icons.qr_code),
                     ),
                   ],

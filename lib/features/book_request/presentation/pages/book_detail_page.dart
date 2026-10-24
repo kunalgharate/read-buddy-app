@@ -523,7 +523,13 @@ class _CoverImageSection extends StatelessWidget {
               const SizedBox(width: 8),
               _IconCircleButton(
                 icon: Icons.share_outlined,
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Share link copied to clipboard!'),
+                    ),
+                  );
+                },
               ),
             ],
           ),
