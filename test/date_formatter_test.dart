@@ -13,6 +13,8 @@ void main() {
       expect(DateFormatter.parseRequestDateOnly('not-a-date'), isNull);
       expect(DateFormatter.parseRequestDateOnly('2026-99-99'), isNull);
       expect(DateFormatter.parseRequestDateOnly('2024-02-31'), isNull);
+      expect(DateFormatter.parseRequestDateOnly('2026-10-20 garbage'), isNull);
+      expect(DateFormatter.parseRequestDateOnly('05-12-25'), isNull);
     });
 
     test('parses date-only string YYYY-MM-DD correctly', () {

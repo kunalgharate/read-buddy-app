@@ -19,6 +19,9 @@ class DateFormatter {
     final s = raw.trim();
     if (s.isEmpty) return null;
 
+    final dt = DateTime.tryParse(s);
+    if (dt == null) return null;
+
     final datePart = s.split(RegExp(r'[\sT]')).first.split('-');
     if (datePart.length == 3) {
       final y = int.tryParse(datePart[0]);
@@ -34,8 +37,6 @@ class DateFormatter {
       return DateTime(y, m, d);
     }
 
-    final dt = DateTime.tryParse(s);
-    if (dt == null) return null;
     return DateTime(dt.year, dt.month, dt.day);
   }
 

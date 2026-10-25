@@ -302,16 +302,18 @@ class _RequestCardState extends State<_RequestCard> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              final reason = reasonController.text.trim();
-              if (reason.isNotEmpty) {
-                setState(() => _processing = true);
-                context
-                    .read<LibrarianBloc>()
-                    .add(RejectRequestEvent(requestId, reason));
-                Navigator.pop(ctx);
-              }
-            },
+            onPressed: _processing
+                ? null
+                : () {
+                    final reason = reasonController.text.trim();
+                    if (reason.isNotEmpty) {
+                      setState(() => _processing = true);
+                      context
+                          .read<LibrarianBloc>()
+                          .add(RejectRequestEvent(requestId, reason));
+                      Navigator.pop(ctx);
+                    }
+                  },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Reject', style: TextStyle(color: Colors.white)),
           ),

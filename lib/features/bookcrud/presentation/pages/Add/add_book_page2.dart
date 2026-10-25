@@ -457,18 +457,24 @@ class _AddBookPage2State extends State<AddBookPage2> {
     setState(() => _tags.remove(tag));
   }
 
+  int _locationSearchGen = 0;
+
   /// ✅ Location Search Debounce
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       final query = locationController.text.trim();
+      final gen = ++_locationSearchGen;
       if (query.length >= 3 && mounted) {
         await context.read<LocationCubit>().fetchlocations(query);
-        if (mounted) setState(() {});
+        if (_locationSearchGen != gen || !mounted) return;
+        setState(() {});
       } else if (mounted) {
-        setState(() {
-          BookValueItems.locationsuggestions.clear();
-        });
+        if (_locationSearchGen == gen) {
+          setState(() {
+            BookValueItems.locationsuggestions.clear();
+          });
+        }
       }
     });
   }
