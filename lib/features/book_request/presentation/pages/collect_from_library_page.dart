@@ -12,6 +12,9 @@ import '../../../../core/utils/secure_storage_utils.dart';
 import '../../../address/domain/entities/address_entity.dart';
 import '../../../address/domain/usecases/address_usecases.dart';
 import '../../../address/presentation/pages/address_management_page.dart';
+import '../../../library/domain/entities/library_entity.dart'
+    as library_feature;
+import '../../../library/presentation/widgets/pickup_library_selector.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
@@ -101,6 +104,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   // Return pickup address picked from the saved-address flow.
   bool _addressResolved = false;
   String? _addressLabel;
+
+  // Library chosen for a drop-off return. The picker owns the 15 km radius,
+  // the location fallbacks and the empty states (same behavior as the Borrow
+  // Cart), so this page only tracks what the user picked.
+  library_feature.LibraryEntity? _selectedDropOffLibrary;
 
   @override
   void initState() {
@@ -286,22 +294,12 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     final address = _addressController.text.trim();
     final isDropOffReturn = widget.isReturn && _selectedTab == 1;
 
-    // A drop-off return needs an eligible library branch before it can proceed
-    // (issue: the "No library found within 15 km" state must block Next).
-    if (isDropOffReturn) {
-      final libState = context.read<BookRequestBloc>().state;
-      if (libState is LibraryDetailsLoading) {
-        _showSnack('Please wait, locating the nearest library…');
-        return false;
-      }
-      if (libState is! LibraryDetailsLoaded ||
-          libState.library.id.isEmpty) {
-        _showSnack(
-          'No library is available for drop-off yet. '
-          'Please try again later or choose home pickup.',
-        );
-        return false;
-      }
+    // A drop-off return needs a library chosen from the picker before it can
+    // proceed. The picker surfaces "location unavailable" / "no library within
+    // 15 km" itself, so a valid selection is the only thing to check here.
+    if (isDropOffReturn && _selectedDropOffLibrary == null) {
+      _showSnack('Please select a library to drop the book at.');
+      return false;
     }
 
     if (!widget.isReturn) {
@@ -352,11 +350,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   // pickup is handled by the Razorpay create-order/verify flow below.
   bool get _isHomePickupReturn => widget.isReturn && _selectedTab == 0;
 
-  String? get _selectedLibraryId {
-    final state = context.read<BookRequestBloc>().state;
-    if (state is LibraryDetailsLoaded) return state.library.id;
-    return null;
-  }
+  // The library the user explicitly picked in the drop-off tab. Returns null
+  // for every other mode, which never submits a branch id.
+  String? get _selectedDropOffLibraryId =>
+      widget.isReturn && _selectedTab == 1 ? _selectedDropOffLibrary?.id : null;
 
   // The chosen return slot, in the same shapes the initiate-return contract
   // uses (full ISO-8601 date, "hh:mm AM/PM" slot). Sent with the pickup
@@ -385,10 +382,9 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
         ? 'library-drop-off'
         : _addressController.text.trim();
 
-    final libraryId = widget.isReturn && _selectedTab == 1
-        ? _selectedLibraryId
-        : null;
-    if (widget.isReturn && _selectedTab == 1 &&
+    final libraryId = _selectedDropOffLibraryId;
+    if (widget.isReturn &&
+        _selectedTab == 1 &&
         (libraryId == null || libraryId.isEmpty)) {
       _showSnack('Library details are still loading. Please try again.');
       return;
@@ -857,30 +853,43 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
 
                           const SizedBox(height: 12),
 
-                          // ── Library card ───────────────────────────────────
-                          BlocBuilder<BookRequestBloc, BookRequestState>(
-                            builder: (context, state) {
-                              if (state is LibraryDetailsLoading) {
-                                return const Center(
-                                  child: CircularProgressIndicator(
-                                    color: Color(0xFF2CE07F),
-                                  ),
-                                );
-                              }
-                              if (state is LibraryDetailsLoaded) {
-                                return _LibraryCard(library: state.library);
-                              }
-                              if (state is LibraryDetailsError) {
-                                return Center(
-                                  child: Text(
-                                    state.message,
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
+                          // ── Library selection ────────────────────────────
+                          // A drop-off return shows the full picker (15 km
+                          // radius, location fallbacks, empty states — same
+                          // behavior as the Borrow Cart); every other mode
+                          // keeps the bloc-resolved library card.
+                          if (widget.isReturn && _selectedTab == 1)
+                            PickupLibrarySelector(
+                              selectedLibrary: _selectedDropOffLibrary,
+                              onSelected: (lib) =>
+                                  setState(() => _selectedDropOffLibrary = lib),
+                              fallbackSentence: 'Choose Pick Up instead.',
+                            )
+                          else
+                            BlocBuilder<BookRequestBloc, BookRequestState>(
+                              builder: (context, state) {
+                                if (state is LibraryDetailsLoading) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Color(0xFF2CE07F),
+                                    ),
+                                  );
+                                }
+                                if (state is LibraryDetailsLoaded) {
+                                  return _LibraryCard(library: state.library);
+                                }
+                                if (state is LibraryDetailsError) {
+                                  return Center(
+                                    child: Text(
+                                      state.message,
+                                      style:
+                                          const TextStyle(color: Colors.grey),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
 
                           const SizedBox(height: 28),
                         ],
@@ -997,11 +1006,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                 height: 52,
                 child: BlocBuilder<BookRequestBloc, BookRequestState>(
                   builder: (context, state) {
-                    // A drop-off return cannot be confirmed until an eligible
-                    // library branch within range has been resolved.
+                    // A drop-off return cannot be confirmed until a library
+                    // has been chosen from the picker.
                     final dropOffBlocked = widget.isReturn &&
                         _selectedTab == 1 &&
-                        state is! LibraryDetailsLoaded;
+                        _selectedDropOffLibrary == null;
                     return ElevatedButton(
                       onPressed: dropOffBlocked ? null : _onConfirm,
                       style: ElevatedButton.styleFrom(
