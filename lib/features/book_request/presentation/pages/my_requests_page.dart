@@ -343,13 +343,16 @@ class _RequestCardState extends State<_RequestCard> {
               builder: (_) => DeliveredRequestDetailPage(request: request),
             ),
           );
+
     } else if (isApproved) {
       onTap = () async {
         BookRequestEntity enriched = request;
+
         if (request.bookId != null && request.bookId!.isNotEmpty) {
           try {
-            final ds = di.getIt<BookRequestRemoteDataSource>();
+            final ds = getIt<BookRequestRemoteDataSource>();
             final book = await ds.getBookById(request.bookId!);
+
             enriched = BookRequestEntity(
               id: request.id,
               userId: request.userId,
@@ -361,64 +364,61 @@ class _RequestCardState extends State<_RequestCard> {
               libraryName: request.libraryName,
               dueDate: request.dueDate,
               returnDate: request.returnDate,
+
+              // Preserve the existing request's pickup and return details.
+              returnMethod: request.returnMethod,
+              returnBranchId: request.returnBranchId,
+              returnScheduledDate: request.returnScheduledDate,
+              returnScheduledSlot: request.returnScheduledSlot,
+              returnPaymentStatus: request.returnPaymentStatus,
+              returnCondition: request.returnCondition,
+              deliveryAddress: request.deliveryAddress,
+              deliveryName: request.deliveryName,
+              deliveryPhone: request.deliveryPhone,
+              deliveryPincode: request.deliveryPincode,
+              deliveryPreferredDate: request.deliveryPreferredDate,
+              deliveryPreferredTime: request.deliveryPreferredTime,
+              pickupUserName: request.pickupUserName,
+              pickupPhone: request.pickupPhone,
+              pickupAddress: request.pickupAddress,
+              pickupDate: request.pickupDate,
+              pickupTime: request.pickupTime,
+              returnPickupAddress: request.returnPickupAddress,
+              userEmail: request.userEmail,
+              rejectionReason: request.rejectionReason,
+
               bookId: book.id,
               bookTitle: book.title,
               bookCoverUrl: book.coverImageUrl,
               bookFormat: book.format,
               donorName: book.owner.name,
               bookCondition: book.condition,
+              bookAuthor: request.bookAuthor,
+              userName: request.userName,
             );
-          } catch (_) {}
-        }
-        if (context.mounted) {
-          final method = enriched.fulfillmentMethod.toLowerCase();
-          final paymentStatus = enriched.paymentStatus.toUpperCase();
-          final isDelivery = method == 'dropoff' ||
-              method == 'drop_off' ||
-              method == 'delivery' ||
-              method == 'shipping';
-          if (paymentStatus == 'FREE') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => CollectFromLibraryPage(
-                  request: enriched,
-                  initialTab: 0,
-                ),
-              ),
-            );
-          } else if (paymentStatus == 'PAID' || isDelivery) {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ApprovedBookRequestPage(
-                  request: enriched,
-                  initialTab: 0,
-                ),
-              ),
-            );
-            // Reload so any payment made on the detail page (e.g. the ₹25
-            // delivery fee) is reflected in the list and on re-open.
-            if (context.mounted) {
-              context.read<MyRequestsBloc>().add(LoadMyRequests());
-            }
-          } else {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ApprovedBookRequestPage(
-                  request: enriched,
-                  initialTab: 0,
-                ),
-              ),
-            );
-            if (context.mounted) {
-              context.read<MyRequestsBloc>().add(LoadMyRequests());
-            }
+          } catch (_) {
+            // If fetching book details fails, keep the original request.
           }
+        }
+
+        if (!context.mounted) return;
+
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ApprovedBookRequestPage(
+              request: enriched,
+              initialTab: 0,
+            ),
+          ),
+        );
+
+        if (context.mounted) {
+          context.read<MyRequestsBloc>().add(LoadMyRequests());
         }
       };
     }
+
 
     return GestureDetector(
       onTap: onTap,
