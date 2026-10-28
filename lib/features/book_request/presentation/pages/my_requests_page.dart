@@ -7,7 +7,6 @@ import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/my_requests_bloc.dart';
 import '../pages/approved_book_request_page.dart';
 import '../pages/book_request_success_page.dart';
-import '../pages/collect_from_library_page.dart';
 import '../pages/delivered_request_detail_page.dart';
 import '../../../../core/di/injection.dart' as di;
 
@@ -393,7 +392,7 @@ class _RequestCardState extends State<_RequestCard> {
               bookFormat: book.format,
               donorName: book.owner.name,
               bookCondition: book.condition,
-              bookAuthor: (book.author?.isNotEmpty == true)
+              bookAuthor: (book.author.isNotEmpty == true)
               ? book.author
               : (request.bookAuthor ?? ''),
               userName: request.userName,
