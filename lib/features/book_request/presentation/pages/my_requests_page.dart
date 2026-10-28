@@ -393,7 +393,9 @@ class _RequestCardState extends State<_RequestCard> {
               bookFormat: book.format,
               donorName: book.owner.name,
               bookCondition: book.condition,
-              bookAuthor: request.bookAuthor,
+              bookAuthor: (book.author?.isNotEmpty == true)
+              ? book.author
+              : (request.bookAuthor ?? ''),
               userName: request.userName,
             );
           } catch (_) {

@@ -1010,7 +1010,8 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                     // has been chosen from the picker.
                     final dropOffBlocked = widget.isReturn &&
                         _selectedTab == 1 &&
-                        _selectedDropOffLibrary == null;
+                        (_selectedDropOffLibrary == null ||
+                            _selectedDropOffLibrary!.id.isEmpty);
                     return ElevatedButton(
                       onPressed: dropOffBlocked ? null : _onConfirm,
                       style: ElevatedButton.styleFrom(
