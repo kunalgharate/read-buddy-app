@@ -8,7 +8,6 @@ import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/my_requests_bloc.dart';
 import '../pages/approved_book_request_page.dart';
 import '../pages/book_request_success_page.dart';
-import '../pages/collect_from_library_page.dart';
 import '../pages/delivered_request_detail_page.dart';
 import '../../../../core/di/injection.dart' as di;
 
@@ -372,50 +371,24 @@ class _RequestCardState extends State<_RequestCard> {
           } catch (_) {}
         }
         if (context.mounted) {
-          final method = enriched.fulfillmentMethod.toLowerCase();
-          final paymentStatus = enriched.paymentStatus.toUpperCase();
-          final isDelivery = method == 'dropoff' ||
-              method == 'drop_off' ||
-              method == 'delivery' ||
-              method == 'shipping';
-          if (paymentStatus == 'FREE') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => CollectFromLibraryPage(
-                  request: enriched,
-                  initialTab: 0,
-                ),
+          // Always land on the approved-request detail page — it shows the
+          // approval status, due date and pickup info, and from there the
+          // user can still open the pickup/drop scheduling form or pay the
+          // delivery fee. (Previously FREE pickup requests skipped it and
+          // went straight to the scheduling form.)
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ApprovedBookRequestPage(
+                request: enriched,
+                initialTab: 0,
               ),
-            );
-          } else if (paymentStatus == 'PAID' || isDelivery) {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ApprovedBookRequestPage(
-                  request: enriched,
-                  initialTab: 0,
-                ),
-              ),
-            );
-            // Reload so any payment made on the detail page (e.g. the ₹25
-            // delivery fee) is reflected in the list and on re-open.
-            if (context.mounted) {
-              context.read<MyRequestsBloc>().add(LoadMyRequests());
-            }
-          } else {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ApprovedBookRequestPage(
-                  request: enriched,
-                  initialTab: 0,
-                ),
-              ),
-            );
-            if (context.mounted) {
-              context.read<MyRequestsBloc>().add(LoadMyRequests());
-            }
+            ),
+          );
+          // Reload so any payment made on the detail page (e.g. the ₹25
+          // delivery fee) is reflected in the list and on re-open.
+          if (context.mounted) {
+            context.read<MyRequestsBloc>().add(LoadMyRequests());
           }
         }
       };

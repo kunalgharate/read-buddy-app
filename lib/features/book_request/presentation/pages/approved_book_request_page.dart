@@ -79,10 +79,21 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
       final ds = getIt<BookRequestRemoteDataSource>();
       final res = await ds.createDeliveryPaymentOrder(widget.request.id);
       if (!mounted) return;
-      final order = res['order'] as Map;
+      final order = res['order'];
+      final keyId = res['keyId'];
+      // Opening checkout without the key id or order id surfaces as a
+      // confusing Razorpay SDK "Authentication failed" — fail fast instead.
+      if (order is! Map ||
+          (order['id'] as String? ?? '').isEmpty ||
+          keyId is! String ||
+          keyId.isEmpty) {
+        throw Exception(
+          'Payment is temporarily unavailable. Please try again later.',
+        );
+      }
       _razorpayOrderId = order['id'] as String?;
       _razorpay.open({
-        'key': res['keyId'],
+        'key': keyId,
         'amount': order['amount'],
         'currency': order['currency'] ?? 'INR',
         'order_id': order['id'],

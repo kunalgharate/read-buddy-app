@@ -92,6 +92,18 @@ class _BookOrderViewState extends State<_BookOrderView> {
   }
 
   void _openCheckout(RequestPaymentIntent intent) {
+    // A missing key or order id makes the Razorpay SDK fail with a confusing
+    // "Authentication failed" — surface a clear message instead.
+    if (intent.razorpayKey.isEmpty || intent.orderId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Payment is temporarily unavailable. Please try again later.',
+          ),
+        ),
+      );
+      return;
+    }
     final options = {
       'key': intent.razorpayKey,
       'amount': intent.amount.toString(),

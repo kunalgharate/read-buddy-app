@@ -86,10 +86,10 @@ class _ProfileView extends StatelessWidget {
         pickedFile.path,
         filename: pickedFile.name,
       );
+      // The backend accepts only 'picture' — extra file fields make multer's
+      // upload.single() reject the request (LIMIT_UNEXPECTED_FILE → 500).
       final formData = FormData.fromMap({
-        'image': file,
         'picture': file,
-        'profileImage': file,
       });
       final response = await dio.post(
         ApiConstants.uploadProfileImage,

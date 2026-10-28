@@ -13,6 +13,8 @@ import '../../../address/domain/entities/address_entity.dart';
 import '../../../address/domain/usecases/address_usecases.dart';
 import '../../../address/presentation/pages/address_management_page.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
+import '../../../library/domain/entities/library_entity.dart' as lib_entity;
+import '../../../library/domain/usecases/library_usecases.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/entities/library_entity.dart';
@@ -101,6 +103,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   // Return pickup address picked from the saved-address flow.
   bool _addressResolved = false;
   String? _addressLabel;
+
+  // Drop-off return: the library branch the user picked from the eligible
+  // list (within-15 km, nearest first — same rules as the borrow cart).
+  lib_entity.LibraryEntity? _dropOffLibrary;
+  bool _dropOffLibrariesLoading = true;
 
   @override
   void initState() {
@@ -294,15 +301,13 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     // A drop-off return needs an eligible library branch before it can proceed
     // (issue: the "No library found within 15 km" state must block Next).
     if (isDropOffReturn) {
-      final libState = context.read<BookRequestBloc>().state;
-      if (libState is LibraryDetailsLoading) {
-        _showSnack('Please wait, locating the nearest library…');
+      if (_dropOffLibrariesLoading) {
+        _showSnack('Please wait, loading eligible libraries…');
         return false;
       }
-      if (libState is! LibraryDetailsLoaded || libState.library.id.isEmpty) {
+      if (_dropOffLibrary == null || _dropOffLibrary!.id.isEmpty) {
         _showSnack(
-          'No library is available for drop-off yet. '
-          'Please try again later or choose home pickup.',
+          'Please select a drop-off library to continue.',
         );
         return false;
       }
@@ -359,6 +364,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
   bool get _isHomePickupReturn => widget.isReturn && _selectedTab == 0;
 
   String? get _selectedLibraryId {
+    // Drop-off return uses the eligible-library selector; the pickup/collect
+    // flows keep the single resolved library from the bloc.
+    if (widget.isReturn && _selectedTab == 1) {
+      return _dropOffLibrary?.id;
+    }
     final state = context.read<BookRequestBloc>().state;
     if (state is LibraryDetailsLoaded) return state.library.id;
     return null;
@@ -396,7 +406,7 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     if (widget.isReturn &&
         _selectedTab == 1 &&
         (libraryId == null || libraryId.isEmpty)) {
-      _showSnack('Library details are still loading. Please try again.');
+      _showSnack('Please select a drop-off library to continue.');
       return;
     }
 
@@ -604,6 +614,8 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                 ),
                 const SizedBox(height: 16),
                 _confirmRow('Method', isPickup ? 'Pick Up' : 'Drop Off'),
+                if (isDropOffReturn)
+                  _confirmRow('Library', _dropOffLibrary?.name ?? ''),
                 if (!isDropOffReturn) ...[
                   _confirmRow('Name', _nameController.text.trim()),
                   _confirmRow('Phone', _phoneController.text.trim()),
@@ -863,30 +875,45 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
 
                           const SizedBox(height: 12),
 
-                          // ── Library card ───────────────────────────────────
-                          BlocBuilder<BookRequestBloc, BookRequestState>(
-                            builder: (context, state) {
-                              if (state is LibraryDetailsLoading) {
-                                return const Center(
-                                  child: CircularProgressIndicator(
-                                    color: Color(0xFF2CE07F),
-                                  ),
-                                );
-                              }
-                              if (state is LibraryDetailsLoaded) {
-                                return _LibraryCard(library: state.library);
-                              }
-                              if (state is LibraryDetailsError) {
-                                return Center(
-                                  child: Text(
-                                    state.message,
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
+                          // ── Library selection ──────────────────────────────
+                          // Drop-off returns list every eligible branch (same
+                          // rules as the borrow cart); pickup/collect keeps the
+                          // single resolved library card.
+                          if (widget.isReturn && _selectedTab == 1)
+                            _DropOffLibrarySelector(
+                              selectedLibraryId: _dropOffLibrary?.id,
+                              onSelected: (library) => setState(
+                                () => _dropOffLibrary = library,
+                              ),
+                              onLoadingChanged: (loading) => setState(
+                                () => _dropOffLibrariesLoading = loading,
+                              ),
+                            )
+                          else
+                            BlocBuilder<BookRequestBloc, BookRequestState>(
+                              builder: (context, state) {
+                                if (state is LibraryDetailsLoading) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Color(0xFF2CE07F),
+                                    ),
+                                  );
+                                }
+                                if (state is LibraryDetailsLoaded) {
+                                  return _LibraryCard(library: state.library);
+                                }
+                                if (state is LibraryDetailsError) {
+                                  return Center(
+                                    child: Text(
+                                      state.message,
+                                      style:
+                                          const TextStyle(color: Colors.grey),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
 
                           const SizedBox(height: 28),
                         ],
@@ -1004,10 +1031,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                 child: BlocBuilder<BookRequestBloc, BookRequestState>(
                   builder: (context, state) {
                     // A drop-off return cannot be confirmed until an eligible
-                    // library branch within range has been resolved.
+                    // library branch has been selected.
                     final dropOffBlocked = widget.isReturn &&
                         _selectedTab == 1 &&
-                        state is! LibraryDetailsLoaded;
+                        (_dropOffLibrariesLoading || _dropOffLibrary == null);
                     return ElevatedButton(
                       onPressed: dropOffBlocked ? null : _onConfirm,
                       style: ElevatedButton.styleFrom(
@@ -1578,6 +1605,323 @@ class _DateTimePickerButton extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─── Drop-off library selector ────────────────────────────────────────────────
+
+/// Return drop-off branch picker. Uses the same eligibility rules as the
+/// borrow cart's pickup selector: libraries within 15 km of the user's
+/// location, nearest first, with coordinate-less libraries kept as fallbacks;
+/// when location is unavailable the full list is shown unsorted for manual
+/// selection. Auto-selects the nearest in-range branch.
+class _DropOffLibrarySelector extends StatefulWidget {
+  final String? selectedLibraryId;
+  final ValueChanged<lib_entity.LibraryEntity?> onSelected;
+  final ValueChanged<bool>? onLoadingChanged;
+
+  const _DropOffLibrarySelector({
+    required this.selectedLibraryId,
+    required this.onSelected,
+    this.onLoadingChanged,
+  });
+
+  @override
+  State<_DropOffLibrarySelector> createState() =>
+      _DropOffLibrarySelectorState();
+}
+
+class _DropOffLibrarySelectorState extends State<_DropOffLibrarySelector> {
+  static const double _radiusKm = 15.0;
+
+  bool _loading = true;
+  String? _error;
+  bool _locationUnavailable = false;
+  bool _hadLibraries = false;
+  List<({lib_entity.LibraryEntity library, double? distanceKm})> _libraries =
+      [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  void _setLoading(bool value) {
+    _loading = value;
+    widget.onLoadingChanged?.call(value);
+  }
+
+  // Keep the current selection while it is still offered; otherwise
+  // auto-select only the nearest IN-RANGE library — a coordinate-less
+  // fallback could be anywhere, so it stays an explicit user choice.
+  void _reconcileSelection(
+    List<({lib_entity.LibraryEntity library, double? distanceKm})> items,
+  ) {
+    final currentId = widget.selectedLibraryId;
+    final stillValid =
+        currentId != null && items.any((l) => l.library.id == currentId);
+    if (stillValid) return;
+    final firstInRange = items.where((l) => l.distanceKm != null);
+    widget.onSelected(
+      firstInRange.isNotEmpty ? firstInRange.first.library : null,
+    );
+  }
+
+  lib_entity.LibraryEntity? _byId(String? id) {
+    if (id == null) return null;
+    for (final item in _libraries) {
+      if (item.library.id == id) return item.library;
+    }
+    return null;
+  }
+
+  Future<void> _load() async {
+    _setLoading(true);
+    setState(() {
+      _error = null;
+      _locationUnavailable = false;
+    });
+    try {
+      final all = await getIt<GetLibraryDetails>()();
+      if (!mounted) return;
+      final position = await LocationService.instance.getCurrentLocation();
+      if (!mounted) return;
+
+      if (position == null) {
+        final listed = all
+            .map(
+              (l) =>
+                  (library: l, distanceKm: null as double?),
+            )
+            .toList();
+        _reconcileSelection(listed);
+        setState(() {
+          _locationUnavailable = true;
+          _hadLibraries = all.isNotEmpty;
+          _libraries = listed;
+        });
+        _setLoading(false);
+        return;
+      }
+
+      final within = <({lib_entity.LibraryEntity library, double? distanceKm})>[];
+      final noCoords =
+          <({lib_entity.LibraryEntity library, double? distanceKm})>[];
+      for (final lib in all) {
+        final lat = lib.address.latitude;
+        final lng = lib.address.longitude;
+        if (lat == 0 || lng == 0) {
+          noCoords.add((library: lib, distanceKm: null));
+          continue;
+        }
+        final km = LocationService.instance.calculateDistanceKm(
+          position.latitude,
+          position.longitude,
+          lat,
+          lng,
+        );
+        if (km <= _radiusKm) {
+          within.add((library: lib, distanceKm: km));
+        }
+      }
+      within.sort(
+        (a, b) => (a.distanceKm ?? 0).compareTo(b.distanceKm ?? 0),
+      );
+      final visible = [...within, ...noCoords];
+
+      _reconcileSelection(visible);
+      setState(() {
+        _hadLibraries = all.isNotEmpty;
+        _libraries = visible;
+      });
+      _setLoading(false);
+    } catch (e) {
+      if (!mounted) return;
+      widget.onSelected(null);
+      setState(() {
+        _error = 'Could not load libraries. Please try again.';
+      });
+      _setLoading(false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(
+          child: CircularProgressIndicator(color: Color(0xFF2CE07F)),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_error!, style: const TextStyle(color: AppColors.error)),
+          const SizedBox(height: 8),
+          TextButton(onPressed: _load, child: const Text('Retry')),
+        ],
+      );
+    }
+
+    if (_libraries.isEmpty) {
+      final String message;
+      if (_locationUnavailable) {
+        message = 'Location unavailable — enable location to find nearby '
+            'libraries, or choose Pickup from Home instead.';
+      } else if (_hadLibraries) {
+        message = 'No libraries within 15 km of your location. '
+            'Try Pickup from Home instead.';
+      } else {
+        message = 'No libraries are available for drop-off right now. '
+            'Try Pickup from Home instead.';
+      }
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.orange.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.location_off, color: Colors.orange, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Select Drop-off Library',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        if (_locationUnavailable) ...[
+          const SizedBox(height: 6),
+          const Text(
+            'Location unavailable — showing all libraries. '
+            'Enable location to see the nearest ones.',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+        ],
+        const SizedBox(height: 10),
+        ..._libraries.map((item) {
+          final isSelected = widget.selectedLibraryId == item.library.id;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: GestureDetector(
+              onTap: () => widget.onSelected(_byId(item.library.id)),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color:
+                        isSelected ? AppColors.primary : Colors.grey.shade300,
+                    width: isSelected ? 2 : 1,
+                  ),
+                  color: isSelected
+                      ? AppColors.primary.withValues(alpha: 0.05)
+                      : Colors.white,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: item.library.isSuperLibrary
+                            ? Colors.amber.withValues(alpha: 0.15)
+                            : AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        item.library.isSuperLibrary
+                            ? Icons.star
+                            : Icons.local_library,
+                        size: 20,
+                        color: item.library.isSuperLibrary
+                            ? Colors.amber
+                            : AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.library.name,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.library.address.fullAddress,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (item.distanceKm != null) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        LocationService.instance.formatDistance(
+                          item.distanceKm!,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                    if (isSelected) ...[
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.check_circle,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }
