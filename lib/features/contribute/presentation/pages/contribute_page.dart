@@ -20,6 +20,19 @@ class ContributePage extends StatefulWidget {
 
 class _ContributePageState extends State<ContributePage> {
   @override
+  void initState() {
+    super.initState();
+    // Prime gating depends on the app-level profile. It is loaded at splash,
+    // but re-request here if it hasn't loaded yet so the Buy Prime / Prime
+    // member sections never render from a stale unknown state.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && context.read<ProfileBloc>().state is! ProfileLoaded) {
+        context.read<ProfileBloc>().add(LoadProfileEvent());
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
@@ -35,6 +48,13 @@ class _ContributePageState extends State<ContributePage> {
         appBar: AppBar(
           title: const Text('Contribute'),
           centerTitle: true,
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/my-contributions'),
+              child: const Text('My Contributions'),
+            ),
+          ],
         ),
         body: BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, profileState) {
@@ -45,26 +65,33 @@ class _ContributePageState extends State<ContributePage> {
               userName = profileState.user.name;
             }
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(userName, isPrime),
-                  const SizedBox(height: 24),
-                  if (!isPrime) ...[
-                    _buildActionCards(context, isPrime),
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<DonateBookBloc>().add(LoadDonationStats());
+                await context.read<ContributeCubit>().loadMoneyDonations();
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(userName, isPrime),
+                    const SizedBox(height: 24),
+                    if (!isPrime) ...[
+                      _buildActionCards(context, isPrime),
+                      const SizedBox(height: 28),
+                    ] else ...[
+                      _buildPrimeOnlyBookCard(context),
+                      const SizedBox(height: 28),
+                    ],
+                    _buildImpactSection(context, isPrime),
                     const SizedBox(height: 28),
-                  ] else ...[
-                    _buildPrimeOnlyBookCard(context),
+                    _buildRecentBookDonations(context),
                     const SizedBox(height: 28),
+                    _buildRecentMoneyDonations(context),
                   ],
-                  _buildImpactSection(context, isPrime),
-                  const SizedBox(height: 28),
-                  _buildRecentBookDonations(context),
-                  const SizedBox(height: 28),
-                  _buildRecentMoneyDonations(context),
-                ],
+                ),
               ),
             );
           },

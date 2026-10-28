@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:read_buddy_app/core/utils/access_control.dart';
+import 'package:read_buddy_app/features/contribute/presentation/pages/contribute_page.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/category_tab.dart';
-import 'package:read_buddy_app/features/home/presentation/widgets/donation_tab.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/main_tab.dart';
 import 'package:read_buddy_app/features/profile/presentation/blocs/profile_bloc.dart';
 import 'package:read_buddy_app/features/profile/presentation/pages/screen/profile_screen.dart';
@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.pushNamed(context, '/donate-money'),
           ),
           const CategoryTab(),
-          const DonationTab(),
+          const ContributePage(),
           const ProfileScreen(),
         ],
       ),
