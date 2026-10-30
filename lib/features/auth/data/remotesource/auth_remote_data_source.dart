@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/network/api_constants.dart';
@@ -6,11 +6,17 @@ import '../../../../core/utils/network_utils.dart';
 import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
+<<<<<<< Updated upstream
   Future<AppUserModel> signIn({
     required String email,
     required String password,
   });
   Future<String> registerUser(Map<String, dynamic> data);
+=======
+  Future<AppUserModel> signIn(
+      {required String email, required String password});
+  Future<AppUserModel> registerUser(Map<String, dynamic> data);
+>>>>>>> Stashed changes
   Future<AppUserModel> verifyEmail(String email, String code);
   Future<void> resendRegisterOtp(String email);
   Future<AppUserModel> signInWithGoogle({required String token});
@@ -31,9 +37,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Starting sign in API call');
-      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.login}');
-      print('🌐 AuthRemoteDataSource: Email: $email');
+      print('≡ƒîÉ AuthRemoteDataSource: Starting sign in API call');
+      print('≡ƒîÉ AuthRemoteDataSource: URL: ${ApiConstants.login}');
+      print('≡ƒîÉ AuthRemoteDataSource: Email: $email');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -69,10 +75,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<String> registerUser(Map<String, dynamic> data) async {
+  Future<AppUserModel> registerUser(Map<String, dynamic> data) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Starting register API call');
-      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.register}');
+      print('≡ƒîÉ AuthRemoteDataSource: Starting register API call');
+      print('≡ƒîÉ AuthRemoteDataSource: URL: ${ApiConstants.register}');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -91,67 +97,40 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'name': data['name']?.toString().trim(),
       };
 
-      // Strip empty or null picture — backend requires a valid URL or absent
+      // Strip empty or null picture ΓÇö backend requires a valid URL or absent
       if (cleanData['picture'] == null ||
           cleanData['picture'].toString().trim().isEmpty) {
         cleanData.remove('picture');
       }
 
-      final email = cleanData['email'].toString();
       final response = await _dio.post(ApiConstants.register, data: cleanData);
-      final responseData = response.data;
-
-      // Backend contract:
-      //  201 + full `user` object  -> brand-new user registered (OTP sent)
-      //  200 + generic message     -> email already exists (no user object)
-      //                              -> resend probe decides verified vs not
-      //
-      // The user shape may be nested (`{ "user": {...} }`) or flat (the user
-      // fields at the top level, as AppUserModel.fromJson already supports).
-      // Detect both before classifying the outcome as a new registration.
-      final isNestedUser = responseData is Map<String, dynamic> &&
-          responseData['user'] is Map<String, dynamic>;
-      final isFlatUser = responseData is Map<String, dynamic> &&
-          (responseData['_id'] != null || responseData['id'] != null) &&
-          (responseData['email'] != null || responseData['name'] != null);
-      final hasUser = isNestedUser || isFlatUser;
-      final isNewRegistration =
-          response.statusCode == ApiConstants.created && hasUser;
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Register new-user ($isNewRegistration)'
-            ' status: ${response.statusCode}');
+        print('≡ƒîÉ AuthRemoteDataSource: Register response status: ${response.statusCode}');
       }
 
-      if (isNewRegistration) {
-        return email;
-      }
-
-      // Existing account or rate-limited register. The register response
-      // cannot distinguish a verified account from an unverified one, but
-      // resend-register-otp can: verified accounts answer 400 "already
-      // verified and registered"; unverified accounts answer 200 (and an OTP
-      // is sent, which the user needs anyway). Only a confirmed verified
-      // account proceeds to Sign In — every other outcome lands on the OTP
-      // screen so the user is never blocked. A rate-limited register (429)
-      // is treated as an existing account too: an OTP from an earlier
-      // attempt is likely still valid, and Resend (with its 60s cooldown)
-      // is always available on the OTP screen.
       if (response.statusCode == ApiConstants.success ||
-          response.statusCode == ApiConstants.tooManyRequests) {
-        final isVerified = await _isVerifiedExistingAccount(email);
-        if (isVerified) {
-          throw DioException(
-            requestOptions: response.requestOptions,
-            response: Response(
+          response.statusCode == ApiConstants.created) {
+        // Check if the API returned "user already registered" with 200 status
+        final responseData = response.data;
+        if (responseData is Map<String, dynamic>) {
+          final message =
+              responseData['message']?.toString().toLowerCase() ?? '';
+          if (message.contains('already registered') ||
+              message.contains('user already exists')) {
+            throw DioException(
               requestOptions: response.requestOptions,
-              statusCode: ApiConstants.forbidden,
-              data: responseData,
-            ),
-            message: 'user already registered',
-          );
+              response: Response(
+                requestOptions: response.requestOptions,
+                statusCode: ApiConstants.forbidden,
+                data: responseData,
+              ),
+              message: 'user already registered',
+            );
+          }
         }
-        return email;
+
+        return AppUserModel.fromJson(response.data);
       }
 
       throw DioException(
@@ -161,61 +140,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     } catch (e) {
       rethrow;
-    }
-  }
-
-  /// Tells a verified existing account apart from an unverified one by
-  /// probing resend-register-otp.
-  ///
-  /// Clear outcomes:
-  ///  - 200 success (OTP sent)                        -> unverified (false)
-  ///  - "already verified and registered" signature   -> verified (true)
-  ///
-  /// Every other outcome (429 rate limit, 500, offline, timeout) is treated
-  /// as unverified (false) so the user is always routed to the OTP screen
-  /// and never blocked: the register call holds a usable code for existing
-  /// unverified accounts, and the Resend action (with its 60s cooldown) is
-  /// always available on the OTP screen. A confirmed-verified account is
-  /// the only case that diverts to Sign In.
-  Future<bool> _isVerifiedExistingAccount(String email) async {
-    try {
-      final response = await _dio.post(
-        ApiConstants.resendRegisterOtp,
-        data: {'email': email},
-      );
-      // Inspect the response body too: some backends announce a verified
-      // account inside a success response instead of an error status, so a
-      // verified account must still be redirected to Sign In.
-      final data = response.data;
-      if (data is Map<String, dynamic>) {
-        final message =
-            (data['message'] ?? data['error'] ?? '').toString().toLowerCase();
-        if (message.contains('already verified and registered')) return true;
-      }
-      return false;
-    } catch (error) {
-      if (error is DioException) {
-        final data = error.response?.data;
-        final message =
-            '${data is Map ? (data['message'] ?? data['error'] ?? '') : ''} '
-                    '${error.message ?? ''}'
-                .toLowerCase();
-        if (message.contains('already verified and registered')) {
-          return true;
-        }
-      }
-      // Ambiguous failure (500, 429, offline, timeout): do not block the
-      // user. Route to the OTP screen; Resend with its cooldown is there.
-      //
-      // Note (review P1): returning false here classifies the account as
-      // "unverified" without a confirmed OTP. This is deliberate. The
-      // register call already holds a usable code for an existing unverified
-      // account, and in the worst case (no code at all) the OTP screen is the
-      // only screen from which the user can reach Resend to recover. Surfacing
-      // the error instead would reintroduce the blocked-user bug where a
-      // rate-limit or flakey network froze sign-up. There is no stranded
-      // scenario: the OTP screen is always the safe recovery path.
-      return false;
     }
   }
 
@@ -256,7 +180,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> resendRegisterOtp(String email) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Resending register OTP to $email');
+      print('≡ƒîÉ AuthRemoteDataSource: Resending register OTP to $email');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -276,7 +200,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-          '🌐 AuthRemoteDataSource: Register OTP resent ${response.statusCode}',
+          '≡ƒîÉ AuthRemoteDataSource: Register OTP resent ${response.statusCode}',
         );
       }
 
@@ -296,9 +220,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AppUserModel> signInWithGoogle({required String token}) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Starting Google sign-in API call');
-      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.loginWithGoogle}');
-      print('🌐 AuthRemoteDataSource: Token length: ${token.length}');
+      print('≡ƒîÉ AuthRemoteDataSource: Starting Google sign-in API call');
+      print('≡ƒîÉ AuthRemoteDataSource: URL: ${ApiConstants.loginWithGoogle}');
+      print('≡ƒîÉ AuthRemoteDataSource: Token length: ${token.length}');
     }
 
     try {
@@ -309,7 +233,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-          '🌐 AuthRemoteDataSource: Google sign-in response status: ${response.statusCode}',
+          '≡ƒîÉ AuthRemoteDataSource: Google sign-in response status: ${response.statusCode}',
         );
       }
 
@@ -326,9 +250,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (kDebugMode) {
         // Log only the error type, not the message, to avoid leaking any
         // request payload or credentials from the exception.
+<<<<<<< Updated upstream
         print(
-          '🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})',
+          '≡ƒîÉ AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})',
         );
+=======
+        print('≡ƒîÉ AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
+>>>>>>> Stashed changes
       }
       rethrow;
     }
@@ -336,7 +264,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> sendOtp(String email) async {
-    if (kDebugMode) print('🌐 AuthRemoteDataSource: Sending OTP to $email');
+    if (kDebugMode) print('≡ƒîÉ AuthRemoteDataSource: Sending OTP to $email');
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
@@ -354,7 +282,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: OTP sent ${response.statusCode}');
+        print('≡ƒîÉ AuthRemoteDataSource: OTP sent ${response.statusCode}');
       }
 
       if (response.statusCode != ApiConstants.success &&
@@ -372,7 +300,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> verifyResetOtp(String email, String otp) async {
-    if (kDebugMode) print('🌐 AuthRemoteDataSource: Verifying OTP for $email');
+    if (kDebugMode) print('≡ƒîÉ AuthRemoteDataSource: Verifying OTP for $email');
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
@@ -393,7 +321,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: OTP verified ${response.statusCode}');
+        print('≡ƒîÉ AuthRemoteDataSource: OTP verified ${response.statusCode}');
       }
 
       if (response.statusCode != ApiConstants.success) {
@@ -415,7 +343,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String newPassword,
   ) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Changing password for $email');
+      print('≡ƒîÉ AuthRemoteDataSource: Changing password for $email');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -439,7 +367,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-          '🌐 AuthRemoteDataSource: Password changed ${response.statusCode}',
+          '≡ƒîÉ AuthRemoteDataSource: Password changed ${response.statusCode}',
         );
       }
 
