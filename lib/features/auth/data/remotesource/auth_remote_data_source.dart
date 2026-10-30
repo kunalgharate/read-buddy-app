@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/network/api_constants.dart';
@@ -37,9 +37,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Starting sign in API call');
-      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.login}');
-      print('🌐 AuthRemoteDataSource: Email: $email');
+      print('≡ƒîÉ AuthRemoteDataSource: Starting sign in API call');
+      print('≡ƒîÉ AuthRemoteDataSource: URL: ${ApiConstants.login}');
+      print('≡ƒîÉ AuthRemoteDataSource: Email: $email');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -77,8 +77,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AppUserModel> registerUser(Map<String, dynamic> data) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Starting register API call');
-      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.register}');
+      print('≡ƒîÉ AuthRemoteDataSource: Starting register API call');
+      print('≡ƒîÉ AuthRemoteDataSource: URL: ${ApiConstants.register}');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -97,7 +97,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'name': data['name']?.toString().trim(),
       };
 
-      // Strip empty or null picture — backend requires a valid URL or absent
+      // Strip empty or null picture ΓÇö backend requires a valid URL or absent
       if (cleanData['picture'] == null ||
           cleanData['picture'].toString().trim().isEmpty) {
         cleanData.remove('picture');
@@ -106,7 +106,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await _dio.post(ApiConstants.register, data: cleanData);
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: Register response status: ${response.statusCode}');
+        print('≡ƒîÉ AuthRemoteDataSource: Register response status: ${response.statusCode}');
       }
 
       if (response.statusCode == ApiConstants.success ||
@@ -180,7 +180,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> resendRegisterOtp(String email) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Resending register OTP to $email');
+      print('≡ƒîÉ AuthRemoteDataSource: Resending register OTP to $email');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -200,7 +200,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-          '🌐 AuthRemoteDataSource: Register OTP resent ${response.statusCode}',
+          '≡ƒîÉ AuthRemoteDataSource: Register OTP resent ${response.statusCode}',
         );
       }
 
@@ -220,9 +220,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AppUserModel> signInWithGoogle({required String token}) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Starting Google sign-in API call');
-      print('🌐 AuthRemoteDataSource: URL: ${ApiConstants.loginWithGoogle}');
-      print('🌐 AuthRemoteDataSource: Token length: ${token.length}');
+      print('≡ƒîÉ AuthRemoteDataSource: Starting Google sign-in API call');
+      print('≡ƒîÉ AuthRemoteDataSource: URL: ${ApiConstants.loginWithGoogle}');
+      print('≡ƒîÉ AuthRemoteDataSource: Token length: ${token.length}');
     }
 
     try {
@@ -233,7 +233,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-          '🌐 AuthRemoteDataSource: Google sign-in response status: ${response.statusCode}',
+          '≡ƒîÉ AuthRemoteDataSource: Google sign-in response status: ${response.statusCode}',
         );
       }
 
@@ -252,10 +252,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         // request payload or credentials from the exception.
 <<<<<<< Updated upstream
         print(
-          '🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})',
+          '≡ƒîÉ AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})',
         );
 =======
-        print('🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
+        print('≡ƒîÉ AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
 >>>>>>> Stashed changes
       }
       rethrow;
@@ -264,7 +264,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> sendOtp(String email) async {
-    if (kDebugMode) print('🌐 AuthRemoteDataSource: Sending OTP to $email');
+    if (kDebugMode) print('≡ƒîÉ AuthRemoteDataSource: Sending OTP to $email');
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
@@ -282,7 +282,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: OTP sent ${response.statusCode}');
+        print('≡ƒîÉ AuthRemoteDataSource: OTP sent ${response.statusCode}');
       }
 
       if (response.statusCode != ApiConstants.success &&
@@ -300,7 +300,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> verifyResetOtp(String email, String otp) async {
-    if (kDebugMode) print('🌐 AuthRemoteDataSource: Verifying OTP for $email');
+    if (kDebugMode) print('≡ƒîÉ AuthRemoteDataSource: Verifying OTP for $email');
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
     if (!hasInternet) {
@@ -321,7 +321,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (kDebugMode) {
-        print('🌐 AuthRemoteDataSource: OTP verified ${response.statusCode}');
+        print('≡ƒîÉ AuthRemoteDataSource: OTP verified ${response.statusCode}');
       }
 
       if (response.statusCode != ApiConstants.success) {
@@ -343,7 +343,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String newPassword,
   ) async {
     if (kDebugMode) {
-      print('🌐 AuthRemoteDataSource: Changing password for $email');
+      print('≡ƒîÉ AuthRemoteDataSource: Changing password for $email');
     }
 
     final hasInternet = await NetworkUtils.hasInternetConnection();
@@ -367,7 +367,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (kDebugMode) {
         print(
-          '🌐 AuthRemoteDataSource: Password changed ${response.statusCode}',
+          '≡ƒîÉ AuthRemoteDataSource: Password changed ${response.statusCode}',
         );
       }
 

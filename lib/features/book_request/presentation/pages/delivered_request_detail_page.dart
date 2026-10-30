@@ -1,4 +1,4 @@
-import 'package:read_buddy_app/core/theme/app_colors.dart';
+﻿import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/features/reviews/presentation/widgets/write_review_entry.dart';
@@ -126,7 +126,7 @@ class _DeliveredRequestDetailPageState
               'Method',
               widget.request.fulfillmentMethod.isNotEmpty
                   ? _capitalize(widget.request.fulfillmentMethod)
-                  : '—',
+                  : 'ΓÇö',
             ),
 
             // Pickup details
@@ -144,7 +144,7 @@ class _DeliveredRequestDetailPageState
                 _InfoRow('Pickup Address', widget.request.pickupAddress!),
             ],
 
-            // Delivery details — original borrow delivery, hidden once a
+            // Delivery details ΓÇö original borrow delivery, hidden once a
             // return has been initiated (return details shown below instead)
             if (widget.request.deliveryAddress != null &&
                 widget.request.returnMethod == null) ...[
@@ -152,7 +152,7 @@ class _DeliveredRequestDetailPageState
               _InfoRow('Delivery Address', widget.request.deliveryAddress!),
             ],
 
-            // Return details — driven by returnMethod (mirrors web ShowReturnDetails)
+            // Return details ΓÇö driven by returnMethod (mirrors web ShowReturnDetails)
             if (widget.request.returnMethod != null) ...[
               const SizedBox(height: 16),
               const _SectionTitle('Return Details'),
@@ -160,7 +160,7 @@ class _DeliveredRequestDetailPageState
               ..._buildReturnDetails(widget.request),
             ],
 
-            // Shipment tracking — shown for shipping/delivered/returning
+            // Shipment tracking ΓÇö shown for shipping/delivered/returning
             if (['shipping', 'delivered', 'returning']
                 .contains(widget.request.status.toLowerCase()))
               ShipmentTrackingWidget(requestId: widget.request.id),
@@ -176,7 +176,7 @@ class _DeliveredRequestDetailPageState
             if (widget.request.returnDate != null)
               _InfoRow('Return Date', _fmtDate(widget.request.returnDate)),
 
-            // Extension guidance — there is no extension endpoint, so this is
+            // Extension guidance ΓÇö there is no extension endpoint, so this is
             // instructions-only and mirrors the FAQ wording.
             if (widget.request.status.toLowerCase() == 'delivered' &&
                 (widget.request.dueDate ?? '').isNotEmpty) ...[
@@ -184,7 +184,7 @@ class _DeliveredRequestDetailPageState
               _ExtensionCard(dueDate: widget.request.dueDate!),
             ],
 
-            // Write a review — the widget queries the eligibility endpoint and
+            // Write a review ΓÇö the widget queries the eligibility endpoint and
             // shows a 'Write a review' button when the user is eligible and
             // has not yet reviewed, or an 'Edit your review' button when a
             // review already exists. It renders nothing otherwise.
@@ -334,7 +334,7 @@ class _DeliveredRequestDetailPageState
         ),
       );
     } else {
-      // Home pickup — show the address submitted during the pickup payment
+      // Home pickup ΓÇö show the address submitted during the pickup payment
       // (returnPickupAddress); fall back to the older pickupDetails/address
       // mapping for legacy records.
       final pickupAddress = (r.returnPickupAddress?.isNotEmpty == true)
@@ -437,7 +437,7 @@ class _ExtensionCard extends StatelessWidget {
     final isDueNow = isDueOnOrBeforeToday(dueDate);
     final message = isDueNow
         ? 'Your due date is $formatted. Need more time? You can request an '
-            'extension (usually 30 more days), subject to availability — email '
+            'extension (usually 30 more days), subject to availability ΓÇö email '
             'readbuddyin@gmail.com with your book title to request one.'
         : 'Return by $formatted. Need more time? Extensions are available on '
             'request.';
@@ -556,7 +556,7 @@ DateTime? parseRequestDateOnly(String? raw) {
 String formatRequestDate(String? raw) {
   final date = parseRequestDateOnly(raw);
   if (date == null) {
-    if (raw == null || raw.trim().isEmpty) return '—';
+    if (raw == null || raw.trim().isEmpty) return 'ΓÇö';
     return raw;
   }
   return '${date.day} ${_monthAbbr[date.month - 1]} ${date.year}';
