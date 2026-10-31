@@ -8,7 +8,10 @@ abstract class DonateRemoteDataSource {
   Future<DonationStatsModel> getDonationStats();
   Future<void> createBookDonation(BookDonationRequestModel request);
   Future<void> uploadReceipt(String donationId, FormData formData);
-  Future<Map<String, dynamic>> initiateMoneyDonation(int amount);
+  Future<Map<String, dynamic>> initiateMoneyDonation(
+    int amount, {
+    String currency = 'INR',
+  });
   Future<Map<String, dynamic>> verifyMoneyDonation({
     required String razorpayOrderId,
     required String razorpayPaymentId,
@@ -93,15 +96,39 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> initiateMoneyDonation(int amount) async {
-    final response = await dio.post(
-      ApiConstants.donateMoneyInitiate,
-      data: {'amount': amount},
-    );
-    if (response.statusCode != 200) {
-      throw Exception(response.data?['error'] ?? 'Failed to initiate donation');
+  Future<Map<String, dynamic>> initiateMoneyDonation(
+    int amount, {
+    String currency = 'INR',
+  }) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.donateMoneyInitiate,
+        data: {
+          'amount': amount,
+          'currency': currency,
+        },
+      );
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(
+          response.data?['error'] ??
+              response.data?['message'] ??
+              'Failed to initiate donation',
+        );
+      }
+      final raw = response.data;
+      if (raw is Map) {
+        final Map map = raw['data'] is Map ? raw['data'] as Map : raw;
+        return Map<String, dynamic>.from(map);
+      }
+      throw Exception('Unexpected response from payment server');
+    } on DioException catch (e) {
+      if (e.response == null) rethrow;
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['error'] ?? e.response!.data['message'])
+              as String?
+          : null;
+      throw Exception(serverMsg ?? 'Failed to initiate donation');
     }
-    return response.data as Map<String, dynamic>;
   }
 
   @override
@@ -111,18 +138,31 @@ class DonateRemoteDataSourceImpl implements DonateRemoteDataSource {
     required String razorpaySignature,
     required int amount,
   }) async {
-    final response = await dio.post(
-      ApiConstants.donateMoneyVerify,
-      data: {
-        'razorpay_order_id': razorpayOrderId,
-        'razorpay_payment_id': razorpayPaymentId,
-        'razorpay_signature': razorpaySignature,
-        'amount': amount,
-      },
-    );
-    if (response.statusCode != 200) {
-      throw Exception(response.data?['error'] ?? 'Payment verification failed');
+    try {
+      final response = await dio.post(
+        ApiConstants.donateMoneyVerify,
+        data: {
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+          'amount': amount,
+        },
+      );
+      if (response.statusCode != 200) {
+        throw Exception(
+          response.data?['error'] ??
+              response.data?['message'] ??
+              'Payment verification failed',
+        );
+      }
+      return Map<String, dynamic>.from(response.data as Map);
+    } on DioException catch (e) {
+      if (e.response == null) rethrow;
+      final serverMsg = e.response?.data is Map
+          ? (e.response!.data['error'] ?? e.response!.data['message'])
+              as String?
+          : null;
+      throw Exception(serverMsg ?? 'Payment verification failed');
     }
-    return response.data as Map<String, dynamic>;
   }
 }

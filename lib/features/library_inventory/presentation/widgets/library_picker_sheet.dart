@@ -69,6 +69,7 @@ class LibraryPickerSheet extends StatefulWidget {
 
 class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
   bool _loading = true;
+  bool _selecting = false;
   String? _error;
   // We also need variantId and formatId for the selected library
   // The browse API groups by bookId — we need per-library detail
@@ -117,6 +118,7 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
             libraryId: lib.libraryId,
             libraryName: lib.libraryName,
             formatType: lib.formatType,
+            variantId: lib.variantId,
             availableCopies: lib.availableCopies,
             totalCopies: lib.totalCopies,
             distanceKm: lib.distanceKm,
@@ -173,51 +175,76 @@ class _LibraryPickerSheetState extends State<LibraryPickerSheet> {
     _LibraryOption option,
     String fulfillmentMethod,
   ) async {
-    // Resolve variantId + formatId from data the detail page already loaded
-    // (the book's variants). We deliberately avoid GET /v1/library-inventory
-    // here: that endpoint is admin/librarian-only and returns 403 for regular
-    // users, which previously broke borrowing.
-    var match = widget.formatByType[option.formatType.toLowerCase()];
+    if (_selecting) return;
+    setState(() => _selecting = true);
+    try {
+      // Resolve variantId + formatId from data the detail page already loaded
+      // (the book's variants). We deliberately avoid GET /v1/library-inventory
+      // here: that endpoint is admin/librarian-only and returns 403 for regular
+      // users, which previously broke borrowing.
+      var match = widget.formatByType[option.formatType.toLowerCase()];
 
-    // The detail page may not have supplied this format (e.g. variants arrived
-    // without format ids). Fall back to fetching the book's variants, which is
-    // a user-accessible endpoint, so borrowing still works.
-    if (match == null || match.variantId.isEmpty || match.formatId.isEmpty) {
-      match = await _resolveFormatFromVariants(option.formatType);
-    }
-    if (match == null || match.variantId.isEmpty || match.formatId.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('This edition is not available at this library.'),
-          ),
+      // If the library inventory provided the specific variantId for this edition,
+      // match against it so we don't accidentally check out a different edition
+      // that shares the same format type (e.g. translated edition).
+      if (option.variantId != null && option.variantId!.isNotEmpty) {
+        if (match?.variantId != option.variantId) {
+          match =
+              null; // force fetch or we could just resolve the format for this variantId
+        }
+      }
+
+      // The detail page may not have supplied this format (e.g. variants arrived
+      // without format ids). Fall back to fetching the book's variants, which is
+      // a user-accessible endpoint, so borrowing still works.
+      if (match == null || match.variantId.isEmpty || match.formatId.isEmpty) {
+        match = await _resolveFormatFromVariants(
+          option.formatType,
+          option.variantId,
         );
       }
-      return;
-    }
-    if (!mounted) return;
+      if (match == null || match.variantId.isEmpty || match.formatId.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('This edition is not available at this library.'),
+            ),
+          );
+        }
+        return;
+      }
+      if (!mounted) return;
 
-    Navigator.pop(
-      context,
-      LibraryPickResult(
-        libraryId: option.libraryId,
-        libraryName: option.libraryName,
-        variantId: match.variantId,
-        formatId: match.formatId,
-        formatType: option.formatType,
-        fulfillmentMethod: fulfillmentMethod,
-      ),
-    );
+      Navigator.pop(
+        context,
+        LibraryPickResult(
+          libraryId: option.libraryId,
+          libraryName: option.libraryName,
+          variantId: match.variantId,
+          formatId: match.formatId,
+          formatType: option.formatType,
+          fulfillmentMethod: fulfillmentMethod,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _selecting = false);
+    }
   }
 
   Future<({String variantId, String formatId})?> _resolveFormatFromVariants(
     String formatType,
+    String? targetVariantId,
   ) async {
     try {
       final variants =
           await getIt<VariantRepository>().getVariantsForBook(widget.bookId);
       final key = formatType.toLowerCase();
       for (final v in variants) {
+        if (targetVariantId != null &&
+            targetVariantId.isNotEmpty &&
+            v.id != targetVariantId) {
+          continue;
+        }
         for (final f in v.formats) {
           if (f.type.toLowerCase() == key && (f.id?.isNotEmpty ?? false)) {
             return (variantId: v.id, formatId: f.id!);
@@ -332,6 +359,7 @@ class _LibraryOption {
   final String libraryId;
   final String libraryName;
   final String formatType;
+  final String? variantId;
   final int availableCopies;
   final int totalCopies;
   final double? distanceKm;
@@ -341,6 +369,7 @@ class _LibraryOption {
     required this.libraryId,
     required this.libraryName,
     required this.formatType,
+    this.variantId,
     required this.availableCopies,
     required this.totalCopies,
     this.distanceKm,

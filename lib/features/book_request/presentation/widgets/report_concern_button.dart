@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/utils/app_validators.dart';
 import '../../data/datasources/book_report_service.dart';
 
 /// A "Report a concern" text button that opens a bottom sheet to submit a
@@ -53,8 +54,6 @@ class _ReportSheetState extends State<_ReportSheet> {
     'other': 'Other',
   };
 
-  static const _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-
   String _reason = 'copyright';
   final _formKey = GlobalKey<FormState>();
   final _details = TextEditingController();
@@ -71,7 +70,7 @@ class _ReportSheetState extends State<_ReportSheet> {
   String? _validateEmail(String? value) {
     final email = value?.trim() ?? '';
     if (email.isEmpty) return null;
-    if (!RegExp(_emailRegex).hasMatch(email)) {
+    if (!AppValidators.isValidEmail(email)) {
       return 'Please enter a valid email address';
     }
     return null;

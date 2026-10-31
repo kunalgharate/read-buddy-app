@@ -551,7 +551,9 @@ class _AddressFormState extends State<_AddressForm> {
               setState(() => _showStateList = true);
             }
           },
-          onChanged: (_) => setState(() {}),
+          onChanged: (_) => setState(() {
+            _showStateList = true;
+          }),
           decoration: InputDecoration(
             labelText: 'State *',
             counterText: '',

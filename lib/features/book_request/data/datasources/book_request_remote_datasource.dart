@@ -83,6 +83,9 @@ abstract class BookRequestRemoteDataSource {
   });
 
   Future<RequestPaymentIntent> createBookRequestPayment(String id);
+
+  /// Requests a 30-day due-date extension for an active delivered book request.
+  Future<void> extendBookRequest(String id);
   Future<void> verifyBookRequestPayment(
     String id, {
     required String paymentId,
@@ -574,7 +577,9 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
           ? (e.response!.data['message'] ?? e.response!.data['error'])
               as String?
           : null;
-      throw Exception(serverMsg ?? 'Failed to initiate return. Please try again.');
+      throw Exception(
+        serverMsg ?? 'Failed to initiate return. Please try again.',
+      );
     } catch (e) {
       rethrow;
     }
@@ -702,6 +707,11 @@ class BookRequestRemoteDataSourceImpl implements BookRequestRemoteDataSource {
           : null;
       throw Exception(serverMsg ?? 'Failed to create delivery payment order');
     }
+  }
+
+  @override
+  Future<void> extendBookRequest(String id) async {
+    await dio.patch(ApiConstants.extendBookRequest(id));
   }
 
   @override

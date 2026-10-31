@@ -5,12 +5,31 @@
 /// Every UI/route gate that decides "can this user do X?" must use an
 /// allow-list defined here so the checks cannot drift apart.
 class AccessControl {
+  /// Admin-only roles.
+  static const Set<String> adminRoles = {'admin'};
+
+  /// Librarian-only roles.
+  static const Set<String> librarianRoles = {'librarian'};
+
   /// Roles allowed behind "Manage Books": create / edit / publish / delete
   /// books, their variants, and their categories.
-  ///
-  /// * `admin` — Admin
-  /// * `librarian` — Library Manager
   static const Set<String> bookManagerRoles = {'admin', 'librarian'};
+
+  /// Whether [role] is an administrator.
+  static bool isAdmin(String? role) {
+    if (role == null) return false;
+    final normalised = role.trim().toLowerCase();
+    if (normalised.isEmpty) return false;
+    return adminRoles.contains(normalised);
+  }
+
+  /// Whether [role] is a librarian.
+  static bool isLibrarian(String? role) {
+    if (role == null) return false;
+    final normalised = role.trim().toLowerCase();
+    if (normalised.isEmpty) return false;
+    return librarianRoles.contains(normalised);
+  }
 
   /// Whether [role] may access book-management functionality.
   ///

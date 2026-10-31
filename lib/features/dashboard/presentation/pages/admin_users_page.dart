@@ -307,7 +307,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
         return null;
       }
 
-      return showDialog<String>(
+      return await showDialog<String>(
         context: context,
         builder: (ctx) => SimpleDialog(
           title: const Text('Assign to Library'),

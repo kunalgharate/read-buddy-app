@@ -34,8 +34,8 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     emit(SignUpLoading());
 
     try {
-      final email = await _registerUserUseCase(event.userData);
-      emit(SignUpSuccess(email));
+      final user = await _registerUserUseCase(event.userData);
+      emit(SignUpSuccess(user.email));
     } catch (error) {
       final errorMessage = ErrorHandler.getErrorMessage(error);
       final isUserExists = ErrorHandler.isUserAlreadyExists(error);

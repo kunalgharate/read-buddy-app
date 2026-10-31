@@ -56,7 +56,6 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     }
   }
-<<<<<<< Updated upstream
 
   @override
   Future<void> sendOtp(String email) async {
@@ -67,8 +66,6 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     }
   }
-=======
->>>>>>> Stashed changes
 
   @override
   Future<void> verifyResetOtp(String email, String otp) async {

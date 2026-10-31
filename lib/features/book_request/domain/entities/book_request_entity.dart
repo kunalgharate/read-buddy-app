@@ -13,6 +13,7 @@ class BookRequestEntity extends Equatable {
   final String? returnDate;
   final String? returnMethod;
   final String? returnBranchId;
+  final String? returnBranchName;
   final String? returnScheduledDate;
   final String? returnScheduledSlot;
   final String? returnPaymentStatus;
@@ -53,6 +54,7 @@ class BookRequestEntity extends Equatable {
     this.returnDate,
     this.returnMethod,
     this.returnBranchId,
+    this.returnBranchName,
     this.returnScheduledDate,
     this.returnScheduledSlot,
     this.returnPaymentStatus,
@@ -95,6 +97,7 @@ class BookRequestEntity extends Equatable {
         returnDate,
         returnMethod,
         returnBranchId,
+        returnBranchName,
         returnScheduledDate,
         returnScheduledSlot,
         returnPaymentStatus,

@@ -6,17 +6,11 @@ import '../../../../core/utils/network_utils.dart';
 import '../models/app_user_model.dart';
 
 abstract class AuthRemoteDataSource {
-<<<<<<< Updated upstream
   Future<AppUserModel> signIn({
     required String email,
     required String password,
   });
-  Future<String> registerUser(Map<String, dynamic> data);
-=======
-  Future<AppUserModel> signIn(
-      {required String email, required String password});
   Future<AppUserModel> registerUser(Map<String, dynamic> data);
->>>>>>> Stashed changes
   Future<AppUserModel> verifyEmail(String email, String code);
   Future<void> resendRegisterOtp(String email);
   Future<AppUserModel> signInWithGoogle({required String token});
@@ -250,13 +244,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (kDebugMode) {
         // Log only the error type, not the message, to avoid leaking any
         // request payload or credentials from the exception.
-<<<<<<< Updated upstream
         print(
           '🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})',
         );
-=======
-        print('🌐 AuthRemoteDataSource: Google sign-in failed (${e.runtimeType})');
->>>>>>> Stashed changes
       }
       rethrow;
     }

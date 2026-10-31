@@ -382,7 +382,11 @@ class _UpdateBookPageState extends State<UpdateBookPage> {
                     );
                     widget.onContinue(book);
                   } else {
-                    // One or more fields are invalid, show errors
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please correct the invalid fields.'),
+                      ),
+                    );
                   }
                 },
                 // onPressed: () {

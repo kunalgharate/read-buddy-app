@@ -31,5 +31,22 @@ class UserEntity {
     required this.badges,
   });
 
-  static empty() {}
+  static UserEntity empty() {
+    return const UserEntity(
+      id: '',
+      name: '',
+      email: '',
+      userRole: '',
+      authType: '',
+      socialId: '',
+      isEmailVerified: false,
+      phone: '',
+      pincode: '',
+      city: '',
+      isPrime: false,
+      membershipExpires: null,
+      finesDue: 0,
+      badges: [],
+    );
+  }
 }

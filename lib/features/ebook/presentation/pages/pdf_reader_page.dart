@@ -219,7 +219,9 @@ class _PdfReaderPageState extends State<PdfReaderPage> {
     }
     _searchResult = _pdfController.searchText(query);
     _searchResult.addListener(() {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 

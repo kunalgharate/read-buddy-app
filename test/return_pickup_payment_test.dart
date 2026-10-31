@@ -73,7 +73,8 @@ void main() {
 
   group('BookRequestRemoteDataSource.initiateReturn', () {
     test('sends method, branch and an ISO-8601 return schedule', () async {
-      final adapter = _stub({'success': true, 'message': 'Return initiated'}, 200);
+      final adapter =
+          _stub({'success': true, 'message': 'Return initiated'}, 200);
       final ds = _datasource(adapter);
 
       await ds.initiateReturn(
@@ -119,7 +120,8 @@ void main() {
         () => ds.initiateReturn('req3', 'DROP_OFF'),
         throwsA(
           predicate(
-            (e) => e is Exception &&
+            (e) =>
+                e is Exception &&
                 e.toString().contains('Book must be delivered'),
           ),
         ),
@@ -212,7 +214,8 @@ void main() {
         () => ds.createReturnPickupOrder('req4'),
         throwsA(
           predicate(
-            (e) => e is Exception &&
+            (e) =>
+                e is Exception &&
                 e.toString().contains('Book must be delivered'),
           ),
         ),
@@ -222,7 +225,8 @@ void main() {
 
   group('BookRequestRemoteDataSource.verifyReturnPickupPayment', () {
     test('PATCHes the verify endpoint with the contract body', () async {
-      final adapter = _stub({'success': true, 'message': 'Payment verified'}, 200);
+      final adapter =
+          _stub({'success': true, 'message': 'Payment verified'}, 200);
       final ds = _datasource(adapter);
 
       await ds.verifyReturnPickupPayment(
@@ -260,6 +264,8 @@ void main() {
         orderId: 'order_1',
         signature: 'sig_1',
         pickupAddress: 'addr',
+        returnScheduledDate: '',
+        returnScheduledSlot: '',
       );
 
       final data = adapter.lastOptions!.data as Map;
@@ -284,7 +290,8 @@ void main() {
         ),
         throwsA(
           predicate(
-            (e) => e is Exception &&
+            (e) =>
+                e is Exception &&
                 e.toString().contains('Invalid payment signature'),
           ),
         ),

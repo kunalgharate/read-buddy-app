@@ -38,15 +38,28 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   }
 
   Future<void> _initiatePayment() async {
+    if (_processing) return;
     setState(() => _processing = true);
 
     try {
       final datasource = getIt<DonateRemoteDataSource>();
-      final result = await datasource.initiateMoneyDonation(_selectedPlan);
+      final result = await datasource.initiateMoneyDonation(
+        _selectedPlan,
+        currency: 'INR',
+      );
 
-      _currentOrderId = result['orderId'] as String;
+      _currentOrderId =
+          (result['orderId'] ?? result['order']?['id'] ?? '').toString();
       _currentAmount = _selectedPlan;
-      final razorpayKey = result['razorpayKey'] as String;
+      final razorpayKey =
+          (result['razorpayKey'] ?? result['keyId'] ?? '').toString();
+      final currency = (result['currency'] ?? 'INR').toString();
+
+      if (_currentOrderId == null ||
+          _currentOrderId!.isEmpty ||
+          razorpayKey.isEmpty) {
+        throw Exception('Invalid order details returned from server');
+      }
 
       if (kDebugMode) {
         debugPrint(
@@ -55,13 +68,14 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
         debugPrint(
           '💳 [Razorpay] Key is LIVE mode: ${razorpayKey.startsWith('rzp_live_')}',
         );
-        debugPrint('💳 [Razorpay] Amount: $_currentAmount INR');
+        debugPrint('💳 [Razorpay] Amount: $_currentAmount $currency');
       }
 
       final options = {
         'key': razorpayKey,
-        'amount': (_selectedPlan * 100).toString(), // paise
-        'currency': 'INR',
+        // razorpay_flutter expects the amount as an int (paise), not a String.
+        'amount': _selectedPlan * 100,
+        'currency': currency,
         'order_id': _currentOrderId,
         'name': 'ReadBuddy',
         'description': 'Prime Membership - 1 Year',
@@ -72,12 +86,11 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
       _razorpay.open(options);
     } catch (e) {
       if (mounted) {
+        setState(() => _processing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to initiate payment: $e')),
         );
       }
-    } finally {
-      if (mounted) setState(() => _processing = false);
     }
   }
 
@@ -117,6 +130,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
           SnackBar(content: Text('Payment verification failed: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _processing = false);
     }
   }
 
@@ -164,12 +179,20 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   /// fallback so QA/automation can exercise the Prime membership flow.
   /// Never shown in prod builds (gated by AppConfig.isDev).
   Future<void> _completeTestPayment() async {
+    if (_processing) return;
     setState(() => _processing = true);
     try {
       final datasource = getIt<DonateRemoteDataSource>();
       // Initiate a real order so we have a valid order id to verify against.
-      final result = await datasource.initiateMoneyDonation(_selectedPlan);
-      final orderId = result['orderId'] as String;
+      final result = await datasource.initiateMoneyDonation(
+        _selectedPlan,
+        currency: 'INR',
+      );
+      final orderId =
+          (result['orderId'] ?? result['order']?['id'] ?? '').toString();
+      if (orderId.isEmpty) {
+        throw Exception('Failed to get valid order id for test payment');
+      }
 
       await datasource.verifyMoneyDonation(
         razorpayOrderId: orderId,
@@ -190,6 +213,7 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
   }
 
   void _onPaymentError(PaymentFailureResponse response) {
+    if (mounted) setState(() => _processing = false);
     if (kDebugMode) {
       debugPrint(
         '💳 [Razorpay] PAYMENT_ERROR | code=${response.code} (redacted: ${response.message == null ? 'none' : '${response.message!.length} chars'})',

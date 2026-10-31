@@ -2,12 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/utils/date_formatter.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../bloc/my_requests_bloc.dart';
 import '../pages/approved_book_request_page.dart';
 import '../pages/book_request_success_page.dart';
-import '../pages/collect_from_library_page.dart';
 import '../pages/delivered_request_detail_page.dart';
 import '../../../../core/di/injection.dart' as di;
 
@@ -403,6 +403,11 @@ class _RequestCardState extends State<_RequestCard> {
 
         if (!context.mounted) return;
 
+        // Always land on the approved-request detail page — it shows the
+        // approval status, due date and pickup info, and from there the
+        // user can still open the pickup/drop scheduling form or pay the
+        // delivery fee. (Previously FREE pickup requests skipped it and
+        // went straight to the scheduling form.)
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -413,6 +418,8 @@ class _RequestCardState extends State<_RequestCard> {
           ),
         );
 
+        // Reload so any payment made on the detail page (e.g. the ₹25
+        // delivery fee) is reflected in the list and on re-open.
         if (context.mounted) {
           context.read<MyRequestsBloc>().add(LoadMyRequests());
         }
@@ -520,7 +527,7 @@ class _RequestCardState extends State<_RequestCard> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Due ${formatRequestDate(request.dueDate)}',
+                                'Due ${DateFormatter.formatRequestDate(request.dueDate)}',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isMutedDue

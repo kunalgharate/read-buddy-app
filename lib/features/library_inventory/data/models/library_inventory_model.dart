@@ -90,6 +90,7 @@ class CityBookLibraryInfoModel extends CityBookLibraryInfo {
     required super.libraryId,
     required super.libraryName,
     required super.formatType,
+    super.variantId,
     required super.availableCopies,
     required super.totalCopies,
     super.latitude,
@@ -99,10 +100,15 @@ class CityBookLibraryInfoModel extends CityBookLibraryInfo {
   });
 
   factory CityBookLibraryInfoModel.fromJson(Map<String, dynamic> json) {
+    final variant = json['variantId'];
+    final variantIdStr =
+        variant is Map ? variant['_id']?.toString() : variant?.toString();
+
     return CityBookLibraryInfoModel(
       libraryId: json['libraryId']?.toString() ?? '',
       libraryName: json['libraryName']?.toString() ?? 'Unknown',
       formatType: json['formatType']?.toString() ?? 'hardcover',
+      variantId: variantIdStr,
       availableCopies: (json['availableCopies'] ?? 0) as int,
       totalCopies: (json['totalCopies'] ?? 0) as int,
       latitude: (json['latitude'] as num?)?.toDouble(),

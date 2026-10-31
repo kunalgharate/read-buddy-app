@@ -56,6 +56,7 @@ class _CategoryTabState extends State<CategoryTab> {
   void _onCategorySelected(CategoryEntity? category) {
     setState(() {
       _selectedCategory = category;
+      _filterCategoryId = null; // Clear the sheet filter to let navigation win
     });
   }
 
@@ -391,61 +392,66 @@ class _CategoryTabState extends State<CategoryTab> {
           const SizedBox(height: 16),
 
           // ─── Category Sections with Horizontal Books Lists ──────────────
-          ...allCategories.map((category) {
-            final categoryBooks = filteredBooks
-                .where((book) => _isBookInCategory(book, category))
-                .toList();
+          if (!allCategories.any(
+            (cat) => filteredBooks.any((book) => _isBookInCategory(book, cat)),
+          ))
+            _buildNoBooksFound()
+          else
+            ...allCategories.map((category) {
+              final categoryBooks = filteredBooks
+                  .where((book) => _isBookInCategory(book, category))
+                  .toList();
 
-            // Only display the category section if it has books matching the search query
-            if (categoryBooks.isEmpty) {
-              return const SizedBox.shrink();
-            }
+              // Only display the category section if it has books matching the search query
+              if (categoryBooks.isEmpty) {
+                return const SizedBox.shrink();
+              }
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _capitalize(category.title),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _capitalize(category.title),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () => _onCategorySelected(category),
-                          child: Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.onSurface,
+                          GestureDetector(
+                            onTap: () => _onCategorySelected(category),
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 230,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: categoryBooks.length,
-                      itemBuilder: (context, index) {
-                        return _buildHorizontalBookCard(categoryBooks[index]);
-                      },
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 230,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemCount: categoryBooks.length,
+                        itemBuilder: (context, index) {
+                          return _buildHorizontalBookCard(categoryBooks[index]);
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                  ],
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -575,7 +581,9 @@ class _CategoryTabState extends State<CategoryTab> {
         );
       case _BookSortOption.categoryAsc:
         books.sort(
-          (a, b) => _categoryLabel(a).compareTo(_categoryLabel(b)),
+          (a, b) => a.bookCategory.categoryName
+              .toLowerCase()
+              .compareTo(b.bookCategory.categoryName.toLowerCase()),
         );
     }
   }
@@ -586,12 +594,6 @@ class _CategoryTabState extends State<CategoryTab> {
       if (category.id == id) return category;
     }
     return null;
-  }
-
-  String _categoryLabel(Book book) {
-    final genre = book.genre.trim().toLowerCase();
-    if (genre.isNotEmpty) return genre;
-    return book.bookCategory.categoryName.trim().toLowerCase();
   }
 
   // ─── Horizontal Book Card Widget ───────────────────────────────────────────
@@ -1064,7 +1066,8 @@ class _FilterSortSheetState extends State<_FilterSortSheet> {
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: isDark ? Theme.of(context).colorScheme.onSurface : AppColors.navy,
+          color:
+              isDark ? Theme.of(context).colorScheme.onSurface : AppColors.navy,
         ),
       ),
     );

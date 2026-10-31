@@ -80,6 +80,7 @@ class CityBookLibraryInfo extends Equatable {
   final String libraryId;
   final String libraryName;
   final String formatType;
+  final String? variantId;
   final int availableCopies;
   final int totalCopies;
   final double? latitude;
@@ -91,6 +92,7 @@ class CityBookLibraryInfo extends Equatable {
     required this.libraryId,
     required this.libraryName,
     required this.formatType,
+    this.variantId,
     required this.availableCopies,
     required this.totalCopies,
     this.latitude,
@@ -103,6 +105,7 @@ class CityBookLibraryInfo extends Equatable {
   List<Object?> get props => [
         libraryId,
         formatType,
+        variantId,
         availableCopies,
         totalCopies,
         latitude,

@@ -1,3 +1,4 @@
+import 'package:read_buddy_app/core/utils/app_validators.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,7 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (value == null || value.trim().isEmpty) {
       return 'Email is required';
     }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+    if (!AppValidators.isValidEmail(value)) {
       return 'Please enter a valid email';
     }
     return null;

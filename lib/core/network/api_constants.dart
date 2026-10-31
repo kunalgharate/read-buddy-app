@@ -68,6 +68,7 @@ class ApiConstants {
   static String get getAllBookRequests => '$baseUrl/bookrequests';
   static String get bookRequests => '$baseUrl/bookrequests';
   static String bookRequestPayment(String id) => '$v1BookRequests/$id/payment';
+  static String extendBookRequest(String id) => '$v1BookRequests/$id/extend';
   static String bookRequestPaymentVerify(String id) =>
       '$v1BookRequests/$id/payment/verify';
 

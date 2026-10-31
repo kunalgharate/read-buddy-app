@@ -154,10 +154,11 @@ class AppInterceptor extends QueuedInterceptor {
     // routes, etc.) untouched. NOT_PRIME is filtered out in onError before
     // this method is consulted.
     if (status == 403 && responseData is Map) {
-      final message = (responseData['error'] ?? responseData['message'] ?? '')
-          .toString()
-          .toLowerCase();
-      if (message.contains('token') && !message.contains('refresh token')) {
+      final errorStr = (responseData['error']?.toString() ?? '').toLowerCase();
+      final msgStr = (responseData['message']?.toString() ?? '').toLowerCase();
+      final combined = '$errorStr $msgStr';
+
+      if (combined.contains('token') && !combined.contains('refresh token')) {
         return true;
       }
     }

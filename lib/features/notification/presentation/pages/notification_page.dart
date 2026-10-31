@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -107,10 +108,11 @@ class _NotificationView extends StatelessWidget {
       (state) => state is NotificationLoaded || state is NotificationError,
     );
     bloc.add(LoadMyNotifications());
-    await finished.timeout(
-      const Duration(seconds: 20),
-      onTimeout: () => NotificationLoaded(const <Map<String, dynamic>>[]),
-    );
+    try {
+      await finished.timeout(const Duration(seconds: 20));
+    } catch (_) {
+      bloc.add(NotificationLoadTimeout());
+    }
   }
 }
 
@@ -215,31 +217,70 @@ class _NotificationCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Book cover placeholder
-          Container(
-            width: 74,
-            height: 80,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE0E0E0),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Icon(
-              Icons.menu_book,
-              color: Color(0xFF9E9E9E),
-              size: 28,
+          // Book cover or icon
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: SizedBox(
+              width: 50,
+              height: 60,
+              child: data.coverUrl != null && data.coverUrl!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: data.coverUrl!,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        color: const Color(0xFFE0E0E0),
+                        child: const Icon(
+                          Icons.notifications,
+                          color: Color(0xFF9E9E9E),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        color: const Color(0xFFE0E0E0),
+                        child: const Icon(
+                          Icons.notifications,
+                          color: Color(0xFF9E9E9E),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      color: const Color(0xFFE0E0E0),
+                      child: const Icon(
+                        Icons.notifications_outlined,
+                        color: Color(0xFF9E9E9E),
+                        size: 24,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(width: 12),
-          // Message
+          // Title + Body
           Expanded(
-            child: Text(
-              data.message,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-                color: NotificationPage._textColor,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (data.title != null && data.title!.isNotEmpty) ...[
+                  Text(
+                    data.title!,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: NotificationPage._textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                if (data.message.isNotEmpty)
+                  Text(
+                    data.message,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 13,
+                      color: Color(0xFF555555),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 8),
@@ -251,15 +292,9 @@ class _NotificationCard extends StatelessWidget {
                 data.time,
                 style: const TextStyle(
                   fontFamily: 'Poppins',
-                  fontSize: 12,
+                  fontSize: 11,
                   color: Color(0xFF9E9E9E),
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Icon(
-                Icons.more_vert,
-                size: 20,
-                color: Color(0xFF9E9E9E),
               ),
             ],
           ),
@@ -270,34 +305,52 @@ class _NotificationCard extends StatelessWidget {
 }
 
 class _NotificationData {
+  final String? title;
   final String message;
+  final String? coverUrl;
   final String time;
   final bool isHighlighted;
 
   const _NotificationData({
+    this.title,
     required this.message,
+    this.coverUrl,
     required this.time,
     this.isHighlighted = false,
   });
 }
 
 _NotificationData _toNotificationData(Map<String, dynamic> raw, int index) {
+  final dataObj =
+      raw['data'] is Map ? raw['data'] as Map<String, dynamic> : null;
+
+  final title = _asText(raw['title']) ?? _asText(dataObj?['title']);
+  var body = _asText(raw['body']) ??
+      _asText(raw['message']) ??
+      _asText(raw['text']) ??
+      _asText(dataObj?['body']) ??
+      _asText(dataObj?['message']) ??
+      _asText(dataObj?['text']);
+
+  if (title != null && body != null && title.trim() == body.trim()) {
+    body = null;
+  }
+  if (title == null && (body == null || body.trim().isEmpty)) {
+    body = 'Notification';
+  }
+
+  final cover = _asText(raw['coverImageUrl']) ??
+      _asText(raw['image']) ??
+      _asText(dataObj?['coverImageUrl']) ??
+      _asText(dataObj?['image']);
+
   return _NotificationData(
-    message: _extractMessage(raw),
+    title: title,
+    message: body ?? '',
+    coverUrl: cover,
     time: _formatRelativeTime(_extractTimestamp(raw)),
     isHighlighted: _isHighlighted(raw, index),
   );
-}
-
-String _extractMessage(Map<String, dynamic> raw) {
-  final title = _asText(raw['title']);
-  final body = _asText(raw['body']);
-  if (title != null && body != null) {
-    return title == body ? title : '$title $body';
-  }
-  final message = _asText(raw['message']);
-  final text = _asText(raw['text']);
-  return title ?? message ?? body ?? text ?? 'No details available';
 }
 
 DateTime? _extractTimestamp(Map<String, dynamic> raw) {

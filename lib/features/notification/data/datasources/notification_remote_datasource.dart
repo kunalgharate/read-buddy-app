@@ -34,15 +34,25 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
 
   @override
   Future<List<Map<String, dynamic>>> getMyNotifications() async {
-    final response = await _dio.get(
-      '${ApiConstants.baseUrl}/notifications/my',
-    );
+    Response response;
+    try {
+      response = await _dio.get('${ApiConstants.baseUrl}/notifications');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        response = await _dio.get('${ApiConstants.baseUrl}/notifications/my');
+      } else {
+        rethrow;
+      }
+    }
     final data = response.data;
     if (data is List) {
       return data.cast<Map<String, dynamic>>();
     }
     if (data is Map && data['data'] is List) {
       return (data['data'] as List).cast<Map<String, dynamic>>();
+    }
+    if (data is Map && data['notifications'] is List) {
+      return (data['notifications'] as List).cast<Map<String, dynamic>>();
     }
     return [];
   }

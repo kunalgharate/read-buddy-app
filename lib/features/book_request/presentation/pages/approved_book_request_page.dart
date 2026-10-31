@@ -4,13 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import '../../../../core/config/app_config.dart';
 import '../../../../core/di/injection.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
 import 'collect_from_library_page.dart';
-import 'delivered_request_detail_page.dart';
+import '../../../../core/utils/date_formatter.dart';
 
 class ApprovedBookRequestPage extends StatefulWidget {
   final BookRequestEntity request;
@@ -58,7 +57,11 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onDeliveryPaid);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _onDeliveryPayError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (response) {
+      if (kDebugMode) {
+        debugPrint('External wallet selected: ${response.walletName}');
+      }
+    });
   }
 
   @override
@@ -69,16 +72,27 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
 
   // Creates the ₹25 delivery order and opens Razorpay checkout.
   Future<void> _payDeliveryFee() async {
-    if (!_isPayable) return;
+    if (!_isPayable || _paying) return;
     setState(() => _paying = true);
     try {
       final ds = getIt<BookRequestRemoteDataSource>();
       final res = await ds.createDeliveryPaymentOrder(widget.request.id);
       if (!mounted) return;
-      final order = res['order'] as Map;
+      final order = res['order'];
+      final keyId = res['keyId'];
+      // Opening checkout without the key id or order id surfaces as a
+      // confusing Razorpay SDK "Authentication failed" — fail fast instead.
+      if (order is! Map ||
+          (order['id'] as String? ?? '').isEmpty ||
+          keyId is! String ||
+          keyId.isEmpty) {
+        throw Exception(
+          'Payment is temporarily unavailable. Please try again later.',
+        );
+      }
       _razorpayOrderId = order['id'] as String?;
       _razorpay.open({
-        'key': res['keyId'],
+        'key': keyId,
         'amount': order['amount'],
         'currency': order['currency'] ?? 'INR',
         'order_id': order['id'],
@@ -104,8 +118,10 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     // Fall back to the callback value only if it was never captured.
     final orderId = _razorpayOrderId ?? response.orderId ?? '';
     if (kDebugMode) {
+      final pid = response.paymentId ?? '';
+      final oid = orderId;
       debugPrint(
-        '[Pay ₹25] verify | request=${widget.request.id} | paymentId=${response.paymentId ?? ''} | orderId=$orderId',
+        '💳 [Pay ₹25] PAYMENT_SUCCESS | request=${widget.request.id} | paymentId=...${pid.length > 6 ? pid.substring(pid.length - 6) : pid} | orderId=...${oid.length > 6 ? oid.substring(oid.length - 6) : oid}',
       );
     }
     try {
@@ -148,42 +164,13 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     );
   }
 
-  // DEV/TEST ONLY: complete the ₹25 fee via the backend demo bypass (no card).
-  Future<void> _payDeliveryFeeTest() async {
-    if (!_isPayable) return;
-    setState(() => _paying = true);
-    try {
-      final ds = getIt<BookRequestRemoteDataSource>();
-      final res = await ds.createDeliveryPaymentOrder(widget.request.id);
-      if (!mounted) return;
-      final order = res['order'] as Map;
-      await ds.verifyDeliveryPayment(
-        widget.request.id,
-        paymentId: 'pay_demo_success_99',
-        orderId: order['id'] as String,
-        signature: 'demo_bypass',
-      );
-      if (!mounted) return;
-      setState(() {
-        _paying = false;
-        _paid = true;
-      });
-      context.read<ProfileBloc>().add(LoadProfileEvent());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment successful! (test)')),
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() => _paying = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Test payment failed: $e')),
-        );
-      }
-    }
-  }
+  // NOTE: The backend removed the demo-bypass from
+  // /api/v1/book-requests/:id/payment/verify (signature is always enforced),
+  // so the previous "Pay ₹25 (TEST)" hook (pay_demo_success_99 + demo_bypass)
+  // always failed with "Invalid signature" and has been removed.
 
   String _formatDate(String? dateStr) {
-    final dt = parseRequestDateOnly(dateStr);
+    final dt = DateFormatter.parseRequestDateOnly(dateStr);
     if (dt == null) {
       if (dateStr == null || dateStr.isEmpty) return '—';
       return dateStr;
@@ -472,21 +459,6 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                           ),
                         ),
                       ),
-                      // DEV/TEST ONLY — complete the ₹25 fee without a real card.
-                      if (kDebugMode ||
-                          (AppConfig.isInitialized &&
-                              AppConfig.instance.isDev)) ...[
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: OutlinedButton.icon(
-                            onPressed: _paying ? null : _payDeliveryFeeTest,
-                            icon: const Icon(Icons.bolt, size: 18),
-                            label: const Text('Pay ₹25 (TEST)'),
-                          ),
-                        ),
-                      ],
                     ] else ...[
                       // Non-payable payment status (not PENDING/PAID/FREE):
                       // do not expose the ₹25 payment control.
