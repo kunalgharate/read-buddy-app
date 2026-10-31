@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import '../../../../core/config/app_config.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/secure_storage_utils.dart';
@@ -93,6 +92,14 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
 
   late final Razorpay _razorpay;
   bool _paying = false;
+
+  /// The Razorpay order id the backend created for this ₹25 return pickup fee
+  /// and the checkout was opened with. Signature verification MUST use this
+  /// value (per Razorpay docs) and NOT the `razorpay_order_id` echoed by the
+  /// checkout callback, which is undefined/blank in test-mode on some payment
+  /// methods — sending a blank order id makes the backend hash over
+  /// `|payment_id` and fail with "Invalid signature".
+  String? _returnPickupOrderId;
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -439,6 +446,10 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
           'Payment is temporarily unavailable. Please try again later.',
         );
       }
+      // Remember the server-created order id for signature verification on
+      // payment success (the checkout callback's order id cannot be trusted
+      // in test mode).
+      _returnPickupOrderId = orderId;
       if (!mounted) return;
       final amount = res['amount'];
       _razorpay.open({
@@ -468,7 +479,11 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
       await ds.verifyReturnPickupPayment(
         widget.request.id,
         paymentId: response.paymentId ?? '',
-        orderId: response.orderId ?? '',
+        // Verify against the order id the server created and the checkout was
+        // opened with, not the callback's razorpay_order_id (can be blank in
+        // test mode — Razorpay docs: never use it for signature verification).
+        // Fall back to the callback value only if it was never captured.
+        orderId: _returnPickupOrderId ?? response.orderId ?? '',
         signature: response.signature ?? '',
         pickupAddress: _addressController.text.trim(),
         returnScheduledDate: _returnScheduledDateIso,
@@ -496,73 +511,6 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
     if (!mounted) return;
     setState(() => _paying = false);
     _showSnack('Payment failed: ${response.message ?? 'Please try again'}');
-  }
-
-  // DEV/TEST ONLY: completes the ₹25 return pickup fee via the backend demo
-  // bypass (no card), mirroring the delivery-fee test hook. Useful for E2E
-  // testing while the live checkout key is pending on the backend.
-  //
-  // Resilient by design so a reviewer can always exercise the return flow:
-  //  • if create-order is unavailable (live Razorpay key not yet deployed) we
-  //    fall back to a demo order id;
-  //  • if verify-payment rejects the demo signature, we fall back to the free
-  //    initiate-return PICKUP path so the return still gets scheduled.
-  Future<void> _payReturnPickupTest() async {
-    if (_paying) return;
-    setState(() => _paying = true);
-    final ds = getIt<BookRequestRemoteDataSource>();
-    final address = _addressController.text.trim();
-
-    try {
-      var orderId = '';
-      try {
-        final res = await ds.createReturnPickupOrder(widget.request.id);
-        orderId = (res['orderId'] as String?) ?? '';
-      } catch (_) {
-        // create-order not available yet — fall through with a demo order id.
-      }
-      orderId = orderId.isEmpty ? 'order_test_${widget.request.id}' : orderId;
-
-      try {
-        await ds.verifyReturnPickupPayment(
-          widget.request.id,
-          paymentId: 'pay_demo_success_99',
-          orderId: orderId,
-          signature: 'demo_bypass',
-          pickupAddress: address,
-          returnScheduledDate: _returnScheduledDateIso,
-          returnScheduledSlot: _returnScheduledSlot,
-        );
-      } catch (_) {
-        // Demo signature was not accepted — schedule via the free return path.
-        await ds.initiateReturn(
-          widget.request.id,
-          'PICKUP',
-          pickup: PickupDetailsEntity(
-            requestId: widget.request.id,
-            userName: _nameController.text.trim(),
-            phoneNumber: _phoneController.text.trim(),
-            address: address,
-            pickupDate: _selectedDate!,
-            pickupTime:
-                '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}',
-          ),
-        );
-      }
-
-      if (!mounted) return;
-      setState(() => _paying = false);
-      context.read<ProfileBloc>().add(LoadProfileEvent());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Return pickup scheduled! (test)')),
-      );
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    } catch (e) {
-      if (mounted) {
-        setState(() => _paying = false);
-        _showSnack(e.toString().replaceFirst('Exception: ', ''));
-      }
-    }
   }
 
   void _showSnack(String message) {
@@ -959,21 +907,6 @@ class _CollectFromLibraryViewState extends State<_CollectFromLibraryView> {
                       },
                     ),
                   ),
-                  if (_isHomePickupReturn &&
-                      (kDebugMode ||
-                          (AppConfig.isInitialized &&
-                              AppConfig.instance.isDev))) ...[
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 44,
-                      child: OutlinedButton.icon(
-                        onPressed: _paying ? null : _payReturnPickupTest,
-                        icon: const Icon(Icons.bolt, size: 18),
-                        label: const Text('Pay ₹25 (TEST)'),
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,

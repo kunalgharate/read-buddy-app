@@ -106,7 +106,8 @@ class _BookOrderViewState extends State<_BookOrderView> {
     }
     final options = {
       'key': intent.razorpayKey,
-      'amount': intent.amount.toString(),
+      // razorpay_flutter expects the amount as an int (paise), not a String.
+      'amount': intent.amount,
       'currency': intent.currency,
       'order_id': intent.orderId,
       'name': 'ReadBuddy',
@@ -131,7 +132,11 @@ class _BookOrderViewState extends State<_BookOrderView> {
             preferredDate: _formatDate(_selectedDate!),
             preferredTime: _formatTime(_selectedTime!),
             paymentId: response.paymentId ?? '',
-            orderId: response.orderId ?? _paymentIntent?.orderId ?? '',
+            // Verify against the order id the server created and the checkout
+            // was opened with, not the callback's razorpay_order_id (can be
+            // blank in test mode — Razorpay docs: never use it for signature
+            // verification). Fall back to the callback only if never captured.
+            orderId: _paymentIntent?.orderId ?? response.orderId ?? '',
             signature: response.signature ?? '',
           ),
         );

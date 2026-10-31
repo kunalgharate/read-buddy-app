@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import '../../../../core/config/app_config.dart';
 import '../../../../core/di/injection.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
@@ -165,39 +164,10 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
     );
   }
 
-  // DEV/TEST ONLY: complete the ₹25 fee via the backend demo bypass (no card).
-  Future<void> _payDeliveryFeeTest() async {
-    if (!_isPayable || _paying) return;
-    setState(() => _paying = true);
-    try {
-      final ds = getIt<BookRequestRemoteDataSource>();
-      final res = await ds.createDeliveryPaymentOrder(widget.request.id);
-      if (!mounted) return;
-      final order = res['order'] as Map;
-      await ds.verifyDeliveryPayment(
-        widget.request.id,
-        paymentId: 'pay_demo_success_99',
-        orderId: order['id'] as String,
-        signature: 'demo_bypass',
-      );
-      if (!mounted) return;
-      setState(() {
-        _paying = false;
-        _paid = true;
-      });
-      context.read<ProfileBloc>().add(LoadProfileEvent());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment successful! (test)')),
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() => _paying = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Test payment failed: $e')),
-        );
-      }
-    }
-  }
+  // NOTE: The backend removed the demo-bypass from
+  // /api/v1/book-requests/:id/payment/verify (signature is always enforced),
+  // so the previous "Pay ₹25 (TEST)" hook (pay_demo_success_99 + demo_bypass)
+  // always failed with "Invalid signature" and has been removed.
 
   String _formatDate(String? dateStr) {
     final dt = DateFormatter.parseRequestDateOnly(dateStr);
@@ -489,21 +459,6 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                           ),
                         ),
                       ),
-                      // DEV/TEST ONLY — complete the ₹25 fee without a real card.
-                      if (kDebugMode ||
-                          (AppConfig.isInitialized &&
-                              AppConfig.instance.isDev)) ...[
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: OutlinedButton.icon(
-                            onPressed: _paying ? null : _payDeliveryFeeTest,
-                            icon: const Icon(Icons.bolt, size: 18),
-                            label: const Text('Pay ₹25 (TEST)'),
-                          ),
-                        ),
-                      ],
                     ] else ...[
                       // Non-payable payment status (not PENDING/PAID/FREE):
                       // do not expose the ₹25 payment control.

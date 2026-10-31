@@ -73,7 +73,8 @@ class _DonateMoneyPageState extends State<DonateMoneyPage> {
 
       final options = {
         'key': razorpayKey,
-        'amount': (_selectedPlan * 100).toString(), // paise
+        // razorpay_flutter expects the amount as an int (paise), not a String.
+        'amount': _selectedPlan * 100,
         'currency': currency,
         'order_id': _currentOrderId,
         'name': 'ReadBuddy',
