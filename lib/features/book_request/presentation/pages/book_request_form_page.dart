@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
-import '../../../../core/services/location_service.dart';
 import '../../../library/domain/entities/library_entity.dart';
-import '../../../library/domain/usecases/library_usecases.dart';
+import '../../../library/presentation/widgets/pickup_library_selector.dart';
 import '../bloc/book_request_bloc.dart';
 import '../bloc/book_request_event.dart';
 import '../bloc/book_request_state.dart';
@@ -38,73 +37,9 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
   final _pincodeController = TextEditingController();
   DateTime? _preferredDate;
 
-  // Library selection for pickup
-  List<LibraryEntity> _libraries = [];
+  // Library selection for pickup. The shared selector resolves the user's
+  // location, filters to 15 km, and exposes the "Detect location" action.
   LibraryEntity? _selectedLibrary;
-  bool _loadingLibraries = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchLibraries();
-  }
-
-  Future<void> _fetchLibraries() async {
-    setState(() => _loadingLibraries = true);
-    try {
-      final getLibraryDetails = getIt<GetLibraryDetails>();
-      var libraries = await getLibraryDetails();
-
-      // Filter and sort by distance if location available
-      final position = await LocationService.instance.getCurrentLocation();
-      if (position != null && libraries.isNotEmpty) {
-        // Only show libraries within 15 km
-        libraries = libraries.where((lib) {
-          if (lib.address.latitude == 0 && lib.address.longitude == 0) {
-            return false;
-          }
-          final km = LocationService.instance.calculateDistanceKm(
-            position.latitude,
-            position.longitude,
-            lib.address.latitude,
-            lib.address.longitude,
-          );
-          return km <= 15;
-        }).toList();
-
-        // Sort nearest first
-        libraries.sort((a, b) {
-          final distA = LocationService.instance.calculateDistanceKm(
-            position.latitude,
-            position.longitude,
-            a.address.latitude,
-            a.address.longitude,
-          );
-          final distB = LocationService.instance.calculateDistanceKm(
-            position.latitude,
-            position.longitude,
-            b.address.latitude,
-            b.address.longitude,
-          );
-          return distA.compareTo(distB);
-        });
-      }
-
-      // If no nearby libraries, fallback to super libraries
-      if (libraries.isEmpty) {
-        final getSuperLibraries = getIt<GetSuperLibraries>();
-        libraries = await getSuperLibraries();
-      }
-
-      setState(() {
-        _libraries = libraries;
-        _loadingLibraries = false;
-        if (libraries.isNotEmpty) _selectedLibrary = libraries.first;
-      });
-    } catch (e) {
-      setState(() => _loadingLibraries = false);
-    }
-  }
 
   @override
   void dispose() {
@@ -403,54 +338,11 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
 
           if (_fulfillmentMethod == 'pickup') ...[
             const SizedBox(height: 20),
-            const _SectionLabel('Select Library for Pickup'),
-            const SizedBox(height: 12),
-            if (_loadingLibraries)
-              const Center(child: CircularProgressIndicator(strokeWidth: 2))
-            else if (_libraries.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8E1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber.shade200),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(
-                      Icons.location_off,
-                      color: Colors.amber,
-                      size: 32,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'No libraries nearby or in your city',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Please choose the Drop-off (delivery) option instead.',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      onPressed: () =>
-                          setState(() => _fulfillmentMethod = 'dropoff'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF2CE07F),
-                        side: const BorderSide(color: Color(0xFF2CE07F)),
-                      ),
-                      child: const Text('Switch to Delivery'),
-                    ),
-                  ],
-                ),
-              )
-            else
-              ..._libraries.map((lib) => _libraryTile(lib)),
+            PickupLibrarySelector(
+              selectedLibrary: _selectedLibrary,
+              onSelected: (lib) => setState(() => _selectedLibrary = lib),
+              fallbackSentence: 'Choose Drop-off instead.',
+            ),
           ],
 
           const SizedBox(height: 32),
@@ -742,123 +634,6 @@ class _BookRequestFormPageState extends State<BookRequestFormPage> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _libraryTile(LibraryEntity lib) {
-    final isSelected = _selectedLibrary?.id == lib.id;
-    final position = LocationService.instance.lastPosition;
-    String? distanceText;
-    if (position != null && lib.address.latitude != 0) {
-      final km = LocationService.instance.calculateDistanceKm(
-        position.latitude,
-        position.longitude,
-        lib.address.latitude,
-        lib.address.longitude,
-      );
-      distanceText = LocationService.instance.formatDistance(km);
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedLibrary = lib),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? const Color(0xFF2CE07F)
-                  : const Color(0xFFE0E0E0),
-              width: isSelected ? 2 : 1,
-            ),
-            color: isSelected
-                ? const Color(0xFF2CE07F).withValues(alpha: 0.05)
-                : Colors.white,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: lib.isSuperLibrary
-                      ? Colors.amber.withValues(alpha: 0.15)
-                      : const Color(0xFF2CE07F).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  lib.isSuperLibrary ? Icons.star : Icons.local_library,
-                  size: 20,
-                  color: lib.isSuperLibrary
-                      ? Colors.amber
-                      : const Color(0xFF2CE07F),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      lib.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      lib.address.fullAddress,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF999999),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (lib.openHours.isNotEmpty)
-                      Text(
-                        lib.openHours,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFFBBBBBB),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              if (distanceText != null)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2CE07F).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    distanceText,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2CE07F),
-                    ),
-                  ),
-                ),
-              if (isSelected) ...[
-                const SizedBox(width: 8),
-                const Icon(
-                  Icons.check_circle,
-                  color: Color(0xFF2CE07F),
-                  size: 22,
-                ),
-              ],
-            ],
-          ),
         ),
       ),
     );

@@ -36,6 +36,10 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>ReadBuddy uses your location to find libraries and books near you.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>ReadBuddy uses your location to find libraries and books near you.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>ReadBuddy needs camera access so you can take a profile photo.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

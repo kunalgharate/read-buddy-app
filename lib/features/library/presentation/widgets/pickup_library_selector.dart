@@ -35,6 +35,7 @@ class _PickupLibrarySelectorState extends State<PickupLibrarySelector> {
   static const double _radiusKm = 15.0;
 
   bool _loading = true;
+  bool _detecting = false;
   String? _error;
   bool _locationUnavailable = false;
   bool _hadLibraries = false;
@@ -141,6 +142,53 @@ class _PickupLibrarySelectorState extends State<PickupLibrarySelector> {
     }
   }
 
+  // Re-runs detection after the user asks for it. If permission (or the
+  // device's location switch) is off, explain and offer the right settings
+  // screen instead of silently reloading the same unsorted list.
+  Future<void> _detectLocation() async {
+    if (_detecting) return;
+    setState(() => _detecting = true);
+
+    final available = await LocationService.instance.isLocationAvailable();
+    if (!mounted) return;
+
+    if (!available) {
+      final granted = await LocationService.instance.requestPermission();
+      if (!mounted) return;
+      if (!granted) {
+        final servicesOn = await LocationService.instance.isServiceEnabled();
+        if (!mounted) return;
+        setState(() => _detecting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              servicesOn
+                  ? 'Location permission is off. Allow it to see which '
+                      'libraries are nearest.'
+                  : 'Location is turned off on this device. Turn it on to '
+                      'see which libraries are nearest.',
+            ),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: 'Settings',
+              onPressed: () {
+                if (servicesOn) {
+                  LocationService.instance.openAppSettings();
+                } else {
+                  LocationService.instance.openSettings();
+                }
+              },
+            ),
+          ),
+        );
+        return;
+      }
+    }
+
+    await _load();
+    if (mounted) setState(() => _detecting = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -183,18 +231,28 @@ class _PickupLibrarySelectorState extends State<PickupLibrarySelector> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.location_off, color: Colors.orange, size: 22),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textPrimary,
+            Row(
+              children: [
+                const Icon(Icons.location_off, color: Colors.orange, size: 22),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
-              ),
+              ],
+            ),
+            TextButton.icon(
+              onPressed: _detectLocation,
+              icon: const Icon(Icons.my_location, size: 16),
+              label: const Text('Detect location'),
             ),
           ],
         ),
@@ -204,13 +262,37 @@ class _PickupLibrarySelectorState extends State<PickupLibrarySelector> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Select Pickup Library',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Select Pickup Library',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            // Always available, including when a list is already showing, so
+            // the user can refresh distances after enabling location/permission.
+            TextButton.icon(
+              onPressed: _detecting ? null : _detectLocation,
+              icon: _detecting
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.my_location, size: 16),
+              label: const Text('Detect location'),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(0, 32),
+                alignment: Alignment.centerRight,
+              ),
+            ),
+          ],
         ),
         if (_locationUnavailable) ...[
           const SizedBox(height: 6),

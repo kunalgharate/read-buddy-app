@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:read_buddy_app/core/services/city_notifier.dart';
+import 'package:read_buddy_app/core/services/location_service.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
 
 /// Zomato-style location bar showing the current city.
@@ -126,10 +127,28 @@ class _CityPickerSheetState extends State<_CityPickerSheet> {
       widget.onCityChanged?.call(city);
       Navigator.pop(context);
     } else {
+      // Distinguish "permission denied" from "nothing came back" so the user
+      // gets a path forward instead of a dead end.
+      final servicesOn = await LocationService.instance.isServiceEnabled();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Could not detect location. Please enable GPS or type your city.',
+            servicesOn
+                ? 'Could not detect location. Allow location permission or '
+                    'type your city.'
+                : 'Could not detect location. Turn on GPS or type your city.',
+          ),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'Settings',
+            onPressed: () {
+              if (servicesOn) {
+                LocationService.instance.openAppSettings();
+              } else {
+                LocationService.instance.openSettings();
+              }
+            },
           ),
         ),
       );

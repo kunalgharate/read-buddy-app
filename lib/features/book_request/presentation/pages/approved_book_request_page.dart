@@ -9,8 +9,8 @@ import '../../../../core/di/injection.dart';
 import '../../../profile/presentation/blocs/profile_bloc.dart';
 import '../../data/datasources/book_request_remote_datasource.dart';
 import '../../domain/entities/book_request_entity.dart';
-import 'collect_from_library_page.dart';
 import 'delivered_request_detail_page.dart';
+import 'pickup_details_page.dart';
 
 class ApprovedBookRequestPage extends StatefulWidget {
   final BookRequestEntity request;
@@ -372,10 +372,7 @@ class _ApprovedBookRequestPageState extends State<ApprovedBookRequestPage> {
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CollectFromLibraryPage(
-                              request: req,
-                              initialTab: 0,
-                            ),
+                            builder: (_) => PickupDetailsPage(request: req),
                           ),
                         ),
                         icon: const Icon(

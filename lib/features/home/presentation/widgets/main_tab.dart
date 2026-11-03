@@ -80,16 +80,29 @@ class _MainTabState extends State<MainTab> {
       final granted = await LocationService.instance.requestPermission();
       if (!granted) {
         if (!mounted) return;
+        final servicesOn = await LocationService.instance.isServiceEnabled();
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Enable location to see books available near you, '
-              'or pick your city from the top bar.',
+            content: Text(
+              servicesOn
+                  ? 'Location permission is off. Allow it to see books near '
+                      'you, or pick your city from the top bar.'
+                  : 'Location is turned off on this device. Turn it on to see '
+                      'books near you, or pick your city from the top bar.',
             ),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'Settings',
-              onPressed: () => LocationService.instance.openAppSettings(),
+              onPressed: () {
+                // Services off -> system location settings; permission off ->
+                // this app's settings page.
+                if (servicesOn) {
+                  LocationService.instance.openAppSettings();
+                } else {
+                  LocationService.instance.openSettings();
+                }
+              },
             ),
           ),
         );
@@ -106,11 +119,20 @@ class _MainTabState extends State<MainTab> {
     if (!mounted) return;
     if (city == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not detect your city. Please pick it from the top bar.',
+        SnackBar(
+          content: const Text(
+            'Could not detect your city. Pick it from the top bar or try '
+            'detecting again.',
           ),
           behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: () {
+              // Allow another attempt without waiting for a remount.
+              _promptedForLocation = false;
+              _ensureLocation();
+            },
+          ),
         ),
       );
     }
@@ -214,7 +236,7 @@ class _MainTabView extends StatelessWidget {
                     const _ContinueReadingSection(),
                     const SizedBox(height: 32),
 
-_BookSection(
+                    _BookSection(
                       title: 'Latest',
                       books: state.latestBooks,
                     ),

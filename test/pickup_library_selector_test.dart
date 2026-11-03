@@ -129,10 +129,42 @@ void main() {
       reason: 'the user must be told the location could not be resolved',
     );
     expect(
+      find.text('Detect location'),
+      findsOneWidget,
+      reason: 'the borrow flow must always offer a way to detect location',
+    );
+    expect(
       selected,
       isNull,
       reason: 'without a location nothing may be auto-selected',
     );
+  });
+
+  testWidgets(
+      'detect location explains that device location is off and offers settings',
+      (tester) async {
+    _mockGeo(tester, serviceEnabled: false);
+    _registerLibraries([_library('a', lat: 13.05, lng: 77.55)]);
+
+    await tester.pumpWidget(
+      _host(
+        PickupLibrarySelector(
+          selectedLibrary: null,
+          onSelected: (_) {},
+          fallbackSentence: 'Choose Pick Up instead.',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Detect location'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Location is turned off on this device'),
+      findsOneWidget,
+    );
+    expect(find.text('Settings'), findsOneWidget);
   });
 
   testWidgets(
@@ -166,6 +198,11 @@ void main() {
       reason: 'libraries beyond the 15 km radius must not be listed',
     );
     expect(selected?.id, 'near', reason: 'the nearest in-range library wins');
+    expect(
+      find.text('Detect location'),
+      findsOneWidget,
+      reason: 'distances can be refreshed without leaving the borrow cart',
+    );
 
     final nearTop = tester.getTopLeft(find.text('Near Library')).dy;
     final coordlessTop = tester.getTopLeft(find.text('No-Coord Library')).dy;

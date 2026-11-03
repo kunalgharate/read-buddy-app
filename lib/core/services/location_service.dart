@@ -9,6 +9,12 @@ class LocationService {
   static final instance = LocationService._();
 
   Position? _lastPosition;
+  DateTime? _lastFixAt;
+
+  /// How long a cached fix is considered fresh enough to reuse without
+  /// hitting the GPS again. Keeps repeated calls (home tab, pickup picker,
+  /// library details) from each triggering a slow cold fix.
+  static const _cacheDuration = Duration(seconds: 30);
 
   /// Returns the last known position without requesting a new one.
   Position? get lastPosition => _lastPosition;
@@ -23,6 +29,12 @@ class LocationService {
     return permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse;
   }
+
+  /// Whether the device-level location service (GPS) is switched on.
+  /// Separate from permission so callers can send the user to the right
+  /// settings screen: services off -> location settings, permission denied
+  /// -> app settings.
+  Future<bool> isServiceEnabled() => Geolocator.isLocationServiceEnabled();
 
   /// Request location permission. Returns true if granted.
   Future<bool> requestPermission() async {
@@ -53,24 +65,73 @@ class LocationService {
   /// Get user's current GPS coordinates.
   /// Returns null if permission denied or service unavailable.
   Future<Position?> getCurrentLocation() async {
+    // Reuse a very recent fix so consumers calling in sequence don't each
+    // wait on a fresh GPS lock.
+    final cachedAt = _lastFixAt;
+    if (_lastPosition != null &&
+        cachedAt != null &&
+        DateTime.now().difference(cachedAt) < _cacheDuration) {
+      return _lastPosition;
+    }
+
     final hasPermission = await requestPermission();
     if (!hasPermission) return null;
 
+    // Grab the last known fix first: it is instant and makes detection work
+    // when the live fix is slow or times out indoors.
+    Position? lastKnown;
     try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 15),
-        ),
-      );
-      _lastPosition = position;
-      if (kDebugMode) {
-        print('📍 Location: ${position.latitude}, ${position.longitude}');
+      lastKnown = await Geolocator.getLastKnownPosition();
+    } catch (_) {
+      lastKnown = null;
+    }
+
+    // Try a fast, lower-accuracy fix first, then a high-accuracy one. A cold
+    // GPS frequently times out on the first attempt; two attempts plus the
+    // last-known fallback keep "Detect location" from failing outright.
+    const attempts = [
+      LocationSettings(
+        accuracy: LocationAccuracy.medium,
+        timeLimit: Duration(seconds: 10),
+      ),
+      LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 20),
+      ),
+    ];
+
+    for (final settings in attempts) {
+      try {
+        final position = await Geolocator.getCurrentPosition(
+          locationSettings: settings,
+        );
+        _cache(position);
+        return position;
+      } catch (e) {
+        if (kDebugMode) {
+          print('📍 ${settings.accuracy.name} fix failed: $e');
+        }
       }
-      return position;
-    } catch (e) {
-      if (kDebugMode) print('📍 Failed to get location: $e');
-      return null;
+    }
+
+    if (lastKnown != null) {
+      _cache(lastKnown);
+      if (kDebugMode) {
+        print('📍 Location (last known): '
+            '${lastKnown.latitude}, ${lastKnown.longitude}');
+      }
+      return lastKnown;
+    }
+
+    if (kDebugMode) print('📍 Could not obtain any location fix');
+    return null;
+  }
+
+  void _cache(Position position) {
+    _lastPosition = position;
+    _lastFixAt = DateTime.now();
+    if (kDebugMode) {
+      print('📍 Location: ${position.latitude}, ${position.longitude}');
     }
   }
 
@@ -103,16 +164,46 @@ class LocationService {
     double latitude,
     double longitude,
   ) async {
+    List<Placemark> placemarks;
     try {
-      final placemarks = await placemarkFromCoordinates(latitude, longitude);
+      placemarks = await placemarkFromCoordinates(latitude, longitude);
+    } catch (e) {
+      // The platform geocoder is occasionally flaky on a cold start; a single
+      // retry avoids reporting a valid GPS fix as an undetectable city.
+      if (kDebugMode) print('📍 Reverse geocode attempt failed: $e');
+      try {
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+        placemarks = await placemarkFromCoordinates(latitude, longitude);
+      } catch (e2) {
+        if (kDebugMode) print('📍 Reverse geocode failed: $e2');
+        return null;
+      }
+    }
+    try {
       if (placemarks.isEmpty) return null;
 
       final p = placemarks.first;
+      // `locality` is null for many valid fixes (villages, new developments,
+      // some Android geocoders). Walk through the narrower/wider admin fields
+      // so a successful GPS fix is not reported as "location unavailable" just
+      // because the city label came back empty.
+      final city = [
+        p.locality,
+        p.subAdministrativeArea,
+        p.subLocality,
+        p.administrativeArea,
+      ].firstWhere(
+        (s) => s != null && s.trim().isNotEmpty,
+        orElse: () => '',
+      )!;
+      final street = [
+        p.thoroughfare,
+        p.street,
+        p.subLocality,
+      ].where((s) => s != null && s.trim().isNotEmpty).join(', ');
       return PlacemarkAddress(
-        street: [p.street, p.subLocality]
-            .where((s) => s != null && s.isNotEmpty)
-            .join(', '),
-        city: p.locality ?? '',
+        street: street,
+        city: city,
         state: p.administrativeArea ?? '',
         country: p.country ?? '',
         pincode: p.postalCode ?? '',

@@ -49,13 +49,27 @@ class _ProfileView extends StatelessWidget {
   }
 
   Future<void> _pickAndUploadPhoto(BuildContext context) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 80,
-    );
+    XFile? pickedFile;
+    try {
+      pickedFile = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not open your photos. Check the photo permission and try '
+            'again.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     if (pickedFile == null) return;
     if (!context.mounted) return;
 
@@ -82,15 +96,20 @@ class _ProfileView extends StatelessWidget {
 
     try {
       final dio = getIt<Dio>();
+      // Use bytes rather than the file path so the upload also works on
+      // platforms without dart:io (web), where MultipartFile.fromFile throws.
+      // The explicit multipart content type matches the other upload calls in
+      // the app and avoids the shared JSON default header being applied.
       final formData = FormData.fromMap({
-        'profileImage': await MultipartFile.fromFile(
-          pickedFile.path,
+        'profileImage': MultipartFile.fromBytes(
+          await pickedFile.readAsBytes(),
           filename: pickedFile.name,
         ),
       });
       final response = await dio.post(
         ApiConstants.uploadProfileImage,
         data: formData,
+        options: Options(contentType: 'multipart/form-data'),
       );
 
       if (!context.mounted) return;
@@ -161,7 +180,8 @@ class _ProfileView extends StatelessWidget {
     if (_pictureUrlFrom(data) != null) return null;
     final success = data['success'];
     if (success == false || success == 'false') {
-      return _serverMessage(data) ?? 'Failed to upload photo. Please try again.';
+      return _serverMessage(data) ??
+          'Failed to upload photo. Please try again.';
     }
     return null;
   }
