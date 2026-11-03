@@ -89,27 +89,47 @@ class DioClient {
       'User-Agent': 'ReadBuddyApp/1.0.0',
     };
 
-    // Retry interceptor for timeout and TLS errors
+    // Retry interceptor for timeout, TLS and dropped connections.
     dio.interceptors.add(
       InterceptorsWrapper(
         onError: (error, handler) async {
+          final isTimeout = error.type == DioExceptionType.connectionTimeout ||
+              error.type == DioExceptionType.receiveTimeout ||
+              error.type == DioExceptionType.sendTimeout;
+
+          // The Render/Cloudflare edge sometimes drops pooled keep-alive
+          // connections ("Connection reset by peer"), which surfaces as a
+          // DioExceptionType.unknown with no response. Only retry idempotent
+          // requests so a retry can never create a duplicate record.
+          final isIdempotent = error.requestOptions.method == 'GET' ||
+              error.requestOptions.method == 'HEAD';
+          final isDroppedConnection =
+              isIdempotent && _isDroppedConnection(error);
+
           final shouldRetry =
-              error.type == DioExceptionType.connectionTimeout ||
-                  error.type == DioExceptionType.receiveTimeout ||
-                  error.type == DioExceptionType.sendTimeout ||
-                  _isTlsError(error);
+              isTimeout || _isTlsError(error) || isDroppedConnection;
 
           if (shouldRetry) {
-            // Only retry once — check if we already retried
-            final retryCount = error.requestOptions.extra['_retryCount'] ?? 0;
-            if (retryCount < 1) {
+            // Timeouts/TLS get one retry, dropped connections two with a
+            // short backoff so a half-closed socket has time to clear.
+            final maxRetries = isDroppedConnection ? 2 : 1;
+            final retryCount =
+                (error.requestOptions.extra['_retryCount'] as num?)?.toInt() ??
+                    0;
+            if (retryCount < maxRetries) {
               if (kDebugMode) {
                 print(
-                  '🔄 Retrying request due to ${_isTlsError(error) ? "TLS error" : "timeout"}...',
+                  '🔄 Retrying request due to ${_retryReason(error)} '
+                  '(${retryCount + 1}/$maxRetries)...',
                 );
               }
 
               try {
+                if (isDroppedConnection) {
+                  await Future.delayed(
+                    Duration(milliseconds: 300 * (retryCount + 1)),
+                  );
+                }
                 error.requestOptions.extra['_retryCount'] = retryCount + 1;
                 final response = await dio.fetch(error.requestOptions);
                 handler.resolve(response);
@@ -127,6 +147,25 @@ class DioClient {
     );
 
     return dio;
+  }
+
+  /// Check if the request never got a response because the socket was closed
+  /// under us (stale keep-alive connection, edge proxy reset, etc.).
+  static bool _isDroppedConnection(DioException error) {
+    if (error.response != null) return false;
+    final details = '${error.message ?? ''} ${error.error ?? ''}'.toLowerCase();
+    return details.contains('connection reset') ||
+        details.contains('connection closed') ||
+        details.contains('connection terminated') ||
+        details.contains('broken pipe') ||
+        error.error is SocketException ||
+        error.type == DioExceptionType.connectionError;
+  }
+
+  static String _retryReason(DioException error) {
+    if (_isDroppedConnection(error)) return 'a dropped connection';
+    if (_isTlsError(error)) return 'a TLS error';
+    return 'a timeout';
   }
 
   /// Check if error is a TLS/SSL handshake error
