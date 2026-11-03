@@ -15,7 +15,8 @@ class ApiConstants {
   static String get logout => '$baseUrl/users/logout';
   static String get resendRegisterOtp => '$baseUrl/users/resend-register-otp';
   static String get changePasswordAuth => '$baseUrl/users/change-password';
-  static String get uploadProfileImage => '$baseUrl/users/upload-profile-image';
+  static String get uploadProfileImage =>
+      '$baseUrl/v1/users/upload-profile-image';
 
   // User endpoints
   static String get users => '$baseUrl/users';
