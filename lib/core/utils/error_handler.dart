@@ -106,6 +106,11 @@ class ErrorHandler {
         if (error.message?.contains('SocketException') == true) {
           return 'Network connection failed. Please check your internet and try again.';
         }
+        // The connection was dropped mid-request (stale keep-alive socket,
+        // proxy reset). The request itself is valid, so invite a retry.
+        if (_isDroppedConnection(error)) {
+          return 'The connection was interrupted. Please try again.';
+        }
         return _extractErrorMessage(error.response?.data) ??
             'An unexpected error occurred. Please try again.';
 
@@ -113,6 +118,15 @@ class ErrorHandler {
         return _extractErrorMessage(error.response?.data) ??
             'Something went wrong. Please try again.';
     }
+  }
+
+  /// Whether the socket was closed under us before a response arrived.
+  static bool _isDroppedConnection(DioException error) {
+    final details = '${error.message ?? ''} ${error.error ?? ''}'.toLowerCase();
+    return details.contains('connection reset') ||
+        details.contains('connection closed') ||
+        details.contains('connection terminated') ||
+        details.contains('broken pipe');
   }
 
   static String _handleForbiddenError(dynamic responseData) {

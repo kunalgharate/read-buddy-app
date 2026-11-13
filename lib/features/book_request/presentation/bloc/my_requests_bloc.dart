@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/error_handler.dart';
 import '../../domain/entities/book_request_entity.dart';
 import '../../domain/usecases/get_my_book_requests.dart';
 import '../../domain/usecases/cancel_book_request.dart';
@@ -68,7 +69,9 @@ class MyRequestsBloc extends Bloc<MyRequestsEvent, MyRequestsState> {
         final requests = await getMyBookRequests();
         emit(MyRequestsLoaded(requests));
       } catch (e) {
-        emit(MyRequestsErrorState('Failed to load requests: $e'));
+        // Never show the raw exception (e.g. "DioException [unknown]"): map it
+        // to a readable message with a retry hint.
+        emit(MyRequestsErrorState(ErrorHandler.getErrorMessage(e)));
       }
     });
     on<CancelRequest>((event, emit) async {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/network/api_constants.dart';
 import '../../../../../core/services/app_preferences.dart';
@@ -48,14 +49,106 @@ class _ProfileView extends StatelessWidget {
     );
   }
 
-  Future<void> _pickAndUploadPhoto(BuildContext context) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 80,
+  /// Lets the user choose between the camera and the photo library before
+  /// opening the picker, instead of silently defaulting to the gallery.
+  Future<void> _showPhotoSourceSheet(BuildContext context) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera, color: _green),
+              title: const Text('Take Photo'),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: _green),
+              title: const Text('Choose from Gallery'),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
     );
+
+    if (source == null || !context.mounted) return;
+    await _pickAndUploadPhoto(context, source: source);
+  }
+
+  Future<void> _pickAndUploadPhoto(
+    BuildContext context, {
+    ImageSource source = ImageSource.gallery,
+  }) async {
+    // image_picker needs the runtime camera permission on Android when it is
+    // declared in the manifest, so ask explicitly and explain a denial.
+    if (source == ImageSource.camera) {
+      final status = await Permission.camera.request();
+      if (!context.mounted) return;
+      if (status.isPermanentlyDenied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Camera permission is blocked. Enable it in app settings to take '
+              'a photo.',
+            ),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Settings',
+              textColor: Colors.white,
+              onPressed: openAppSettings,
+            ),
+          ),
+        );
+        return;
+      }
+      if (!status.isGranted && !status.isLimited) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Camera permission is required to take a photo.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
+    XFile? pickedFile;
+    try {
+      pickedFile = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not open your photos. Check the photo permission and try '
+            'again.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     if (pickedFile == null) return;
     if (!context.mounted) return;
 
@@ -82,15 +175,25 @@ class _ProfileView extends StatelessWidget {
 
     try {
       final dio = getIt<Dio>();
+      // Use bytes rather than the file path so the upload also works on
+      // platforms without dart:io (web), where MultipartFile.fromFile throws.
+      // The explicit multipart content type matches the other upload calls in
+      // the app and avoids the shared JSON default header being applied.
+      // The backend expects the multipart file under the field name `picture`.
+      // Sending `profileImage` makes the upload endpoint fail with a 500.
+      final filename =
+          pickedFile.name.contains('.') ? pickedFile.name : 'profile.jpg';
       final formData = FormData.fromMap({
-        'profileImage': await MultipartFile.fromFile(
-          pickedFile.path,
-          filename: pickedFile.name,
+        'picture': MultipartFile.fromBytes(
+          await pickedFile.readAsBytes(),
+          filename: filename,
+          contentType: _imageMediaType(filename),
         ),
       });
       final response = await dio.post(
         ApiConstants.uploadProfileImage,
         data: formData,
+        options: Options(contentType: 'multipart/form-data'),
       );
 
       if (!context.mounted) return;
@@ -129,6 +232,23 @@ class _ProfileView extends StatelessWidget {
     }
   }
 
+  /// Media type for the picked file so the server accepts it as an image.
+  DioMediaType _imageMediaType(String filename) {
+    final extension = filename.toLowerCase().split('.').last;
+    switch (extension) {
+      case 'png':
+        return DioMediaType('image', 'png');
+      case 'webp':
+        return DioMediaType('image', 'webp');
+      case 'gif':
+        return DioMediaType('image', 'gif');
+      case 'heic':
+        return DioMediaType('image', 'heic');
+      default:
+        return DioMediaType('image', 'jpeg');
+    }
+  }
+
   /// Extracts a picture/profile image URL from an upload response body.
   String? _pictureUrlFrom(dynamic data) {
     if (data is! Map) return null;
@@ -161,7 +281,8 @@ class _ProfileView extends StatelessWidget {
     if (_pictureUrlFrom(data) != null) return null;
     final success = data['success'];
     if (success == false || success == 'false') {
-      return _serverMessage(data) ?? 'Failed to upload photo. Please try again.';
+      return _serverMessage(data) ??
+          'Failed to upload photo. Please try again.';
     }
     return null;
   }
@@ -395,7 +516,7 @@ class _ProfileView extends StatelessWidget {
     return Column(
       children: [
         GestureDetector(
-          onTap: isUpdating ? null : () => _pickAndUploadPhoto(context),
+          onTap: isUpdating ? null : () => _showPhotoSourceSheet(context),
           child: Stack(
             children: [
               _buildAvatarCircle(user, isUpdating),
@@ -441,7 +562,8 @@ class _ProfileView extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             OutlinedButton.icon(
-              onPressed: isUpdating ? null : () => _pickAndUploadPhoto(context),
+              onPressed:
+                  isUpdating ? null : () => _showPhotoSourceSheet(context),
               icon: const Icon(Icons.photo_library, color: _green, size: 18),
               label: const Text(
                 'Upload Photo',

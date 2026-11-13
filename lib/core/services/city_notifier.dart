@@ -117,14 +117,22 @@ class CityNotifier extends ValueNotifier<String?> {
         position.latitude,
         position.longitude,
       );
-      if (address != null && address.city.isNotEmpty) {
-        await setCity(
-          address.city,
-          latitude: position.latitude,
-          longitude: position.longitude,
-        );
-        return address.city;
+      // The GPS fix itself is cached by LocationService, so distance-based
+      // features still work even when the city label could not be resolved.
+      // Only the city-based browse needs a name.
+      if (address == null || address.city.trim().isEmpty) {
+        if (kDebugMode) {
+          print('📍 GPS fix obtained but no city name was resolved');
+        }
+        return null;
       }
+      final city = address.city.trim();
+      await setCity(
+        city,
+        latitude: position.latitude,
+        longitude: position.longitude,
+      );
+      return city;
     } catch (e) {
       if (kDebugMode) print('📍 CityNotifier GPS detect failed: $e');
     }
