@@ -21,7 +21,13 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          # Pin the SDK that the Android Gradle setup in this repo is verified
+          # against. Unpinned "stable" pulls in newer AGP/Gradle migrators
+          # (android.newDsl, Kotlin DSL preference) that break these Groovy
+          # build files during the configuration phase.
+          flutter-version: '3.44.8'
           channel: 'stable'
+          cache: true
 
       - name: Install dependencies
         run: flutter pub get
