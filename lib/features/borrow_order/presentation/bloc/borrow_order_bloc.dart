@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:read_buddy_app/core/utils/error_handler.dart';
 import '../../domain/entities/borrow_order_entity.dart';
 import '../../domain/usecases/borrow_order_usecases.dart';
+import '../cart_badge_notifier.dart';
 
 part 'borrow_order_event.dart';
 part 'borrow_order_state.dart';
@@ -72,6 +73,7 @@ class BorrowOrderBloc extends Bloc<BorrowOrderEvent, BorrowOrderState> {
       );
       // Re-fetch the draft so the UI shows the authoritative updated cart
       final order = await _getMyDraft();
+      markCartChanged();
       emit(DraftOrderLoaded(order));
     } catch (e) {
       emit(BorrowOrderError(ErrorHandler.getErrorMessage(e)));
@@ -85,6 +87,7 @@ class BorrowOrderBloc extends Bloc<BorrowOrderEvent, BorrowOrderState> {
     // Don't emit full loading — keep the existing cart visible during mutation
     try {
       final order = await _removeBookFromOrder(event.bookRequestId);
+      markCartChanged();
       emit(DraftOrderLoaded(order));
     } catch (e) {
       emit(BorrowOrderError(ErrorHandler.getErrorMessage(e)));
@@ -102,6 +105,7 @@ class BorrowOrderBloc extends Bloc<BorrowOrderEvent, BorrowOrderState> {
         address: event.address,
         libraryId: event.libraryId,
       );
+      markCartChanged();
       emit(OrderSubmitted(order));
     } catch (e) {
       emit(BorrowOrderError(ErrorHandler.getErrorMessage(e)));

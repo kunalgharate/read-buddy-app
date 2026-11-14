@@ -9,6 +9,7 @@ import 'package:read_buddy_app/features/books/presentation/bloc/book_bloc.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_event.dart';
 import 'package:read_buddy_app/features/books/presentation/bloc/book_state.dart';
 import 'package:read_buddy_app/features/books/domain/entities/book.dart';
+import 'package:read_buddy_app/features/borrow_order/presentation/widgets/cart_entry_button.dart';
 
 const _green = Color(0xFF00C853);
 
@@ -174,6 +175,10 @@ class _CategoryTabState extends State<CategoryTab> {
               ),
             ),
           ),
+          const SizedBox(width: 12),
+          // Keep the borrow cart reachable even after the user leaves the
+          // cart screen that opened right after adding a book.
+          const CartEntryButton(boxed: true),
           const SizedBox(width: 12),
           Container(
             height: 52,
