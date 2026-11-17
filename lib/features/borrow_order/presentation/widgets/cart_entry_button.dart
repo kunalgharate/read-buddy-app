@@ -110,9 +110,8 @@ class _CartEntryViewState extends State<_CartEntryView> {
             backgroundColor: AppColors.primary,
             child: Icon(
               Icons.shopping_cart_outlined,
-              color: widget.boxed
-                  ? Theme.of(context).colorScheme.onSurface
-                  : null,
+              color:
+                  widget.boxed ? Theme.of(context).colorScheme.onSurface : null,
             ),
           ),
         );

@@ -1069,7 +1069,8 @@ class _FilterSortSheetState extends State<_FilterSortSheet> {
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: isDark ? Theme.of(context).colorScheme.onSurface : AppColors.navy,
+          color:
+              isDark ? Theme.of(context).colorScheme.onSurface : AppColors.navy,
         ),
       ),
     );

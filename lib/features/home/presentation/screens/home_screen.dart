@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:read_buddy_app/core/theme/app_colors.dart';
+import 'package:read_buddy_app/features/borrow_order/presentation/widgets/cart_entry_button.dart';
 import 'package:read_buddy_app/features/donate/presentation/bloc/donate_book_bloc.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/bottom_navigation_widget.dart';
 import 'package:read_buddy_app/features/home/presentation/widgets/category_tab.dart';
@@ -41,6 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.search),
                   tooltip: 'Search',
                 ),
+                // The borrow cart must be reachable after a user leaves the
+                // cart screen that opens right after adding a book.
+                const CartEntryButton(),
                 IconButton(
                   onPressed: () =>
                       Navigator.pushNamed(context, '/notification'),
